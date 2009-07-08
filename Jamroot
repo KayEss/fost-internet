@@ -32,4 +32,10 @@ project
         build-dir $(BUILD_DIRECTORY)
     ;
 
+alias examples
+    :
+        Examples/http/
+    ;
+explicit examples ;
+
 build-project Cpp/fost-inet-test ;
