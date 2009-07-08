@@ -1,0 +1,41 @@
+#!/bin/bash
+cd `dirname $0`
+
+if test -z $1
+then {
+    export VARIANTS=debug
+} else {
+    export VARIANTS=$*
+}
+fi
+
+if test -e /proc/
+then {
+    export CPUCOUNT=`grep -c ^processor /proc/cpuinfo`
+    export TOOLSET=gcc
+    export LD_LIBRARY_PATH=../dist/lib
+    EXTENSION="so"
+}
+else {
+    export CPUCOUNT=1
+    export TOOLSET=darwin
+    export DYLD_LIBRARY_PATH=../dist/lib
+    EXTENSION="dylib"
+    export LANG=C
+}
+fi
+
+if ../bjam -j$CPUCOUNT toolset=$TOOLSET $VARIANTS
+then {
+    if ../dist/bin/ftest -b false \
+        libfost-inet-test-smoke.$EXTENSION
+    then {
+        echo fost-internet smoke tests passed
+    } else {
+        exit 1
+    }
+    fi
+} else {
+    exit 1
+}
+fi

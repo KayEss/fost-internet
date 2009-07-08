@@ -1,0 +1,18 @@
+
+lib fost-inet
+    :
+        ../../../Boost//boost-date_time-dll
+        ../../../Boost//boost-regex-dll
+        ../../../Boost//boost-system-dll
+        ../../../Boost//boost-thread-dll
+        ../../../fost-base/Cpp/fost-core/
+        asio.cpp
+        headers.cpp
+        host.cpp
+        http.server.cpp
+        http.useragent.cpp
+        mime.cpp
+        smtp.cpp
+        url.cpp
+    ;
+
