@@ -7,7 +7,7 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/internet/http.useragent.hpp>
+#include <fost/detail/http.useragent.hpp>
 
 
 using namespace fostlib;

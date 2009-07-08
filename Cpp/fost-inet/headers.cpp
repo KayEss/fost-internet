@@ -7,7 +7,7 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/internet/mime.hpp>
+#include <fost/detail/mime.hpp>
 #include <fost/exception/parse_error.hpp>
 
 
