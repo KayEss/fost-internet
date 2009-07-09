@@ -70,22 +70,29 @@ FSL_TEST_FUNCTION( query_string_parser ) {
 }
 
 
-#define URL_PARSE( str, u_ ) \
-    FSL_CHECK( boost::spirit::parse( str, url_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
+#define URL_PARSE_HOSTPART( str, u_ ) \
+    FSL_CHECK( boost::spirit::parse( str, url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( u.as_string(), u_.as_string() );
-FSL_TEST_FUNCTION( url_parser ) {
+FSL_TEST_FUNCTION( url_parser_hostpart ) {
     url u;
-    URL_PARSE( L"http://localhost/", url() );
-    URL_PARSE( L"http://127.0.0.1/", url( host( 127, 0, 0, 1 ) ) );
-    URL_PARSE( L"http://10.0.2.2/", url( host( 10, 0, 2, 2 ) ) );
-    URL_PARSE( L"http://www.felspar.com/", url( host( L"www.felspar.com" ) ) );
-    FSL_CHECK( !boost::spirit::parse( L"http://www..felspar.com/", url_p ).full );
-    FSL_CHECK( !boost::spirit::parse( L"http://www./", url_p ).full );
-    FSL_CHECK( !boost::spirit::parse( L"http://.www/", url_p ).full );
-    URL_PARSE( L"http://123.45/", url( host( L"123.45" ) ) );
-    URL_PARSE( L"http://12345/", url( host( 12345 ) ) );
+    URL_PARSE_HOSTPART( L"http://localhost/", url() );
+    URL_PARSE_HOSTPART( L"http://127.0.0.1/", url( host( 127, 0, 0, 1 ) ) );
+    URL_PARSE_HOSTPART( L"http://10.0.2.2/", url( host( 10, 0, 2, 2 ) ) );
+    URL_PARSE_HOSTPART( L"http://www.felspar.com/", url( host( L"www.felspar.com" ) ) );
+    FSL_CHECK( !boost::spirit::parse( L"http://www..felspar.com/", url_hostpart_p ).full );
+    FSL_CHECK( !boost::spirit::parse( L"http://www./", url_hostpart_p ).full );
+    FSL_CHECK( !boost::spirit::parse( L"http://.www/", url_hostpart_p ).full );
+    URL_PARSE_HOSTPART( L"http://123.45/", url( host( L"123.45" ) ) );
+    URL_PARSE_HOSTPART( L"http://12345/", url( host( 12345 ) ) );
 }
-
+#define URL_PARSE_FILESPEC( str, s_ ) \
+    FSL_CHECK( boost::spirit::parse( str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK_EQ( s, ascii_string( s_ ) )
+FSL_TEST_FUNCTION( url_parser_filespec ) {
+    ascii_string s;
+    URL_PARSE_FILESPEC( L"/", "/" );
+    URL_PARSE_FILESPEC( L"/file.html", "/file.html" );
+}
 
 FSL_TEST_FUNCTION( path_spec ) {
     url u( L"http://localhost/" );
@@ -100,6 +107,10 @@ FSL_TEST_FUNCTION( parse ) {
         FSL_CHECK_EQ( a.server().name(), L"localhost" );
         FSL_CHECK( a.user().isnull() );
     )
+
+    FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );
+
+    FSL_CHECK_EXCEPTION( url( "http://localhost/file path.html" ), fostlib::exceptions::parse_error& );
 }
 
 /*

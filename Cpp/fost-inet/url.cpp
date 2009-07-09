@@ -18,7 +18,8 @@ using namespace fostlib;
 
 
 const query_string_parser fostlib::query_string_p;
-const url_parser fostlib::url_p;
+const url_hostpart_parser fostlib::url_hostpart_p;
+const url_filespec_parser fostlib::url_filespec_p;
 
 
 namespace {
@@ -243,10 +244,14 @@ fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nu
 fostlib::url::url( const string &a_url )
 : protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
     try {
-        url u;
-        if ( !boost::spirit::parse( a_url.c_str(), url_p[ phoenix::var( u ) = phoenix::arg1 ] ).full )
+        url u; ascii_string fs;
+        if ( !boost::spirit::parse( a_url.c_str(),
+            url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
+            >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+        ).full )
             throw exceptions::parse_error( L"Could not parse URL" );
         *this = u;
+        pathspec( url::filepath_string( fs ) );
     } catch ( exceptions::exception &e ) {
         e.info() << L"Parsing: " << a_url << std::endl;
         throw;
