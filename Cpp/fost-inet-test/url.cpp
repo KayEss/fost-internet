@@ -92,6 +92,7 @@ FSL_TEST_FUNCTION( url_parser_filespec ) {
     ascii_string s;
     URL_PARSE_FILESPEC( L"/", "/" );
     URL_PARSE_FILESPEC( L"/file.html", "/file.html" );
+    URL_PARSE_FILESPEC( L"/Site:/file.html", "/Site:/file.html" );
 }
 
 FSL_TEST_FUNCTION( path_spec ) {
@@ -111,6 +112,7 @@ FSL_TEST_FUNCTION( parse ) {
     FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );
 
     FSL_CHECK_EXCEPTION( url( "http://localhost/file path.html" ), fostlib::exceptions::parse_error& );
+    FSL_CHECK_EXCEPTION( url( "http://localhost/file\\path.html" ), fostlib::exceptions::parse_error& );
 }
 
 /*
