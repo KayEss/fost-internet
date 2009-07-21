@@ -22,8 +22,8 @@ namespace fostlib {
 
         struct query_string_closure : boost::spirit::closure< query_string_closure,
             url::query_string,
-            string,
-            string
+            utf8string,
+            utf8string
         > {
             member1 qs;
             member2 key;
@@ -36,7 +36,7 @@ namespace fostlib {
             };
             template <typename Container, typename Key, typename Value>
             void operator()(Container& c, Key const& key, Value const& value) const {
-                c.append( key, value.empty() ? nullable< string >() : value );
+                c.append( coerce< string >( key ), value.empty() ? nullable< string >() : coerce< string >( value ) );
             }
         };
         const phoenix::function<query_string_inserter> query_string_insert = query_string_inserter();
@@ -69,7 +69,7 @@ namespace fostlib {
             definition( query_string_parser const& self ) {
                 top = !boost::spirit::list_p( (
                         key[ self.key = phoenix::arg1 ] >>
-                        boost::spirit::chlit< wchar_t >( '=' )[ self.value = string() ] >>
+                        boost::spirit::chlit< wchar_t >( '=' )[ self.value = utf8string() ] >>
                         !value[ self.value = phoenix::arg1 ]
                     )[
                         detail::query_string_insert( self.qs, self.key, self.value )
