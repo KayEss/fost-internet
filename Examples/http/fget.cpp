@@ -26,10 +26,7 @@ FSL_MAIN(
     http::user_agent browser;
     std::auto_ptr< http::user_agent::response > response( browser.get( url( location ) ) );
     o << response->headers() << std::endl;
-    // If the body is HTML then display it
-    if ( response->content_type().substr( 0, 5 ) == L"text/" )
-        o << *(response->body()) << std::endl;
-    else
-        o << L"Not text : " << response->content_type() << std::endl;
+    // Display the body
+    o << *(response->body()) << std::endl;
     return 0;
 }

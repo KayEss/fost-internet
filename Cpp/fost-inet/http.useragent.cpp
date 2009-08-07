@@ -73,12 +73,18 @@ fostlib::http::user_agent::response::response(
 std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
     if (!headers().exists("Content-Length"))
         throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where there is no content length");
+    if ( content_type().substr(0, 5) == "text/" ) {
+        int64_t length = coerce< int64_t >(headers()["Content-Length"].value());
 
-    int64_t length = coerce< int64_t >(headers()["Content-Length"].value());
-
-    boost::scoped_array< utf8 > body_text( new utf8[ length ] );
-    m_stream.read(reinterpret_cast< char* >(body_text.get()), length);
-    if (m_stream.gcount() != length)
-        throw exceptions::unexpected_eof("Not all request data was read");
-    return std::auto_ptr< mime >(new text_body(body_text.get(), body_text.get() + length));
+        const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
+        if ( charset == "utf-8" || charset == "UTF-8" ) {
+            boost::scoped_array< utf8 > body_text(new utf8[length]);
+            m_stream.read(reinterpret_cast< char* >(body_text.get()), length);
+            if (m_stream.gcount() != length)
+                throw exceptions::unexpected_eof("Not all request data was read");
+            return std::auto_ptr< mime >(new text_body(body_text.get(), body_text.get() + length));
+        } else
+            throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8");
+    } else
+        throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
 }
