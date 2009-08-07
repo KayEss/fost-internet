@@ -46,8 +46,36 @@ Content-Type: multipart/mixed; boundary=" + coerce< utf8string >( headers[L"Cont
 */
 
 
-FSL_TEST_FUNCTION( text ) {
-    text_body ta( L"Test text document" );
+FSL_TEST_FUNCTION(text1) {
+    text_body ta(L"Test text document");
+    std::stringstream ss;
+    ss << ta;
+    mime::mime_headers headers;
+    headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
+    FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+Content-Length: 18\r\n\
+Content-Transfer-Encoding: 8bit\r\n\
+Content-Type: text/plain; charset=\"utf-8\"\r\n\
+\r\n\
+Test text document" );
+}
+FSL_TEST_FUNCTION(text2) {
+    text_body ta(utf8string("Test text document"));
+    std::stringstream ss;
+    ss << ta;
+    mime::mime_headers headers;
+    headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
+    FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+Content-Length: 18\r\n\
+Content-Transfer-Encoding: 8bit\r\n\
+Content-Type: text/plain; charset=\"utf-8\"\r\n\
+\r\n\
+Test text document" );
+}
+FSL_TEST_FUNCTION(text3) {
+    utf8 b[19];
+    std::strcpy(reinterpret_cast< char * >(b), "Test text document");
+    text_body ta(b, b+18);
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;

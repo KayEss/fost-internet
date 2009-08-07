@@ -72,13 +72,13 @@ fostlib::http::user_agent::response::response(
 #include <fost/exception/not_implemented.hpp>
 std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
     if (!headers().exists("Content-Length"))
-        throw exceptions::not_implemented( "fostlib::http::user_agent::response::body() -- where there is no content length" );
+        throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where there is no content length");
 
     int64_t length = coerce< int64_t >(headers()["Content-Length"].value());
 
-    boost::scoped_array< char > body_text( new char[ length ] );
-    m_stream.read(body_text.get(), length);
+    boost::scoped_array< utf8 > body_text( new utf8[ length ] );
+    m_stream.read(reinterpret_cast< char* >(body_text.get()), length);
     if (m_stream.gcount() != length)
         throw exceptions::unexpected_eof("Not all request data was read");
-    return std::auto_ptr< mime >( new text_body( string( body_text.get(), body_text.get() + length ) ) );
+    return std::auto_ptr< mime >(new text_body(body_text.get(), body_text.get() + length));
 }

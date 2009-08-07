@@ -87,12 +87,24 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
     fostlib::text_body
 */
 
-
-fostlib::text_body::text_body( const fostlib::string &text, const fostlib::string &mime_type )
-: m_text( coerce< utf8string >( text ) ) {
-    headers().add( L"Content-Type", mime_headers::content( mime_type ).subvalue( L"charset", L"utf-8" ) );
-    headers().add( L"Content-Transfer-Encoding", L"8bit" );
-    headers().add( L"Content-Length", coerce< string >( text.length() ) );
+namespace {
+    void do_headers(text_body &tb, const utf8string &body, const string &mime_type) {
+        tb.headers().add(L"Content-Type", mime::mime_headers::content(mime_type).subvalue( L"charset", L"utf-8" ));
+        tb.headers().add(L"Content-Transfer-Encoding", L"8bit");
+        tb.headers().add(L"Content-Length", coerce< string >(body.length()));
+    }
+}
+fostlib::text_body::text_body(const utf8 *begin, const utf8 *end, const string &mime_type)
+: m_text(begin, end) {
+    do_headers(*this, m_text, mime_type);
+}
+fostlib::text_body::text_body(const utf8string &text, const string &mime_type)
+: m_text( text ) {
+    do_headers(*this, m_text, mime_type);
+}
+fostlib::text_body::text_body(const fostlib::string &text, const fostlib::string &mime_type)
+: m_text(coerce< utf8string >(text)) {
+    do_headers(*this, m_text, mime_type);
 }
 
 std::ostream &fostlib::text_body::print_on( std::ostream &o ) const {
