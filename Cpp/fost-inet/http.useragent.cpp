@@ -8,6 +8,7 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/http.useragent.hpp>
+#include <fost/exception/unexpected_eof.hpp>
 
 
 using namespace fostlib;
@@ -23,21 +24,23 @@ fostlib::http::user_agent::user_agent() {
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (
     const string &method, const url &url, const nullable< string > &data
 ) {
-    std::auto_ptr< asio::tcpsocket > socket( new asio::tcpsocket( m_service ) );
-    socket->socket.connect( boost::asio::ip::tcp::endpoint( url.server().address(), url.port().value( 80 ) ) );
+    std::auto_ptr< boost::asio::ip::tcp::iostream > cnx(
+       new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port().value(80)))
+    );
 
-    asio::send( *socket, coerce< utf8string >( method ) + " " + url.pathspec().underlying().underlying() + " HTTP/1.1\r\n" );
+    (*cnx) << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";
+    text_body request(data.value(string()));
+    request.headers().add("Host", url.server().name());
+    request.print_on(*cnx);
 
-    text_body request( data.value( string() ) );
-    request.headers().add( L"Host", url.server().name() );
-    std::stringstream ss;
-    request.print_on( ss );
-    asio::send( *socket, ss.str() );
+    if ( !data.isnull() ) {
+        utf8string utf8data = coerce< utf8string >(data.value());
+        cnx->write(utf8data.c_str(), utf8data.length());
+    }
 
-    if ( !data.isnull() )
-        asio::send( *socket, coerce< utf8string>( data.value() ) );
+    cnx->flush();
 
-    return std::auto_ptr< http::user_agent::response >( new http::user_agent::response( socket, method, url ) );
+    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, method, url));
 }
 
 
@@ -46,18 +49,36 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
 */
 
 fostlib::http::user_agent::response::response(
-    std::auto_ptr< asio::tcpsocket > sock,
+    std::auto_ptr< boost::asio::ip::tcp::iostream > connection,
     const string &method, const url &url
-) : method( method ), location( url ), m_socket( sock ) {
-    string first_line;
-    asio::getline( *m_socket, first_line, L"\r\n" );
+) : method(method), location(url), m_stream(*connection), m_cnx(connection) {
+    std::string http, status, message;
+
+    m_stream >> http >> status;
+    std::getline(m_stream, message, '\r');
+    assert(m_stream.get() == '\n');
 
     while ( true ) {
-        string line;
-        asio::getline( *m_socket, line, L"\r\n" );
-        if ( line.empty() )
+        std::string line;
+        std::getline(m_stream, line, '\r');
+        assert(m_stream.get() == '\n');
+        if (line.empty())
             break;
-        headers().parse( line );
+        headers().parse(line);
     }
-    content_type( headers()[ L"Content-Type" ].value() );
+    content_type(headers()[ L"Content-Type" ].value());
+}
+
+#include <fost/exception/not_implemented.hpp>
+std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
+    if (!headers().exists("Content-Length"))
+        throw exceptions::not_implemented( "fostlib::http::user_agent::response::body() -- where there is no content length" );
+
+    int64_t length = coerce< int64_t >(headers()["Content-Length"].value());
+
+    boost::scoped_array< char > body_text( new char[ length ] );
+    m_stream.read(body_text.get(), length);
+    if (m_stream.gcount() != length)
+        throw exceptions::unexpected_eof("Not all request data was read");
+    return std::auto_ptr< mime >( new text_body( string( body_text.get(), body_text.get() + length ) ) );
 }

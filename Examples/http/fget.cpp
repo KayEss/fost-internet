@@ -28,7 +28,7 @@ FSL_MAIN(
     o << response->headers() << std::endl;
     // If the body is HTML then display it
     if ( response->content_type().substr( 0, 5 ) == L"text/" )
-        o << response->items().size() << L" items" << std::endl;
+        o << *(response->body()) << std::endl;
     else
         o << L"Not text : " << response->content_type() << std::endl;
     return 0;
