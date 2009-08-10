@@ -99,14 +99,27 @@ namespace fostlib {
 
 
     template<>
+    struct FOST_INET_DECLSPEC coercer< string, url > {
+        string coerce( const url &u ) {
+            return fostlib::coerce< string >( u.as_string() );
+        }
+    };
+    template<>
+    struct FOST_INET_DECLSPEC coercer< url, string > {
+        url coerce( const string &u ) {
+            return url( u );
+        }
+    };
+
+    template<>
     struct FOST_INET_DECLSPEC coercer< json, url > {
-        json coerce( const url u ) {
+        json coerce( const url &u ) {
             return json( fostlib::coerce< string >( u.as_string().underlying() ) );
         }
     };
     template<>
     struct FOST_INET_DECLSPEC coercer< url, json > {
-        url coerce( const json u ) {
+        url coerce( const json &u ) {
             return url( fostlib::coerce< string >( u ) );
         }
     };
@@ -115,6 +128,17 @@ namespace fostlib {
     struct FOST_INET_DECLSPEC coercer< url::filepath_string, string > {
         url::filepath_string coerce( const string &s );
     };
+
+
+}
+
+
+namespace std {
+
+
+    inline fostlib::ostream &operator << ( fostlib::ostream &o, const fostlib::url &u ) {
+        return o << fostlib::coerce< fostlib::string >( u );
+    }
 
 
 }

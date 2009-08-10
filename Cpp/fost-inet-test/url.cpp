@@ -115,6 +115,10 @@ FSL_TEST_FUNCTION( parse ) {
     FSL_CHECK_EXCEPTION( url( "http://localhost/file\\path.html" ), fostlib::exceptions::parse_error& );
 }
 
+FSL_TEST_FUNCTION( coercion ) {
+    FSL_CHECK_EQ( coerce< string >( url( "http://localhost/file-path.html" ) ), L"http://localhost/file-path.html" );
+}
+
 /*
 FSL_TEST_FUNCTION( parse_port ) {
     url  a( L"http://localhost:8000/" );
