@@ -64,7 +64,7 @@ fostlib::http::user_agent::response::response(
         assert(m_stream.get() == '\n');
         if (line.empty())
             break;
-        headers().parse(line);
+        headers().parse(coerce< string >(line));
     }
     content_type(headers()[ L"Content-Type" ].value());
 }
