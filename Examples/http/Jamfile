@@ -32,7 +32,7 @@ exe s3put
         ../../../fost-base/Cpp/fost-core/
         ../../../fost-base/Cpp/fost-cli/
         ../../Cpp/fost-inet/
-        fget.cpp
+        s3put.cpp
     ;
 
 install-example fget http-simple s3put ;
