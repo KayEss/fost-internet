@@ -1,0 +1,12 @@
+
+lib fost-aws
+    :
+        ../../../Boost//boost-date_time-dll
+        ../../../Boost//boost-regex-dll
+        ../../../Boost//boost-system-dll
+        ../../../Boost//boost-thread-dll
+        ../../../fost-base/Cpp/fost-core/
+        ../fost-inet/
+        s3.cpp
+    ;
+

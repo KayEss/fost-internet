@@ -11,6 +11,7 @@
 #pragma once
 
 
+#include <fost/crypto>
 #include <fost/internet>
 #include "http.useragent.hpp"
 
@@ -19,6 +20,17 @@ namespace fostlib {
 
 
     namespace aws {
+
+
+        class FOST_AWS_DECLSPEC s3 {
+        public:
+            s3();
+            explicit s3( const string &name );
+
+            void put( const boost::filesystem::wpath &file, const url &location ) const;
+        };
+
+
     }
 
 

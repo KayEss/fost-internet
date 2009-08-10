@@ -7,10 +7,8 @@
 
 
 #ifdef WIN32
-    #define FOST_AWS_DECLSPEC __declspec( dllimport )
+    #define FOST_AWS_DECLSPEC __declspec( dllexport )
 #else
     #define FOST_AWS_DECLSPEC
 #endif
 
-
-#include <fost/detail/s3.hpp>
