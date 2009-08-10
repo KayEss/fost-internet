@@ -8,8 +8,7 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/mime.hpp>
-#include <fost/string/utility.hpp>
-#include <fost/string/utility-nullable.hpp>
+#include <fost/string>
 #include <fost/exception/parse_error.hpp>
 
 

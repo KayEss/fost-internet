@@ -12,7 +12,7 @@
 
 
 #include <fost/detail/host.hpp>
-#include <fost/string/tagged-string.hpp>
+#include <fost/detail/tagged-string.hpp>
 
 
 namespace fostlib {

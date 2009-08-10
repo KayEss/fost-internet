@@ -8,10 +8,11 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/url.hpp>
+#include <fost/string>
+#include <fost/parse/url.hpp>
+
 #include <fost/exception/out_of_range.hpp>
 #include <fost/exception/parse_error.hpp>
-#include <fost/string/utility.hpp>
-#include <fost/parse/url.hpp>
 
 
 using namespace fostlib;
