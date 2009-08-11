@@ -25,7 +25,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     const string &method, const url &url, const nullable< string > &data
 ) {
     std::auto_ptr< boost::asio::ip::tcp::iostream > cnx(
-       new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port().value(80)))
+       new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port()))
     );
 
     (*cnx) << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";

@@ -105,7 +105,6 @@ namespace fostlib {
                         >> boost::spirit::chlit< wchar_t >( ':' )
                         >> boost::spirit::strlit< wliteral >( L"//" )
                         >> host_p[ self.host = phoenix::arg1 ]
-                        >> boost::spirit::chlit< wchar_t >( '/' )
                     )[ self.url = phoenix::construct_< fostlib::url >( self.moniker, self.host ) ];
 
                 moniker = ( +boost::spirit::chset<>( L"a-zA-Z+" )[

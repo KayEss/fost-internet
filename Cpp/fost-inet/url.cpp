@@ -213,14 +213,14 @@ setting< string > fostlib::url::s_default_host( L"fost-base/Cpp/fost-inet/url.cp
 
 
 fostlib::url::url()
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), port( 80 ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const url& url, const filepath_string &path )
-: protocol( ascii_string( "http" ) ), m_host( url.server() ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), port( 80 ), m_host( url.server() ), m_pathspec( "/" ) {
     pathspec( path );
 }
 fostlib::url::url( const t_form form, const string &str )
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), port( 80 ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
     std::pair< string, nullable< string > > anchor_parts( partition( str, L"#" ) );
     std::pair< string, nullable< string > > query_parts( partition( anchor_parts.first, L"?" ) );
     switch ( form ) {
@@ -240,19 +240,24 @@ fostlib::url::url( const t_form form, const string &str )
         anchor( ascii_string( coerce< utf8string >( anchor_parts.second.value() ) ) );
 }
 fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw )
-: protocol( ascii_string( "http" ) ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), port( 80 ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const string &a_url )
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), port( 80 ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
     try {
         url u; ascii_string fs;
         if ( !boost::spirit::parse( a_url.c_str(),
             url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
-            >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+            >> !(
+                boost::spirit::chlit< wchar_t >( '/' )
+                >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+            )
         ).full )
             throw exceptions::parse_error( L"Could not parse URL" );
         *this = u;
         pathspec( url::filepath_string( fs ) );
+        if ( protocol() == ascii_string("https") && port() == 80 )
+            port( 443 );
     } catch ( exceptions::exception &e ) {
         e.info() << L"Parsing: " << a_url << std::endl;
         throw;
@@ -261,7 +266,7 @@ fostlib::url::url( const string &a_url )
 fostlib::url::url( const ascii_string &protocol, const host &h,
     const nullable< string > &username,
     const nullable< string > &password
-) : protocol( protocol ), user( username ), password( password ), m_host( h ), m_pathspec( "/" ) {
+) : protocol( protocol ), port( 80 ), user( username ), password( password ), m_host( h ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const ascii_string &protocol, const host &h, port_number port,
     const nullable< string > &username,

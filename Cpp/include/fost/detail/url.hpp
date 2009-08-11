@@ -64,7 +64,7 @@ namespace fostlib {
 
         accessors< ascii_string > protocol;
         host server() const;
-        accessors< nullable< port_number > > port;
+        accessors< port_number > port;
         accessors< nullable< string > > user;
         accessors< nullable< string > > password;
         const filepath_string &pathspec() const;
