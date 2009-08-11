@@ -8,6 +8,8 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/http.useragent.hpp>
+
+#include <fost/exception/not_implemented.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
 
@@ -24,9 +26,13 @@ fostlib::http::user_agent::user_agent() {
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (
     const string &method, const url &url, const nullable< string > &data
 ) {
-    std::auto_ptr< std::iostream > cnx(
-       new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port()))
-    );
+    std::auto_ptr< std::iostream > cnx;
+    if ( url.protocol() == ascii_string("http") )
+        cnx = std::auto_ptr< std::iostream >(
+            new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port()))
+        );
+    else
+        throw exceptions::not_implemented( L"fostlib::http::user_agent with this protocol", coerce< string >(url.protocol()) );
 
     (*cnx) << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";
     text_body request(data.value(string()));
