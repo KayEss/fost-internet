@@ -1,51 +1,21 @@
 
-exe fget
+fost-exe fget
     :
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-regex-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
-        ../../../fost-base/Cpp/fost-cli/
         ../../Cpp/fost-inet/
         fget.cpp
-    :
-        <target-os>windows:<source>../../../OpenSSL//libeay32-dll
-        <target-os>linux:<source>../../../fost-base/External//openssl
-        <target-os>darwin:<source>../../../fost-base/External//openssl
     ;
 
-exe http-simple
+fost-exe http-simple
     :
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-regex-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
-        ../../../fost-base/Cpp/fost-cli/
         ../../Cpp/fost-inet/
         simple.cpp
-    :
-        <target-os>windows:<source>../../../OpenSSL//libeay32-dll
-        <target-os>linux:<source>../../../fost-base/External//openssl
-        <target-os>darwin:<source>../../../fost-base/External//openssl
     ;
 
-exe s3put
+fost-exe s3put
     :
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-regex-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
-        ../../../fost-base/Cpp/fost-cli/
         ../../Cpp/fost-aws/
         ../../Cpp/fost-inet/
         s3put.cpp
-    :
-        <target-os>windows:<source>../../../OpenSSL//libeay32-dll
-        <target-os>linux:<source>../../../fost-base/External//openssl
-        <target-os>darwin:<source>../../../fost-base/External//openssl
     ;
 
 install-example fget http-simple s3put ;
