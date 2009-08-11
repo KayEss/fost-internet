@@ -13,6 +13,7 @@
 
 #include <fost/cli>
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 
 
 namespace fostlib {
