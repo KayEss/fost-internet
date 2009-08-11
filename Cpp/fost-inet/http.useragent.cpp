@@ -24,7 +24,7 @@ fostlib::http::user_agent::user_agent() {
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (
     const string &method, const url &url, const nullable< string > &data
 ) {
-    std::auto_ptr< boost::asio::ip::tcp::iostream > cnx(
+    std::auto_ptr< std::iostream > cnx(
        new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port()))
     );
 
@@ -49,7 +49,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
 */
 
 fostlib::http::user_agent::response::response(
-    std::auto_ptr< boost::asio::ip::tcp::iostream > connection,
+    std::auto_ptr< std::iostream > connection,
     const string &method, const url &url
 ) : method(method), location(url), m_stream(*connection), m_cnx(connection) {
     std::string http, status, message;
