@@ -1,10 +1,6 @@
 
 fost-smoke-test fost-inet-test-smoke
     :
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-regex-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
         ../../../fost-base/Cpp/fost-core/
         ../../../fost-base/Cpp/fost-test/
         ../fost-inet/

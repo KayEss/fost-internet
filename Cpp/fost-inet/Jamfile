@@ -14,5 +14,10 @@ lib fost-inet
         mime.cpp
         smtp.cpp
         url.cpp
+    :
+        <target-os>windows:<source>../../../OpenSSL//libeay32-dll
+        <target-os>windows:<source>../../../OpenSSL//ssleay32-dll
+        <target-os>linux:<source>../../../fost-base/External//openssl
+        <target-os>darwin:<source>../../../fost-base/External//openssl
     ;
 
