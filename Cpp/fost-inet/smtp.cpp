@@ -8,6 +8,7 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/smtp.hpp>
+#include <fost/exception/not_implemented.hpp>
 #include <fost/exception/null.hpp>
 #include <fost/exception/parse_error.hpp>
 
@@ -16,18 +17,32 @@ using namespace fostlib;
 
 
 /*
-    fostlib::rfc822_address
+    fostlib::rfc822_address_tag
 */
 
 
-fostlib::rfc822_address::rfc822_address() {
+void fostlib::rfc822_address_tag::do_encode( fostlib::nliteral from, ascii_string &into ) {
+    throw exceptions::not_implemented("fostlib::rfc822_address_tag::do_encode( fostlib::nliteral from, ascii_string &into )");
+}
+void fostlib::rfc822_address_tag::do_encode( const ascii_string &from, ascii_string &into ) {
+    throw exceptions::not_implemented("fostlib::rfc822_address_tag::do_encode( const ascii_string &from, ascii_string &into )");
+}
+void fostlib::rfc822_address_tag::check_encoded( const ascii_string &s ) {
+    if ( s.empty() )
+        throw exceptions::null( L"Email address is empty" );
+    if ( s.underlying().find( '@' ) == string::npos )
+        throw exceptions::parse_error( L"Email address doesn't contain @ symbol", coerce< string >(s) );
 }
 
 
-fostlib::rfc822_address::rfc822_address( const string &e, const nullable<string> &n )
+/*
+    fostlib::email_address
+*/
+
+
+fostlib::email_address::email_address() {
+}
+
+fostlib::email_address::email_address( const rfc822_address &e, const nullable<string> &n )
 : email( e ), name( n ) {
-    if ( email().empty() )
-        throw exceptions::null( L"Email address is empty" );
-    if ( email().find( '@' ) == string::npos )
-        throw exceptions::parse_error( L"Email address doesn't contain @ symbol", email() );
 }

@@ -17,5 +17,5 @@ FSL_TEST_SUITE( smtp );
 
 
 FSL_TEST_FUNCTION( basic ) {
-    rfc822_address kirit( L"kirit_nospam@felspar.com" );
+    email_address sample(rfc822_address("address@example.com"));
 }

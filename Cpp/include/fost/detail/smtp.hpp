@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2008, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2009, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -11,19 +11,26 @@
 #pragma once
 
 
-#include <fost/core>
+#include <fost/string>
 #include <set>
 
 
 namespace fostlib {
 
 
-    struct FOST_INET_DECLSPEC rfc822_address {
-        fostlib::accessors< string > email;
+    struct FOST_INET_DECLSPEC rfc822_address_tag {
+        static void do_encode( fostlib::nliteral from, ascii_string &into );
+        static void do_encode( const ascii_string &from, ascii_string &into );
+        static void check_encoded( const ascii_string &s );
+    };
+    typedef tagged_string< rfc822_address_tag, ascii_string > rfc822_address;
+
+    struct FOST_INET_DECLSPEC email_address {
+        fostlib::accessors< rfc822_address > email;
         fostlib::accessors< nullable< string > > name;
 
-        rfc822_address();
-        explicit rfc822_address( const string &email, const nullable< string > &name = null );
+        email_address();
+        explicit email_address( const rfc822_address &email, const nullable< string > &name = null );
     };
 
 
@@ -32,9 +39,9 @@ namespace fostlib {
 
 namespace std {
     template<>
-    struct less< fostlib::rfc822_address > : public std::binary_function< bool, fostlib::rfc822_address, fostlib::rfc822_address > {
-        bool operator ()( const fostlib::rfc822_address &l, const fostlib::rfc822_address &r ) const {
-            return std::less< fostlib::string >()( l.email(), r.email() );
+    struct less< fostlib::email_address > : public std::binary_function< bool, fostlib::email_address, fostlib::email_address > {
+        bool operator ()( const fostlib::email_address &l, const fostlib::email_address &r ) const {
+            return less< fostlib::rfc822_address >()( l.email(), r.email() );
         }
     };
 }
