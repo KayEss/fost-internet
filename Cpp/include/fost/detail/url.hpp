@@ -18,9 +18,6 @@
 namespace fostlib {
 
 
-    typedef uint16_t port_number;
-
-
     class FOST_INET_DECLSPEC url {
     public:
         struct FOST_INET_DECLSPEC filepath_string_tag {
@@ -57,14 +54,10 @@ namespace fostlib {
             const nullable< string > &username = null,
             const nullable< string > &password = null
         );
-        url( const ascii_string &protocol, const host &, port_number port,
-            const nullable< string > &username = null,
-            const nullable< string > &password = null
-        );
 
         accessors< ascii_string > protocol;
         host server() const;
-        accessors< port_number > port;
+        port_number port() const;
         accessors< nullable< string > > user;
         accessors< nullable< string > > password;
         const filepath_string &pathspec() const;

@@ -18,6 +18,9 @@
 namespace fostlib {
 
 
+    typedef uint16_t port_number;
+
+
     namespace asio {
 
 
