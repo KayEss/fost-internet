@@ -9,7 +9,6 @@
 #include <fost/cli>
 #include <fost/main.hpp>
 #include <fost/internet>
-#include <fost/detail/http.useragent.hpp>
 
 
 using namespace fostlib;
