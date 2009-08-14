@@ -29,6 +29,20 @@ namespace fostlib {
             member2 hostname;
             member3 ipv4;
         };
+        struct host_port_setter {
+            template< typename H, typename N >
+            struct result {
+                typedef void type;
+            };
+            template< typename H, typename N >
+            void operator () ( H &h, N n ) {
+                if ( h.service().isnull() )
+                    h.service(fostlib::string(1, n));
+                else
+                    h.service(h.service().value() + fostlib::string(1, n));
+            }
+        };
+        const phoenix::function<host_port_setter> host_port = host_port_setter();
 
 
     }
@@ -40,11 +54,16 @@ namespace fostlib {
         template< typename scanner_t >
         struct definition {
             definition( host_parser const &self ) {
-                top =
+                top = (
                     ipv4address[ self.host = phoenix::construct_< fostlib::host >( self.ipv4 ) ]
                     | fqname[ self.host = phoenix::construct_< fostlib::host >( self.hostname ) ]
                     | rawipv4[ self.host = phoenix::construct_< fostlib::host >( self.ipv4 ) ]
-                    | hname[ self.host = phoenix::construct_< fostlib::host >( self.hostname ) ];
+                    | hname[ self.host = phoenix::construct_< fostlib::host >( self.hostname ) ]
+                    ) >> ! ( boost::spirit::chlit< wchar_t >( ':' )
+                        >> +boost::spirit::chset<>(L"0-9")[
+                            detail::host_port(self.host, phoenix::arg1)
+                        ]
+                    );
 
                 rawipv4 = boost::spirit::uint_parser< uint32_t, 10, 1, 10 >()[
                     self.ipv4 = phoenix::arg1

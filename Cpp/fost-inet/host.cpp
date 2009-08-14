@@ -76,8 +76,15 @@ string fostlib::host::name() const {
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( address.to_string() );
 }
+#include <fost/exception/not_implemented.hpp>
 ascii_string fostlib::coercer< ascii_string, host >::coerce( const host &h ) {
-    return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded );
+    if ( h.service().isnull() )
+        return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded );
+    else
+        return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded ) +
+            ascii_string(":") +
+            ascii_string( fostlib::coerce< utf8string >( h.service().value() ).c_str(), ascii_string::encoded )
+        ;
 }
 
 

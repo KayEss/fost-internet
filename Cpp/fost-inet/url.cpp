@@ -213,14 +213,14 @@ setting< string > fostlib::url::s_default_host( L"fost-base/Cpp/fost-inet/url.cp
 
 
 fostlib::url::url()
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const url& url, const filepath_string &path )
 : protocol( ascii_string( "http" ) ), m_host( url.server() ), m_pathspec( "/" ) {
     pathspec( path );
 }
 fostlib::url::url( const t_form form, const string &str )
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
     std::pair< string, nullable< string > > anchor_parts( partition( str, L"#" ) );
     std::pair< string, nullable< string > > query_parts( partition( anchor_parts.first, L"?" ) );
     switch ( form ) {
@@ -243,7 +243,7 @@ fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nu
 : protocol( ascii_string( "http" ) ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const string &a_url )
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value(), L"http" ), m_pathspec( "/" ) {
+: protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
     try {
         url u; ascii_string fs;
         if ( !boost::spirit::parse( a_url.c_str(),
@@ -290,7 +290,10 @@ ascii_string fostlib::url::as_string( const url &relative_from ) const {
 }
 
 fostlib::port_number fostlib::url::port() const {
-    return protocol() == ascii_string("http") ? 80 : 443;
+    if ( server().service().isnull() )
+        return protocol() == ascii_string("http") ? 80 : 443;
+    else
+        return coerce< port_number >( server().service().value() );
 }
 
 fostlib::host fostlib::url::server() const {

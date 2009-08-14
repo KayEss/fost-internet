@@ -33,4 +33,6 @@ FSL_TEST_FUNCTION( parse ) {
     HOST_PARSE("localhost");
     HOST_PARSE("www.felspar.com");
     HOST_PARSE("127.0.0.1");
+
+    HOST_PARSE("localhost:80");
 }

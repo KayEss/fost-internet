@@ -93,6 +93,8 @@ FSL_TEST_FUNCTION( url_parser_hostpart ) {
     FSL_CHECK( !boost::spirit::parse( L"http://.www/", url_hostpart_p ).full );
     URL_PARSE_HOSTPART( L"http://123.45", url( host( L"123.45" ) ) );
     URL_PARSE_HOSTPART( L"http://12345", url( host( 12345 ) ) );
+    URL_PARSE_HOSTPART( L"http://localhost:80", url( host( L"localhost", L"80" ) ) );
+    URL_PARSE_HOSTPART( L"http://localhost:8080", url( host( L"localhost", L"8080" ) ) );
 }
 #define URL_PARSE_FILESPEC( str, s_ ) \
     FSL_CHECK( boost::spirit::parse( str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
@@ -119,6 +121,8 @@ FSL_TEST_FUNCTION( parse ) {
     )
     FSL_CHECK_EQ( url( "http://localhost" ).server().name(), L"localhost" );
     FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );
+    FSL_CHECK_EQ( url( "http://localhost:6789/file-path.html" ).server().service().value(), L"6789" );
+    FSL_CHECK_EQ( url( "http://localhost:6789/file-path.html" ).port(), 6789 );
 
     FSL_CHECK_EXCEPTION( url( "http://localhost/file path.html" ), fostlib::exceptions::parse_error& );
     FSL_CHECK_EXCEPTION( url( "http://localhost/file\\path.html" ), fostlib::exceptions::parse_error& );
