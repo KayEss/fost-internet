@@ -100,14 +100,23 @@ std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
         int64_t length = coerce< int64_t >(headers()["Content-Length"].value());
 
         const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
-        if ( charset == "utf-8" || charset == "UTF-8" ) {
+        if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
             boost::scoped_array< utf8 > body_text(new utf8[length]);
             m_stream.read(reinterpret_cast< char* >(body_text.get()), length);
             if (m_stream.gcount() != length)
                 throw exceptions::unexpected_eof("Not all request data was read");
-            return std::auto_ptr< mime >(new text_body(body_text.get(), body_text.get() + length));
+            try {
+                return std::auto_ptr< mime >(new text_body(body_text.get(), body_text.get() + length));
+            } catch ( fostlib::exceptions::exception &e ) {
+                if ( charset.isnull() )
+                    e.info() << L"Assumed that the page was UTF-8 as the charset from the Content-Type header was blank\n";
+                else
+                    e.info() << L"Charset in Content-Type header given as " << charset.value() << L"\n";
+                throw;
+            }
         } else
             throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8");
+
     } else
         throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
 }
