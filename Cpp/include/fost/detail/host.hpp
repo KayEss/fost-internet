@@ -11,7 +11,7 @@
 #pragma once
 
 
-#include <fost/core>
+#include <fost/string>
 #include <fost/detail/asio.hpp>
 
 
@@ -27,7 +27,7 @@ namespace fostlib {
 
         boost::asio::ip::address address() const;
         string name() const;
-        string service() const;
+        accessors< nullable< string > > service;
 
     private:
         fostlib::string m_name, m_service;
@@ -49,14 +49,25 @@ namespace fostlib {
 
     }
 
+
     template<>
     struct FOST_INET_DECLSPEC coercer< string, boost::asio::ip::address > {
         string coerce( const boost::asio::ip::address &i );
     };
+    template<>
+    struct FOST_INET_DECLSPEC coercer< ascii_string, host > {
+        ascii_string coerce( const host &i );
+    };
 
 
-    inline fostlib::ostream  &operator <<( fostlib::ostream  &o, const host &h ) {
-        return o << h.name();
+}
+
+
+namespace std {
+
+
+    inline fostlib::ostream  &operator <<( fostlib::ostream &o, const fostlib::host &h ) {
+        return o << fostlib::coerce< fostlib::string >( fostlib::coerce< fostlib::ascii_string >( h ) );
     }
 
 

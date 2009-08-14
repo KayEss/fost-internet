@@ -25,7 +25,7 @@ namespace {
         boost::asio::io_service io_service;
         boost::asio::ip::tcp::resolver resolver( io_service );
         boost::asio::ip::tcp::resolver::query query(
-            coerce< std::string >( host.name() ), coerce< std::string >( host.service() )
+            coerce< std::string >( host.name() ), coerce< std::string >( host.service().value("0") )
         );
         boost::system::error_code error;
         boost::asio::ip::tcp::resolver::iterator it( resolver.resolve( query, error ) );
@@ -38,24 +38,23 @@ namespace {
 }
 
 
-fostlib::host::host()
-: m_service( L"0" ) {
+fostlib::host::host() {
 }
 
 
 fostlib::host::host( const fostlib::string &name, const nullable< string > &service )
-: m_name( name ), m_service( service.value( L"0" ) ) {
+: service( service ), m_name( name ) {
 }
 
 
 fostlib::host::host( uint32_t address, const nullable< string > &service )
-: m_service( service.value( L"0" ) ), m_address( boost::asio::ip::address_v4( address ) ) {
+: service( service ), m_address( boost::asio::ip::address_v4( address ) ) {
     m_name = coerce< string >( m_address.value() );
 }
 
 
 fostlib::host::host( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, const nullable< string > &service )
-: m_service( service.value( L"0" ) ), m_address(
+: service( service ), m_address(
     boost::asio::ip::address_v4( ( b1 << 24 ) + ( b2 << 16 ) + ( b3 << 8 ) + b4 )
 ) {
     m_name = coerce< string >( m_address.value() );
@@ -72,13 +71,13 @@ boost::asio::ip::address fostlib::host::address() const {
 string fostlib::host::name() const {
     return m_name;
 }
-string fostlib::host::service() const {
-    return m_service;
-}
 
 
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( address.to_string() );
+}
+ascii_string fostlib::coercer< ascii_string, host >::coerce( const host &h ) {
+    return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded );
 }
 
 
