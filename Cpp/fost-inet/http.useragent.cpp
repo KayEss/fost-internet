@@ -7,6 +7,7 @@
 
 
 #include "fost-inet.hpp"
+#include <boost/asio/ssl.hpp>
 #include <fost/detail/http.useragent.hpp>
 
 #include <fost/exception/not_implemented.hpp>
