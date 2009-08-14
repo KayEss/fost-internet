@@ -42,6 +42,8 @@ namespace fostlib {
                 std::auto_ptr< std::iostream > m_cnx;
             };
 
+            accessors< nullable< boost::function< void ( request & ) > > > authentication;
+
             std::auto_ptr< response > operator () ( const string &method, const url &url, const nullable< string > &data  = null );
 
             std::auto_ptr< response > get( const url &url ) {
