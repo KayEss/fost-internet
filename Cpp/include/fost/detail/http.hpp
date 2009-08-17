@@ -11,29 +11,15 @@
 #pragma once
 
 
-#include <fost/detail/url.hpp>
+#include <fost/detail/connection.hpp>
 #include <fost/detail/mime.hpp>
+#include <fost/detail/url.hpp>
 
 
 namespace fostlib {
 
 
     namespace http {
-
-
-        class FOST_INET_DECLSPEC request : boost::noncopyable {
-        public:
-            request( std::auto_ptr< asio::tcpsocket > socket );
-
-            const string &method();
-            const string &file_spec();
-
-            void operator() ( const mime &response );
-
-        private:
-            std::auto_ptr< asio::tcpsocket > m_sock;
-            nullable< std::pair< string, string > > m_first_line;
-        };
 
 
     }

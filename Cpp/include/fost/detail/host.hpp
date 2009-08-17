@@ -12,10 +12,13 @@
 
 
 #include <fost/string>
-#include <fost/detail/asio.hpp>
+#include <boost/asio.hpp>
 
 
 namespace fostlib {
+
+
+    typedef uint16_t port_number;
 
 
     class FOST_INET_DECLSPEC host {

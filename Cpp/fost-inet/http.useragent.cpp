@@ -32,10 +32,10 @@ fostlib::http::user_agent::user_agent() {
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (
     const string &method, const url &url, const nullable< string > &data
 ) {
-    std::auto_ptr< std::iostream > cnx;
+    std::auto_ptr< network_connection > cnx;
     if ( url.protocol() == ascii_string("http") )
-        cnx = std::auto_ptr< std::iostream >(
-            new boost::asio::ip::tcp::iostream(boost::asio::ip::tcp::endpoint(url.server().address(), url.port()))
+        cnx = std::auto_ptr< network_connection >(
+            new network_connection(url.server(), url.port())
         );
     else if ( url.protocol() == ascii_string("https") ) {
         boost::asio::ssl::context ctx(g_io_service, boost::asio::ssl::context::sslv23_client);
@@ -51,17 +51,17 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     } else
         throw exceptions::not_implemented( L"fostlib::http::user_agent with this protocol", coerce< string >(url.protocol()) );
 
-    (*cnx) << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";
+    std::stringstream buffer;
+    buffer << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";
     text_body request(data.value(string()));
     request.headers().add("Host", url.server().name());
-    request.print_on(*cnx);
+    request.print_on(buffer);
+    *cnx << buffer;
 
     if ( !data.isnull() ) {
         utf8string utf8data = coerce< utf8string >(data.value());
-        cnx->write(utf8data.c_str(), utf8data.length());
+        *cnx << utf8data;
     }
-
-    cnx->flush();
 
     return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, method, url));
 }
@@ -72,19 +72,16 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
 */
 
 fostlib::http::user_agent::response::response(
-    std::auto_ptr< std::iostream > connection,
+    std::auto_ptr< network_connection > connection,
     const string &method, const url &url
-) : method(method), location(url), m_stream(*connection), m_cnx(connection) {
-    std::string http, status, message;
+) : method(method), location(url), m_cnx(connection) {
+    utf8string first_line;
 
-    m_stream >> http >> status;
-    std::getline(m_stream, message, '\r');
-    assert(m_stream.get() == '\n');
+    *m_cnx >> first_line;
 
     while ( true ) {
-        std::string line;
-        std::getline(m_stream, line, '\r');
-        assert(m_stream.get() == '\n');
+        utf8string line;
+        *m_cnx >> line;
         if (line.empty())
             break;
         headers().parse(coerce< string >(line));
@@ -101,12 +98,10 @@ std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
 
         const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
         if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
-            boost::scoped_array< utf8 > body_text(new utf8[length]);
-            m_stream.read(reinterpret_cast< char* >(body_text.get()), length);
-            if (m_stream.gcount() != length)
-                throw exceptions::unexpected_eof("Not all request data was read");
+            std::vector< utf8 > body_text(length);
+            *m_cnx >> body_text;
             try {
-                return std::auto_ptr< mime >(new text_body(body_text.get(), body_text.get() + length));
+                return std::auto_ptr< mime >(new text_body(&body_text[0], &body_text[0] + length));
             } catch ( fostlib::exceptions::exception &e ) {
                 if ( charset.isnull() )
                     e.info() << L"Assumed that the page was UTF-8 as the charset from the Content-Type header was blank\n";
@@ -116,7 +111,6 @@ std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
             }
         } else
             throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8");
-
     } else
         throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
 }

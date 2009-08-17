@@ -6,7 +6,7 @@ lib fost-inet
         ../../../Boost//boost-system-dll
         ../../../Boost//boost-thread-dll
         ../../../fost-base/Cpp/fost-core/
-        asio.cpp
+        connection.cpp
         headers.cpp
         host.cpp
         http.server.cpp

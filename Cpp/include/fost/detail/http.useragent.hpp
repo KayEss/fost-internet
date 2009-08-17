@@ -24,12 +24,12 @@ namespace fostlib {
         public:
             user_agent();
 
-            class request : public http::request {
+            class request : public mime {
             };
             class response : public mime {
                 friend class user_agent;
                 response(
-                    std::auto_ptr< std::iostream > connection,
+                    std::auto_ptr< network_connection > connection,
                     const string &m, const url &u
                 );
             public:
@@ -38,8 +38,7 @@ namespace fostlib {
 
                 std::auto_ptr< mime > body();
             private:
-                std::iostream &m_stream;
-                std::auto_ptr< std::iostream > m_cnx;
+                std::auto_ptr< network_connection > m_cnx;
             };
 
             accessors< nullable< boost::function< void ( request & ) > > > authentication;
