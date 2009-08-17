@@ -33,9 +33,13 @@ fostlib::http::user_agent::user_agent(const url &u)
 
 
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) {
+    req.headers().add("Host", req.address().server().name());
+
+    if ( !authentication().isnull() )
+        authentication().value()( req );
+
     std::stringstream buffer;
     buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.1\r\n";
-    req.headers().add("Host", req.address().server().name());
     req.print_on(buffer);
 
     std::auto_ptr< network_connection > cnx(
@@ -43,9 +47,6 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     );
     if ( req.address().protocol() == ascii_string("https") )
         cnx->start_ssl();
-
-    if ( !authentication().isnull() )
-        authentication().value()( req );
 
     *cnx << buffer;
 
