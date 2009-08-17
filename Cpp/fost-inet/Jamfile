@@ -9,6 +9,7 @@ lib fost-inet
         connection.cpp
         headers.cpp
         host.cpp
+        http.authentication.cpp
         http.server.cpp
         http.useragent.cpp
         mime.cpp
