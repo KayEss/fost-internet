@@ -7,7 +7,6 @@
 
 
 #include "fost-inet.hpp"
-#include <boost/asio/ssl.hpp>
 #include <fost/detail/http.useragent.hpp>
 
 #include <fost/exception/not_implemented.hpp>
@@ -32,24 +31,11 @@ fostlib::http::user_agent::user_agent() {
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (
     const string &method, const url &url, const nullable< string > &data
 ) {
-    std::auto_ptr< network_connection > cnx;
-    if ( url.protocol() == ascii_string("http") )
-        cnx = std::auto_ptr< network_connection >(
-            new network_connection(url.server(), url.port())
-        );
-    else if ( url.protocol() == ascii_string("https") ) {
-        boost::asio::ssl::context ctx(g_io_service, boost::asio::ssl::context::sslv23_client);
-        ctx.set_verify_mode(boost::asio::ssl::context::verify_none);
-
-        boost::asio::ip::tcp::socket socket(g_io_service);
-        socket.connect(boost::asio::ip::tcp::endpoint(url.server().address(), url.port()));
-
-        boost::asio::ssl::stream< boost::asio::ip::tcp::socket& > ssl_sock(socket, ctx);
-        ssl_sock.handshake(boost::asio::ssl::stream_base::client);
-
-        throw exceptions::not_implemented( L"HTTPS not supported" );
-    } else
-        throw exceptions::not_implemented( L"fostlib::http::user_agent with this protocol", coerce< string >(url.protocol()) );
+    std::auto_ptr< network_connection > cnx(
+        new network_connection(url.server(), url.port())
+    );
+    if ( url.protocol() == ascii_string("https") )
+        cnx->start_ssl();
 
     std::stringstream buffer;
     buffer << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";
