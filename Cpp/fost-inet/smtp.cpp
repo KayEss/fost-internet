@@ -46,3 +46,11 @@ fostlib::email_address::email_address() {
 fostlib::email_address::email_address( const rfc822_address &e, const nullable<string> &n )
 : email( e ), name( n ) {
 }
+
+
+string fostlib::coercer< string, email_address >::coerce( const email_address &e ) {
+    if ( e.name().isnull() )
+        return fostlib::coerce< string >( e.email().underlying() );
+    else
+        return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
+}

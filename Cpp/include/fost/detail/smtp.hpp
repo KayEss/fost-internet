@@ -34,6 +34,12 @@ namespace fostlib {
     };
 
 
+    template<>
+    struct FOST_INET_DECLSPEC coercer< string, email_address > {
+        string coerce( const email_address & );
+    };
+
+
 }
 
 

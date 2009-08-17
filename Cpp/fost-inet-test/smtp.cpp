@@ -19,3 +19,12 @@ FSL_TEST_SUITE( smtp );
 FSL_TEST_FUNCTION( basic ) {
     email_address sample(rfc822_address("address@example.com"));
 }
+
+
+
+FSL_TEST_FUNCTION( to_string ) {
+    email_address addy(rfc822_address("address@example.com"));
+    FSL_CHECK_EQ(coerce< string >(addy), "address@example.com");
+    addy.name(L"Mr. Address");
+    FSL_CHECK_EQ(coerce< string >(addy), "Mr. Address <address@example.com>");
+}
