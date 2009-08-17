@@ -24,8 +24,6 @@ namespace fostlib {
         public:
             user_agent();
 
-            class request : public mime {
-            };
             class response : public mime {
                 friend class user_agent;
                 response(
@@ -39,6 +37,15 @@ namespace fostlib {
                 std::auto_ptr< mime > body();
             private:
                 std::auto_ptr< network_connection > m_cnx;
+            };
+            class request : public text_body {
+                friend class user_agent;
+                request(const user_agent &ua, const string &method, const url &url, const nullable< string > &data  = null);
+            public:
+                accessors< const string > method;
+                accessors< const url > address;
+
+                std::auto_ptr< response > operator () ();
             };
 
             accessors< nullable< boost::function< void ( request & ) > > > authentication;

@@ -86,7 +86,6 @@ namespace fostlib {
 
 
     class FOST_INET_DECLSPEC text_body : public mime {
-        utf8string m_text;
     public:
         text_body( const utf8 *begin, const utf8 *end, const string &mime = "text/plain" );
         text_body( const utf8string &text, const string &mime = "text/plain" );
@@ -94,6 +93,8 @@ namespace fostlib {
 
         std::ostream &print_on( std::ostream &o ) const;
         bool boundary_is_ok( const string &boundary ) const;
+
+        accessors< const utf8string > text;
     };
 
 

@@ -28,28 +28,39 @@ namespace {
 fostlib::http::user_agent::user_agent() {
 }
 
-std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (
-    const string &method, const url &url, const nullable< string > &data
-) {
+std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (const string &method, const url &url, const nullable< string > &data) {
+    return request(*this, method, url, data)();
+}
+
+
+/*
+    fostlib::http::user_agent::request
+*/
+
+
+fostlib::http::user_agent::request::request(const user_agent &, const string &method, const url &url, const nullable< string > &data)
+: text_body(data.value(string())), method(method), address(url) {
+}
+
+
+std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::request::operator () () {
+    std::stringstream buffer;
+    buffer << coerce< utf8string >( method() ) << " " << address().pathspec().underlying().underlying() << " HTTP/1.1\r\n";
+    headers().add("Host", address().server().name());
+    print_on(buffer);
+
     std::auto_ptr< network_connection > cnx(
-        new network_connection(url.server(), url.port())
+        new network_connection(address().server(), address().port())
     );
-    if ( url.protocol() == ascii_string("https") )
+    if ( address().protocol() == ascii_string("https") )
         cnx->start_ssl();
 
-    std::stringstream buffer;
-    buffer << coerce< utf8string >( method ) << " " << url.pathspec().underlying().underlying() << " HTTP/1.1\r\n";
-    text_body request(data.value(string()));
-    request.headers().add("Host", url.server().name());
-    request.print_on(buffer);
     *cnx << buffer;
 
-    if ( !data.isnull() ) {
-        utf8string utf8data = coerce< utf8string >(data.value());
-        *cnx << utf8data;
-    }
+    if ( !text().empty() )
+        *cnx << text();
 
-    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, method, url));
+    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, method(), address()));
 }
 
 

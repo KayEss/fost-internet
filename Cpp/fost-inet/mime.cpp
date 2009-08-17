@@ -94,22 +94,22 @@ namespace {
     }
 }
 fostlib::text_body::text_body(const utf8 *begin, const utf8 *end, const string &mime_type)
-: m_text(begin, end) {
-    do_headers(*this, m_text, mime_type);
+: text(utf8string(begin, end)) {
+    do_headers(*this, text(), mime_type);
 }
-fostlib::text_body::text_body(const utf8string &text, const string &mime_type)
-: m_text( text ) {
-    do_headers(*this, m_text, mime_type);
+fostlib::text_body::text_body(const utf8string &t, const string &mime_type)
+: text(t) {
+    do_headers(*this, text(), mime_type);
 }
-fostlib::text_body::text_body(const fostlib::string &text, const fostlib::string &mime_type)
-: m_text(coerce< utf8string >(text)) {
-    do_headers(*this, m_text, mime_type);
+fostlib::text_body::text_body(const fostlib::string &t, const fostlib::string &mime_type)
+: text(coerce< utf8string >(t)) {
+    do_headers(*this, text(), mime_type);
 }
 
 std::ostream &fostlib::text_body::print_on( std::ostream &o ) const {
-    return o << headers() << "\r\n" << m_text;
+    return o << headers() << "\r\n" << text();
 }
 
 bool fostlib::text_body::boundary_is_ok( const string &boundary ) const {
-    return m_text.find( coerce< utf8string >( boundary ) ) == string::npos;
+    return text().find( coerce< utf8string >( boundary ) ) == string::npos;
 }
