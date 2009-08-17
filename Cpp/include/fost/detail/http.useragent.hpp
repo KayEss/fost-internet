@@ -21,46 +21,48 @@ namespace fostlib {
 
 
         class FOST_INET_DECLSPEC user_agent : boost::noncopyable {
-        public:
-            user_agent();
-
-            class response : public mime {
-                friend class user_agent;
-                response(
-                    std::auto_ptr< network_connection > connection,
-                    const string &m, const url &u
-                );
             public:
-                accessors< const string > method;
-                accessors< const url > location;
+                user_agent();
+                explicit user_agent(const url &base);
 
-                std::auto_ptr< mime > body();
-            private:
-                std::auto_ptr< network_connection > m_cnx;
-            };
-            class request : public text_body {
-                friend class user_agent;
-                request(const user_agent &ua, const string &method, const url &url, const nullable< string > &data  = null);
-            public:
-                accessors< const string > method;
-                accessors< const url > address;
 
-                std::auto_ptr< response > operator () ();
-            };
+                class response : public mime {
+                    friend class user_agent;
+                    response(
+                        std::auto_ptr< network_connection > connection,
+                        const string &m, const url &u
+                    );
+                    public:
+                        accessors< const string > method;
+                        accessors< const url > location;
 
-            accessors< nullable< boost::function< void ( request & ) > > > authentication;
+                        std::auto_ptr< mime > body();
+                    private:
+                        std::auto_ptr< network_connection > m_cnx;
+                };
+                class request : public text_body {
+                    public:
+                        request(const string &method, const url &url, const nullable< string > &data  = null);
 
-            std::auto_ptr< response > operator () ( const string &method, const url &url, const nullable< string > &data  = null );
+                        accessors< const string > method;
+                        accessors< const url > address;
+                };
 
-            std::auto_ptr< response > get( const url &url ) {
-                return (*this)( L"GET", url, null );
-            }
-            std::auto_ptr< response > post( const url &url, const string &data ) {
-                return (*this)( L"POST", url, data );
-            }
 
-        private:
-            boost::asio::io_service m_service;
+                accessors< nullable< boost::function< void ( request & ) > > > authentication;
+                accessors< url > base;
+
+
+                std::auto_ptr< response > operator () (request &);
+
+                std::auto_ptr< response > get( const url &url ) {
+                    request r(L"GET", url);
+                    return (*this)(r);
+                }
+                std::auto_ptr< response > post( const url &url, const string &data ) {
+                    request r(L"POST", url, data);
+                    return (*this)(r);
+                }
         };
 
 

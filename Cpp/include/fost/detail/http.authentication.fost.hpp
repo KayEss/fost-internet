@@ -21,8 +21,9 @@ namespace fostlib {
 
 
         void fost_authentication(
-            const fostlib::ascii_string &api_key,
-            const fostlib::ascii_string &secret,
+            const fostlib::string &api_key,
+            const fostlib::string &secret,
+            const std::set< fostlib::string > &headers_to_sign,
             user_agent::request &request
         );
 

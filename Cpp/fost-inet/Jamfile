@@ -6,6 +6,8 @@ lib fost-inet
         ../../../Boost//boost-system-dll
         ../../../Boost//boost-thread-dll
         ../../../fost-base/Cpp/fost-core/
+        ../../../fost-base/Cpp/fost-crypto/
+        ../../../fost-base/Cpp/fost-datetime/
         connection.cpp
         headers.cpp
         host.cpp

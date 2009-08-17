@@ -27,9 +27,32 @@ namespace {
 
 fostlib::http::user_agent::user_agent() {
 }
+fostlib::http::user_agent::user_agent(const url &u)
+: base(u) {
+}
 
-std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (const string &method, const url &url, const nullable< string > &data) {
-    return request(*this, method, url, data)();
+
+std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) {
+    std::stringstream buffer;
+    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.1\r\n";
+    req.headers().add("Host", req.address().server().name());
+    req.print_on(buffer);
+
+    std::auto_ptr< network_connection > cnx(
+        new network_connection(req.address().server(), req.address().port())
+    );
+    if ( req.address().protocol() == ascii_string("https") )
+        cnx->start_ssl();
+
+    if ( !authentication().isnull() )
+        authentication().value()( req );
+
+    *cnx << buffer;
+
+    if ( !req.text().empty() )
+        *cnx << req.text();
+
+    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, req.method(), req.address()));
 }
 
 
@@ -38,29 +61,8 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
 */
 
 
-fostlib::http::user_agent::request::request(const user_agent &, const string &method, const url &url, const nullable< string > &data)
+fostlib::http::user_agent::request::request(const string &method, const url &url, const nullable< string > &data)
 : text_body(data.value(string())), method(method), address(url) {
-}
-
-
-std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::request::operator () () {
-    std::stringstream buffer;
-    buffer << coerce< utf8string >( method() ) << " " << address().pathspec().underlying().underlying() << " HTTP/1.1\r\n";
-    headers().add("Host", address().server().name());
-    print_on(buffer);
-
-    std::auto_ptr< network_connection > cnx(
-        new network_connection(address().server(), address().port())
-    );
-    if ( address().protocol() == ascii_string("https") )
-        cnx->start_ssl();
-
-    *cnx << buffer;
-
-    if ( !text().empty() )
-        *cnx << text();
-
-    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, method(), address()));
 }
 
 
