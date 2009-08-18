@@ -39,7 +39,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
         authentication().value()( req );
 
     std::stringstream buffer;
-    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.1\r\n";
+    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.0\r\n";
     req.print_on(buffer);
 
     std::auto_ptr< network_connection > cnx(
