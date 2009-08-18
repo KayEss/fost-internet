@@ -53,13 +53,13 @@ namespace fostlib {
                 accessors< url > base;
 
 
-                std::auto_ptr< response > operator () (request &);
+                std::auto_ptr< response > operator () (request &) const;
 
-                std::auto_ptr< response > get( const url &url ) {
+                std::auto_ptr< response > get( const url &url ) const {
                     request r(L"GET", url);
                     return (*this)(r);
                 }
-                std::auto_ptr< response > post( const url &url, const string &data ) {
+                std::auto_ptr< response > post( const url &url, const string &data ) const {
                     request r(L"POST", url, data);
                     return (*this)(r);
                 }

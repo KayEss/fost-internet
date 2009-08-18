@@ -32,7 +32,7 @@ fostlib::http::user_agent::user_agent(const url &u)
 }
 
 
-std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) {
+std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) const {
     req.headers().add("Host", req.address().server().name());
 
     if ( !authentication().isnull() )
@@ -89,26 +89,29 @@ fostlib::http::user_agent::response::response(
     content_type(headers()[ L"Content-Type" ].value());
 }
 
-#include <fost/exception/not_implemented.hpp>
-std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
-    if (!headers().exists("Content-Length"))
-        throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where there is no content length");
-    if ( content_type().substr(0, 5) == "text/" ) {
-        int64_t length = coerce< int64_t >(headers()["Content-Length"].value());
 
+std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
+    nullable< int64_t > length;
+    if (headers().exists("Content-Length"))
+        length = coerce< int64_t >(headers()["Content-Length"].value());
+
+    if ( content_type().substr(0, 5) == "text/" ) {
         const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
         if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
-            std::vector< utf8 > body_text(length);
-            *m_cnx >> body_text;
-            try {
-                return std::auto_ptr< mime >(new text_body(&body_text[0], &body_text[0] + length));
-            } catch ( fostlib::exceptions::exception &e ) {
-                if ( charset.isnull() )
-                    e.info() << L"Assumed that the page was UTF-8 as the charset from the Content-Type header was blank\n";
-                else
-                    e.info() << L"Charset in Content-Type header given as " << charset.value() << L"\n";
-                throw;
-            }
+            if ( length.value() ) {
+                std::vector< utf8 > body_text(length.value());
+                *m_cnx >> body_text;
+                try {
+                    return std::auto_ptr< mime >(new text_body(&body_text[0], &body_text[0] + length.value()));
+                } catch ( fostlib::exceptions::exception &e ) {
+                    if ( charset.isnull() )
+                        e.info() << L"Assumed that the page was UTF-8 as the charset from the Content-Type header was blank\n";
+                    else
+                        e.info() << L"Charset in Content-Type header given as " << charset.value() << L"\n";
+                    throw;
+                }
+            } else
+                throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content length us unknown");
         } else
             throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8");
     } else
