@@ -20,7 +20,7 @@ namespace fostlib {
     namespace http {
 
 
-        void fost_authentication(
+        void FOST_INET_DECLSPEC fost_authentication(
             const fostlib::string &api_key,
             const fostlib::string &secret,
             const std::set< fostlib::string > &headers_to_sign,

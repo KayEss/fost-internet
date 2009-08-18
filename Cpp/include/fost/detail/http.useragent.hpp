@@ -26,7 +26,7 @@ namespace fostlib {
                 explicit user_agent(const url &base);
 
 
-                class response : public mime {
+                class FOST_INET_DECLSPEC response : public mime {
                     friend class user_agent;
                     response(
                         std::auto_ptr< network_connection > connection,
@@ -40,7 +40,7 @@ namespace fostlib {
                     private:
                         std::auto_ptr< network_connection > m_cnx;
                 };
-                class request : public text_body {
+                class FOST_INET_DECLSPEC request : public text_body {
                     public:
                         request(const string &method, const url &url, const nullable< string > &data  = null);
 

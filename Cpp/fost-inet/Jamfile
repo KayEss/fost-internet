@@ -1,11 +1,6 @@
 
-lib fost-inet
+fost-lib fost-inet
     :
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-regex-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
         ../../../fost-base/Cpp/fost-crypto/
         ../../../fost-base/Cpp/fost-datetime/
         connection.cpp
@@ -17,10 +12,4 @@ lib fost-inet
         mime.cpp
         smtp.cpp
         url.cpp
-    :
-        <target-os>windows:<source>../../../OpenSSL//libeay32-dll
-        <target-os>windows:<source>../../../OpenSSL//ssleay32-dll
-        <target-os>linux:<source>../../../fost-base/External//openssl
-        <target-os>darwin:<source>../../../fost-base/External//openssl
     ;
-
