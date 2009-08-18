@@ -22,6 +22,8 @@ using namespace fostlib;
 
 namespace {
     boost::asio::io_service g_io_service;
+
+    const fostlib::setting< fostlib::string > c_user_agent( L"fost-internet/Cpp/fost-inet/http.useragent.cpp", L"HTTP", L"UserAgent", L"Felspar user agent", true );
 }
 
 
@@ -34,6 +36,8 @@ fostlib::http::user_agent::user_agent(const url &u)
 
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) const {
     req.headers().add("Host", req.address().server().name());
+    if ( !req.headers().exists("User-Agent") )
+        req.headers().add("User-Agent", c_user_agent.value() + L"/Fost 4.09.09");
 
     if ( !authentication().isnull() )
         authentication().value()( req );
@@ -98,7 +102,7 @@ std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
     if ( content_type().substr(0, 5) == "text/" ) {
         const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
         if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
-            if ( length.value() ) {
+            if ( !length.isnull() ) {
                 std::vector< utf8 > body_text(length.value());
                 *m_cnx >> body_text;
                 try {
