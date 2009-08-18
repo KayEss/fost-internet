@@ -120,10 +120,10 @@ network_connection &fostlib::network_connection::operator >> ( std::vector< utf8
     return *this;
 }
 void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
-    boost::system::error_code error;
-    read(*m_socket, m_ssl_data, m_input_buffer, boost::asio::transfer_all(), error);
-    if ( error != boost::asio::error::eof )
-        throw boost::system::system_error(error);
     while ( m_input_buffer.size() )
         b.sputc(m_input_buffer.sbumpc());
+    boost::system::error_code error;
+    read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
+    if ( error != boost::asio::error::eof )
+        throw boost::system::system_error(error);
 }
