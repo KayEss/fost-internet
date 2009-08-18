@@ -66,8 +66,11 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
 */
 
 
-fostlib::http::user_agent::request::request(const string &method, const url &url, const nullable< string > &data)
-: text_body(data.value(string())), method(method), address(url) {
+fostlib::http::user_agent::request::request(const string &method, const url &url)
+: text_body(string()), method(method), address(url) {
+}
+fostlib::http::user_agent::request::request(const string &method, const url &url, const string &data)
+: text_body(data), method(method), address(url) {
 }
 
 

@@ -42,7 +42,8 @@ namespace fostlib {
                 };
                 class FOST_INET_DECLSPEC request : public text_body {
                     public:
-                        request(const string &method, const url &url, const nullable< string > &data  = null);
+                        request(const string &method, const url &url);
+                        request(const string &method, const url &url, const string &data);
 
                         accessors< const string > method;
                         accessors< const url > address;
