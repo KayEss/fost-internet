@@ -78,6 +78,13 @@ namespace {
         else
             return boost::asio::read(sock, b, f);
     }
+    template< typename F >
+    std::size_t read(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, boost::asio::streambuf &b, F f, boost::system::error_code &e) {
+        if ( ssl )
+            return boost::asio::read(ssl->ssl_sock, b, f, e);
+        else
+            return boost::asio::read(sock, b, f, e);
+    }
 }
 
 
@@ -112,4 +119,11 @@ network_connection &fostlib::network_connection::operator >> ( std::vector< utf8
         v[p] = m_input_buffer.sbumpc();
     return *this;
 }
-
+void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
+    boost::system::error_code error;
+    read(*m_socket, m_ssl_data, m_input_buffer, boost::asio::transfer_all(), error);
+    if ( error != boost::asio::error::eof )
+        throw boost::system::system_error(error);
+    while ( m_input_buffer.size() )
+        b.sputc(m_input_buffer.sbumpc());
+}
