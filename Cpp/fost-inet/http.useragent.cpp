@@ -124,7 +124,7 @@ std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
                 throw;
             }
         } else
-            throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8");
+            throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8", charset.value());
     } else
         throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
 }
