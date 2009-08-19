@@ -54,6 +54,11 @@ namespace fostlib {
 
 
     template<>
+    struct FOST_INET_DECLSPEC coercer< host, string > {
+        host coerce( const string &h );
+    };
+
+    template<>
     struct FOST_INET_DECLSPEC coercer< string, boost::asio::ip::address > {
         string coerce( const boost::asio::ip::address &i );
     };

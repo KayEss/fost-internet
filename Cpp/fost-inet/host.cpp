@@ -73,10 +73,16 @@ string fostlib::host::name() const {
 }
 
 
+host fostlib::coercer< host, string >::coerce( const string &h ) {
+    host r;
+    if ( boost::spirit::parse(h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
+        return r;
+    else
+        throw exceptions::not_implemented("fostlib::coercer< host, string >::coerce( const string &h ) -- where the host name didn't parse");
+}
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( address.to_string() );
 }
-#include <fost/exception/not_implemented.hpp>
 ascii_string fostlib::coercer< ascii_string, host >::coerce( const host &h ) {
     if ( h.service().isnull() )
         return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded );

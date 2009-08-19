@@ -19,6 +19,15 @@ using namespace fostlib;
 
 namespace {
     boost::asio::io_service g_io_service;
+
+    setting< json > c_socks_version("fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Socks version", json(),
+        true
+    );
+    setting< string > c_socks_host("fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Socks host", L"localhost:8888",
+        true
+    );
 }
 
 
@@ -37,28 +46,8 @@ struct network_connection::ssl : public ssl_data {
     : ssl_data(sock) {
     }
 };
-
-
-fostlib::network_connection::network_connection(std::auto_ptr< boost::asio::ip::tcp::socket > socket)
-: m_socket(socket), m_ssl_data(NULL) {
-}
-
-fostlib::network_connection::network_connection(const host &h, nullable< port_number > p)
-: m_socket(new boost::asio::ip::tcp::socket(g_io_service)), m_ssl_data(NULL) {
-    m_socket->connect(boost::asio::ip::tcp::endpoint(
-        h.address(), p.value(coerce< port_number >(h.service().value("0")))
-    ));
-}
-
-fostlib::network_connection::~network_connection() {
-    delete m_ssl_data;
-}
-
-
-void fostlib::network_connection::start_ssl() {
-    m_ssl_data = new ssl(*m_socket);
-}
 namespace {
+
     std::size_t send(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, boost::asio::streambuf &b) {
         if ( ssl )
             return boost::asio::write(ssl->ssl_sock, b);
@@ -85,6 +74,54 @@ namespace {
         else
             return boost::asio::read(sock, b, f, e);
     }
+
+}
+
+
+fostlib::network_connection::network_connection(std::auto_ptr< boost::asio::ip::tcp::socket > socket)
+: m_socket(socket), m_ssl_data(NULL) {
+}
+
+fostlib::network_connection::network_connection(const host &h, nullable< port_number > p)
+: m_socket(new boost::asio::ip::tcp::socket(g_io_service)), m_ssl_data(NULL) {
+    const port_number port = p.value(coerce< port_number >(h.service().value("0")));
+    json socks(c_socks_version.value());
+
+    if ( !socks.isnull() ) {
+        const host socks_host( coerce< host >( c_socks_host.value() ) );
+        m_socket->connect(boost::asio::ip::tcp::endpoint(
+            socks_host.address(), coerce< port_number >(socks_host.service().value("0"))
+        ));
+        if ( c_socks_version.value() == json(4) ) {
+            boost::asio::streambuf b;
+            // Build and send the command to establish the connection
+            b.sputc(0x4); // SOCKS v 4
+            b.sputc(0x1); // stream
+            b.sputc((port & 0xff00) >> 8); b.sputc(port & 0xff); // Destination port
+            boost::asio::ip::address_v4::bytes_type bytes( h.address().to_v4().to_bytes() );
+            for ( std::size_t p = 0; p < 4; ++p )
+                b.sputc(bytes[p]);
+            b.sputc(0); // User ID
+            send(*m_socket, NULL, b);
+            // Receive the response
+            read(*m_socket, NULL, m_input_buffer, boost::asio::transfer_at_least(8));
+            if ( m_input_buffer.sbumpc() != 0x00 || m_input_buffer.sbumpc() != 0x5a )
+                throw exceptions::not_implemented("SOCKS 4 error handling where the response values are not 0x00 0x5a");
+            char ignore[6];
+            m_input_buffer.sgetn(ignore, 6);
+        } else
+            throw exceptions::not_implemented("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
+    } else
+        m_socket->connect(boost::asio::ip::tcp::endpoint(h.address(), port));
+}
+
+fostlib::network_connection::~network_connection() {
+    delete m_ssl_data;
+}
+
+
+void fostlib::network_connection::start_ssl() {
+    m_ssl_data = new ssl(*m_socket);
 }
 
 

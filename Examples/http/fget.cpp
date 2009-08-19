@@ -18,6 +18,8 @@ FSL_MAIN(
     L"fget",
     L"Simple HTTP client\nCopyright (C) 2008-2009, Felspar Co. Ltd."
 )( fostlib::ostream &o, fostlib::arguments &args ) {
+    args.commandSwitch("socks", "Network settings", "Socks version");
+
     // The URL to be fetched (default to localhost)
     string location = args[ 1 ].value( L"http://localhost/" );
     o << location << std::endl;
