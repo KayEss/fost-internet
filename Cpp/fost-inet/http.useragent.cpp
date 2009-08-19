@@ -8,8 +8,8 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/http.useragent.hpp>
+#include <fost/parse/parse.hpp>
 
-#include <fost/exception/not_implemented.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
 
@@ -57,7 +57,28 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     if ( !req.text().empty() )
         *cnx << req.text();
 
-    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(cnx, req.method(), req.address()));
+    utf8string first_line;
+    *cnx >> first_line;
+    string protocol, message; int status;
+    if ( !boost::spirit::parse(first_line.c_str(),
+        (
+            boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
+            boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
+            boost::spirit::strlit< wliteral >(L"HTTP/1.1")
+        )[ phoenix::var(protocol) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
+        >> boost::spirit::chlit< wchar_t >( ' ' )
+        >> boost::spirit::uint_parser< int, 10, 3, 3 >()[ phoenix::var(status) = phoenix::arg1 ]
+        >> boost::spirit::chlit< wchar_t >( ' ' )
+        >> (
+            +boost::spirit::chset<>( L"a-zA-Z " )
+        )[ phoenix::var(message) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
+    ).full )
+        throw exceptions::not_implemented("Expected a HTTP response", first_line);
+
+    return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(
+        cnx, req.method(), req.address(),
+        protocol, status, message
+    ));
 }
 
 
@@ -80,12 +101,9 @@ fostlib::http::user_agent::request::request(const string &method, const url &url
 
 fostlib::http::user_agent::response::response(
     std::auto_ptr< network_connection > connection,
-    const string &method, const url &url
-) : method(method), location(url), m_cnx(connection) {
-    utf8string first_line;
-
-    *m_cnx >> first_line;
-
+    const string &method, const url &url,
+    const string &protocol, int status, const string &message
+) : method(method), address(url), protocol(protocol), status(status), message(message), m_cnx(connection) {
     while ( true ) {
         utf8string line;
         *m_cnx >> line;

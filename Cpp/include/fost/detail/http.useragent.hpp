@@ -30,11 +30,18 @@ namespace fostlib {
                     friend class user_agent;
                     response(
                         std::auto_ptr< network_connection > connection,
-                        const string &m, const url &u
+                        const string &m, const url &u,
+                        const string &protocol, int status, const string &message
                     );
                     public:
+                        // What we asked for
                         accessors< const string > method;
-                        accessors< const url > location;
+                        accessors< const url > address;
+
+                        // What we got
+                        accessors< const string > protocol;
+                        accessors< const int > status;
+                        accessors< const string > message;
 
                         std::auto_ptr< mime > body();
                     private:
@@ -45,8 +52,8 @@ namespace fostlib {
                         request(const string &method, const url &url);
                         request(const string &method, const url &url, const string &data);
 
-                        accessors< const string > method;
-                        accessors< const url > address;
+                        accessors< string > method;
+                        accessors< url > address;
                 };
 
 
