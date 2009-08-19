@@ -43,9 +43,10 @@ namespace fostlib {
                         accessors< const int > status;
                         accessors< const string > message;
 
-                        std::auto_ptr< mime > body();
+                        const mime &body() const;
                     private:
                         std::auto_ptr< network_connection > m_cnx;
+                        mutable boost::scoped_ptr< mime > m_body;
                 };
                 class FOST_INET_DECLSPEC request : public text_body {
                     public:

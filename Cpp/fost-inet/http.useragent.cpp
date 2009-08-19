@@ -115,37 +115,42 @@ fostlib::http::user_agent::response::response(
 }
 
 
-std::auto_ptr< mime > fostlib::http::user_agent::response::body() {
-    nullable< int64_t > length;
-    if (headers().exists("Content-Length"))
-        length = coerce< int64_t >(headers()["Content-Length"].value());
+const mime &fostlib::http::user_agent::response::body() const {
+    if ( !m_body ) {
+        nullable< int64_t > length;
+        if ( method() == L"HEAD" )
+            length = 0;
+        else if (headers().exists("Content-Length"))
+            length = coerce< int64_t >(headers()["Content-Length"].value());
 
-    if ( content_type().substr(0, 5) == "text/" ) {
-        const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
-        if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
-            try {
-                if ( !length.isnull() ) {
-                    std::vector< utf8 > body_text(length.value());
-                    *m_cnx >> body_text;
-                    return std::auto_ptr< mime >(new text_body(&body_text[0], &body_text[0] + length.value()));
-                } else {
-                    boost::asio::streambuf body_buffer;
-                    *m_cnx >> body_buffer;
-                    utf8string body_text;
-                    body_text.reserve(body_buffer.size());
-                    while ( body_buffer.size() )
-                        body_text += body_buffer.sbumpc();
-                    return std::auto_ptr< mime >(new text_body(body_text));
+        if ( content_type().substr(0, 5) == "text/" ) {
+            const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
+            if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
+                try {
+                    if ( !length.isnull() ) {
+                        std::vector< utf8 > body_text(length.value());
+                        *m_cnx >> body_text;
+                        m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value()));
+                    } else {
+                        boost::asio::streambuf body_buffer;
+                        *m_cnx >> body_buffer;
+                        utf8string body_text;
+                        body_text.reserve(body_buffer.size());
+                        while ( body_buffer.size() )
+                            body_text += body_buffer.sbumpc();
+                        m_body.reset(new text_body(body_text));
+                    }
+                } catch ( fostlib::exceptions::exception &e ) {
+                    if ( charset.isnull() )
+                        e.info() << L"Assumed that the page was UTF-8 as the charset from the Content-Type header was blank\n";
+                    else
+                        e.info() << L"Charset in Content-Type header given as " << charset.value() << L"\n";
+                    throw;
                 }
-            } catch ( fostlib::exceptions::exception &e ) {
-                if ( charset.isnull() )
-                    e.info() << L"Assumed that the page was UTF-8 as the charset from the Content-Type header was blank\n";
-                else
-                    e.info() << L"Charset in Content-Type header given as " << charset.value() << L"\n";
-                throw;
-            }
+            } else
+                throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8", charset.value());
         } else
-            throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8", charset.value());
-    } else
-        throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
+            throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
+    }
+    return *m_body;
 }
