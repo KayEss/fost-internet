@@ -73,7 +73,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
             +boost::spirit::chset<>( L"a-zA-Z " )
         )[ phoenix::var(message) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
     ).full )
-        throw exceptions::not_implemented("Expected a HTTP response", first_line);
+        throw exceptions::not_implemented("Expected a HTTP response", coerce< string >(first_line));
 
     return std::auto_ptr< http::user_agent::response >(new http::user_agent::response(
         cnx, req.method(), req.address(),
