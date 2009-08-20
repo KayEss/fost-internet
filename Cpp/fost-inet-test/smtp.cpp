@@ -18,8 +18,8 @@ FSL_TEST_SUITE( smtp );
 
 FSL_TEST_FUNCTION( basic ) {
     email_address sample(rfc822_address("address@example.com"));
+    sample = rfc822_address("sample@example.com");
 }
-
 
 
 FSL_TEST_FUNCTION( to_string ) {
