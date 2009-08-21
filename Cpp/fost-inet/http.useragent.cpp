@@ -128,9 +128,12 @@ const mime &fostlib::http::user_agent::response::body() const {
             if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
                 try {
                     if ( !length.isnull() ) {
-                        std::vector< utf8 > body_text(length.value());
-                        *m_cnx >> body_text;
-                        m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value()));
+                        if ( length.value() ) {
+                            std::vector< utf8 > body_text(length.value());
+                            *m_cnx >> body_text;
+                            m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value()));
+                        } else
+                            m_body.reset(new text_body(utf8string()));
                     } else {
                         boost::asio::streambuf body_buffer;
                         *m_cnx >> body_buffer;
