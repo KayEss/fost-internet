@@ -8,7 +8,8 @@
 
 #include "fost-inet.hpp"
 #include <fost/detail/smtp.hpp>
-#include <fost/exception/not_implemented.hpp>
+#include <fost/parse/parse.hpp>
+
 #include <fost/exception/null.hpp>
 #include <fost/exception/parse_error.hpp>
 
@@ -53,4 +54,17 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
         return fostlib::coerce< string >( e.email().underlying() );
     else
         return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
+}
+email_address fostlib::coercer< email_address, string >::coerce( const string &s ) {
+    string name, address;
+    if ( !boost::spirit::parse(s.c_str(),
+        (+boost::spirit::chset<>( L"a-zA-Z@\\.\\+-" ))[
+            phoenix::var( address ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+        ]
+    ).full )
+        throw exceptions::not_implemented("fostlib::coercer< email_address, string >::coerce( const string &s ) -- could not parse");
+    if ( name.empty() )
+        return rfc822_address( fostlib::coerce< ascii_string >( address ) );
+    else
+        return email_address( rfc822_address( fostlib::coerce< ascii_string >( address ) ), name );
 }

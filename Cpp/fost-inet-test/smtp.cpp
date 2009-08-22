@@ -29,3 +29,14 @@ FSL_TEST_FUNCTION( to_string ) {
     FSL_CHECK_EQ(coerce< string >(addy), "Mr. Address <address@example.com>");
     FSL_CHECK_EQ(coerce< utf8string >(addy), "Mr. Address <address@example.com>");
 }
+
+#define PARSE_PLAIN(s) \
+    FSL_CHECK_EQ(coerce< email_address >(string(s)).email(), rfc822_address(s)); \
+    FSL_CHECK(coerce< email_address >(string(s)).name().isnull());
+FSL_TEST_FUNCTION( from_string_plain ) {
+    PARSE_PLAIN("address@example.com");
+    PARSE_PLAIN("address-whatever@example.com");
+    PARSE_PLAIN("address+whatever@example.com");
+    PARSE_PLAIN("address.whatever@example.com");
+    FSL_CHECK_EXCEPTION(PARSE_PLAIN("<address-whatever@example.com>"), exceptions::not_implemented&);
+}
