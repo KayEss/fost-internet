@@ -11,6 +11,7 @@
 #pragma once
 
 
+#include <fost/unicode>
 #include <fost/detail/host.hpp>
 #include <fost/detail/tagged-string.hpp>
 
@@ -44,7 +45,8 @@ namespace fostlib {
 
         url();
         explicit url( const string & );
-        url( const url &base, const filepath_string &relative );
+        url( const url &base, const filepath_string &new_path );
+        url( const url &base, const boost::filesystem::wpath &new_path );
         url( const t_form, const string & );
         explicit url( const host &,
             const nullable< string > &username = null,
@@ -120,6 +122,10 @@ namespace fostlib {
     template<>
     struct FOST_INET_DECLSPEC coercer< url::filepath_string, string > {
         url::filepath_string coerce( const string &s );
+    };
+    template<>
+    struct FOST_INET_DECLSPEC coercer< url::filepath_string, boost::filesystem::wpath > {
+        url::filepath_string coerce( const boost::filesystem::wpath &s );
     };
 
 

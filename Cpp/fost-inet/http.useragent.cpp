@@ -93,6 +93,10 @@ fostlib::http::user_agent::request::request(const string &method, const url &url
 fostlib::http::user_agent::request::request(const string &method, const url &url, const string &data)
 : text_body(data), method(method), address(url) {
 }
+fostlib::http::user_agent::request::request(const string &method, const url &url, const boost::filesystem::wpath &data)
+: text_body(string()), method(method), address(url) {
+    throw exceptions::not_implemented("fostlib::http::user_agent::request::request(const string &method, const url &url, const boost::filesystem::wpath &data)");
+}
 
 
 /*

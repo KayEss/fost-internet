@@ -12,8 +12,7 @@
 
 
 #include <fost/crypto>
-#include <fost/internet>
-#include "http.useragent.hpp"
+#include <fost/http>
 
 
 namespace fostlib {
@@ -22,13 +21,31 @@ namespace fostlib {
     namespace aws {
 
 
-        class FOST_AWS_DECLSPEC s3 {
-        public:
-            s3();
-            explicit s3( const string &name );
+        namespace s3 {
 
-            void put( const boost::filesystem::wpath &file, const url &location ) const;
-        };
+
+            class FOST_AWS_DECLSPEC file_info {
+                public:
+                    file_info(const http::user_agent &, const ascii_string &bucket, const boost::filesystem::wpath &);
+
+                    accessors< const boost::filesystem::wpath > path;
+
+                    bool exists() const;
+            };
+
+            class FOST_AWS_DECLSPEC bucket {
+                http::user_agent m_ua;
+                public:
+                    explicit bucket(const ascii_string &name);
+
+                    accessors< const ascii_string > name;
+
+                    file_info stat(const boost::filesystem::wpath &) const;
+                    void put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const;
+            };
+
+
+        }
 
 
     }

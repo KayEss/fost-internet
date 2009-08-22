@@ -106,9 +106,6 @@ namespace {
 */
 
 
-#include <fost/exception/not_implemented.hpp>
-
-
 void fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_string &into ) {
     throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_string &into )" );
 }
@@ -146,6 +143,11 @@ url::filepath_string fostlib::coercer< url::filepath_string, string >::coerce( c
         else
             encoded += *it;
     return encoded;
+}
+
+
+url::filepath_string fostlib::coercer< url::filepath_string, boost::filesystem::wpath >::coerce( const boost::filesystem::wpath &p ) {
+    return fostlib::coerce< url::filepath_string >( fostlib::coerce< string >(p.string()) );
 }
 
 
@@ -218,6 +220,10 @@ fostlib::url::url()
 fostlib::url::url( const url& url, const filepath_string &path )
 : protocol( ascii_string( "http" ) ), m_host( url.server() ), m_pathspec( "/" ) {
     pathspec( path );
+}
+fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
+: protocol( ascii_string( "http" ) ), m_host( url.server() ), m_pathspec( "/" ) {
+    pathspec( coerce< filepath_string >( path ) );
 }
 fostlib::url::url( const t_form form, const string &str )
 : protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {

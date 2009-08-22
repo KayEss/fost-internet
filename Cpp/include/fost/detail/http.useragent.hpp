@@ -52,6 +52,7 @@ namespace fostlib {
                     public:
                         request(const string &method, const url &url);
                         request(const string &method, const url &url, const string &data);
+                        request(const string &method, const url &url, const boost::filesystem::wpath &data);
 
                         accessors< string > method;
                         accessors< url > address;

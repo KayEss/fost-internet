@@ -110,6 +110,8 @@ FSL_TEST_FUNCTION( path_spec ) {
     url u( L"http://localhost/" );
     u.pathspec( url::filepath_string( "/file-name" ) );
     FSL_CHECK_EQ( u.as_string(), ascii_string( "http://localhost/file-name" ) );
+
+    FSL_CHECK_EQ( coerce< url::filepath_string >( boost::filesystem::wpath(L"test") ), url::filepath_string("test") );
 }
 
 

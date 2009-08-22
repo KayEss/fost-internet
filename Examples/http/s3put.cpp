@@ -7,7 +7,8 @@
 
 
 #include <fost/cli>
-#include <fost/main.hpp>
+#include <fost/main>
+#include <fost/unicode>
 #include <fost/aws>
 
 
@@ -15,22 +16,25 @@ using namespace fostlib;
 
 
 FSL_MAIN(
-    L"fget",
+    L"s3put",
     L"Amazon S3 client -- push to S3\nCopyright (C) 2008-2009, Felspar Co. Ltd."
 )( fostlib::ostream &o, fostlib::arguments &args ) {
     // Check we have the minimum number of command line arguments
-    if ( args.size() < 3 ) {
-        o << L"Must supply at least one file and a S3 location to put it to" << std::endl;
+    if ( args.size() < 4 ) {
+        o << "Must supply at least one file and a bucket name and an S3 location to put it to" << std::endl;
         return 1;
     }
-    // Create the S3 account object
-    boost::scoped_ptr< aws::s3 > s3account;
-    if ( !args.commandSwitch("a").isnull() )
-        s3account.reset(new aws::s3(args.commandSwitch("a").value()));
+    // Local file information
+    digester local_md5(md5);
+    local_md5 << coerce< boost::filesystem::wpath >( args[1].value() );
+    o << "Local file " << args[1].value() << " md5: " << coerce< hex_string >( local_md5.digest() ) << std::endl;
+    // Create the bucket object
+    aws::s3::bucket bucket(coerce< ascii_string >( args[2] ));
+    // Remote file information
+    aws::s3::file_info remote(bucket.stat(coerce< boost::filesystem::wpath >( args[3].value() )));
+    if ( !remote.exists() )
+        bucket.put(coerce< boost::filesystem::wpath >( args[1].value() ), remote.path());
     else
-        s3account.reset(new aws::s3);
-    // Work out the base URL and show the user what is about to happen
-    url base(args[2].value());
-    o << L"Base URL: " << base << std::endl;
+        throw exceptions::not_implemented("s3put -- where the remote file exists");
     return 0;
 }
