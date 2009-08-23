@@ -28,23 +28,26 @@ FSL_TEST_FUNCTION( headers ) {
 }
 
 
-/*
-    This test for an empty mime envelope probably isn't valid
-
-FSL_TEST_FUNCTION( mime ) {
-    mime envelope;
+FSL_TEST_FUNCTION( empty_mime ) {
+    empty_mime empty;
     std::stringstream ss;
-    ss << envelope;
-    mime::mime_headers headers;
-    headers.parse( partition( string( ss.str() ), L"\r\n\r\n" ).first );
+    ss << empty;
     FSL_CHECK_EQ( ss.str(), "\
-Content-Type: multipart/mixed; boundary=" + coerce< utf8string >( headers[L"Content-Type"].subvalue( L"boundary" ) ) + "\r\n\
 \r\n\
---" + coerce< utf8string >( headers[L"Content-Type"].subvalue( L"boundary" ) ) + "--\r\n\
 " );
 }
-*/
-
+FSL_TEST_FUNCTION( empty_mime_with_headers ) {
+    empty_mime empty;
+    empty.headers().add("Host", fostlib::string("localhost"));
+    empty.headers().add("User-Agent", fostlib::string("Fake agent"));
+    std::stringstream ss;
+    ss << empty;
+    FSL_CHECK_EQ( ss.str(), "\
+Host: localhost\r\n\
+User-Agent: Fake agent\r\n\
+\r\n\
+" );
+}
 
 FSL_TEST_FUNCTION(text1) {
     text_body ta(L"Test text document");
@@ -90,7 +93,7 @@ Test text document" );
 
 
 FSL_TEST_FUNCTION( mime_attachment ) {
-    mime envelope;
+    mime_envelope envelope;
     envelope.items().push_back( boost::shared_ptr< mime >( new text_body( L"Test text document" ) ) );
     std::stringstream ss;
     ss << envelope;

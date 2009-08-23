@@ -42,20 +42,19 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     if ( !authentication().isnull() )
         authentication().value()( req );
 
-    std::stringstream buffer;
-    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.0\r\n";
-    req.print_on(buffer);
-
     std::auto_ptr< network_connection > cnx(
         new network_connection(req.address().server(), req.address().port())
     );
     if ( req.address().protocol() == ascii_string("https") )
         cnx->start_ssl();
 
+    std::stringstream buffer;
+    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.0\r\n";
+    req.print_on(buffer);
     *cnx << buffer;
 
-    if ( !req.text().empty() )
-        *cnx << req.text();
+    for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i )
+        *cnx << *i;
 
     utf8string first_line;
     *cnx >> first_line;
@@ -88,13 +87,13 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
 
 
 fostlib::http::user_agent::request::request(const string &method, const url &url)
-: text_body(string()), method(method), address(url) {
+: m_data(new empty_mime), method(method), address(url) {
 }
 fostlib::http::user_agent::request::request(const string &method, const url &url, const string &data)
-: text_body(data), method(method), address(url) {
+: m_data(new text_body(data)), method(method), address(url) {
 }
 fostlib::http::user_agent::request::request(const string &method, const url &url, const boost::filesystem::wpath &data)
-: text_body(string()), method(method), address(url) {
+: m_data(new mime_envelope), method(method), address(url) {
     throw exceptions::not_implemented("fostlib::http::user_agent::request::request(const string &method, const url &url, const boost::filesystem::wpath &data)");
 }
 
@@ -113,9 +112,8 @@ fostlib::http::user_agent::response::response(
         *m_cnx >> line;
         if (line.empty())
             break;
-        headers().parse(coerce< string >(line));
+        m_headers.parse(coerce< string >(line));
     }
-    content_type(headers()[ L"Content-Type" ].value());
 }
 
 
@@ -124,20 +122,20 @@ const mime &fostlib::http::user_agent::response::body() const {
         nullable< int64_t > length;
         if ( method() == L"HEAD" )
             length = 0;
-        else if (headers().exists("Content-Length"))
-            length = coerce< int64_t >(headers()["Content-Length"].value());
+        else if (m_headers.exists("Content-Length"))
+            length = coerce< int64_t >(m_headers["Content-Length"].value());
 
-        if ( content_type().substr(0, 5) == "text/" ) {
-            const nullable< string > charset( headers()["Content-Type"].subvalue("charset") );
+        if ( m_headers[ L"Content-Type" ].value().substr(0, 5) == "text/" ) {
+            const nullable< string > charset( m_headers["Content-Type"].subvalue("charset") );
             if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
                 try {
                     if ( !length.isnull() ) {
                         if ( length.value() ) {
                             std::vector< utf8 > body_text(length.value());
                             *m_cnx >> body_text;
-                            m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value()));
+                            m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value(), m_headers));
                         } else
-                            m_body.reset(new text_body(utf8string()));
+                            m_body.reset(new empty_mime(m_headers));
                     } else {
                         boost::asio::streambuf body_buffer;
                         *m_cnx >> body_buffer;
@@ -145,7 +143,7 @@ const mime &fostlib::http::user_agent::response::body() const {
                         body_text.reserve(body_buffer.size());
                         while ( body_buffer.size() )
                             body_text += body_buffer.sbumpc();
-                        m_body.reset(new text_body(body_text));
+                        m_body.reset(new text_body(body_text, m_headers));
                     }
                 } catch ( fostlib::exceptions::exception &e ) {
                     if ( charset.isnull() )

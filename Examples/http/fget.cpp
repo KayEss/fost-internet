@@ -26,8 +26,8 @@ FSL_MAIN(
     // Create a user agent and request the URL
     http::user_agent browser;
     std::auto_ptr< http::user_agent::response > response( browser.get( url( location ) ) );
-    o << response->headers() << std::endl;
     // Display the body
+    o << response->body().headers() << std::endl;
     o << response->body() << std::endl;
     return 0;
 }

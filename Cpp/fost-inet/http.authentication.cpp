@@ -7,11 +7,12 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/detail/http.authentication.fost.hpp>
 #include <fost/datetime>
 #include <fost/crypto>
 
-#include <fost/exception/not_implemented.hpp>
+#include <fost/detail/http.authentication.fost.hpp>
+
+#include <boost/lambda/lambda.hpp>
 
 
 void fostlib::http::fost_authentication(
@@ -32,7 +33,9 @@ void fostlib::http::fost_authentication(
         to_sign += L"\n" + request.headers()[ *i ].value();
         signd += L" " + *i;
     }
-    signature << signd << to_sign << "\n" << request.text();
+    signature << signd << to_sign << "\n";
+    for ( mime::const_iterator i(request.data().begin()); i != request.data().end(); ++i )
+        signature << *i;
 
     request.headers().add( L"X-FOST-Headers", signd );
     request.headers().add( L"Authorization", L"FOST " + api_key + L":" +

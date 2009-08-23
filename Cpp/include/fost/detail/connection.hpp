@@ -12,6 +12,7 @@
 
 
 #include <fost/core>
+#include <fost/pointers>
 #include <fost/detail/host.hpp>
 
 
@@ -41,6 +42,7 @@ namespace fostlib {
         /*
             These methods just drop the data straight out to the network.
         */
+        network_connection &operator << ( const const_memory_block & );
         network_connection &operator << ( const utf8string &s );
         network_connection &operator << ( const std::stringstream &ss );
 

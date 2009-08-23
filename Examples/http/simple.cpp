@@ -30,7 +30,7 @@ FSL_MAIN(
     for ( bool process( true ); process; ) {
         std::auto_ptr< http::server::request > req( server() );
         o << req->method() << L" " << req->file_spec() << std::endl;
-        (*req)( text_body( L"<html><body>This <b>is</b> a response</body></html>", L"text/html" ) );
+        (*req)( text_body( L"<html><body>This <b>is</b> a response</body></html>", mime::mime_headers(), L"text/html" ) );
         process = false;
     };
     o << L"Told to exit" << std::endl;

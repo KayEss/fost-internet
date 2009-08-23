@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2008, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2009, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -12,6 +12,7 @@
 
 
 #include <fost/core>
+#include <fost/pointers>
 
 
 namespace fostlib {
@@ -27,7 +28,7 @@ namespace fostlib {
 
         bool exists( const string & ) const;
         content &add( const string &name, const content & );
-        const content &operator[]( const string & ) const;
+        const content &operator [] ( const string & ) const;
 
         typedef std::map< string, content >::const_iterator const_iterator;
         const_iterator begin() const;
@@ -65,36 +66,79 @@ namespace fostlib {
         This initial implementation is only intended to be able to parse HTTP POST multipart/form-data encoded data and HTTP host headers. A later implementation will need to consider the transport parameters in order to know how to encode the content and which headers are required.
     */
     class FOST_INET_DECLSPEC mime : boost::noncopyable {
-    public:
-        class FOST_INET_DECLSPEC mime_headers : public fostlib::headers_base {
         protected:
-            std::pair< string, headers_base::content > value( const string &name, const string &value );
-        };
+            struct FOST_INET_DECLSPEC iterator_implementation {
+                virtual ~iterator_implementation();
+                virtual const_memory_block operator () () = 0;
+            };
+        public:
+            class FOST_INET_DECLSPEC mime_headers : public fostlib::headers_base {
+                protected:
+                    std::pair< string, headers_base::content > value( const string &name, const string &value );
+            };
+            virtual ~mime();
 
-        mime( const string &content_type = L"multipart/mixed" );
-        explicit mime( const mime_headers &headers, const string &content_type = L"multipart/mixed" );
-        virtual ~mime();
+            accessors< string > content_type;
+            accessors< mime_headers, fostlib::lvalue > headers;
 
-        accessors< string > content_type;
-        accessors< mime_headers, fostlib::lvalue > headers;
-        accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue > items;
+            virtual bool boundary_is_ok( const string &boundary ) const = 0;
+            virtual std::ostream &print_on( std::ostream & ) const = 0;
 
-        virtual std::ostream &print_on( std::ostream & ) const;
+            class FOST_INET_DECLSPEC const_iterator {
+                friend class fostlib::mime;
+                boost::shared_ptr< iterator_implementation > underlying;
+                const_memory_block current;
+                const_iterator( std::auto_ptr< iterator_implementation > p );
+                public:
+                    bool operator == ( const const_iterator & ) const;
+                    bool operator != ( const const_iterator & ) const;
+                    const_memory_block operator * () const;
+                    const const_iterator &operator ++();
+            };
 
-        virtual bool boundary_is_ok( const string &boundary ) const;
+            const_iterator begin() const;
+            const_iterator end() const;
+
+        protected:
+            virtual std::auto_ptr< iterator_implementation > iterator() const = 0;
+
+            explicit mime( const mime_headers &headers, const string &content_type );
     };
 
 
+    class FOST_INET_DECLSPEC empty_mime : public mime {
+        struct empty_mime_iterator;
+        std::auto_ptr< iterator_implementation > iterator() const;
+        public:
+            empty_mime(const mime_headers &headers = mime_headers());
+
+            std::ostream &print_on( std::ostream &o ) const;
+            bool boundary_is_ok( const string &boundary ) const;
+    };
+
+    class FOST_INET_DECLSPEC mime_envelope : public mime {
+        std::auto_ptr< iterator_implementation > iterator() const;
+        public:
+            mime_envelope(const mime_headers &headers = mime_headers());
+
+            std::ostream &print_on( std::ostream &o ) const;
+            bool boundary_is_ok( const string &boundary ) const;
+
+            accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue > items;
+    };
+
     class FOST_INET_DECLSPEC text_body : public mime {
-    public:
-        text_body( const utf8 *begin, const utf8 *end, const string &mime = "text/plain" );
-        text_body( const utf8string &text, const string &mime = "text/plain" );
-        text_body( const string &text, const string &mime = L"text/plain" );
+        struct text_body_iterator;
+        std::auto_ptr< iterator_implementation > iterator() const;
+        public:
+            text_body( const utf8 *begin, const utf8 *end, const mime_headers &headers = mime_headers(), const string &mime = "text/plain" );
+            text_body( const utf8string &text, const mime_headers &headers = mime_headers(), const string &mime = "text/plain" );
+            text_body( const string &text, const mime_headers &headers = mime_headers(), const string &mime = L"text/plain" );
 
-        std::ostream &print_on( std::ostream &o ) const;
-        bool boundary_is_ok( const string &boundary ) const;
+            std::ostream &print_on( std::ostream &o ) const;
+            bool boundary_is_ok( const string &boundary ) const;
 
-        accessors< const utf8string > text;
+            accessors< const utf8string > text;
     };
 
 

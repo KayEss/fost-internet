@@ -26,8 +26,9 @@ namespace fostlib {
                 explicit user_agent(const url &base);
 
 
-                class FOST_INET_DECLSPEC response : public mime {
+                class FOST_INET_DECLSPEC response : boost::noncopyable {
                     friend class user_agent;
+                    mime::mime_headers m_headers;
                     response(
                         std::auto_ptr< network_connection > connection,
                         const string &m, const url &u,
@@ -48,14 +49,20 @@ namespace fostlib {
                         std::auto_ptr< network_connection > m_cnx;
                         mutable boost::scoped_ptr< mime > m_body;
                 };
-                class FOST_INET_DECLSPEC request : public text_body {
+                class FOST_INET_DECLSPEC request {
+                    boost::shared_ptr< mime > m_data;
                     public:
                         request(const string &method, const url &url);
                         request(const string &method, const url &url, const string &data);
                         request(const string &method, const url &url, const boost::filesystem::wpath &data);
 
+                        mime::mime_headers &headers() { return m_data->headers(); }
+                        const mime::mime_headers & headers() const { return m_data->headers(); }
+                        std::ostream &print_on( std::ostream &o ) const { return m_data->print_on( o ); }
+
                         accessors< string > method;
                         accessors< url > address;
+                        mime &data() const { return *m_data; }
                 };
 
 

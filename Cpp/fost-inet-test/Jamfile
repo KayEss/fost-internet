@@ -9,4 +9,5 @@ fost-smoke-test fost-inet-test-smoke
         mime.cpp
         smtp.cpp
         url.cpp
+        user_agent.cpp
     ;

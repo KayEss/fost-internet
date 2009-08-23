@@ -125,6 +125,21 @@ void fostlib::network_connection::start_ssl() {
 }
 
 
+network_connection &fostlib::network_connection::operator << ( const const_memory_block &p ) {
+    const unsigned char
+        *begin = reinterpret_cast< const unsigned char * >( p.first ),
+        *end =  reinterpret_cast< const unsigned char * >( p.second )
+    ;
+    std::size_t length = end - begin;
+    if ( length ) {
+        boost::asio::streambuf b;
+        for ( std::size_t pos = 0; pos != length; ++pos )
+            b.sputc( begin[pos] );
+        std::size_t sent(send(*m_socket, m_ssl_data, b));
+        b.consume(sent);
+    }
+    return *this;
+}
 network_connection &fostlib::network_connection::operator << ( const utf8string &s ) {
     boost::asio::streambuf b;
     std::ostream os(&b);
