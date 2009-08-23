@@ -1,0 +1,15 @@
+
+exe host
+    :
+        ../../../Boost//boost-date_time-dll
+        ../../../Boost//boost-regex-dll
+        ../../../Boost//boost-system-dll
+        ../../../fost-base/Cpp/fost-core/
+        ../../../fost-base/Cpp/fost-cli/
+        ../../Cpp/fost-inet/
+        host-main.cpp
+    ;
+
+install-example
+        host
+    ;

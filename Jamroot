@@ -7,6 +7,7 @@ fost-project fost-internet ;
 
 alias examples
     :
+        Examples/host/
         Examples/http/
     ;
 explicit examples ;
