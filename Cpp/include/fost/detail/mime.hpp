@@ -149,7 +149,7 @@ namespace fostlib {
             file_body(
                 const boost::filesystem::wpath &file,
                 const mime_headers &headers = mime_headers(),
-                const string &mime = "application/octet-stream"
+                const string &mime = "binary/octet-stream"
             );
 
             std::ostream &print_on( std::ostream &o ) const;
