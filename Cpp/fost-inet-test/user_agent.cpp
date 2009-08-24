@@ -17,18 +17,12 @@ FSL_TEST_SUITE( user_agent );
 
 
 FSL_TEST_FUNCTION( request ) {
-    FSL_CHECK_NOTHROW( http::user_agent::request(url()) );
-    FSL_CHECK_NOTHROW(
-        http::user_agent::request r(url());
-        std::stringstream() << r;
-    )
+    FSL_CHECK_NOTHROW(http::user_agent::request r("HEAD", url()));
 }
 
 
 FSL_TEST_FUNCTION( user_agent ) {
-    FSL_CHECK_NOTHROW(
-        http::user_agent ua(url("http://www.google.com/"));
-        http::user_agent::request r("HEAD", ua.base());
-        ua(r);
-    );
+    http::user_agent ua(url("http://www.google.com/"));
+    http::user_agent::request r("HEAD", ua.base());
+    ua(r);
 }

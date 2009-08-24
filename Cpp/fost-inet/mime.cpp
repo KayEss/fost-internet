@@ -170,7 +170,7 @@ std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
 
     mime_headers local_headers = headers();
     mime_headers::content with_boundary(headers()["Content-Type"]);
-    with_boundary.subvalue("boundary", coerce< utf8string >(boundary));
+    with_boundary.subvalue("boundary", boundary);
     local_headers.set("Content-Type", with_boundary);
 
     o << local_headers;

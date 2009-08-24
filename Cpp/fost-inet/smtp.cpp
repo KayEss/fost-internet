@@ -58,7 +58,7 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
 email_address fostlib::coercer< email_address, string >::coerce( const string &s ) {
     string name, address;
     if ( !boost::spirit::parse(s.c_str(),
-        (+boost::spirit::chset<>( L"a-zA-Z@\\.\\+-" ))[
+        (+boost::spirit::chset< wchar_t >( L"a-zA-Z@\\.\\+-" ))[
             phoenix::var( address ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
         ]
     ).full )
