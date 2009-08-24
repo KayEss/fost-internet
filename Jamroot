@@ -12,4 +12,5 @@ alias examples
     ;
 explicit examples ;
 
+build-project Cpp/fost-aws-test ;
 build-project Cpp/fost-inet-test ;

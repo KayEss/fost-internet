@@ -26,7 +26,8 @@ using namespace fostlib;
 
 fostlib::mime::mime( const mime_headers &h, const string &content_type )
 : content_type( content_type ), headers( h ) {
-    headers().set(L"Content-Type", mime::mime_headers::content(content_type));
+    if ( !headers().exists("Content-Type") )
+        headers().set(L"Content-Type", mime::mime_headers::content(content_type));
 }
 
 fostlib::mime::~mime() {
@@ -122,7 +123,8 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
 
 fostlib::empty_mime::empty_mime( const mime_headers &headers )
 : mime( headers, "application/x-empty" ) {
-    this->headers().set("Content-Length", L"0");
+    if ( !this->headers().exists(L"Content-Length") )
+        this->headers().set("Content-Length", L"0");
 }
 
 

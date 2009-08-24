@@ -9,6 +9,8 @@
 #include "fost-aws.hpp"
 #include <fost/detail/s3.hpp>
 
+#include <boost/lambda/bind.hpp>
+
 
 using namespace fostlib;
 using namespace fostlib::aws::s3;
@@ -18,12 +20,19 @@ using namespace fostlib::aws::s3;
     fostlib::aws::s3::bucket
 */
 
+const setting< string > fostlib::aws::s3::bucket::s_account_name(
+    "fost-internet/Cpp/fost-aws/s3.cpp",
+    "Amazon S3", "Default account name", "default", true
+);
 
 namespace {
     std::auto_ptr< http::user_agent::response > s3do(const http::user_agent &ua, http::user_agent::request &request) {
         std::auto_ptr< http::user_agent::response > response = ua(request);
-        if ( response->status() == 403 )
-            throw exceptions::not_implemented("S3 request resulting in 403 forbidden");
+        if ( response->status() == 403 ) {
+            exceptions::not_implemented exception("S3 request resulting in 403 forbidden");
+            exception.info() << response->body() << std::endl;
+            throw exception;
+        }
         return response;
     }
 }
@@ -31,6 +40,9 @@ namespace {
 
 fostlib::aws::s3::bucket::bucket( const ascii_string &name )
 : m_ua(url(coerce< string >( ascii_string("https://") + name + ascii_string(".s3.amazonaws.com/") ))), name( name ) {
+    m_ua.authentication(boost::function< void ( http::user_agent::request & ) >(boost::lambda::bind(
+        rest_authentication, s_account_name.value(), name, boost::lambda::_1
+    )));
 }
 
 
@@ -55,7 +67,7 @@ void fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const b
 
 fostlib::aws::s3::file_info::file_info(const http::user_agent &ua, const ascii_string &bucket, const boost::filesystem::wpath &location )
 : path( location ) {
-    http::user_agent::request request("HEAD", url(ua.base(), location));
+    http::user_agent::request request("GET", url(ua.base(), location));
     std::auto_ptr< http::user_agent::response > response(s3do(ua, request));
 
     switch ( response->status() ) {

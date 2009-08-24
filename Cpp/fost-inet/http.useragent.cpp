@@ -7,6 +7,8 @@
 
 
 #include "fost-inet.hpp"
+#include <fost/datetime>
+
 #include <fost/detail/http.useragent.hpp>
 #include <fost/parse/parse.hpp>
 
@@ -35,6 +37,7 @@ fostlib::http::user_agent::user_agent(const url &u)
 
 
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) const {
+    req.headers().set("Date", coerce< string >( coerce< rfc1123_timestamp >(timestamp::now()) ));
     req.headers().set("Host", req.address().server().name());
     if ( !req.headers().exists("User-Agent") )
         req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4.09.09");
@@ -123,7 +126,10 @@ const mime &fostlib::http::user_agent::response::body() const {
         else if (m_headers.exists("Content-Length"))
             length = coerce< int64_t >(m_headers["Content-Length"].value());
 
-        if ( m_headers[ L"Content-Type" ].value().substr(0, 5) == "text/" ) {
+        if (
+            m_headers[ L"Content-Type" ].value().substr(0, 5) == "text/" ||
+            m_headers[ L"Content-Type" ].value() == "application/xml"
+        ) {
             const nullable< string > charset( m_headers["Content-Type"].subvalue("charset") );
             if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
                 try {
@@ -169,7 +175,10 @@ const mime &fostlib::http::user_agent::response::body() const {
             } else
                 throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8", charset.value());
         } else
-            throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the content is not text");
+            throw exceptions::not_implemented(
+                "fostlib::http::user_agent::response::body() -- where the content is not text",
+                m_headers[ L"Content-Type" ].value().empty() ? L"No content type specified" : m_headers[ L"Content-Type" ].value()
+            );
     }
     return *m_body;
 }

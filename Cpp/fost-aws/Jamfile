@@ -8,5 +8,6 @@ lib fost-aws
         ../../../fost-base/Cpp/fost-core/
         ../fost-inet/
         s3.cpp
+        s3authen.cpp
     ;
 

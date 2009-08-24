@@ -24,6 +24,11 @@ namespace fostlib {
         namespace s3 {
 
 
+            void FOST_AWS_DECLSPEC rest_authentication(
+                const string &account, const ascii_string &bucket, http::user_agent::request &request
+            );
+
+
             class FOST_AWS_DECLSPEC file_info {
                 public:
                     file_info(const http::user_agent &, const ascii_string &bucket, const boost::filesystem::wpath &);
@@ -36,6 +41,8 @@ namespace fostlib {
             class FOST_AWS_DECLSPEC bucket {
                 http::user_agent m_ua;
                 public:
+                    static const setting< string > s_account_name;
+
                     explicit bucket(const ascii_string &name);
 
                     accessors< const ascii_string > name;
