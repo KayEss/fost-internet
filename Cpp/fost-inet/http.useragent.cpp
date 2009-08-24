@@ -126,20 +126,19 @@ const mime &fostlib::http::user_agent::response::body() const {
         else if (m_headers.exists("Content-Length"))
             length = coerce< int64_t >(m_headers["Content-Length"].value());
 
-        if (
+        if ( !length.isnull() && length.value() == 0 )
+            m_body.reset(new empty_mime(m_headers));
+        else if ( ( length.isnull() || length.value() ) && (
             m_headers[ L"Content-Type" ].value().substr(0, 5) == "text/" ||
             m_headers[ L"Content-Type" ].value() == "application/xml"
-        ) {
+        )) {
             const nullable< string > charset( m_headers["Content-Type"].subvalue("charset") );
             if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
                 try {
                     if ( !length.isnull() ) {
-                        if ( length.value() ) {
-                            std::vector< utf8 > body_text(length.value());
-                            *m_cnx >> body_text;
-                            m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value(), m_headers));
-                        } else
-                            m_body.reset(new empty_mime(m_headers));
+                        std::vector< utf8 > body_text(length.value());
+                        *m_cnx >> body_text;
+                        m_body.reset(new text_body(&body_text[0], &body_text[0] + length.value(), m_headers));
                     } else {
                         boost::asio::streambuf body_buffer;
                         *m_cnx >> body_buffer;
@@ -161,22 +160,19 @@ const mime &fostlib::http::user_agent::response::body() const {
                     ISO-8859-1 has the same coce points as Unicode. We can interpret each byte coming in as a Unicode code point
                 */
                 if ( !length.isnull() ) {
-                    if ( length.value() ) {
-                        std::vector< unsigned char > body(length.value()); string text;
-                        *m_cnx >> body;
-                        for ( std::vector< unsigned char >::const_iterator i( body.begin() ); i != body.end(); ++i )
-                            text += utf32( *i );
-                        m_body.reset(new text_body(coerce< utf8string >(text), m_headers));
-                    } else
-                        m_body.reset(new empty_mime(m_headers));
+                    std::vector< unsigned char > body(length.value()); string text;
+                    *m_cnx >> body;
+                    for ( std::vector< unsigned char >::const_iterator i( body.begin() ); i != body.end(); ++i )
+                        text += utf32( *i );
+                    m_body.reset(new text_body(coerce< utf8string >(text), m_headers));
                 } else {
                     throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- for iso-8859-1 -- length is not known");
                 }
             } else
                 throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8", charset.value());
-        } else
+        } else if ( length.isnull() || length.value() )
             throw exceptions::not_implemented(
-                "fostlib::http::user_agent::response::body() -- where the content is not text",
+                "fostlib::http::user_agent::response::body() -- where the content is not text and we have to download something",
                 m_headers[ L"Content-Type" ].value().empty() ? L"No content type specified" : m_headers[ L"Content-Type" ].value()
             );
     }

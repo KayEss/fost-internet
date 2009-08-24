@@ -30,12 +30,14 @@ namespace fostlib {
 
 
             class FOST_AWS_DECLSPEC file_info {
+                boost::shared_ptr< http::user_agent::response > m_response;
                 public:
                     file_info(const http::user_agent &, const ascii_string &bucket, const boost::filesystem::wpath &);
 
                     accessors< const boost::filesystem::wpath > path;
 
                     bool exists() const;
+                    nullable< string > md5() const;
             };
 
             class FOST_AWS_DECLSPEC bucket {

@@ -54,9 +54,14 @@ file_info fostlib::aws::s3::bucket::stat(const boost::filesystem::wpath &locatio
 void fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const {
     http::user_agent::request request("PUT", url(m_ua.base(), location), file);
     std::auto_ptr< http::user_agent::response > response(s3do(m_ua, request));
-    exceptions::not_implemented exception("fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const -- with response status", fostlib::coerce< fostlib::string >( response->status() ));
-    exception.info() << response->body() << std::endl;
-    throw exception;
+    switch ( response->status() ) {
+        case 200:
+            break;
+        default:
+            exceptions::not_implemented exception(L"fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const -- with response status" + fostlib::coerce< fostlib::string >( response->status() ));
+            exception.info() << response->body() << std::endl;
+            throw exception;
+    }
 }
 
 
@@ -65,21 +70,30 @@ void fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const b
 */
 
 
+namespace {
+    std::auto_ptr< http::user_agent::response > init_file_info(const http::user_agent &ua, const url &u) {
+        http::user_agent::request r("HEAD", u);
+        return s3do(ua, r);
+    }
+}
 fostlib::aws::s3::file_info::file_info(const http::user_agent &ua, const ascii_string &bucket, const boost::filesystem::wpath &location )
-: path( location ) {
-    http::user_agent::request request("GET", url(ua.base(), location));
-    std::auto_ptr< http::user_agent::response > response(s3do(ua, request));
-
-    switch ( response->status() ) {
-    case 404:
-        break;
-    default:
-        throw fostlib::exceptions::not_implemented("fostlib::aws::s3::file_info::file_info( const fostlib::aws::s3::bucket &bucket, const boost::filesystem::wpath &location ) -- with status code", fostlib::coerce< fostlib::string >( response->status() ));
+: m_response( init_file_info(ua, url(ua.base(), location)).release() ), path( location ) {
+    switch ( m_response->status() ) {
+        case 200:
+        case 404:
+            break;
+        default:
+            throw fostlib::exceptions::not_implemented("fostlib::aws::s3::file_info::file_info( const fostlib::aws::s3::bucket &bucket, const boost::filesystem::wpath &location ) -- with status code", fostlib::coerce< fostlib::string >( m_response->status() ));
     }
 }
 
 
 bool fostlib::aws::s3::file_info::exists() const {
-    return false;
+    return m_response->status() == 200;
 }
-
+nullable< string > fostlib::aws::s3::file_info::md5() const {
+    if ( exists() && m_response->body().headers().exists(L"ETag") )
+        return m_response->body().headers()[L"ETag"].value();
+    else
+        return null;
+}
