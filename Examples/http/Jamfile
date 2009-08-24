@@ -13,6 +13,7 @@ fost-exe http-simple
 
 fost-exe s3put
     :
+        ../../../fost-base/Cpp/fost-crypto/
         ../../Cpp/fost-aws/
         ../../Cpp/fost-inet/
         s3put.cpp

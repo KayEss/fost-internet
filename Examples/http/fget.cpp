@@ -27,7 +27,6 @@ FSL_MAIN(
     http::user_agent browser;
     std::auto_ptr< http::user_agent::response > response( browser.get( url( location ) ) );
     // Display the body
-    o << response->body().headers() << std::endl;
     o << response->body() << std::endl;
     return 0;
 }

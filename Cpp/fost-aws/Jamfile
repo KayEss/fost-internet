@@ -1,13 +1,8 @@
 
-lib fost-aws
+fost-lib fost-aws
     :
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-regex-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
+        ../../../fost-base/Cpp/fost-crypto/
         ../fost-inet/
         s3.cpp
         s3authen.cpp
     ;
-
