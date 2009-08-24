@@ -164,11 +164,13 @@ namespace fostlib {
     inline std::ostream &operator << ( std::ostream &o, const mime &m ) {
         return m.print_on( o );
     }
+#ifdef WIN32
     inline std::wostream &operator << ( std::wostream &o, const mime &m ) {
         std::stringstream ss;
         ss << m;
         return o << coerce< string >( ss.str() );
     }
+#endif
 
 
 }
