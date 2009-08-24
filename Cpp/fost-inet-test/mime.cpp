@@ -84,7 +84,7 @@ Test text document" );
 }
 FSL_TEST_FUNCTION(text3) {
     utf8 b[19];
-    std::strcpy(reinterpret_cast< char * >(b), "Test text document");
+    std::strncpy(reinterpret_cast< char * >(b), "Test text document", 19);
     text_body ta(b, b+18);
     std::stringstream ss;
     ss << ta;
