@@ -55,8 +55,8 @@ const headers_base::content &fostlib::headers_base::operator [] ( const fostlib:
         return (*p).second;
 }
 
-headers_base::content &fostlib::headers_base::add( const string &n, const content &v ) {
-    return (*m_headers.insert( std::make_pair( n, v ) ).first).second;
+headers_base::content &fostlib::headers_base::set( const string &n, const content &v ) {
+    return m_headers[n] = v;
 }
 
 fostlib::headers_base::const_iterator fostlib::headers_base::begin() const {

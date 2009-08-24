@@ -1,5 +1,5 @@
 /*
-    Copyright 2008, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -39,7 +39,9 @@ void fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const b
         m_ua.base(), boost::filesystem::wpath(coerce< std::wstring >(name()) / location)
     ), file );
     std::auto_ptr< http::user_agent::response > response(m_ua(request));
-    throw fostlib::exceptions::not_implemented("fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const -- with response status", fostlib::coerce< fostlib::string >( response->status() ));
+    fostlib::exceptions::not_implemented exception("fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const -- with response status", fostlib::coerce< fostlib::string >( response->status() ));
+    exception.info() << response->body() << std::endl;
+    throw exception;
 }
 
 

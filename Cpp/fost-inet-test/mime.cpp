@@ -25,6 +25,9 @@ FSL_TEST_FUNCTION( headers ) {
 
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"value" );
     FSL_CHECK_EQ( headers[ L"X-Second" ].value(), L"value" );
+
+    headers.set("X-First", L"Another value");
+    FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"Another value" );
 }
 
 
@@ -33,16 +36,20 @@ FSL_TEST_FUNCTION( empty_mime ) {
     std::stringstream ss;
     ss << empty;
     FSL_CHECK_EQ( ss.str(), "\
+Content-Length: 0\r\n\
+Content-Type: application/x-empty\r\n\
 \r\n\
 " );
 }
 FSL_TEST_FUNCTION( empty_mime_with_headers ) {
     empty_mime empty;
-    empty.headers().add("Host", fostlib::string("localhost"));
-    empty.headers().add("User-Agent", fostlib::string("Fake agent"));
+    empty.headers().set("Host", fostlib::string("localhost"));
+    empty.headers().set("User-Agent", fostlib::string("Fake agent"));
     std::stringstream ss;
     ss << empty;
     FSL_CHECK_EQ( ss.str(), "\
+Content-Length: 0\r\n\
+Content-Type: application/x-empty\r\n\
 Host: localhost\r\n\
 User-Agent: Fake agent\r\n\
 \r\n\
@@ -99,8 +106,9 @@ FSL_TEST_FUNCTION( mime_attachment ) {
     ss << envelope;
     mime::mime_headers headers;
     headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
-    FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
-Content-Type: multipart/mixed; boundary=" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\r\n\
+    try {
+        FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+Content-Type: multipart/mixed; boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\
 \r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\r\n\
 Content-Length: 18\r\n\
@@ -110,5 +118,10 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 Test text document\r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"--\r\n\
 " );
+    } catch ( fostlib::exceptions::exception &e ) {
+        if ( headers[L"Content-Type"].subvalue( L"boundary" ).isnull() )
+            e.info() << L"Output from the envelope:\n" << ss.str() << std::endl;
+        throw;
+    }
 }
 

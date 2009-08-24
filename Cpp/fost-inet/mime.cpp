@@ -13,6 +13,8 @@
 #include <fost/exception/parse_error.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
+#include <boost/filesystem/fstream.hpp>
+
 
 using namespace fostlib;
 
@@ -24,6 +26,7 @@ using namespace fostlib;
 
 fostlib::mime::mime( const mime_headers &h, const string &content_type )
 : content_type( content_type ), headers( h ) {
+    headers().set(L"Content-Type", mime::mime_headers::content(content_type));
 }
 
 fostlib::mime::~mime() {
@@ -119,6 +122,7 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
 
 fostlib::empty_mime::empty_mime( const mime_headers &headers )
 : mime( headers, "application/x-empty" ) {
+    this->headers().set("Content-Length", L"0");
 }
 
 
@@ -164,7 +168,12 @@ std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
         boundary = guid();
     } while ( !boundary_is_ok( boundary ) );
 
-    o << headers() << "Content-Type: " << coerce< utf8string >( content_type() ) << "; boundary=" + coerce< utf8string >( boundary ) + "\r\n";
+    mime_headers local_headers = headers();
+    mime_headers::content with_boundary(headers()["Content-Type"]);
+    with_boundary.subvalue("boundary", coerce< utf8string >(boundary));
+    local_headers.set("Content-Type", with_boundary);
+
+    o << local_headers;
     for ( std::list< boost::shared_ptr< mime > >::const_iterator part( items().begin() ) ;part != items().end(); ++part ) {
         o << "\r\n--" << coerce< utf8string >( boundary ) << "\r\n";
         (*part)->print_on( o );
@@ -187,9 +196,9 @@ std::auto_ptr< mime::iterator_implementation > fostlib::mime_envelope::iterator(
 
 namespace {
     void do_headers(text_body &tb, const utf8string &body, const string &mime_type) {
-        tb.headers().add(L"Content-Type", mime::mime_headers::content(mime_type).subvalue( L"charset", L"utf-8" ));
-        tb.headers().add(L"Content-Transfer-Encoding", L"8bit");
-        tb.headers().add(L"Content-Length", coerce< string >(body.length()));
+        tb.headers().set(L"Content-Type", mime::mime_headers::content(mime_type).subvalue( L"charset", L"utf-8" ));
+        tb.headers().set(L"Content-Transfer-Encoding", L"8bit");
+        tb.headers().set(L"Content-Length", coerce< string >(body.length()));
     }
 }
 fostlib::text_body::text_body(const utf8 *begin, const utf8 *end, const mime_headers &headers, const string &mime_type)
@@ -230,5 +239,46 @@ struct fostlib::text_body::text_body_iterator : public mime::iterator_implementa
 };
 std::auto_ptr< mime::iterator_implementation > fostlib::text_body::iterator() const {
     return std::auto_ptr< mime::iterator_implementation >(new text_body_iterator(text()));
+}
+
+
+/*
+    fostlib::file_body
+*/
+
+
+fostlib::file_body::file_body( const boost::filesystem::wpath &p, const mime_headers &headers, const string &mime_type )
+: mime( headers, mime_type ), filename( p ) {
+    this->headers().set(L"Content-Transfer-Encoding", L"8bit");
+    this->headers().set(L"Content-Length", coerce< string >( boost::filesystem::file_size(p) ));
+}
+
+
+std::ostream &fostlib::file_body::print_on( std::ostream &o ) const {
+    boost::filesystem::ifstream file(filename(), std::ios::binary);
+    return o << headers() << "\r\n" << file.rdbuf();
+}
+
+bool fostlib::file_body::boundary_is_ok( const string &boundary ) const {
+    throw exceptions::not_implemented("fostlib::file_body::boundary_is_ok( const string &boundary ) const");
+}
+
+
+struct fostlib::file_body::file_body_iteration : public mime::iterator_implementation {
+    boost::filesystem::ifstream file;
+    boost::array< char, 2048 > buffer;
+    file_body_iteration( const boost::filesystem::wpath &p )
+    : file( p, std::ios::binary ) {
+    }
+    const_memory_block operator () () {
+        if ( !file.eof() && file.good() ) {
+            file.read(buffer.c_array(), buffer.size());
+            return const_memory_block( buffer.data(), buffer.data() + file.gcount() );
+        } else
+            return const_memory_block( NULL, NULL );
+    }
+};
+std::auto_ptr< mime::iterator_implementation > fostlib::file_body::iterator() const {
+    return std::auto_ptr< mime::iterator_implementation >(new file_body_iteration(filename()));;
 }
 

@@ -35,9 +35,9 @@ fostlib::http::user_agent::user_agent(const url &u)
 
 
 std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator () (request &req) const {
-    req.headers().add("Host", req.address().server().name());
+    req.headers().set("Host", req.address().server().name());
     if ( !req.headers().exists("User-Agent") )
-        req.headers().add("User-Agent", c_user_agent.value() + L"/Fost 4.09.09");
+        req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4.09.09");
 
     if ( !authentication().isnull() )
         authentication().value()( req );
@@ -49,8 +49,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
         cnx->start_ssl();
 
     std::stringstream buffer;
-    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.0\r\n";
-    req.print_on(buffer);
+    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.0\r\n" << req.headers() << "\r\n";
     *cnx << buffer;
 
     for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i )
@@ -93,8 +92,7 @@ fostlib::http::user_agent::request::request(const string &method, const url &url
 : m_data(new text_body(data)), method(method), address(url) {
 }
 fostlib::http::user_agent::request::request(const string &method, const url &url, const boost::filesystem::wpath &data)
-: m_data(new mime_envelope), method(method), address(url) {
-    throw exceptions::not_implemented("fostlib::http::user_agent::request::request(const string &method, const url &url, const boost::filesystem::wpath &data)");
+: m_data(new file_body(data)), method(method), address(url) {
 }
 
 
@@ -151,6 +149,22 @@ const mime &fostlib::http::user_agent::response::body() const {
                     else
                         e.info() << L"Charset in Content-Type header given as " << charset.value() << L"\n";
                     throw;
+                }
+            } else if ( charset == "iso-8859-1" ) {
+                /*
+                    ISO-8859-1 has the same coce points as Unicode. We can interpret each byte coming in as a Unicode code point
+                */
+                if ( !length.isnull() ) {
+                    if ( length.value() ) {
+                        std::vector< unsigned char > body(length.value()); string text;
+                        *m_cnx >> body;
+                        for ( std::vector< unsigned char >::const_iterator i( body.begin() ); i != body.end(); ++i )
+                            text += utf32( *i );
+                        m_body.reset(new text_body(coerce< utf8string >(text), m_headers));
+                    } else
+                        m_body.reset(new empty_mime(m_headers));
+                } else {
+                    throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- for iso-8859-1 -- length is not known");
                 }
             } else
                 throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- where the encoding is not UTF-8", charset.value());

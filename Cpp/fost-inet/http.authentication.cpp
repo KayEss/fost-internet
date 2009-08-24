@@ -25,7 +25,7 @@ void fostlib::http::fost_authentication(
     signature << request.method() << " " << request.address().pathspec().underlying().underlying() << "\n";
 
     fostlib::string now = fostlib::coerce< fostlib::string >( fostlib::timestamp::now() );
-    request.headers().add( L"X-FOST-Timestamp", now );
+    request.headers().set( L"X-FOST-Timestamp", now );
     signature << now << "\n";
 
     fostlib::string to_sign, signd = L"X-FOST-Headers";
@@ -37,8 +37,8 @@ void fostlib::http::fost_authentication(
     for ( mime::const_iterator i(request.data().begin()); i != request.data().end(); ++i )
         signature << *i;
 
-    request.headers().add( L"X-FOST-Headers", signd );
-    request.headers().add( L"Authorization", L"FOST " + api_key + L":" +
+    request.headers().set( L"X-FOST-Headers", signd );
+    request.headers().set( L"Authorization", L"FOST " + api_key + L":" +
         fostlib::coerce< string >( fostlib::coerce< fostlib::base64_string >(signature.digest()) )
     );
 }

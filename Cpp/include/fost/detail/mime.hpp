@@ -13,6 +13,7 @@
 
 #include <fost/core>
 #include <fost/pointers>
+#include <boost/filesystem.hpp>
 
 
 namespace fostlib {
@@ -27,7 +28,7 @@ namespace fostlib {
         void parse( const string &headers );
 
         bool exists( const string & ) const;
-        content &add( const string &name, const content & );
+        content &set( const string &name, const content & );
         const content &operator [] ( const string & ) const;
 
         typedef std::map< string, content >::const_iterator const_iterator;
@@ -139,6 +140,22 @@ namespace fostlib {
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< const utf8string > text;
+    };
+
+    class FOST_INET_DECLSPEC file_body : public mime {
+        struct file_body_iteration;
+        std::auto_ptr< iterator_implementation > iterator() const;
+        public:
+            file_body(
+                const boost::filesystem::wpath &file,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "application/octet-stream"
+            );
+
+            std::ostream &print_on( std::ostream &o ) const;
+            bool boundary_is_ok( const string &boundary ) const;
+
+            accessors< const boost::filesystem::wpath > filename;
     };
 
 
