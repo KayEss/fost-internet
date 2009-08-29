@@ -80,6 +80,10 @@ namespace fostlib {
                     request r(L"POST", url, data);
                     return (*this)(r);
                 }
+                std::auto_ptr< response > put( const url &url, const string &data ) const {
+                    request r(L"PUT", url, data);
+                    return (*this)(r);
+                }
         };
 
 
