@@ -11,6 +11,7 @@
 #pragma once
 
 
+#include <fost/detail/url.hpp>
 #include <fost/detail/http.hpp>
 
 
@@ -25,16 +26,17 @@ namespace fostlib {
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 request( std::auto_ptr< boost::asio::ip::tcp::socket > connection );
-            public:
 
-                const string &method();
-                const string &file_spec();
+                network_connection m_cnx;
+                string m_method; url::filepath_string m_pathspec;
+                boost::scoped_ptr< mime > m_mime;
 
-                void operator() ( const mime &response );
+                public:
+                    const string &method() const { return m_method; }
+                    const url::filepath_string &file_spec() const { return m_pathspec; }
+                    const mime &data() const;
 
-            private:
-                std::auto_ptr< network_connection > m_cnx;
-                nullable< std::pair< string, string > > m_first_line;
+                    void operator() ( const mime &response );
             };
 
             explicit server( const host &h, uint16_t port = 80 );
