@@ -62,7 +62,7 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
         m_cnx >> line;
         if ( line.empty() )
             break;
-        headers.parse(line);
+        headers.parse(coerce< string >(line));
     }
 
     if ( method() == L"GET" )
