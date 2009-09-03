@@ -21,6 +21,9 @@ using namespace fostlib;
 
 fostlib::headers_base::headers_base() {
 }
+fostlib::headers_base::~headers_base() {
+}
+
 
 void fostlib::headers_base::parse( const string &headers ) {
     // This implementation ignores character encodings - assumes UTF-8 which won't work for mail headers

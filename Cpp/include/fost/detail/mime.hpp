@@ -21,9 +21,10 @@ namespace fostlib {
 
     class FOST_INET_DECLSPEC FSL_ABSTRACT headers_base {
     public:
-        headers_base();
-
         class content;
+
+        headers_base();
+        virtual ~headers_base();
 
         void parse( const string &headers );
 
