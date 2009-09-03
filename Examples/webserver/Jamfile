@@ -1,0 +1,9 @@
+using testing ;
+
+fost-exe http-simple
+    :
+        ../../Cpp/fost-inet/
+        simple.cpp
+    ;
+
+install-example http-simple ;

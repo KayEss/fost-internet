@@ -24,10 +24,4 @@ run fget
         fget-google-secure
     ;
 
-fost-exe http-simple
-    :
-        ../../Cpp/fost-inet/
-        simple.cpp
-    ;
-
-install-example fget http-simple ;
+install-example fget ;

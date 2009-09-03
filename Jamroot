@@ -10,6 +10,7 @@ alias examples
         Examples/host/
         Examples/http/
         Examples/s3/
+        Examples/webserver/
     ;
 explicit examples ;
 
