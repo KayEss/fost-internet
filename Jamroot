@@ -9,6 +9,7 @@ alias examples
     :
         Examples/host/
         Examples/http/
+        Examples/s3/
     ;
 explicit examples ;
 

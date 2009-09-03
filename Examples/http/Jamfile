@@ -1,8 +1,27 @@
+using testing ;
+
 
 fost-exe fget
     :
         ../../Cpp/fost-inet/
         fget.cpp
+    ;
+
+run fget
+    :
+    :
+    :
+    :
+        fget-localhost
+    ;
+
+run fget
+    :
+        https://www.google.com/
+    :
+    :
+    :
+        fget-google-secure
     ;
 
 fost-exe http-simple
@@ -11,12 +30,4 @@ fost-exe http-simple
         simple.cpp
     ;
 
-fost-exe s3put
-    :
-        ../../../fost-base/Cpp/fost-crypto/
-        ../../Cpp/fost-aws/
-        ../../Cpp/fost-inet/
-        s3put.cpp
-    ;
-
-install-example fget http-simple s3put ;
+install-example fget http-simple ;
