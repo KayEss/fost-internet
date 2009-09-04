@@ -5,6 +5,11 @@ use-project fost-base : ../fost-base/ ;
 include ../fost-base/fost.jam ;
 fost-project fost-internet ;
 
+build-project Cpp/fost-aws ;
+build-project Cpp/fost-aws-test ;
+build-project Cpp/fost-inet ;
+build-project Cpp/fost-inet-test ;
+
 alias examples
     :
         Examples/host/
@@ -13,6 +18,3 @@ alias examples
         Examples/webserver/
     ;
 explicit examples ;
-
-build-project Cpp/fost-aws-test ;
-build-project Cpp/fost-inet-test ;
