@@ -75,6 +75,19 @@ namespace {
             return boost::asio::read(sock, b, f, e);
     }
 
+    void connect(boost::asio::ip::tcp::socket &socket, const host &host, port_number port) {
+        using namespace boost::asio::ip;
+        tcp::resolver resolver(g_io_service);
+        tcp::resolver::query q(coerce<std::string>(host.name()), coerce<std::string>(coerce<string>(port)));
+        tcp::resolver::iterator endpoint = resolver.resolve(q), end;
+        boost::system::error_code error = boost::asio::error::host_not_found;
+        while ( error && endpoint != end ) {
+            socket.close();
+            socket.connect(*endpoint++, error);
+        }
+        if ( error )
+            throw boost::system::system_error(error);
+    }
 }
 
 
@@ -89,9 +102,7 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
 
     if ( !socks.isnull() ) {
         const host socks_host( coerce< host >( c_socks_host.value() ) );
-        m_socket->connect(boost::asio::ip::tcp::endpoint(
-            socks_host.address(), coerce< port_number >(socks_host.service().value("0"))
-        ));
+        connect(*m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
         if ( c_socks_version.value() == json(4) ) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection
@@ -112,7 +123,7 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
         } else
             throw exceptions::not_implemented("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
     } else
-        m_socket->connect(boost::asio::ip::tcp::endpoint(h.address(), port));
+        connect(*m_socket, h, port);
 }
 
 fostlib::network_connection::~network_connection() {
