@@ -4,7 +4,3 @@ fost-exe host
         ../../Cpp/fost-inet/
         host-main.cpp
     ;
-
-install-example
-        host
-    ;
