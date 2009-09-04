@@ -6,4 +6,3 @@ fost-exe http-simple
         simple.cpp
     ;
 
-install-example http-simple ;

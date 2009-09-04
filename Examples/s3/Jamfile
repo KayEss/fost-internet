@@ -19,5 +19,3 @@ run s3put
     :
         s3put-source
     ;
-
-install-example s3put ;

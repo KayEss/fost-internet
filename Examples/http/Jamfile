@@ -23,5 +23,3 @@ run fget
     :
         fget-google-secure
     ;
-
-install-example fget ;
