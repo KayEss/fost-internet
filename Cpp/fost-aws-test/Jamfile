@@ -4,5 +4,6 @@ fost-smoke-test fost-aws-test-smoke
         ../../../fost-base/Cpp/fost-crypto/
         ../fost-aws/
         ../fost-inet/
+    :
         test-s3authen.cpp
     ;
