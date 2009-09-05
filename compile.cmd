@@ -1,3 +1,3 @@
 @echo off
 echo fost-internet
-..\bjam toolset=msvc %* && ..\bjam toolset=msvc examples preserve-test-targets=on %*
+..\bjam toolset=msvc preserve-test-targets=on %*
