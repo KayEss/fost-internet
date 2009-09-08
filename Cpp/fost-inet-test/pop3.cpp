@@ -13,6 +13,15 @@ using namespace fostlib::pop3;
 using namespace fostlib;
 
 
+namespace {
+
+    const setting< string > c_username("fost-inet/Cpp/fost-inet-test/pop3.cpp",
+        "POP3 client test", "Username", "pop3test@felspar.net", true
+    );
+
+}
+
+
 FSL_TEST_SUITE( pop3 );
 
 bool destroy_message(const message &the_message) {
@@ -25,7 +34,7 @@ FSL_TEST_FUNCTION( download_messages ) {
     iterate_mailbox(
         host,
         &destroy_message,
-        "pop3test@felspar.net",
-        "PQijRPrZn7"
+        coerce<utf8string>(c_username.value()),
+        coerce<utf8string>(setting<string>::value(L"POP3 client test", L"Password"))
     );
 }
