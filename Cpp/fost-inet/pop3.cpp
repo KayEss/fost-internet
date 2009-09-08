@@ -14,16 +14,16 @@
 using namespace fostlib::pop3;
 using namespace fostlib;
 
-/*void write_line(utf8string string) {
+void write_line(
+    utf8string string
+) {
     std::cout << string;
     std::cout << std::endl;
-}*/
+}
 
 message::message(
-        network_connection &the_network_connection
-    ) {
-    std::list<string> headers; // need a headers class
-    
+    network_connection &the_network_connection
+) {    
     utf8string line;
     the_network_connection >> line;
 
@@ -31,6 +31,8 @@ message::message(
     while (
         ! line.empty()
     ) {
+        //write_line(line);
+
         utf8string header(line);
         
         line = "";
@@ -38,32 +40,67 @@ message::message(
         
     /* read next header line, if starting with space, add it to header */
         while (
-            (line.substr(0,1) == " ") ||
-            (line.substr(0,1) == "\t")
+           (line.substr(0,1) == " ") ||
+           (line.substr(0,1) == "\t")            
         ) {
             header += line;
             line = "";
             the_network_connection >> line;
         }
-        headers.push_back(header);
+                
+        size_t first_colon_position = header.find(':');
+        utf8string header_key = header.substr(0, first_colon_position);
+        utf8string header_value = header.substr(first_colon_position+1);
+        
+        m_headers[header_key] = header_value;
+        if (header_key == "Status") {
+            m_status = header_value;
+            //write_line("status " + header_value);
+        }
+        /*write_line(
+            header.substr(0, first_colon_position) + 
+            header.substr(first_colon_position+2)
+        );*/
     };
     
 /* read the body: */
-    while ( 
-       (line.substr(0,1) != ".") ||
-       (line.substr(1,2) == ".")
+    while (
+        true
     ) {
-        m_content += line+"\n";        
+        if (
+            (line.length() > 0) && 
+            (line[0] == '.')
+        ) {
+            if (
+                (line.length() > 1) && 
+                (line[1] == '.')
+            ) {
+                line = line.substr(1);
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            m_content += line+"\n";
+        }
+
         line = "";
-        the_network_connection >> line;
+        the_network_connection >> line;        
     };
     //write_line(m_content);
 }
 
+bool message::bounced()
+const {
+    return m_status == "5.5.0";
+}
 
 
-
-void check_OK(network_connection &the_network_connection, utf8string command) {
+void check_OK(
+    network_connection &the_network_connection,
+    utf8string command
+) {
     utf8string server_response;
     the_network_connection >> server_response;
 
@@ -78,12 +115,11 @@ void check_OK(network_connection &the_network_connection, utf8string command) {
 }
 
 void send(
-        network_connection &the_network_connection,
-        const utf8string command, 
-        const utf8string parameter
-    ) {
-    
-//    write_line("Client: "+command+" "+parameter);
+    network_connection &the_network_connection,
+    const utf8string command, 
+    const utf8string parameter
+) {
+    //write_line("Client: "+command+" "+parameter);
 
     {
         the_network_connection << command;
@@ -94,20 +130,20 @@ void send(
 }
 
 void send(
-        network_connection &the_network_connection,
-        const utf8string command
-    ) {
-//    write_line("Client: "+command);    
+    network_connection &the_network_connection,
+    const utf8string command
+) {
+    //write_line("Client: "+command);    
 
     the_network_connection << command;
     the_network_connection << "\r\n";
 }
 
 void send(
-        network_connection &the_network_connection,
-        const utf8string command, 
-        const size_t parameter
-    ) {    
+    network_connection &the_network_connection,
+    const utf8string command, 
+    const size_t parameter
+) {    
     std::stringstream i_stream;
     i_stream << parameter;
     utf8string value(i_stream.str());
@@ -117,28 +153,28 @@ void send(
 
 
 
-void send_and_check(
-        network_connection &the_network_connection,
-        const utf8string command, 
-        const utf8string parameter
-    ) {
+void send_and_check_OK(
+    network_connection &the_network_connection,
+    const utf8string command, 
+    const utf8string parameter
+) {
     send(the_network_connection, command, parameter);
     check_OK(the_network_connection, command);
 }
 
-void send_and_check(
-        network_connection &the_network_connection,
-        const utf8string command, 
-        const size_t parameter
-    ) {
+void send_and_check_OK(
+    network_connection &the_network_connection,
+    const utf8string command, 
+    const size_t parameter
+) {
     send(the_network_connection, command, parameter);
     check_OK(the_network_connection, command);    
 }
 
-void send_and_check(
-        network_connection &the_network_connection,
-        const utf8string command
-    ) {
+void send_and_check_OK(
+    network_connection &the_network_connection,
+    const utf8string command
+) {
     send(the_network_connection, command);
     check_OK(the_network_connection, command);    
 }
@@ -146,24 +182,24 @@ void send_and_check(
 
 
 void pop3::iterate_mailbox(
-        const host &host,
-        boost::function<bool (const message &)> destroy_message,
-        const utf8string &username,
-        const utf8string &password
-    ) {
+    const host &host,
+    boost::function<bool (const message &)> destroy_message,
+    const utf8string &username,
+    const utf8string &password
+) {
     network_connection the_network_connection( host, 110 );
     
     utf8string server_status;    
     the_network_connection >> server_status;
     
-    send_and_check(the_network_connection, "user", username);
-    send_and_check(the_network_connection, "pass", password);
+    send_and_check_OK(the_network_connection, "user", username);
+    send_and_check_OK(the_network_connection, "pass", password);
 
     send(the_network_connection, "stat");
     
     utf8string server_response;
     the_network_connection >> server_response;
-//    write_line("SERVER: "+server_response);
+    //write_line("SERVER: "+server_response);
     
     std::stringstream server_response_stringstream(server_response.substr(3));
     size_t message_count;
@@ -171,22 +207,22 @@ void pop3::iterate_mailbox(
     size_t octets;
     server_response_stringstream >> octets;
     
-//    write_line("messages: "+message_count);
+    //write_line("messages: "+message_count);
     for (
         size_t i = 1;
         i <= message_count;
         ++i
     ) {
-        send_and_check(the_network_connection, "retr", i);
-        
+        send_and_check_OK(the_network_connection, "retr", i);
         utf8string content;
-
         message message(
             the_network_connection
         );
 
-        if ( destroy_message(message) ) {
-            send_and_check(the_network_connection, "dele", i);
+        if (
+            destroy_message(message) 
+        ) {
+            send_and_check_OK(the_network_connection, "dele", i);
         }        
     }
 }

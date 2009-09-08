@@ -20,19 +20,22 @@ namespace fostlib {
         
         typedef const size_t message_id;
         class FOST_INET_DECLSPEC message {
-            std::list<string> headers; // need a headers class
+            std::map<string, string> m_headers;// need a headers class
             utf8string m_content;
+            utf8string m_status;
         public:
             message(
-                network_connection &
+                network_connection &the_network_connection
             );
+            
+            bool bounced() const;
         };
         
         void iterate_mailbox(
-            const host &,
-            boost::function<bool (const message &)>,
-            const utf8string &,
-            const utf8string &
+            const host &host,
+            boost::function<bool (const message &)> destroy_message,
+            const utf8string &username,
+            const utf8string &password
         );
     }
     
