@@ -32,7 +32,7 @@ FSL_TEST_FUNCTION( headers ) {
 
 FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
     mime::mime_headers headers;
-    // from an IIS bounced message:
+    // from an Exchange bounced message:
     headers.parse( L"X-MS-TNEF-Correlator: \r\n" );
 }
 
