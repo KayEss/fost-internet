@@ -13,16 +13,17 @@
 #include <fost/detail/host.hpp>
 #include <fost/detail/connection.hpp>
 #include <fost/detail/smtp.hpp>
+#include <fost/detail/mime.hpp>
+
+
 
 namespace fostlib {
 
     namespace pop3 {
         
-        typedef const size_t message_id;
         class FOST_INET_DECLSPEC message {
-            std::map<string, string> m_headers;// need a headers class
-            utf8string m_content;
-            utf8string m_status;
+            mime::mime_headers m_headers;
+            std::auto_ptr<text_body> m_text_body;
         public:
             message(
                 network_connection &the_network_connection

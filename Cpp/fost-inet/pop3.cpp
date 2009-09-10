@@ -15,30 +15,28 @@ using namespace fostlib::pop3;
 using namespace fostlib;
 
 void write_line(
-    utf8string string
+    string string
 ) {
     std::cout << string;
     std::cout << std::endl;
 }
 
-message::message(
+mime::mime_headers read_headers(
     network_connection &the_network_connection
-) {    
+) {
+    mime::mime_headers m_headers;
+
     utf8string line;
     the_network_connection >> line;
 
-/* read header lines: */
     while (
         ! line.empty()
     ) {
-        //write_line(line);
-
         utf8string header(line);
         
         line = "";
         the_network_connection >> line;
         
-    /* read next header line, if starting with space, add it to header */
         while (
            (line.substr(0,1) == " ") ||
            (line.substr(0,1) == "\t")            
@@ -47,23 +45,20 @@ message::message(
             line = "";
             the_network_connection >> line;
         }
-                
-        size_t first_colon_position = header.find(':');
-        utf8string header_key = header.substr(0, first_colon_position);
-        utf8string header_value = header.substr(first_colon_position+1);
-        
-        m_headers[header_key] = header_value;
-        if (header_key == "Status") {
-            m_status = header_value;
-            //write_line("status " + header_value);
-        }
-        /*write_line(
-            header.substr(0, first_colon_position) + 
-            header.substr(first_colon_position+2)
-        );*/
+                        
+        m_headers.parse(coerce< string >(header));
     };
-    
-/* read the body: */
+    return m_headers;
+};
+
+std::auto_ptr<text_body> read_body(
+    const mime::mime_headers &m_headers,
+    network_connection &the_network_connection
+) {   
+    utf8string m_content;
+    utf8string line;
+    the_network_connection >> line;
+
     while (
         true
     ) {
@@ -88,18 +83,41 @@ message::message(
         line = "";
         the_network_connection >> line;        
     };
-    //write_line(m_content);
-}
+    
+    const utf8string const_content(m_content);
+    
+    std::auto_ptr<text_body> result( 
+        new text_body(
+            const_content,
+            m_headers,
+            "text/plain"
+        )
+    );
+    return result;
+};
+
+message::message(
+    network_connection &the_network_connection
+) 
+: m_headers(
+    read_headers(
+        the_network_connection
+    )
+), m_text_body(
+    read_body(
+        m_headers,
+        the_network_connection
+    )
+) {}
 
 bool message::bounced()
 const {
-    return m_status == "5.5.0";
-}
-
+    return m_text_body->text().find("does not exist") != string::npos;
+};
 
 void check_OK(
     network_connection &the_network_connection,
-    utf8string command
+    string command
 ) {
     utf8string server_response;
     the_network_connection >> server_response;
@@ -214,7 +232,7 @@ void pop3::iterate_mailbox(
         ++i
     ) {
         send_and_check_OK(the_network_connection, "retr", i);
-        utf8string content;
+        string content;
         message message(
             the_network_connection
         );
@@ -225,4 +243,5 @@ void pop3::iterate_mailbox(
             send_and_check_OK(the_network_connection, "dele", i);
         }        
     }
+    send_and_check_OK(the_network_connection, "quit");
 }
