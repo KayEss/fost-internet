@@ -35,8 +35,8 @@ namespace fostlib {
         FOST_INET_DECLSPEC void iterate_mailbox(
             const host &host,
             boost::function<bool (const message &)> destroy_message,
-            const utf8string &username,
-            const utf8string &password
+            const string &username,
+            const string &password
         );
     }
 

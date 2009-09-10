@@ -18,5 +18,6 @@ FSL_TEST_SUITE( http_server );
 
 FSL_TEST_FUNCTION( mock ) {
     http::server::request req("GET", url::filepath_string("/"), std::auto_ptr< mime >( new empty_mime ));
-    FSL_CHECK_EXCEPTION(req( empty_mime() ), exceptions::null&);
+    empty_mime response;
+    FSL_CHECK_EXCEPTION(req( response ), exceptions::null&);
 }

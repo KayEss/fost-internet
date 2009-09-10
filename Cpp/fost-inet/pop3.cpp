@@ -57,7 +57,7 @@ std::auto_ptr<text_body> read_body(
     const mime::mime_headers &m_headers,
     network_connection &the_network_connection
 ) {
-    utf8string m_content;
+    string m_content;
     utf8string line;
     the_network_connection >> line;
 
@@ -86,7 +86,7 @@ std::auto_ptr<text_body> read_body(
         the_network_connection >> line;
     };
 
-    const utf8string const_content(m_content);
+    const string const_content(m_content);
 
     std::auto_ptr<text_body> result(
         new text_body(
@@ -120,7 +120,7 @@ const {
 namespace {
     void check_OK(
         network_connection &the_network_connection,
-        utf8string command
+        string command
     ) {
         utf8string server_response;
         the_network_connection >> server_response;
@@ -129,7 +129,7 @@ namespace {
 
         if (server_response.substr(0,3) != "+OK") {
             throw exceptions::not_implemented(
-                coerce< string >(command),
+                command,
                 coerce< string >(server_response)
             );
         };
@@ -137,37 +137,37 @@ namespace {
 
     void send(
         network_connection &the_network_connection,
-        const utf8string command,
-        const utf8string parameter
+        const string command,
+        const string parameter
     ) {
         //write_line("Client: "+command+" "+parameter);
 
         {
-            the_network_connection << command;
+            the_network_connection << coerce< utf8string >(command);
             the_network_connection << " ";
-            the_network_connection << parameter;
+            the_network_connection << coerce< utf8string >(parameter);
             the_network_connection << "\r\n";
         }
     }
 
     void send(
         network_connection &the_network_connection,
-        const utf8string command
+        const string command
     ) {
         //write_line("Client: "+command);
 
-        the_network_connection << command;
+        the_network_connection << coerce< utf8string >(command);
         the_network_connection << "\r\n";
     }
 
     void send(
         network_connection &the_network_connection,
-        const utf8string command,
+        const string command,
         const size_t parameter
     ) {
         std::stringstream i_stream;
         i_stream << parameter;
-        utf8string value(i_stream.str());
+        string value(i_stream.str());
 
         send(the_network_connection, command, value);
     }
@@ -176,8 +176,8 @@ namespace {
 
     void send_and_check_OK(
         network_connection &the_network_connection,
-        const utf8string command,
-        const utf8string parameter
+        const string command,
+        const string parameter
     ) {
         send(the_network_connection, command, parameter);
         check_OK(the_network_connection, command);
@@ -185,7 +185,7 @@ namespace {
 
     void send_and_check_OK(
         network_connection &the_network_connection,
-        const utf8string command,
+        const string command,
         const size_t parameter
     ) {
         send(the_network_connection, command, parameter);
@@ -194,7 +194,7 @@ namespace {
 
     void send_and_check_OK(
         network_connection &the_network_connection,
-        const utf8string command
+        const string command
     ) {
         send(the_network_connection, command);
         check_OK(the_network_connection, command);
@@ -205,8 +205,8 @@ namespace {
 void fostlib::pop3::iterate_mailbox(
     const host &host,
     boost::function<bool (const message &)> destroy_message,
-    const utf8string &username,
-    const utf8string &password
+    const string &username,
+    const string &password
 ) {
     network_connection the_network_connection( host, 110 );
 
