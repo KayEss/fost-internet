@@ -14,11 +14,13 @@
 using namespace fostlib::pop3;
 using namespace fostlib;
 
-void write_line(
-    string string
-) {
-    std::cout << string;
-    std::cout << std::endl;
+namespace {
+    void write_line(
+        string string
+    ) {
+        std::cout << string;
+        std::cout << std::endl;
+    }
 }
 
 mime::mime_headers read_headers(
@@ -115,89 +117,90 @@ const {
     return m_text_body->text().find("does not exist") != string::npos;
 };
 
-void check_OK(
-    network_connection &the_network_connection,
-    string command
-) {
-    utf8string server_response;
-    the_network_connection >> server_response;
+namespace {
+    void check_OK(
+        network_connection &the_network_connection,
+        string command
+    ) {
+        utf8string server_response;
+        the_network_connection >> server_response;
 
-    //write_line("Server: "+server_response);
+        //write_line("Server: "+server_response);
 
-    if (server_response.substr(0,3) != "+OK") {
-        throw exceptions::not_implemented(
-            command,
-            server_response
-        );
-    };    
-}
+        if (server_response.substr(0,3) != "+OK") {
+            throw exceptions::not_implemented(
+                command,
+                server_response
+            );
+        };    
+    }
 
-void send(
-    network_connection &the_network_connection,
-    const utf8string command, 
-    const utf8string parameter
-) {
-    //write_line("Client: "+command+" "+parameter);
+    void send(
+        network_connection &the_network_connection,
+        const utf8string command, 
+        const utf8string parameter
+    ) {
+        //write_line("Client: "+command+" "+parameter);
 
-    {
+        {
+            the_network_connection << command;
+            the_network_connection << " ";
+            the_network_connection << parameter;
+            the_network_connection << "\r\n";
+        }
+    }
+
+    void send(
+        network_connection &the_network_connection,
+        const utf8string command
+    ) {
+        //write_line("Client: "+command);    
+
         the_network_connection << command;
-        the_network_connection << " ";
-        the_network_connection << parameter;
         the_network_connection << "\r\n";
     }
+
+    void send(
+        network_connection &the_network_connection,
+        const utf8string command, 
+        const size_t parameter
+    ) {    
+        std::stringstream i_stream;
+        i_stream << parameter;
+        utf8string value(i_stream.str());
+
+        send(the_network_connection, command, value);
+    }
+
+
+
+    void send_and_check_OK(
+        network_connection &the_network_connection,
+        const utf8string command, 
+        const utf8string parameter
+    ) {
+        send(the_network_connection, command, parameter);
+        check_OK(the_network_connection, command);
+    }
+
+    void send_and_check_OK(
+        network_connection &the_network_connection,
+        const utf8string command, 
+        const size_t parameter
+    ) {
+        send(the_network_connection, command, parameter);
+        check_OK(the_network_connection, command);    
+    }
+
+    void send_and_check_OK(
+        network_connection &the_network_connection,
+        const utf8string command
+    ) {
+        send(the_network_connection, command);
+        check_OK(the_network_connection, command);    
+    }
+
 }
-
-void send(
-    network_connection &the_network_connection,
-    const utf8string command
-) {
-    //write_line("Client: "+command);    
-
-    the_network_connection << command;
-    the_network_connection << "\r\n";
-}
-
-void send(
-    network_connection &the_network_connection,
-    const utf8string command, 
-    const size_t parameter
-) {    
-    std::stringstream i_stream;
-    i_stream << parameter;
-    utf8string value(i_stream.str());
-
-    send(the_network_connection, command, value);
-}
-
-
-
-void send_and_check_OK(
-    network_connection &the_network_connection,
-    const utf8string command, 
-    const utf8string parameter
-) {
-    send(the_network_connection, command, parameter);
-    check_OK(the_network_connection, command);
-}
-
-void send_and_check_OK(
-    network_connection &the_network_connection,
-    const utf8string command, 
-    const size_t parameter
-) {
-    send(the_network_connection, command, parameter);
-    check_OK(the_network_connection, command);    
-}
-
-void send_and_check_OK(
-    network_connection &the_network_connection,
-    const utf8string command
-) {
-    send(the_network_connection, command);
-    check_OK(the_network_connection, command);    
-}
-
-
 
 void pop3::iterate_mailbox(
     const host &host,
