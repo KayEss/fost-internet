@@ -2,7 +2,7 @@
     Copyright 2009, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
-    http://www.boost.org/LICENSE_1_0.txt
+        http://www.boost.org/LICENSE_1_0.txt
 */
 
 #include "fost-inet.hpp"
@@ -35,19 +35,19 @@ mime::mime_headers read_headers(
         ! line.empty()
     ) {
         utf8string header(line);
-        
+
         line = "";
         the_network_connection >> line;
-        
+
         while (
            (line.substr(0,1) == " ") ||
-           (line.substr(0,1) == "\t")            
+           (line.substr(0,1) == "\t")
         ) {
             header += line;
             line = "";
             the_network_connection >> line;
         }
-                        
+
         m_headers.parse(coerce< string >(header));
     };
     return m_headers;
@@ -56,7 +56,7 @@ mime::mime_headers read_headers(
 std::auto_ptr<text_body> read_body(
     const mime::mime_headers &m_headers,
     network_connection &the_network_connection
-) {   
+) {
     utf8string m_content;
     utf8string line;
     the_network_connection >> line;
@@ -65,11 +65,11 @@ std::auto_ptr<text_body> read_body(
         true
     ) {
         if (
-            (line.length() > 0) && 
+            (line.length() > 0) &&
             (line[0] == '.')
         ) {
             if (
-                (line.length() > 1) && 
+                (line.length() > 1) &&
                 (line[1] == '.')
             ) {
                 line = line.substr(1);
@@ -83,12 +83,12 @@ std::auto_ptr<text_body> read_body(
         }
 
         line = "";
-        the_network_connection >> line;        
+        the_network_connection >> line;
     };
-    
+
     const utf8string const_content(m_content);
-    
-    std::auto_ptr<text_body> result( 
+
+    std::auto_ptr<text_body> result(
         new text_body(
             const_content,
             m_headers,
@@ -100,7 +100,7 @@ std::auto_ptr<text_body> read_body(
 
 message::message(
     network_connection &the_network_connection
-) 
+)
 : m_headers(
     read_headers(
         the_network_connection
@@ -120,7 +120,7 @@ const {
 namespace {
     void check_OK(
         network_connection &the_network_connection,
-        string command
+        utf8string command
     ) {
         utf8string server_response;
         the_network_connection >> server_response;
@@ -129,15 +129,15 @@ namespace {
 
         if (server_response.substr(0,3) != "+OK") {
             throw exceptions::not_implemented(
-                command,
-                server_response
+                coerce< string >(command),
+                coerce< string >(server_response)
             );
-        };    
+        };
     }
 
     void send(
         network_connection &the_network_connection,
-        const utf8string command, 
+        const utf8string command,
         const utf8string parameter
     ) {
         //write_line("Client: "+command+" "+parameter);
@@ -154,7 +154,7 @@ namespace {
         network_connection &the_network_connection,
         const utf8string command
     ) {
-        //write_line("Client: "+command);    
+        //write_line("Client: "+command);
 
         the_network_connection << command;
         the_network_connection << "\r\n";
@@ -162,9 +162,9 @@ namespace {
 
     void send(
         network_connection &the_network_connection,
-        const utf8string command, 
+        const utf8string command,
         const size_t parameter
-    ) {    
+    ) {
         std::stringstream i_stream;
         i_stream << parameter;
         utf8string value(i_stream.str());
@@ -176,7 +176,7 @@ namespace {
 
     void send_and_check_OK(
         network_connection &the_network_connection,
-        const utf8string command, 
+        const utf8string command,
         const utf8string parameter
     ) {
         send(the_network_connection, command, parameter);
@@ -185,11 +185,11 @@ namespace {
 
     void send_and_check_OK(
         network_connection &the_network_connection,
-        const utf8string command, 
+        const utf8string command,
         const size_t parameter
     ) {
         send(the_network_connection, command, parameter);
-        check_OK(the_network_connection, command);    
+        check_OK(the_network_connection, command);
     }
 
     void send_and_check_OK(
@@ -197,37 +197,37 @@ namespace {
         const utf8string command
     ) {
         send(the_network_connection, command);
-        check_OK(the_network_connection, command);    
+        check_OK(the_network_connection, command);
     }
 
 }
 
-void pop3::iterate_mailbox(
+void fostlib::pop3::iterate_mailbox(
     const host &host,
     boost::function<bool (const message &)> destroy_message,
     const utf8string &username,
     const utf8string &password
 ) {
     network_connection the_network_connection( host, 110 );
-    
-    utf8string server_status;    
+
+    utf8string server_status;
     the_network_connection >> server_status;
-    
+
     send_and_check_OK(the_network_connection, "user", username);
     send_and_check_OK(the_network_connection, "pass", password);
 
     send(the_network_connection, "stat");
-    
+
     utf8string server_response;
     the_network_connection >> server_response;
     //write_line("SERVER: "+server_response);
-    
+
     std::stringstream server_response_stringstream(server_response.substr(3));
     size_t message_count;
     server_response_stringstream >> message_count;
     size_t octets;
     server_response_stringstream >> octets;
-    
+
     //write_line("messages: "+message_count);
     for (
         size_t i = 1;
@@ -241,10 +241,10 @@ void pop3::iterate_mailbox(
         );
 
         if (
-            destroy_message(message) 
+            destroy_message(message)
         ) {
             send_and_check_OK(the_network_connection, "dele", i);
-        }        
+        }
     }
     send_and_check_OK(the_network_connection, "quit");
 }

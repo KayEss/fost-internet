@@ -20,7 +20,7 @@
 namespace fostlib {
 
     namespace pop3 {
-        
+
         class FOST_INET_DECLSPEC message {
             mime::mime_headers m_headers;
             std::auto_ptr<text_body> m_text_body;
@@ -28,18 +28,18 @@ namespace fostlib {
             message(
                 network_connection &the_network_connection
             );
-            
+
             bool bounced() const;
         };
-        
-        void iterate_mailbox(
+
+        FOST_INET_DECLSPEC void iterate_mailbox(
             const host &host,
             boost::function<bool (const message &)> destroy_message,
             const utf8string &username,
             const utf8string &password
         );
     }
-    
+
 }
 
 
