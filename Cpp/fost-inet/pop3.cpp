@@ -57,7 +57,7 @@ std::auto_ptr<text_body> read_body(
     const mime::mime_headers &m_headers,
     network_connection &the_network_connection
 ) {
-    string m_content;
+    string content;
     utf8string line;
     the_network_connection >> line;
 
@@ -79,18 +79,16 @@ std::auto_ptr<text_body> read_body(
             }
         }
         else {
-            m_content += line+"\n";
+            content += coerce<string>(line)+L"\n";
         }
 
         line = "";
         the_network_connection >> line;
     };
 
-    const string const_content(m_content);
-
     std::auto_ptr<text_body> result(
         new text_body(
-            const_content,
+            content,
             m_headers,
             "text/plain"
         )
@@ -138,26 +136,18 @@ namespace {
     void send(
         network_connection &the_network_connection,
         const string command,
-        const string parameter
+        const nullable< string > parameter = null
     ) {
         //write_line("Client: "+command+" "+parameter);
 
         {
             the_network_connection << coerce< utf8string >(command);
-            the_network_connection << " ";
-            the_network_connection << coerce< utf8string >(parameter);
+            if ( ! parameter.isnull() ) {
+                the_network_connection << " ";
+                the_network_connection << coerce< utf8string >(parameter);
+            }
             the_network_connection << "\r\n";
         }
-    }
-
-    void send(
-        network_connection &the_network_connection,
-        const string command
-    ) {
-        //write_line("Client: "+command);
-
-        the_network_connection << coerce< utf8string >(command);
-        the_network_connection << "\r\n";
     }
 
     void send(
@@ -167,7 +157,7 @@ namespace {
     ) {
         std::stringstream i_stream;
         i_stream << parameter;
-        string value(i_stream.str());
+        string value(coerce<string>(i_stream.str()));
 
         send(the_network_connection, command, value);
     }
