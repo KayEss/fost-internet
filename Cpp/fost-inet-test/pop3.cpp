@@ -34,14 +34,10 @@ FSL_TEST_FUNCTION( download_messages ) {
     iterate_mailbox(
         host,
         &message::bounced,
-        coerce<utf8string>(
-            c_username.value()
-        ),
-        coerce<utf8string>(
-            setting<string>::value(
-                L"POP3 client test",
-                L"Password"
-            )
+        c_username.value(),
+        setting<string>::value(
+            L"POP3 client test",
+            L"Password"
         )
     );
 }
