@@ -37,9 +37,9 @@ std::auto_ptr< http::server::request > fostlib::http::server::operator() () {
 
 
 fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::socket > socket )
-: m_cnx( socket ) {
+: m_cnx( new network_connection(socket) ) {
     utf8string first_line;
-    m_cnx >> first_line;
+    (*m_cnx) >> first_line;
     if ( !boost::spirit::parse(first_line.c_str(),
         (
             boost::spirit::strlit< wliteral >(L"GET")
@@ -59,7 +59,7 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
     mime::mime_headers headers;
     while ( true ) {
         utf8string line;
-        m_cnx >> line;
+        (*m_cnx) >> line;
         if ( line.empty() )
             break;
         headers.parse(coerce< string >(line));
@@ -69,6 +69,11 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
         m_mime.reset( new empty_mime(headers) );
     else
         throw exceptions::not_implemented(L"HTTP method " + method(), coerce< string >(first_line));
+}
+fostlib::http::server::request::request(
+    const string &method, const url::filepath_string &filespec,
+    std::auto_ptr< mime > headers_and_body
+) : m_method( method ), m_pathspec( filespec ), m_mime( headers_and_body.release() ) {
 }
 
 
@@ -80,9 +85,11 @@ const mime &fostlib::http::server::request::data() const {
 
 
 void fostlib::http::server::request::operator() ( const mime &response ) {
+    if ( !m_cnx.get() )
+        throw exceptions::null("This is a mock server request. It cannot send a response to any client");
     std::stringstream buffer;
     buffer << "HTTP/1.0 200 OK\r\n" << response.headers() << "\r\n";
-    m_cnx << buffer;
+    (*m_cnx) << buffer;
     for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
-        m_cnx << *i;
+        (*m_cnx) << *i;
 }

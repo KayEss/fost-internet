@@ -30,6 +30,11 @@ FSL_TEST_FUNCTION( headers ) {
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"Another value" );
 }
 
+FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
+    mime::mime_headers headers;
+    // from an Exchange bounced message:
+    headers.parse( L"X-MS-TNEF-Correlator: \r\n" );
+}
 
 FSL_TEST_FUNCTION( empty_mime ) {
     empty_mime empty;
@@ -41,6 +46,7 @@ Content-Type: application/x-empty\r\n\
 \r\n\
 " );
 }
+
 FSL_TEST_FUNCTION( empty_mime_with_headers ) {
     empty_mime empty;
     empty.headers().set("Host", fostlib::string("localhost"));

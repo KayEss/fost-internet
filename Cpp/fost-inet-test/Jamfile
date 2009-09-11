@@ -1,12 +1,16 @@
 
 fost-smoke-test fost-inet-test-smoke
     :
+        ../../../fost-base/Cpp/fost-core/
+        ../../../fost-base/Cpp/fost-test/
         ../fost-inet/
     :
         authentication.cpp
         host.cpp
+        http.cpp
         mime.cpp
         smtp.cpp
         url.cpp
         user_agent.cpp
+        pop3.cpp
     ;

@@ -30,9 +30,6 @@ void fostlib::headers_base::parse( const string &headers ) {
     for ( std::pair< string, fostlib::nullable< string > > lines( partition( headers, L"\r\n" ) ); !lines.first.empty(); lines = partition( lines.second, L"\r\n" ) ) {
         std::pair< string, fostlib::nullable< string > > line( partition( lines.first, L": " ) );
         if ( line.second.isnull() ) {
-            fostlib::exceptions::parse_error exc( L"Header has no value" );
-            exc.info() << line.first << std::endl;
-            throw exc;
         } else
             m_headers.insert( value( line.first, line.second.value() ) );
     }

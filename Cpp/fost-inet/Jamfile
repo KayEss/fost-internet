@@ -10,6 +10,7 @@ fost-lib fost-inet
         http.server.cpp
         http.useragent.cpp
         mime.cpp
+        pop3.cpp
         smtp.cpp
         url.cpp
     ;

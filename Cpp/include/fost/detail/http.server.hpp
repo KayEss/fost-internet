@@ -27,15 +27,24 @@ namespace fostlib {
                 friend class fostlib::http::server;
                 request( std::auto_ptr< boost::asio::ip::tcp::socket > connection );
 
-                network_connection m_cnx;
+                boost::scoped_ptr< network_connection > m_cnx;
                 string m_method; url::filepath_string m_pathspec;
                 boost::scoped_ptr< mime > m_mime;
 
                 public:
+                    // This constructor is useful for mocking the request for code tha interacts with a server
+                    request(
+                        const string &method, const url::filepath_string &filespec,
+                        std::auto_ptr< mime > headers_and_body
+                    );
+
+                    // Accessors for the request data
                     const string &method() const { return m_method; }
                     const url::filepath_string &file_spec() const { return m_pathspec; }
                     const mime &data() const;
 
+                    // Used to pass the response back to the user agent.
+                    // This will throw on a mocked connection
                     void operator() ( const mime &response );
             };
 
