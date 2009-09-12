@@ -16,5 +16,6 @@ alias examples
         Examples/fget/
         Examples/s3put/
         Examples/webserver-simple/
+        Examples/webserver-threaded/
     ;
 explicit examples ;
