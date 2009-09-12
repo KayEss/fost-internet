@@ -13,8 +13,8 @@ build-project Cpp/fost-inet-test ;
 alias examples
     :
         Examples/host/
-        Examples/http/
-        Examples/s3/
-        Examples/webserver/
+        Examples/fget/
+        Examples/s3put/
+        Examples/webserver-simple/
     ;
 explicit examples ;
