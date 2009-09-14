@@ -118,6 +118,14 @@ void fostlib::smtp_client::send(const mime &email, const rfc822_address &to, con
     m_impl->check(250, L"RCPT TO");
     m_impl->cnx << "DATA\r\n";
     m_impl->check(354, L"DATA");
+    for ( mime::mime_headers::const_iterator h( email.headers().begin() ); h != email.headers().end(); ++h ) {
+        std::stringstream ss;
+        ss << h->first << ": " << h->second << "\r\n";
+        if ( ss.str().length() > 82 )
+            throw exceptions::not_implemented("Header is too wide for SMTP. Folding not implemented", coerce< string >( ss.str() ));
+        m_impl->cnx << ss;
+    }
+    m_impl->cnx << "\r\n";
     for ( mime::const_iterator d( email.begin() ); d != email.end(); ++d )
         m_impl->cnx << *d;
     m_impl->cnx << "\r\n.\r\n";
