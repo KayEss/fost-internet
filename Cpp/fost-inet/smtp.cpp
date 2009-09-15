@@ -45,9 +45,17 @@ void fostlib::rfc822_address_tag::check_encoded( const ascii_string &s ) {
 fostlib::email_address::email_address() {
 }
 
-fostlib::email_address::email_address( const rfc822_address &e, const nullable<string> &n )
-: email( e ), name( n ) {
+fostlib::email_address::email_address( const rfc822_address &address, const nullable<string> &name )
+: email( address ), name( name ) {
 }
+
+fostlib::email_address::email_address
+(
+    const ascii_string &address,
+    const nullable< string > &name
+) : email(rfc822_address(address)), 
+    name(name) {
+};
 
 
 string fostlib::coercer< string, email_address >::coerce( const email_address &e ) {
@@ -59,11 +67,11 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
 email_address fostlib::coercer< email_address, string >::coerce( const string &s ) {
     string name, address;
     if ( !boost::spirit::parse(s.c_str(),
-        (+boost::spirit::chset< wchar_t >( L"a-zA-Z@\\.\\+-" ))[
+        (+boost::spirit::chset< wchar_t >( L"a-zA-Z0-9_@\\.\\+-" ))[
             phoenix::var( address ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
         ]
     ).full )
-        throw exceptions::not_implemented("fostlib::coercer< email_address, string >::coerce( const string &s ) -- could not parse");
+        throw exceptions::not_implemented("fostlib::coercer< email_address, string >::coerce( const string &s ) -- could not parse", s);
     if ( name.empty() )
         return rfc822_address( fostlib::coerce< ascii_string >( address ) );
     else

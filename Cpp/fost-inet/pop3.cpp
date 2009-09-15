@@ -112,7 +112,10 @@ message::message(
 
 bool message::bounced()
 const {
-    return m_text_body->text().find("does not exist") != string::npos;
+    return 
+        m_headers["Content-Type"].subvalue("report-type") == "delivery-status"
+        && m_text_body->text().find("does not exist") != string::npos
+    ;        
 };
 
 namespace {

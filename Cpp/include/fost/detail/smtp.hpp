@@ -32,7 +32,11 @@ namespace fostlib {
         fostlib::accessors< nullable< string > > name;
 
         email_address();
-        email_address( const rfc822_address &email, const nullable< string > &name = null );
+        email_address( const rfc822_address &address, const nullable< string > &name = null );
+        email_address(
+            const ascii_string &address,
+            const nullable< string > &name = null
+        );
     };
 
 
