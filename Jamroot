@@ -3,7 +3,7 @@ include $(TOP)/../boost-version.jam ;
 
 use-project fost-base : ../fost-base/ ;
 include ../fost-base/fost.jam ;
-fost-project fost-internet : <include>../appservicesdk/Cpp/include ;
+fost-project fost-internet ;
 
 build-project Cpp/fost-aws ;
 build-project Cpp/fost-aws-test ;

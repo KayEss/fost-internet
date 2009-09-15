@@ -7,7 +7,7 @@
 
 #include "fost-inet-test.hpp"
 #include <fost/detail/pop3.hpp>
-#include <appservices/email>
+
 
 using namespace fostlib::pop3;
 using namespace fostlib;
@@ -40,7 +40,7 @@ FSL_TEST_FUNCTION( download_messages ) {
             L"Password"
         )
     );
-    
+
     /*
     // send an email to an invalid address for the next test run to remove
     using namespace appservices;
@@ -54,7 +54,7 @@ FSL_TEST_FUNCTION( download_messages ) {
             L"Api secret"
         )
     );
-    
+
     appservices::send_email(
         email_address(
             coerce<ascii_string>(
@@ -68,20 +68,21 @@ FSL_TEST_FUNCTION( download_messages ) {
         email_address(
             coerce<ascii_string>(
                 string("cocoade@googlemail.com")
-            ), 
+            ),
             string("test")
         ),
         "This message should not arrive here",
-        
+
         "Please remove this inbox or change the test in "
         "fost-internet/Cpp/fost-inet-test/pop3.cpp",
         credentials
     );*/
-    
+
     smtp_client server( host );
-    
+
     text_body mail( L"This message should not arrive here" );
-    mail.headers().set(L"Subject", L"Test email");
-    server.send(mail, "appservices@felspar.net", "pop3test@felspar.com");
-    
+    mail.headers().set(L"Subject", L"Test email -- send directly via SMTP");
+    server.send(mail, "pop3test@felspar.com", "appservices@felspar.com");
+    mail.headers().set(L"Subject", L"Test email -- sent to invalid address");
+    server.send(mail, "not-valid@felspar.com", "pop3test@felspar.com");
 }

@@ -4,7 +4,6 @@ fost-smoke-test fost-inet-test-smoke
         ../../../fost-base/Cpp/fost-core/
         ../../../fost-base/Cpp/fost-test/
         ../fost-inet/
-        ../../../appservicesdk/Cpp/appservices
     :
         authentication.cpp
         host.cpp
