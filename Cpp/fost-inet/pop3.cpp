@@ -112,10 +112,25 @@ message::message(
 
 bool message::bounced()
 const {
-    return 
+/*
+    nullable<string> report_type(m_headers["Content-Type"].subvalue("report-type"));
+
+    if ( ! report_type.isnull() ) {
+        std::cout << report_type.value() << "\n";
+    }
+    else {
+        std::cout << "(Empty Content-Type)\n";
+    }
+*/
+
+    bool bounced = 
         m_headers["Content-Type"].subvalue("report-type") == "delivery-status"
-        && m_text_body->text().find("does not exist") != string::npos
-    ;        
+        && m_text_body->text().find("Status: 5") != string::npos
+    ;     
+
+    //std::cout << bounced;
+    
+    return bounced; 
 };
 
 namespace {
