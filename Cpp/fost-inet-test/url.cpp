@@ -114,6 +114,10 @@ FSL_TEST_FUNCTION( path_spec ) {
     FSL_CHECK_EQ( coerce< url::filepath_string >( boost::filesystem::wpath(L"test") ), url::filepath_string("test") );
 }
 
+FSL_TEST_FUNCTION( path_spec_encoding ) {
+    FSL_CHECK_EQ( url::filepath_string(ascii_string("invalid@felspar.com"), url::filepath_string::unencoded).underlying(), "invalid%40felspar.com" );
+}
+
 
 FSL_TEST_FUNCTION( parse ) {
     FSL_CHECK_NOTHROW(

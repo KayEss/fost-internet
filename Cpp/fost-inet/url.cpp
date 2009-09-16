@@ -112,7 +112,14 @@ void fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii
 
 
 void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, ascii_string &into ) {
-    throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, ascii_string &into )" );
+    into.clear();
+    std::size_t length = from.underlying().length();
+    into.reserve( length + length / 2);
+    for ( ascii_string::const_iterator i(from.begin()); i != from.end(); ++i )
+        if ( g_url_allowed.find( *i ) == utf8string::npos )
+            into += hex< ascii_string >(*i);
+        else
+            into += *i;
 }
 
 
