@@ -133,9 +133,22 @@ namespace fostlib {
         struct text_body_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
-            text_body( const utf8 *begin, const utf8 *end, const mime_headers &headers = mime_headers(), const string &mime = "text/plain" );
-            text_body( const utf8string &text, const mime_headers &headers = mime_headers(), const string &mime = "text/plain" );
-            text_body( const string &text, const mime_headers &headers = mime_headers(), const string &mime = L"text/plain" );
+            text_body(
+                const utf8 *begin,
+                const utf8 *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "text/plain"
+            );
+            text_body( 
+                const utf8string &text, 
+                const mime_headers &headers = mime_headers(), 
+                const string &mime = "text/plain"
+            );
+            text_body( 
+                const string &text,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = L"text/plain"
+            );
 
             std::ostream &print_on( std::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;

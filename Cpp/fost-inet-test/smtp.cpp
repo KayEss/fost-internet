@@ -24,7 +24,7 @@ FSL_TEST_FUNCTION( basic ) {
 
 FSL_TEST_FUNCTION( to_string ) {
     email_address addy(rfc822_address("address@example.com"));
-    FSL_CHECK_EQ(coerce< string >(addy), "address@example.com");
+    FSL_CHECK_EQ(coerce< string >(addy), "<address@example.com>");
     addy.name(L"Mr. Address");
     FSL_CHECK_EQ(coerce< string >(addy), "Mr. Address <address@example.com>");
     FSL_CHECK_EQ(coerce< utf8string >(addy), "Mr. Address <address@example.com>");
@@ -39,4 +39,13 @@ FSL_TEST_FUNCTION( from_string_plain ) {
     PARSE_PLAIN("address+whatever@example.com");
     PARSE_PLAIN("address.whatever@example.com");
     FSL_CHECK_EXCEPTION(PARSE_PLAIN("<address-whatever@example.com>"), exceptions::not_implemented&);
+}
+
+
+FSL_TEST_FUNCTION( smtp_send ) {
+    smtp_client server( host("localhost") );
+
+    text_body mail( L"This is just a simple test email\n\nIgnore/delete it\n" );
+    mail.headers().set(L"Subject", L"Test email");
+    server.send(mail, "kirit@felspar.com", "pop3test@felspar.com");
 }

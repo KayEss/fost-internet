@@ -11,7 +11,7 @@ fost-exe s3put
 
 run s3put
     :
-        Examples/s3/s3put.cpp
+        Examples/s3put/s3put.cpp
         testfost
         s3put.cpp
     :

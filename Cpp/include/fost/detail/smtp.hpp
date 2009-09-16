@@ -13,6 +13,8 @@
 
 #include <fost/string>
 #include <set>
+#include <fost/detail/host.hpp>
+#include <fost/detail/mime.hpp>
 
 
 namespace fostlib {
@@ -30,7 +32,11 @@ namespace fostlib {
         fostlib::accessors< nullable< string > > name;
 
         email_address();
-        email_address( const rfc822_address &email, const nullable< string > &name = null );
+        email_address( const rfc822_address &address, const nullable< string > &name = null );
+        email_address(
+            const ascii_string &address,
+            const nullable< string > &name = null
+        );
     };
 
 
@@ -48,6 +54,17 @@ namespace fostlib {
         utf8string coerce( const email_address &e ) {
             return fostlib::coerce< utf8string >( fostlib::coerce< string >( e ) );
         }
+    };
+
+
+    class FOST_INET_DECLSPEC smtp_client : boost::noncopyable {
+        struct implementation;
+        implementation *m_impl;
+        public:
+            smtp_client( const host &server );
+            ~smtp_client();
+
+            void send( const mime &email, const rfc822_address &to, const rfc822_address &from );
     };
 
 
