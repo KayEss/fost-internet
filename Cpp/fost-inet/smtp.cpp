@@ -53,14 +53,14 @@ fostlib::email_address::email_address
 (
     const ascii_string &address,
     const nullable< string > &name
-) : email(rfc822_address(address)), 
+) : email(rfc822_address(address)),
     name(name) {
 };
 
 
 string fostlib::coercer< string, email_address >::coerce( const email_address &e ) {
     if ( e.name().isnull() )
-        return fostlib::coerce< string >( e.email().underlying() );
+        return L"<" + fostlib::coerce< string >( e.email().underlying() ) + ">";
     else
         return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
 }
