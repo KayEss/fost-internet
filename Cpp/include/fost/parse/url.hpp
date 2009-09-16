@@ -127,17 +127,11 @@ namespace fostlib {
         template< typename scanner_t >
         struct definition {
             definition( url_filespec_parser const &self ) {
-                top = string[ self.filespec = phoenix::arg1 ];
-                string = (
-                    +boost::spirit::chset<>( L"a-zA-Z0-9/.,:()%-" )[
-                        parsers::push_back( string.buffer, phoenix::arg1 )
-                    ]
-                )[
-                    string.text = parsers::coerce< ascii_string >()( string.buffer )
-                ];
+                top = (
+                    +boost::spirit::chset<>( "a-zA-Z0-9/.,:()%-" )
+                )[ self.filespec = phoenix::construct_<ascii_string>(phoenix::arg1, phoenix::arg2) ];
             }
             boost::spirit::rule< scanner_t > top;
-            boost::spirit::rule< scanner_t, ascii_string_builder_closure::context_t > string;
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
