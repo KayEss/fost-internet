@@ -101,9 +101,9 @@ FSL_TEST_FUNCTION( url_parser_hostpart ) {
     FSL_CHECK_EQ( s, ascii_string( s_ ) )
 FSL_TEST_FUNCTION( url_parser_filespec ) {
     ascii_string s;
-    URL_PARSE_FILESPEC( L"/", "/" );
-    URL_PARSE_FILESPEC( L"/file.html", "/file.html" );
-    URL_PARSE_FILESPEC( L"/Site:/file.html", "/Site:/file.html" );
+    URL_PARSE_FILESPEC( "/", "/" );
+    URL_PARSE_FILESPEC( "/file.html", "/file.html" );
+    URL_PARSE_FILESPEC( "/Site:/file.html", "/Site:/file.html" );
 }
 
 FSL_TEST_FUNCTION( path_spec ) {

@@ -7,8 +7,8 @@
 
 
 #include "fost-inet.hpp"
+#include <fost/threading>
 #include <fost/detail/http.server.hpp>
-#include <fost/thread.hpp>
 #include <fost/parse/url.hpp>
 
 
@@ -24,10 +24,31 @@ fostlib::http::server::server( const host &h, uint16_t p )
 : binding( h ), port( p ), m_server( m_service, boost::asio::ip::tcp::endpoint( binding().address(), port() ) ) {
 }
 
-std::auto_ptr< http::server::request > fostlib::http::server::operator() () {
+std::auto_ptr< http::server::request > fostlib::http::server::operator () () {
     std::auto_ptr< boost::asio::ip::tcp::socket > sock( new boost::asio::ip::tcp::socket( m_service ) );
     m_server.accept( *sock );
     return std::auto_ptr< http::server::request >( new http::server::request( sock ) );
+}
+
+namespace {
+    bool service(
+        boost::function< bool ( http::server::request & ) > service_lambda,
+        boost::asio::ip::tcp::socket *sockp
+    ) {
+        std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
+        http::server::request req(sock);
+        return service_lambda(req);
+    }
+}
+void fostlib::http::server::operator () ( boost::function< bool ( http::server::request & ) > service_lambda ) {
+    // Create a worker pool to service the requests
+    workerpool pool;
+    while ( true ) {
+        // Use a raw pointer here for minimum overhead -- if it all goes wrong and a socket leaks, we don't care (for now)
+        boost::asio::ip::tcp::socket *sock( new boost::asio::ip::tcp::socket( m_service ) );
+        m_server.accept( *sock );
+        pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
+    }
 }
 
 
@@ -42,15 +63,17 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
     (*m_cnx) >> first_line;
     if ( !boost::spirit::parse(first_line.c_str(),
         (
-            boost::spirit::strlit< wliteral >(L"GET")
+            boost::spirit::strlit< nliteral >("GET")
         )[ phoenix::var(m_method) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-        >> boost::spirit::chlit< wchar_t >( ' ' )
-        >> url_filespec_p[ phoenix::var(m_pathspec) = phoenix::construct_< url::filepath_string >( phoenix::arg1 ) ]
+        >> boost::spirit::chlit< char >( ' ' )
+        >> (
+            +boost::spirit::chset<>( "a-zA-Z0-9/.,:()%-" )
+        )[ phoenix::var(m_pathspec) = phoenix::construct_< url::filepath_string >( phoenix::arg1, phoenix::arg2 ) ]
         >> !(
-            boost::spirit::chlit< wchar_t >( ' ' )
+            boost::spirit::chlit< char >( ' ' )
             >> (
-                boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
-                boost::spirit::strlit< wliteral >(L"HTTP/1.1")
+                boost::spirit::strlit< nliteral >("HTTP/1.0") |
+                boost::spirit::strlit< nliteral >("HTTP/1.1")
             )
         )
     ).full )
