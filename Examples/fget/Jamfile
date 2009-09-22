@@ -9,10 +9,11 @@ fost-exe fget
 
 run fget
     :
+        http://www.google.com/
     :
     :
     :
-        fget-localhost
+        fget-google
     ;
 
 run fget

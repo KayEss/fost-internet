@@ -20,7 +20,8 @@ namespace {
     setting< int > c_port( L"http-threaded", L"Server", L"Port", 8001 );
 
     bool service( http::server::request &req ) {
-        req( text_body( L"<html><body>This <b>is</b> a response</body></html>", mime::mime_headers(), L"text/html" ) );
+        text_body response( L"<html><body>This <b>is</b> a response</body></html>", mime::mime_headers(), L"text/html" );
+        req( response );
         return true;
     }
 }
