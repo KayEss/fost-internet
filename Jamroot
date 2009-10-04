@@ -10,11 +10,11 @@ alias fost
         Cpp/fost-inet
     ;
 
-alias test
+alias tests
     :
         Cpp/fost-inet-test
     ;
-explicit test ;
+explicit tests ;
 
 alias aws
     :
