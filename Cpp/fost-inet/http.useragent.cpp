@@ -56,7 +56,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     {
         nullable< ascii_string > q = req.address().query().as_string();
         if ( !q.isnull() )
-            buffer << "?" << q.value();
+            buffer << "?" << q.value().underlying();
     }
     buffer << " HTTP/1.0\r\n" << req.headers() << "\r\n";
     *cnx << buffer;
