@@ -23,7 +23,7 @@ else {
 }
 fi
 
-if ../bjam -j$CPUCOUNT toolset=$TOOLSET $VARIANTS
+if ../bjam -j$CPUCOUNT toolset=$TOOLSET $VARIANTS `../python.opts.sh`
 then {
     echo fost-internet OK
     exit 0
