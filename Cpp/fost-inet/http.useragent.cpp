@@ -52,7 +52,13 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
         cnx->start_ssl();
 
     std::stringstream buffer;
-    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying() << " HTTP/1.0\r\n" << req.headers() << "\r\n";
+    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying();
+    {
+        nullable< ascii_string > q = req.address().query().as_string();
+        if ( !q.isnull() )
+            buffer << "?" << q.value().underlying();
+    }
+    buffer << " HTTP/1.0\r\n" << req.headers() << "\r\n";
     *cnx << buffer;
 
     for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i )
