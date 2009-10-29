@@ -189,11 +189,8 @@ void fostlib::pop3::iterate_mailbox(
             the_network_connection
         );
 
-        if (
-            destroy_message(*message)
-        ) {
+        if (destroy_message(*message))
             send_and_check_OK(the_network_connection, "dele", i);
-        }
     }
     send_and_check_OK(the_network_connection, "quit");
 }
