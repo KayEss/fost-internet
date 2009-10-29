@@ -19,29 +19,27 @@
 
 namespace fostlib {
 
+
     namespace pop3 {
 
-        class FOST_INET_DECLSPEC message {
-            mime::mime_headers m_headers;
-            std::auto_ptr<text_body> m_text_body;
-        public:
-            message(
-                network_connection &the_network_connection
-            );
 
-            bool bounced() const;
-        };
-
+        /// Iterates through all of the emails in a POP3 mailbox
         FOST_INET_DECLSPEC void iterate_mailbox(
             const host &host,
-            boost::function<bool (const message &)> destroy_message,
+            boost::function<bool (const text_body &)> destroy_message,
             const string &username,
             const string &password
         );
+
+
+        /// Returns true if the email message is a bounce delivery report (NDR)
+        FOST_INET_DECLSPEC bool email_is_an_ndr( const text_body & );
+
+
     }
+
 
 }
 
 
 #endif // FOST_DETAIL_POP3_HPP
-
