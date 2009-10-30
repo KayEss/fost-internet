@@ -9,131 +9,79 @@
 #include <fost/detail/pop3.hpp>
 
 
-#include <iostream>
-
-using namespace fostlib::pop3;
 using namespace fostlib;
+using namespace fostlib::pop3;
+
 
 namespace {
-    void write_line(
-        string string
+
+    mime::mime_headers read_headers(
+        network_connection &the_network_connection
     ) {
-        std::cout << string;
-        std::cout << std::endl;
+        mime::mime_headers headers;
+
+        utf8string line;
+        the_network_connection >> line;
+
+        while ( !line.empty() ) {
+            utf8string header(line);
+
+            line = "";
+            the_network_connection >> line;
+
+            while (
+                (line.substr(0,1) == " ") ||
+                (line.substr(0,1) == "\t")
+            ) {
+                header += line;
+                line = "";
+                the_network_connection >> line;
+            }
+
+            headers.parse(coerce< string >(header));
+        }
+        return headers;
     }
-}
 
-mime::mime_headers read_headers(
-    network_connection &the_network_connection
-) {
-    mime::mime_headers m_headers;
-
-    utf8string line;
-    the_network_connection >> line;
-
-    while (
-        ! line.empty()
+    std::auto_ptr<text_body> read_body(
+        const mime::mime_headers &headers,
+        network_connection &the_network_connection
     ) {
-        utf8string header(line);
-
-        line = "";
+        string content;
+        utf8string line;
         the_network_connection >> line;
 
         while (
-           (line.substr(0,1) == " ") ||
-           (line.substr(0,1) == "\t")
+            true
         ) {
-            header += line;
+            if (
+                (line.length() > 0) &&
+                (line[0] == '.')
+            ) {
+                if (
+                    (line.length() > 1) &&
+                    (line[1] == '.')
+                ) {
+                    line = line.substr(1);
+                } else
+                    break;
+            } else
+                content += coerce<string>(line)+L"\n";
+
             line = "";
             the_network_connection >> line;
         }
 
-        m_headers.parse(coerce< string >(header));
-    };
-    return m_headers;
-};
-
-std::auto_ptr<text_body> read_body(
-    const mime::mime_headers &m_headers,
-    network_connection &the_network_connection
-) {
-    string content;
-    utf8string line;
-    the_network_connection >> line;
-
-    while (
-        true
-    ) {
-        if (
-            (line.length() > 0) &&
-            (line[0] == '.')
-        ) {
-            if (
-                (line.length() > 1) &&
-                (line[1] == '.')
-            ) {
-                line = line.substr(1);
-            }
-            else {
-                break;
-            }
-        }
-        else {
-            content += coerce<string>(line)+L"\n";
-        }
-
-        line = "";
-        the_network_connection >> line;
-    };
-
-    std::auto_ptr<text_body> result(
-        new text_body(
-            content,
-            m_headers,
-            "text/plain"
-        )
-    );
-    return result;
-};
-
-message::message(
-    network_connection &the_network_connection
-)
-: m_headers(
-    read_headers(
-        the_network_connection
-    )
-), m_text_body(
-    read_body(
-        m_headers,
-        the_network_connection
-    )
-) {}
-
-bool message::bounced()
-const {
-/*
-    nullable<string> report_type(m_headers["Content-Type"].subvalue("report-type"));
-
-    if ( ! report_type.isnull() ) {
-        std::cout << report_type.value() << "\n";
+        return std::auto_ptr<text_body>(
+            new text_body(
+                content,
+                headers,
+                "text/plain"
+            )
+        );
     }
-    else {
-        std::cout << "(Empty Content-Type)\n";
-    }
-*/
 
-    bool bounced = 
-        m_headers["Content-Type"].subvalue("report-type") == "delivery-status"
-        && m_text_body->text().find("Status: 5") != string::npos
-    ;     
 
-    //std::cout << bounced;
-    
-    return bounced; 
-};
-
-namespace {
     void check_OK(
         network_connection &the_network_connection,
         string command
@@ -141,14 +89,12 @@ namespace {
         utf8string server_response;
         the_network_connection >> server_response;
 
-        //write_line("Server: "+server_response);
-
         if (server_response.substr(0,3) != "+OK") {
             throw exceptions::not_implemented(
                 command,
                 coerce< string >(server_response)
             );
-        };
+        }
     }
 
     void send(
@@ -156,16 +102,12 @@ namespace {
         const string command,
         const nullable< string > parameter = null
     ) {
-        //write_line("Client: "+command+" "+parameter);
-
-        {
-            the_network_connection << coerce< utf8string >(command);
-            if ( ! parameter.isnull() ) {
-                the_network_connection << " ";
-                the_network_connection << coerce< utf8string >(parameter);
-            }
-            the_network_connection << "\r\n";
+        the_network_connection << coerce< utf8string >(command);
+        if ( !parameter.isnull() ) {
+            the_network_connection << " ";
+            the_network_connection << coerce< utf8string >(parameter);
         }
+        the_network_connection << "\r\n";
     }
 
     void send(
@@ -210,9 +152,10 @@ namespace {
 
 }
 
+
 void fostlib::pop3::iterate_mailbox(
     const host &host,
-    boost::function<bool (const message &)> destroy_message,
+    boost::function<bool (const text_body &)> destroy_message,
     const string &username,
     const string &password
 ) {
@@ -228,7 +171,6 @@ void fostlib::pop3::iterate_mailbox(
 
     utf8string server_response;
     the_network_connection >> server_response;
-    //write_line("SERVER: "+server_response);
 
     std::stringstream server_response_stringstream(server_response.substr(3));
     size_t message_count;
@@ -236,23 +178,32 @@ void fostlib::pop3::iterate_mailbox(
     size_t octets;
     server_response_stringstream >> octets;
 
-    //write_line("messages: "+message_count);
-    for (
-        size_t i = 1;
-        i <= message_count;
-        ++i
-    ) {
+    // Loop from the end so we always process the latest bounce messages first
+    for ( std::size_t i = message_count; i; --i ) {
         send_and_check_OK(the_network_connection, "retr", i);
-        string content;
-        message message(
+
+        std::auto_ptr< text_body > message = read_body(
+            read_headers(
+                the_network_connection
+            ),
             the_network_connection
         );
 
-        if (
-            destroy_message(message)
-        ) {
+        if (destroy_message(*message))
             send_and_check_OK(the_network_connection, "dele", i);
-        }
     }
     send_and_check_OK(the_network_connection, "quit");
+}
+
+
+bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
+    return
+        ( // Proper NDRs should have this Content-Type and contain a 500 response
+            email.headers()["Content-Type"].subvalue("report-type") == "delivery-status"
+            && email.text().find("Status: 5") != string::npos
+        ) || ( //  We can also check the subject line
+            email.headers().exists("Subject")
+            && email.headers()["Subject"].value().find("Undeliverable: ") == 0
+        )
+    ;
 }
