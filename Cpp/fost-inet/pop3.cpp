@@ -198,12 +198,9 @@ void fostlib::pop3::iterate_mailbox(
 
 bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
     return
-        ( // Proper NDRs should have this Content-Type and contain a 500 response
+        ( // Proper NDRs should have this Content-Type and contain a recording of a 500 response
             email.headers()["Content-Type"].subvalue("report-type") == "delivery-status"
             && email.text().find("Status: 5") != string::npos
-        ) || ( //  We can also check the subject line
-            email.headers().exists("Subject")
-            && email.headers()["Subject"].value().find("Undeliverable: ") == 0
         )
     ;
 }
