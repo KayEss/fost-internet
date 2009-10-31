@@ -198,9 +198,11 @@ std::auto_ptr< mime::iterator_implementation > fostlib::mime_envelope::iterator(
 
 namespace {
     void do_headers(text_body &tb, const utf8string &body, const string &mime_type) {
-        tb.headers().set(L"Content-Type", mime::mime_headers::content(mime_type).subvalue( L"charset", L"utf-8" ));
+        if ( !tb.headers().exists("Content-Type") )
+            tb.headers().set("Content-Type", mime::mime_headers::content(mime_type) );
+        tb.headers().set_subvalue("Content-Type", "charset", "utf-8");
         tb.headers().set(L"Content-Transfer-Encoding", L"8bit");
-        tb.headers().set(L"Content-Length", coerce< string >(body.length()));
+        tb.headers().set("Content-Length", coerce< string >(body.length()));
     }
 }
 fostlib::text_body::text_body(const utf8 *begin, const utf8 *end, const mime_headers &headers, const string &mime_type)

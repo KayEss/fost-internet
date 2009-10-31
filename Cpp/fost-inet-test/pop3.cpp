@@ -33,7 +33,7 @@ FSL_TEST_FUNCTION( download_messages ) {
 
     iterate_mailbox(
         host,
-        &message::bounced,
+        email_is_an_ndr,
         c_pop3_test_account.value(),
         setting<string>::value(
             L"POP3 client test",
@@ -84,8 +84,8 @@ FSL_TEST_FUNCTION( download_messages ) {
     text_body mail( L"This message shows that messages can be sent from appservices.felspar.com" );
     mail.headers().set(L"Subject", L"Test email -- send directly via SMTP");
     server.send(mail, "pop3test@felspar.com", "appservices@felspar.com");
-    
-    
+
+
     text_body should_be_bounced( L"This should be a bounced message. It shows that bounce messages are being received." );
     mail.headers().set(L"Subject", L"Test email -- sent to invalid address");
     server.send(should_be_bounced, "not-valid@felspar.com", "pop3test@felspar.com");

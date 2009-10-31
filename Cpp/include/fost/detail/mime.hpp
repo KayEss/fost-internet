@@ -31,6 +31,8 @@ namespace fostlib {
 
         bool exists( const string & ) const;
         content &set( const string &name, const content & );
+        /// Allow a specified sub-value on the specified header to be set
+        content &set_subvalue( const string &name, const string &k, const string &v );
         const content &operator [] ( const string & ) const;
 
         typedef std::map< string, content >::const_iterator const_iterator;
