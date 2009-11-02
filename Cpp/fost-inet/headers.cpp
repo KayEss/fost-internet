@@ -58,6 +58,9 @@ const headers_base::content &fostlib::headers_base::operator [] ( const fostlib:
 headers_base::content &fostlib::headers_base::set( const string &n, const content &v ) {
     return m_headers[n] = v;
 }
+headers_base::content &fostlib::headers_base::set_subvalue( const string &n, const string &k, const string &v ) {
+    return m_headers[n].subvalue(k, v);
+}
 
 fostlib::headers_base::const_iterator fostlib::headers_base::begin() const {
     return m_headers.begin();
