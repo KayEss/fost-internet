@@ -98,10 +98,13 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
         if ( !disp.second.isnull() ) {
             for ( std::pair< string, nullable< string > > para( partition( disp.second, L";" ) ); !para.first.empty(); para = partition( para.second, L";" ) ) {
                 // Normally the extra argument values should be surrounded by double quotes, but sometimes not
-                std::pair< string, nullable< string > > argument( crack( para.first, L"=\"", L"\"" ) );
-                if ( argument.second.isnull() )
-                    argument = partition( para.first, L"=" );
-
+                std::pair< string, nullable< string > > argument = partition( para.first, L"=" );
+                if ( !argument.second.isnull()
+                    && argument.second.value().at(0) == '"'
+                    && argument.second.value().at(argument.second.value().length()-1) == '"'
+                ) {
+                    argument.second = argument.second.value().substr(1, argument.second.value().length()-2);
+                }
                 if ( argument.second.isnull() )
                     throw exceptions::parse_error( L"Message header " + name + L" does not have a value for an argument", para.first );
                 args[ argument.first ] = argument.second.value();
