@@ -204,3 +204,14 @@ bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
         )
     ;
 }
+
+
+bool fostlib::pop3::email_is_out_of_office( const text_body &email ) {
+    string subject = email.headers()["Subject"].value();
+    return
+        (
+            subject.find("Out of Office: ") == 0
+            || subject.find("Out of Office AutoReply: ") == 0
+        )
+    ;
+}
