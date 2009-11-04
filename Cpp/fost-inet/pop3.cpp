@@ -8,6 +8,7 @@
 #include "fost-inet.hpp"
 #include <fost/detail/pop3.hpp>
 #include <fost/exception/out_of_range.hpp>
+#include <fost/exception/unicode_encoding.hpp>
 
 
 using namespace fostlib;
@@ -44,8 +45,7 @@ namespace {
         return headers;
     }
 
-    std::auto_ptr<text_body> read_body(
-        const mime::mime_headers &headers,
+    std::string read_body(
         network_connection &the_network_connection
     ) {
         std::string content;
@@ -73,13 +73,7 @@ namespace {
             the_network_connection >> line;
         }
 
-        return std::auto_ptr<text_body>(
-            new text_body(
-                coerce< string >( utf8_string(content) ),
-                headers,
-                "text/plain"
-            )
-        );
+        return content;
     }
 
 
@@ -185,7 +179,16 @@ namespace {
             }
             std::auto_ptr< text_body > message( size_t i ) {
                 send_and_check_OK(m_cnx, "retr", i);
-                return read_body(read_headers(m_cnx), m_cnx);
+                mime::mime_headers h = read_headers(m_cnx);
+                utf8_string content;
+                try {
+                    content = read_body(m_cnx);
+                } catch ( fostlib::exceptions::unicode_encoding & ) {
+                    return std::auto_ptr< text_body >();
+                }
+                return std::auto_ptr<text_body>(
+                    new text_body( coerce< string >( content ), h, "text/plain" )
+                );
             }
             void remove( size_t i ) {
                 send_and_check_OK(m_cnx, "dele", i);
@@ -205,7 +208,7 @@ void fostlib::pop3::iterate_mailbox(
     // Loop from the end so we always process the latest bounce messages first
     for ( std::size_t i = messages; i; --i ) {
         std::auto_ptr< text_body > message = mailbox->message(i);
-        if (destroy_message(*message))
+        if (message.get() && destroy_message(*message))
             mailbox->remove(i);
         if ( i % 20 == 0 ) {
             mailbox.reset( new pop3cnx(host, username, password) );
