@@ -116,7 +116,7 @@ void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, asc
     std::size_t length = from.underlying().length();
     into.reserve( length + length / 2);
     for ( ascii_string::const_iterator i(from.begin()); i != from.end(); ++i )
-        if ( g_url_allowed.underlying().find( *i ) == utf8_string::npos )
+        if ( g_url_allowed.underlying().find( *i ) == std::string::npos )
             into += hex< ascii_string >(*i);
         else
             into += *i;
@@ -125,7 +125,7 @@ void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, asc
 
 void fostlib::url::filepath_string_tag::check_encoded( const ascii_string &s ) {
     for ( ascii_string::const_iterator c( s.begin() ); c != s.end(); ++c )
-        if ( g_url_allowed.underlying().find( *c ) == utf8_string::npos ) {
+        if ( g_url_allowed.underlying().find( *c ) == std::string::npos ) {
             if ( *c == '%' )
                 for ( std::size_t p = 0; p != 2; ++p ) {
                     if ( ++c == s.end() )
@@ -145,7 +145,7 @@ url::filepath_string fostlib::coercer< url::filepath_string, string >::coerce( c
     utf8_string narrowed( fostlib::coerce< utf8_string >( str ) );
     url::filepath_string encoded;
     for ( utf8_string::const_iterator it( narrowed.begin() ); it != narrowed.end(); ++it )
-        if ( g_url_allowed.underlying().find( *it ) == utf8_string::npos )
+        if ( g_url_allowed.underlying().find( *it ) == std::string::npos )
             encoded += hex< url::filepath_string >( *it );
         else
             encoded += *it;
@@ -187,7 +187,7 @@ namespace {
     ascii_string query_string_encode( const string &s ) {
         ascii_string r; utf8_string i( coerce< utf8_string >( s ) );
         for ( utf8_string::const_iterator c( i.begin() ); c != i.end(); ++c )
-            if ( g_query_string_allowed.underlying().find( *c ) == utf8_string::npos )
+            if ( g_query_string_allowed.underlying().find( *c ) == std::string::npos )
                 r += hex< ascii_string >( *c );
             else
                 r += *c;
