@@ -46,8 +46,15 @@ namespace {
     }
 
 
-    const fostlib::utf8_string g_url_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
-    const fostlib::utf8_string g_query_string_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+    const fostlib::utf8_string g_url_allowed(
+        ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
+    const fostlib::utf8_string g_url_part_allowed( // Slightly safer without the backslash and / : ~
+        ".,_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
+    const fostlib::utf8_string g_query_string_allowed(
+        ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
 
 
     /*
@@ -111,12 +118,12 @@ void fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii
 }
 
 
-void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, ascii_string &into ) {
+void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, ascii_string &into, const bool encode_slash ) {
     into.clear();
     std::size_t length = from.underlying().length();
     into.reserve( length + length / 2);
     for ( ascii_string::const_iterator i(from.begin()); i != from.end(); ++i )
-        if ( g_url_allowed.underlying().find( *i ) == std::string::npos )
+        if ( (encode_slash ? g_url_part_allowed : g_url_allowed).underlying().find( *i ) == std::string::npos )
             into += hex< ascii_string >(*i);
         else
             into += *i;

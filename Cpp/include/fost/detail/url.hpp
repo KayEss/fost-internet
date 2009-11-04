@@ -23,7 +23,7 @@ namespace fostlib {
     public:
         struct FOST_INET_DECLSPEC filepath_string_tag {
             static void do_encode( fostlib::nliteral from, ascii_string &into );
-            static void do_encode( const ascii_string &from, ascii_string &into );
+            static void do_encode( const ascii_string &from, ascii_string &into, const bool encode_slash = false );
             static void check_encoded( const ascii_string &s );
         };
         typedef tagged_string< filepath_string_tag, ascii_string > filepath_string;
