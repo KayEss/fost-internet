@@ -58,7 +58,7 @@ FSL_TEST_FUNCTION( url ) {
 
 #define QS_PARSE( str ) \
     FSL_CHECK( boost::spirit::parse( (str), query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
-    FSL_CHECK_EQ( qs.as_string().value(), ascii_string(coerce< utf8string >(string(str))) );
+    FSL_CHECK_EQ( qs.as_string().value(), coerce< ascii_string >(string(str)) );
 FSL_TEST_FUNCTION( query_string_parser ) {
     url::query_string qs;
     FSL_CHECK( boost::spirit::parse( L"", query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );

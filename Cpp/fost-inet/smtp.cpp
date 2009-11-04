@@ -90,12 +90,15 @@ struct fostlib::smtp_client::implementation {
     : cnx( h, 25 ) {
     }
     void check( int code, const string &command ) {
-        utf8string response, number = coerce< utf8string >( coerce< string >( code ) );
+        utf8_string response, number = coerce< utf8_string >( coerce< string >( code ) );
         cnx >> response;
-        if ( response.substr( 0, number.length() ) != number ) {
+        if ( response.underlying().substr( 0, number.underlying().length() ) != number.underlying() ) {
             exceptions::not_implemented exception(L"SMTP response was not the one expected");
-            exception.info() << L"Expected " << code << " but got " << response.substr( 0, number.length() )
-                << "\nHandling command: " << command << std::endl;
+            exception.info()
+                << L"Expected " << code << " but got "
+                << response.underlying().substr( 0, number.underlying().length() )
+                << "\nHandling command: " << command << std::endl
+            ;
             throw exception;
         }
     }
@@ -130,7 +133,10 @@ void fostlib::smtp_client::send(const mime &email, const rfc822_address &to, con
         std::stringstream ss;
         ss << h->first << ": " << h->second << "\r\n";
         if ( ss.str().length() > 82 )
-            throw exceptions::not_implemented("Header is too wide for SMTP. Folding not implemented", coerce< string >( ss.str() ));
+            throw exceptions::not_implemented(
+                "Header is too wide for SMTP. Folding not implemented",
+                coerce< string >( utf8_string(ss.str()) )
+            );
         m_impl->cnx << ss;
     }
     m_impl->cnx << "\r\n";

@@ -50,6 +50,7 @@ namespace fostlib {
             These methods allow the socket to be read from.
         */
         // Read up until the next \r\n which is discarded
+        network_connection &operator >> ( std::string &s );
         network_connection &operator >> ( utf8string &s );
         // Read into the vector. The vector size must match the number of bytes expected.
         network_connection &operator >> ( std::vector< utf8 > &v );

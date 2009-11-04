@@ -109,7 +109,7 @@ namespace fostlib {
     template<>
     struct FOST_INET_DECLSPEC coercer< json, url > {
         json coerce( const url &u ) {
-            return json( fostlib::coerce< string >( u.as_string().underlying() ) );
+            return json( fostlib::coerce< string >( u.as_string() ) );
         }
     };
     template<>

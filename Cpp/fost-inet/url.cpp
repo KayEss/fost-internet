@@ -46,8 +46,8 @@ namespace {
     }
 
 
-    const fostlib::utf8string g_url_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
-    const fostlib::utf8string g_query_string_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+    const fostlib::utf8_string g_url_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+    const fostlib::utf8_string g_query_string_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
 
 
     /*
@@ -91,7 +91,7 @@ namespace {
         for( pathlist_type::const_iterator P=pathlist.begin(); P!=pathlist.end(); ++P ) {
             t_path += '/' + (*P);
         }
-        return replaceAll( t_path, "//", "/" );
+        return replaceAll( t_path, "//", "/" ).underlying();
     }
     url::filepath_string normalise_path( const url::filepath_string &path ) {
         return url::filepath_string( ascii_string( normalise_path( path.underlying().underlying() ) ) );
@@ -116,7 +116,7 @@ void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, asc
     std::size_t length = from.underlying().length();
     into.reserve( length + length / 2);
     for ( ascii_string::const_iterator i(from.begin()); i != from.end(); ++i )
-        if ( g_url_allowed.find( *i ) == utf8string::npos )
+        if ( g_url_allowed.underlying().find( *i ) == utf8_string::npos )
             into += hex< ascii_string >(*i);
         else
             into += *i;
@@ -125,7 +125,7 @@ void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, asc
 
 void fostlib::url::filepath_string_tag::check_encoded( const ascii_string &s ) {
     for ( ascii_string::const_iterator c( s.begin() ); c != s.end(); ++c )
-        if ( g_url_allowed.find( *c ) == utf8string::npos ) {
+        if ( g_url_allowed.underlying().find( *c ) == utf8_string::npos ) {
             if ( *c == '%' )
                 for ( std::size_t p = 0; p != 2; ++p ) {
                     if ( ++c == s.end() )
@@ -142,10 +142,10 @@ void fostlib::url::filepath_string_tag::check_encoded( const ascii_string &s ) {
 
 
 url::filepath_string fostlib::coercer< url::filepath_string, string >::coerce( const string &str ) {
-    utf8string narrowed( fostlib::coerce< utf8string >( str ) );
+    utf8_string narrowed( fostlib::coerce< utf8_string >( str ) );
     url::filepath_string encoded;
-    for ( utf8string::const_iterator it( narrowed.begin() ); it != narrowed.end(); ++it )
-        if ( g_url_allowed.find( *it ) == utf8string::npos )
+    for ( utf8_string::const_iterator it( narrowed.begin() ); it != narrowed.end(); ++it )
+        if ( g_url_allowed.underlying().find( *it ) == utf8_string::npos )
             encoded += hex< url::filepath_string >( *it );
         else
             encoded += *it;
@@ -185,9 +185,9 @@ void fostlib::url::query_string::remove( const string &name ) {
 
 namespace {
     ascii_string query_string_encode( const string &s ) {
-        ascii_string r; utf8string i( coerce< utf8string >( s ) );
-        for ( utf8string::const_iterator c( i.begin() ); c != i.end(); ++c )
-            if ( g_query_string_allowed.find( *c ) == utf8string::npos )
+        ascii_string r; utf8_string i( coerce< utf8_string >( s ) );
+        for ( utf8_string::const_iterator c( i.begin() ); c != i.end(); ++c )
+            if ( g_query_string_allowed.underlying().find( *c ) == utf8_string::npos )
                 r += hex< ascii_string >( *c );
             else
                 r += *c;
@@ -250,7 +250,7 @@ fostlib::url::url( const t_form form, const string &str )
     if ( !query_parts.second.isnull() )
         query( query_string( query_parts.second.value() ) );
     if ( !anchor_parts.second.isnull() )
-        anchor( ascii_string( coerce< utf8string >( anchor_parts.second.value() ) ) );
+        anchor( coerce< ascii_string >( anchor_parts.second.value() ) );
 }
 fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw )
 : protocol( ascii_string( "http" ) ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
@@ -283,10 +283,10 @@ fostlib::url::url( const ascii_string &protocol, const host &h,
 ascii_string fostlib::url::as_string() const {
     ascii_string url( protocol() + ascii_string( "://" ) );
     if ( !user().isnull() )
-        url += ascii_string( coerce< utf8string >( user().value() + L":" + password().value( string() ) + L"@" ) );
+        url += coerce< ascii_string >( user().value() + L":" + password().value( string() ) + L"@" );
     else if ( !password().isnull() )
-        url += ascii_string( coerce< utf8string >( L":" + password().value() + L"@" ) );
-    url += ascii_string( coerce< utf8string >( m_host.name() ) ) + pathspec().underlying();
+        url += coerce< ascii_string >( L":" + password().value() + L"@" );
+    url += coerce< ascii_string >( m_host.name() ) + pathspec().underlying();
     url = concat( url, ascii_string( "?" ), query().as_string() ).value();
     return concat( url, ascii_string( "#" ), anchor() ).value();
 }

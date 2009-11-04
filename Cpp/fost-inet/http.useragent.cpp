@@ -67,7 +67,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     utf8string first_line;
     *cnx >> first_line;
     string protocol, message; int status;
-    if ( !boost::spirit::parse(first_line.c_str(),
+    if ( !boost::spirit::parse(first_line.underlying().c_str(),
         (
             boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
             boost::spirit::strlit< wliteral >(L"HTTP/1.0") |

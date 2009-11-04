@@ -22,7 +22,7 @@ void fostlib::http::fost_authentication(
 ) {
     fostlib::hmac signature(fostlib::sha1, secret);
 
-    signature << request.method() << " " << request.address().pathspec().underlying().underlying() << "\n";
+    signature << request.method() << " " << request.address().pathspec().underlying().underlying().c_str() << "\n";
 
     fostlib::string now = fostlib::coerce< fostlib::string >( fostlib::timestamp::now() );
     request.headers().set( L"X-FOST-Timestamp", now );

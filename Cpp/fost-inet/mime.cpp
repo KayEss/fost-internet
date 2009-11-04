@@ -180,10 +180,10 @@ std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
 
     o << local_headers;
     for ( std::list< boost::shared_ptr< mime > >::const_iterator part( items().begin() ) ;part != items().end(); ++part ) {
-        o << "\r\n--" << coerce< utf8string >( boundary ) << "\r\n";
+        o << "\r\n--" << coerce< utf8_string >( boundary ) << "\r\n";
         (*part)->print_on( o );
     }
-    return o << "\r\n--" << coerce< utf8string >( boundary ) << "--\r\n";
+    return o << "\r\n--" << coerce< utf8_string >( boundary ) << "--\r\n";
 }
 
 
@@ -200,24 +200,24 @@ std::auto_ptr< mime::iterator_implementation > fostlib::mime_envelope::iterator(
 
 
 namespace {
-    void do_headers(text_body &tb, const utf8string &body, const string &mime_type) {
+    void do_headers(text_body &tb, const utf8_string &body, const string &mime_type) {
         if ( !tb.headers().exists("Content-Type") )
             tb.headers().set("Content-Type", mime::mime_headers::content(mime_type) );
         tb.headers().set_subvalue("Content-Type", "charset", "utf-8");
         tb.headers().set(L"Content-Transfer-Encoding", L"8bit");
-        tb.headers().set("Content-Length", coerce< string >(body.length()));
+        tb.headers().set("Content-Length", coerce< string >(body.underlying().length()));
     }
 }
 fostlib::text_body::text_body(const utf8 *begin, const utf8 *end, const mime_headers &headers, const string &mime_type)
-: mime( headers, mime_type ), text(utf8string(begin, end)) {
+: mime( headers, mime_type ), text(utf8_string(begin, end)) {
     do_headers(*this, text(), mime_type);
 }
-fostlib::text_body::text_body(const utf8string &t, const mime_headers &headers, const string &mime_type)
+fostlib::text_body::text_body(const utf8_string &t, const mime_headers &headers, const string &mime_type)
 : mime( headers, mime_type ), text(t) {
     do_headers(*this, text(), mime_type);
 }
 fostlib::text_body::text_body(const fostlib::string &t, const mime_headers &headers, const fostlib::string &mime_type)
-: mime( headers, mime_type ), text(coerce< utf8string >(t)) {
+: mime( headers, mime_type ), text(coerce< utf8_string >(t)) {
     do_headers(*this, text(), mime_type);
 }
 
@@ -226,21 +226,21 @@ std::ostream &fostlib::text_body::print_on( std::ostream &o ) const {
 }
 
 bool fostlib::text_body::boundary_is_ok( const string &boundary ) const {
-    return text().find( coerce< utf8string >( boundary ) ) == string::npos;
+    return text().underlying().find( coerce< utf8_string >( boundary ).underlying() ) == string::npos;
 }
 
 
 struct fostlib::text_body::text_body_iterator : public mime::iterator_implementation {
-    const utf8string &body; bool sent;
-    text_body_iterator(const utf8string &b)
+    const utf8_string &body; bool sent;
+    text_body_iterator(const utf8_string &b)
     : body(b), sent(false) {
     }
     const_memory_block operator () () {
-        if ( !body.length() || sent )
+        if ( !body.underlying().length() || sent )
             return const_memory_block( NULL, NULL );
         else {
             sent = true;
-            return const_memory_block( body.c_str(), body.c_str() + body.length() );
+            return const_memory_block( body.underlying().c_str(), body.underlying().c_str() + body.underlying().length() );
         }
     }
 };

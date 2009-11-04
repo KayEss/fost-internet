@@ -61,7 +61,7 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
 : m_cnx( new network_connection(socket) ) {
     utf8string first_line;
     (*m_cnx) >> first_line;
-    if ( !boost::spirit::parse(first_line.c_str(),
+    if ( !boost::spirit::parse(first_line.underlying().c_str(),
         (
             boost::spirit::strlit< nliteral >("GET")
         )[ phoenix::var(m_method) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]

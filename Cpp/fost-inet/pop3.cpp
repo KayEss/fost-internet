@@ -20,18 +20,18 @@ namespace {
     ) {
         mime::mime_headers headers;
 
-        utf8string line;
+        utf8_string line;
         the_network_connection >> line;
 
         while ( !line.empty() ) {
-            utf8string header(line);
+            utf8_string header(line);
 
             line = "";
             the_network_connection >> line;
 
             while (
-                (line.substr(0,1) == " ") ||
-                (line.substr(0,1) == "\t")
+                (line.underlying().substr(0,1) == " ") ||
+                (line.underlying().substr(0,1) == "\t")
             ) {
                 header += line;
                 line = "";
@@ -47,10 +47,10 @@ namespace {
         const mime::mime_headers &headers,
         network_connection &the_network_connection
     ) {
-        string content;
-        utf8string line;
-        the_network_connection >> line;
+        std::string content;
+        std::string line;
 
+        the_network_connection >> line;
         while (
             true
         ) {
@@ -66,7 +66,7 @@ namespace {
                 } else
                     break;
             } else
-                content += coerce<string>(line)+L"\n";
+                content += line+"\n";
 
             line = "";
             the_network_connection >> line;
@@ -74,7 +74,7 @@ namespace {
 
         return std::auto_ptr<text_body>(
             new text_body(
-                content,
+                coerce< string >( utf8_string(content) ),
                 headers,
                 "text/plain"
             )
@@ -86,10 +86,10 @@ namespace {
         network_connection &the_network_connection,
         string command
     ) {
-        utf8string server_response;
+        utf8_string server_response;
         the_network_connection >> server_response;
 
-        if (server_response.substr(0,3) != "+OK") {
+        if (server_response.underlying().substr(0,3) != "+OK") {
             throw exceptions::not_implemented(
                 command,
                 coerce< string >(server_response)
@@ -102,10 +102,10 @@ namespace {
         const string command,
         const nullable< string > parameter = null
     ) {
-        the_network_connection << coerce< utf8string >(command);
+        the_network_connection << coerce< utf8_string >(command);
         if ( !parameter.isnull() ) {
             the_network_connection << " ";
-            the_network_connection << coerce< utf8string >(parameter);
+            the_network_connection << coerce< utf8_string >(parameter);
         }
         the_network_connection << "\r\n";
     }
@@ -117,7 +117,7 @@ namespace {
     ) {
         std::stringstream i_stream;
         i_stream << parameter;
-        string value(coerce<string>(i_stream.str()));
+        string value(coerce<string>(utf8_string(i_stream.str())));
 
         send(the_network_connection, command, value);
     }
@@ -161,7 +161,7 @@ void fostlib::pop3::iterate_mailbox(
 ) {
     network_connection the_network_connection( host, 110 );
 
-    utf8string server_status;
+    utf8_string server_status;
     the_network_connection >> server_status;
 
     send_and_check_OK(the_network_connection, "user", username);
@@ -169,10 +169,10 @@ void fostlib::pop3::iterate_mailbox(
 
     send(the_network_connection, "stat");
 
-    utf8string server_response;
+    utf8_string server_response;
     the_network_connection >> server_response;
 
-    std::stringstream server_response_stringstream(server_response.substr(3));
+    std::stringstream server_response_stringstream(server_response.underlying().substr(3));
     size_t message_count;
     server_response_stringstream >> message_count;
     size_t octets;
@@ -200,7 +200,7 @@ bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
     return
         ( // Proper NDRs should have this Content-Type and contain a recording of a 500 response
             email.headers()["Content-Type"].subvalue("report-type") == "delivery-status"
-            && email.text().find("Status: 5") != string::npos
+            && email.text().underlying().find("Status: 5") != string::npos
         )
     ;
 }

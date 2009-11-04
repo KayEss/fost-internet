@@ -67,8 +67,8 @@ FSL_TEST_FUNCTION(text1) {
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;
-    headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
-    FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+    headers.parse( coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first ) );
+    FSL_CHECK_EQ( utf8_string( ss.str() ), "\
 Content-Length: 18\r\n\
 Content-Transfer-Encoding: 8bit\r\n\
 Content-Type: text/plain; charset=\"utf-8\"\r\n\
@@ -80,8 +80,8 @@ FSL_TEST_FUNCTION(text2) {
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;
-    headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
-    FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+    headers.parse( coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first ) );
+    FSL_CHECK_EQ( utf8_string( ss.str() ), "\
 Content-Length: 18\r\n\
 Content-Transfer-Encoding: 8bit\r\n\
 Content-Type: text/plain; charset=\"utf-8\"\r\n\
@@ -95,8 +95,8 @@ FSL_TEST_FUNCTION(text3) {
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;
-    headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
-    FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+    headers.parse( coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first ) );
+    FSL_CHECK_EQ( utf8_string( ss.str() ), "\
 Content-Length: 18\r\n\
 Content-Transfer-Encoding: 8bit\r\n\
 Content-Type: text/plain; charset=\"utf-8\"\r\n\
@@ -111,9 +111,9 @@ FSL_TEST_FUNCTION( mime_attachment ) {
     std::stringstream ss;
     ss << envelope;
     mime::mime_headers headers;
-    headers.parse( partition( coerce< string >( ss.str() ), L"\r\n\r\n" ).first );
+    headers.parse( coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first ) );
     try {
-        FSL_CHECK_EQ( coerce< string >( ss.str() ), L"\
+        FSL_CHECK_EQ( utf8_string( ss.str() ), coerce< utf8_string>( L"\
 Content-Type: multipart/mixed; boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\
 \r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\r\n\
@@ -123,7 +123,7 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document\r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"--\r\n\
-" );
+" ) );
     } catch ( fostlib::exceptions::exception &e ) {
         if ( headers[L"Content-Type"].subvalue( L"boundary" ).isnull() )
             e.info() << L"Output from the envelope:\n" << ss.str() << std::endl;
