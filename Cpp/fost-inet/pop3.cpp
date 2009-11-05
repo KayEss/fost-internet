@@ -232,6 +232,17 @@ bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
 }
 
 
+bool fostlib::pop3::email_is_a_delay_report( const text_body &email ) {
+    string subject = email.headers()["Subject"].value();
+    return
+        (
+            email.headers()["Content-Type"].subvalue("report-type") == "delivery-status"
+            && subject == "Delivery Status Notification (Delay)"
+        )
+    ;
+}
+
+
 bool fostlib::pop3::email_is_out_of_office( const text_body &email ) {
     string subject = email.headers()["Subject"].value();
     return
