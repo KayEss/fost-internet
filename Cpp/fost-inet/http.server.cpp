@@ -59,7 +59,7 @@ void fostlib::http::server::operator () ( boost::function< bool ( http::server::
 
 fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::socket > socket )
 : m_cnx( new network_connection(socket) ) {
-    utf8string first_line;
+    utf8_string first_line;
     (*m_cnx) >> first_line;
     if ( !boost::spirit::parse(first_line.underlying().c_str(),
         (
@@ -81,7 +81,7 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
 
     mime::mime_headers headers;
     while ( true ) {
-        utf8string line;
+        utf8_string line;
         (*m_cnx) >> line;
         if ( line.empty() )
             break;

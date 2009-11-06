@@ -153,7 +153,7 @@ network_connection &fostlib::network_connection::operator << ( const const_memor
     }
     return *this;
 }
-network_connection &fostlib::network_connection::operator << ( const utf8string &s ) {
+network_connection &fostlib::network_connection::operator << ( const utf8_string &s ) {
     boost::asio::streambuf b;
     std::ostream os(&b);
     os << s;

@@ -43,7 +43,7 @@ namespace fostlib {
             These methods just drop the data straight out to the network.
         */
         network_connection &operator << ( const const_memory_block & );
-        network_connection &operator << ( const utf8string &s );
+        network_connection &operator << ( const utf8_string &s );
         network_connection &operator << ( const std::stringstream &ss );
 
         /*
@@ -51,7 +51,7 @@ namespace fostlib {
         */
         // Read up until the next \r\n which is discarded
         network_connection &operator >> ( std::string &s );
-        network_connection &operator >> ( utf8string &s );
+        network_connection &operator >> ( utf8_string &s );
         // Read into the vector. The vector size must match the number of bytes expected.
         network_connection &operator >> ( std::vector< utf8 > &v );
         // Read everything until the connection is dropped by the server

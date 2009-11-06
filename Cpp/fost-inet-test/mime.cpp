@@ -76,7 +76,7 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 Test text document" );
 }
 FSL_TEST_FUNCTION(text2) {
-    text_body ta(utf8string("Test text document"));
+    text_body ta(utf8_string("Test text document"));
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;
