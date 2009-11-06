@@ -116,6 +116,6 @@ headers_base::content::const_iterator fostlib::headers_base::content::end() cons
 std::ostream &fostlib::operator << ( std::ostream &o, const headers_base::content &value ) {
     o << coerce< utf8string >( value.value() );
     for ( headers_base::content::const_iterator i( value.begin() ); i != value.end(); ++i )
-        o << "; " << coerce< utf8string >( i->first ) << "=\"" << coerce< utf8string >( i->second ) << "\"";
+        o << "; " << coerce< utf8_string >( i->first ) << "=\"" << coerce< utf8_string >( i->second ) << "\"";
     return o;
 }
