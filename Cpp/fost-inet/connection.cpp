@@ -156,7 +156,7 @@ network_connection &fostlib::network_connection::operator << ( const const_memor
 network_connection &fostlib::network_connection::operator << ( const utf8_string &s ) {
     boost::asio::streambuf b;
     std::ostream os(&b);
-    os << s;
+    os << s.underlying();
     std::size_t length(send(*m_socket, m_ssl_data, b));
     b.consume(length);
     return *this;

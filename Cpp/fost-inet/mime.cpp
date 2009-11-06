@@ -180,10 +180,10 @@ std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
 
     o << local_headers;
     for ( std::list< boost::shared_ptr< mime > >::const_iterator part( items().begin() ) ;part != items().end(); ++part ) {
-        o << "\r\n--" << coerce< utf8_string >( boundary ) << "\r\n";
+        o << "\r\n--" << coerce< utf8_string >( boundary ).underlying() << "\r\n";
         (*part)->print_on( o );
     }
-    return o << "\r\n--" << coerce< utf8_string >( boundary ) << "--\r\n";
+    return o << "\r\n--" << coerce< utf8_string >( boundary ).underlying() << "--\r\n";
 }
 
 
@@ -222,7 +222,7 @@ fostlib::text_body::text_body(const fostlib::string &t, const mime_headers &head
 }
 
 std::ostream &fostlib::text_body::print_on( std::ostream &o ) const {
-    return o << headers() << "\r\n" << text();
+    return o << headers() << "\r\n" << text().underlying();
 }
 
 bool fostlib::text_body::boundary_is_ok( const string &boundary ) const {
