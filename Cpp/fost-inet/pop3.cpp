@@ -223,10 +223,20 @@ void fostlib::pop3::iterate_mailbox(
 
 
 bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
+    string subject = email.headers()["Subject"].value();
     return
         ( // Proper NDRs should have this Content-Type and contain a recording of a 500 response
             email.headers()["Content-Type"].subvalue("report-type") == "delivery-status"
-            && email.text().underlying().find("Status: 5") != string::npos
+            && (
+                email.text().underlying().find("Status: 5") != string::npos
+                || subject.find("Undeliverable: ") == 0
+            )
+        ) || (
+            subject == "Delivery failure"
+            || subject == "Delivery Status Notification (Failure)"
+            || subject == "Undelivered Mail Returned to Sender"
+        ) || (
+            subject.find("DELIVERY FAILURE:") == 0
         )
     ;
 }
@@ -235,9 +245,9 @@ bool fostlib::pop3::email_is_an_ndr( const text_body &email ) {
 bool fostlib::pop3::email_is_a_delay_report( const text_body &email ) {
     string subject = email.headers()["Subject"].value();
     return
-        (
-            email.headers()["Content-Type"].subvalue("report-type") == "delivery-status"
-            && subject == "Delivery Status Notification (Delay)"
+        ( // Many don't have the correct report-type
+            // email.headers()["Content-Type"].subvalue("report-type") == "delivery-status" &&
+            subject == "Delivery Status Notification (Delay)"
         )
     ;
 }
@@ -247,8 +257,9 @@ bool fostlib::pop3::email_is_out_of_office( const text_body &email ) {
     string subject = email.headers()["Subject"].value();
     return
         (
-            subject.find("Out of Office: ") == 0
+            subject.find("Out of Office") == 0
             || subject.find("Out of Office AutoReply: ") == 0
+            || subject == "I'm out of the office"
         )
     ;
 }
