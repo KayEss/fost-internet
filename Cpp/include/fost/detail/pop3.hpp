@@ -32,16 +32,6 @@ namespace fostlib {
         );
 
 
-        /// Returns true if the email message is a bounce delivery report (NDR)
-        FOST_INET_DECLSPEC bool email_is_an_ndr( const text_body & );
-
-        /// Returns true if the email message is a delayed delivery report
-        FOST_INET_DECLSPEC bool email_is_a_delay_report( const text_body & );
-
-        /// Returns true if the email message is an "Out of office" or vacation auto-response
-        FOST_INET_DECLSPEC bool email_is_out_of_office( const text_body & );
-
-
     }
 
 
