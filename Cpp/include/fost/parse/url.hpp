@@ -43,7 +43,7 @@ namespace fostlib {
 
         struct url_closure : boost::spirit::closure< url_closure,
             url,
-            ascii_string,
+            ascii_printable_string,
             host
         > {
             member1 url;
@@ -52,7 +52,7 @@ namespace fostlib {
         };
 
         struct url_filespec_closure : boost::spirit::closure< url_filespec_closure,
-            ascii_string
+            ascii_printable_string
         > {
             member1 filespec;
         };
@@ -110,11 +110,11 @@ namespace fostlib {
                 moniker = ( +boost::spirit::chset<>( L"a-zA-Z+" )[
                     parsers::push_back( moniker.buffer, phoenix::arg1 )
                 ] )[
-                    moniker.text = parsers::coerce< ascii_string >()( moniker.buffer )
+                    moniker.text = parsers::coerce< ascii_printable_string >()( moniker.buffer )
                 ];
             }
             boost::spirit::rule< scanner_t > top;
-            boost::spirit::rule< scanner_t, ascii_string_builder_closure::context_t > moniker;
+            boost::spirit::rule< scanner_t, ascii_printable_string_builder_closure::context_t > moniker;
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
@@ -129,7 +129,7 @@ namespace fostlib {
             definition( url_filespec_parser const &self ) {
                 top = (
                     +boost::spirit::chset<>( "a-zA-Z0-9/.,:()%-" )
-                )[ self.filespec = phoenix::construct_<ascii_string>(phoenix::arg1, phoenix::arg2) ];
+                )[ self.filespec = phoenix::construct_<ascii_printable_string>(phoenix::arg1, phoenix::arg2) ];
             }
             boost::spirit::rule< scanner_t > top;
 

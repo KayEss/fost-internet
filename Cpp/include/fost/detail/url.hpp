@@ -22,11 +22,11 @@ namespace fostlib {
     class FOST_INET_DECLSPEC url {
     public:
         struct FOST_INET_DECLSPEC filepath_string_tag {
-            static void do_encode( fostlib::nliteral from, ascii_string &into );
-            static void do_encode( const ascii_string &from, ascii_string &into, const bool encode_slash = false );
-            static void check_encoded( const ascii_string &s );
+            static void do_encode( fostlib::nliteral from, ascii_printable_string &into );
+            static void do_encode( const ascii_printable_string &from, ascii_printable_string &into, const bool encode_slash = false );
+            static void check_encoded( const ascii_printable_string &s );
         };
-        typedef tagged_string< filepath_string_tag, ascii_string > filepath_string;
+        typedef tagged_string< filepath_string_tag, ascii_printable_string > filepath_string;
 
         class FOST_INET_DECLSPEC query_string {
         public:
@@ -36,7 +36,7 @@ namespace fostlib {
             void append( const string &name, const nullable< string > &value );
             void remove( const string &name );
 
-            nullable< ascii_string > as_string() const;
+            nullable< ascii_printable_string > as_string() const;
 
         private:
             std::map< string, std::list< nullable< string > > > m_query;
@@ -52,25 +52,25 @@ namespace fostlib {
             const nullable< string > &username = null,
             const nullable< string > &password = null
         );
-        url( const ascii_string &protocol, const host &,
+        url( const ascii_printable_string &protocol, const host &,
             const nullable< string > &username = null,
             const nullable< string > &password = null
         );
 
-        accessors< ascii_string > protocol;
+        accessors< ascii_printable_string > protocol;
         host server() const;
         port_number port() const;
         accessors< nullable< string > > user;
         accessors< nullable< string > > password;
         const filepath_string &pathspec() const;
         void pathspec( const filepath_string &pathName );
-        accessors< nullable< ascii_string > > anchor;
+        accessors< nullable< ascii_printable_string > > anchor;
         accessors< query_string, fostlib::lvalue > query;
 
         static setting< string > s_default_host;
 
-        ascii_string as_string() const;
-        ascii_string as_string( const url &relative_from ) const;
+        ascii_printable_string as_string() const;
+        ascii_printable_string as_string( const url &relative_from ) const;
 
     private:
         fostlib::host m_host;

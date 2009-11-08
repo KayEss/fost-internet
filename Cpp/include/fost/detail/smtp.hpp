@@ -22,12 +22,12 @@ namespace fostlib {
 
     /// Tag type for an email address
     struct FOST_INET_DECLSPEC rfc822_address_tag {
-        static void do_encode( fostlib::nliteral from, ascii_string &into );
-        static void do_encode( const ascii_string &from, ascii_string &into );
-        static void check_encoded( const ascii_string &s );
+        static void do_encode( fostlib::nliteral from, ascii_printable_string &into );
+        static void do_encode( const ascii_printable_string &from, ascii_printable_string &into );
+        static void check_encoded( const ascii_printable_string &s );
     };
     /// A string type for email addresses
-    typedef tagged_string< rfc822_address_tag, ascii_string > rfc822_address;
+    typedef tagged_string< rfc822_address_tag, ascii_printable_string > rfc822_address;
 
     /// A full email address with recipient name
     struct FOST_INET_DECLSPEC email_address {
@@ -37,7 +37,7 @@ namespace fostlib {
         email_address();
         email_address( const rfc822_address &address, const nullable< string > &name = null );
         email_address(
-            const ascii_string &address,
+            const ascii_printable_string &address,
             const nullable< string > &name = null
         );
     };
