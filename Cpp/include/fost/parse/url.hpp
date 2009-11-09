@@ -75,12 +75,12 @@ namespace fostlib {
                         detail::query_string_insert( self.qs, self.key, self.value )
                     ], boost::spirit::chlit< wchar_t >( '&' )
                 );
-                key = ( +boost::spirit::chset<>( L"a-zA-Z0-9." )[
+                key = ( +boost::spirit::chset<>( L"_a-zA-Z0-9." )[
                     parsers::push_back( key.buffer, phoenix::arg1 )
                 ] )[
                     key.text = parsers::coerce< utf8_string >()( key.buffer )
                 ];
-                value = ( +boost::spirit::chset<>( L"a-zA-Z0-9.,%+" )[
+                value = ( +boost::spirit::chset<>( L"_a-zA-Z0-9.,%+" )[
                     parsers::push_back( value.buffer, phoenix::arg1 )
                 ] )[
                     value.text = parsers::coerce< utf8_string >()( value.buffer )
@@ -128,7 +128,7 @@ namespace fostlib {
         struct definition {
             definition( url_filespec_parser const &self ) {
                 top = (
-                    +boost::spirit::chset<>( "a-zA-Z0-9/.,:()%-" )
+                    +boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%-" )
                 )[ self.filespec = phoenix::construct_<ascii_printable_string>(phoenix::arg1, phoenix::arg2) ];
             }
             boost::spirit::rule< scanner_t > top;
