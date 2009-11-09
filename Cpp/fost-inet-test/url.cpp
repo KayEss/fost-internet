@@ -132,6 +132,11 @@ FSL_TEST_FUNCTION( parse ) {
 
     FSL_CHECK_EXCEPTION( url( "http://localhost/file path.html" ), fostlib::exceptions::parse_error& );
     FSL_CHECK_EXCEPTION( url( "http://localhost/file\\path.html" ), fostlib::exceptions::parse_error& );
+
+    FSL_CHECK_EQ(
+        url("http://bmf.miro.felspar.net:8000/rest/email/new_subscription/123821/").pathspec(),
+        url::filepath_string("/rest/email/new_subscription/123821/")
+    );
 }
 
 FSL_TEST_FUNCTION( coercion ) {
