@@ -32,10 +32,6 @@ namespace fostlib {
         );
 
 
-        /// Returns true if the email message is a bounce delivery report (NDR)
-        FOST_INET_DECLSPEC bool email_is_an_ndr( const text_body & );
-
-
     }
 
 

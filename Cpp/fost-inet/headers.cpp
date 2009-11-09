@@ -71,7 +71,7 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
 
 std::ostream &fostlib::operator << ( std::ostream &o, const fostlib::headers_base &headers ) {
     for ( headers_base::const_iterator i( headers.begin() ); i != headers.end(); ++i )
-        o << coerce< utf8string >( i->first ) << ": " << i->second << "\r\n";
+        o << coerce< utf8_string >( i->first ).underlying() << ": " << i->second << "\r\n";
     return o;
 }
 
@@ -114,8 +114,8 @@ headers_base::content::const_iterator fostlib::headers_base::content::end() cons
 }
 
 std::ostream &fostlib::operator << ( std::ostream &o, const headers_base::content &value ) {
-    o << coerce< utf8string >( value.value() );
+    o << coerce< utf8_string >( value.value() ).underlying();
     for ( headers_base::content::const_iterator i( value.begin() ); i != value.end(); ++i )
-        o << "; " << coerce< utf8string >( i->first ) << "=\"" << coerce< utf8string >( i->second ) << "\"";
+        o << "; " << coerce< utf8_string >( i->first ).underlying() << "=\"" << coerce< utf8_string >( i->second ).underlying() << "\"";
     return o;
 }

@@ -145,7 +145,7 @@ namespace fostlib {
                 const string &mime = "text/plain"
             );
             text_body(
-                const utf8string &text,
+                const utf8_string &text,
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "text/plain"
             );
@@ -158,7 +158,7 @@ namespace fostlib {
             std::ostream &print_on( std::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
 
-            accessors< const utf8string > text;
+            accessors< const utf8_string > text;
     };
 
     /// A MIME container which represents a file on disk
@@ -188,7 +188,7 @@ namespace fostlib {
     inline std::wostream &operator << ( std::wostream &o, const mime &m ) {
         std::stringstream ss;
         ss << m;
-        return o << coerce< string >( ss.str() );
+        return o << coerce< string >( utf8_string( ss.str() ) );
     }
 #endif
 

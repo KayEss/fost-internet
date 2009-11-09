@@ -48,13 +48,13 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     std::auto_ptr< network_connection > cnx(
         new network_connection(req.address().server(), req.address().port())
     );
-    if ( req.address().protocol() == ascii_string("https") )
+    if ( req.address().protocol() == ascii_printable_string("https") )
         cnx->start_ssl();
 
     std::stringstream buffer;
-    buffer << coerce< utf8string >( req.method() ) << " " << req.address().pathspec().underlying().underlying();
+    buffer << coerce< utf8_string >( req.method() ).underlying() << " " << req.address().pathspec().underlying().underlying();
     {
-        nullable< ascii_string > q = req.address().query().as_string();
+        nullable< ascii_printable_string > q = req.address().query().as_string();
         if ( !q.isnull() )
             buffer << "?" << q.value().underlying();
     }
@@ -64,10 +64,10 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i )
         *cnx << *i;
 
-    utf8string first_line;
+    utf8_string first_line;
     *cnx >> first_line;
     string protocol, message; int status;
-    if ( !boost::spirit::parse(first_line.c_str(),
+    if ( !boost::spirit::parse(first_line.underlying().c_str(),
         (
             boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
             boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
@@ -115,7 +115,7 @@ fostlib::http::user_agent::response::response(
     const string &protocol, int status, const string &message
 ) : method(method), address(url), protocol(protocol), status(status), message(message), m_cnx(connection) {
     while ( true ) {
-        utf8string line;
+        utf8_string line;
         *m_cnx >> line;
         if (line.empty())
             break;
@@ -148,7 +148,7 @@ const mime &fostlib::http::user_agent::response::body() const {
                     } else {
                         boost::asio::streambuf body_buffer;
                         *m_cnx >> body_buffer;
-                        utf8string body_text;
+                        utf8_string body_text;
                         body_text.reserve(body_buffer.size());
                         while ( body_buffer.size() )
                             body_text += body_buffer.sbumpc();
@@ -170,7 +170,7 @@ const mime &fostlib::http::user_agent::response::body() const {
                     *m_cnx >> body;
                     for ( std::vector< unsigned char >::const_iterator i( body.begin() ); i != body.end(); ++i )
                         text += utf32( *i );
-                    m_body.reset(new text_body(coerce< utf8string >(text), m_headers));
+                    m_body.reset(new text_body(coerce< utf8_string >(text), m_headers));
                 } else {
                     throw exceptions::not_implemented("fostlib::http::user_agent::response::body() -- for iso-8859-1 -- length is not known");
                 }
