@@ -25,7 +25,10 @@ bool fostlib::email_is_an_ndr( const text_body &email ) {
             )
         ) || (
             subject == "Delivery failure"
+            || subject == "Delivery Notification: Delivery has failed"
+            || subject == "Delivery Report (Failure)"
             || subject == "Delivery Status Notification (Failure)"
+            || subject == "failure notice"
             || subject == "Mail delivery failed: returning message to sender"
             || subject == "Undelivered Mail Returned to Sender"
         ) || (
