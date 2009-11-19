@@ -81,14 +81,17 @@ namespace {
             coerce<ascii_string>(host.name()).underlying(),
             coerce<ascii_string>(coerce<string>(port)).underlying()
         );
-        tcp::resolver::iterator endpoint = resolver.resolve(q), end;
-        boost::system::error_code error = boost::asio::error::host_not_found;
-        while ( error && endpoint != end ) {
+        boost::system::error_code host_error;
+        tcp::resolver::iterator endpoint = resolver.resolve(q, host_error), end;
+        if ( host_error == boost::asio::error::host_not_found )
+            throw exceptions::host_not_found( host.name() );
+        boost::system::error_code connect_error = boost::asio::error::host_not_found;
+        while ( connect_error && endpoint != end ) {
             socket.close();
-            socket.connect(*endpoint++, error);
+            socket.connect(*endpoint++, connect_error);
         }
-        if ( error )
-            throw boost::system::system_error(error);
+        if ( connect_error )
+            throw boost::system::system_error(connect_error);
     }
 }
 

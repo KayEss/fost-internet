@@ -36,3 +36,8 @@ FSL_TEST_FUNCTION( parse ) {
 
     HOST_PARSE("localhost:80");
 }
+
+
+FSL_TEST_FUNCTION( resolution ) {
+    FSL_CHECK_NOTHROW( host("localhost").address() );
+}
