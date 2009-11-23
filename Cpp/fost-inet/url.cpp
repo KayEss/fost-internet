@@ -49,6 +49,9 @@ namespace {
     const fostlib::utf8_string g_url_allowed(
         ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
+    const fostlib::utf8_string g_url_allowed_lax(
+        ".,:/\\_-@+~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
     const fostlib::utf8_string g_url_part_allowed( // Slightly safer without the backslash and / : ~
         ".,_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
@@ -132,7 +135,7 @@ void fostlib::url::filepath_string_tag::do_encode( const ascii_printable_string 
 
 void fostlib::url::filepath_string_tag::check_encoded( const ascii_printable_string &s ) {
     for ( ascii_printable_string::const_iterator c( s.begin() ); c != s.end(); ++c )
-        if ( g_url_allowed.underlying().find( *c ) == std::string::npos ) {
+        if ( g_url_allowed_lax.underlying().find( *c ) == std::string::npos ) {
             if ( *c == '%' )
                 for ( std::size_t p = 0; p != 2; ++p ) {
                     if ( ++c == s.end() )

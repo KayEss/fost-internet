@@ -114,8 +114,11 @@ FSL_TEST_FUNCTION( path_spec ) {
     FSL_CHECK_EQ( coerce< url::filepath_string >( boost::filesystem::wpath(L"test") ), url::filepath_string("test") );
 }
 
+#define TEST_PATH_SPEC_ENCODING( from, to ) \
+    FSL_CHECK_EQ( url::filepath_string(ascii_printable_string(from), url::filepath_string::unencoded).underlying(), to )
 FSL_TEST_FUNCTION( path_spec_encoding ) {
-    FSL_CHECK_EQ( url::filepath_string(ascii_printable_string("invalid@felspar.com"), url::filepath_string::unencoded).underlying(), "invalid%40felspar.com" );
+    TEST_PATH_SPEC_ENCODING("invalid@felspar.com", "invalid%40felspar.com");
+    TEST_PATH_SPEC_ENCODING("/@~:.-_+", "/%40~:.-_%2B");
 }
 
 
@@ -139,9 +142,15 @@ FSL_TEST_FUNCTION( parse ) {
     );
 }
 
+#define TEST_COERCION(u) \
+    FSL_CHECK_EQ( coerce< string >( url( u ) ), u );
 FSL_TEST_FUNCTION( coercion ) {
-    FSL_CHECK_EQ( coerce< string >( url( "http://localhost/file-path.html" ) ), L"http://localhost/file-path.html" );
+    TEST_COERCION( "http://localhost/file-path.html" );
+    TEST_COERCION( "http://localhost/somebody@example.com" );
+    TEST_COERCION( "http://localhost/somebody+else@example.com" );
+    TEST_COERCION( "http://localhost/~somebody" );
 }
+
 
 /*
 FSL_TEST_FUNCTION( parse_port ) {
