@@ -8,14 +8,3 @@ fost-exe s3put
         ../../Cpp/fost-inet/
         s3put.cpp
     ;
-
-run s3put
-    :
-        Examples/s3put/s3put.cpp
-        testfost
-        s3put.cpp
-    :
-    :
-    :
-        s3put-source
-    ;
