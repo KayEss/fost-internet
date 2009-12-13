@@ -1,17 +1,8 @@
 
-fost-lib fost-inet
+fost-lib-autotest fost-inet
+    :
+        Cpp/fost-inet
     :
         ../../../fost-base/Cpp/fost-crypto/
         ../../../fost-base/Cpp/fost-datetime/
-        connection.cpp
-        email.cpp
-        headers.cpp
-        host.cpp
-        http.authentication.cpp
-        http.server.cpp
-        http.useragent.cpp
-        mime.cpp
-        pop3.cpp
-        smtp.cpp
-        url.cpp
     ;
