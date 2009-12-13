@@ -19,8 +19,6 @@ explicit tests ;
 alias aws
     :
         Cpp/fost-aws
-        Cpp/fost-aws-test
-        Examples/s3put/
     ;
 explicit aws ;
 
@@ -34,6 +32,7 @@ alias examples
     :
         Examples/host/
         Examples/fget/
+        Examples/s3put/
         Examples/webserver-simple/
         Examples/webserver-threaded/
     ;
