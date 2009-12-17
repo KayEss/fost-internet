@@ -50,13 +50,13 @@ namespace {
         ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_allowed_lax(
-        ".,:/\\_-@+~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        ".,:/\\_-@*+~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_part_allowed( // Slightly safer without the backslash and / : ~
         ".,_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_query_string_allowed(
-        ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        ".,:/\\_-*~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
 
 
@@ -268,12 +268,15 @@ fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nu
 fostlib::url::url( const string &a_url )
 : protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
     try {
-        url u; ascii_printable_string fs;
+        url u; ascii_printable_string fs; query_string qs;
         if ( !boost::spirit::parse( a_url.c_str(),
             url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
             >> !(
                 boost::spirit::chlit< wchar_t >( '/' )
                 >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+            ) >> !(
+                boost::spirit::chlit< wchar_t >( '?' )
+                >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
             )
         ).full )
             throw exceptions::parse_error( L"Could not parse URL" );
