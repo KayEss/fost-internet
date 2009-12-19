@@ -25,7 +25,7 @@ fi
 
 if ../bjam -j$CPUCOUNT toolset=$TOOLSET $VARIANTS `../python.opts.sh`
 then {
-    echo fost-internet OK
+    echo fost-internet $VARIANTS OK
     exit 0
 } else {
     exit 1

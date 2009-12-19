@@ -1,8 +1,7 @@
 
-fost-lib fost-aws
+fost-lib-autotest fost-aws
+    : Cpp/fost-aws
     :
         ../../../fost-base/Cpp/fost-crypto/
         ../fost-inet/
-        s3.cpp
-        s3authen.cpp
     ;

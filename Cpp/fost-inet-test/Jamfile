@@ -3,12 +3,8 @@ fost-smoke-test fost-inet-test-smoke
     :
         ../fost-inet/
     :
-        authentication.cpp
         host.cpp
-        http.cpp
-        mime.cpp
         pop3.cpp
         smtp.cpp
-        url.cpp
         user_agent.cpp
     ;

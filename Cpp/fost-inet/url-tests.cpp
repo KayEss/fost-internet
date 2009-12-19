@@ -66,6 +66,7 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"key=value&key=value" );
     QS_PARSE( L"key=value" );
     QS_PARSE( L"key=" );
+    QS_PARSE( L"__=" );
     QS_PARSE( L"key=&key=" );
     QS_PARSE( L"key=value&key=" );
 }
@@ -88,6 +89,7 @@ FSL_TEST_FUNCTION( url_parser_hostpart ) {
     URL_PARSE_HOSTPART( L"http://127.0.0.1", url( host( 127, 0, 0, 1 ) ) );
     URL_PARSE_HOSTPART( L"http://10.0.2.2", url( host( 10, 0, 2, 2 ) ) );
     URL_PARSE_HOSTPART( L"http://www.felspar.com", url( host( L"www.felspar.com" ) ) );
+    URL_PARSE_HOSTPART( L"http://urquell-fn.appspot.com", url( host( L"urquell-fn.appspot.com" ) ) );
     FSL_CHECK( !boost::spirit::parse( L"http://www..felspar.com/", url_hostpart_p ).full );
     FSL_CHECK( !boost::spirit::parse( L"http://www./", url_hostpart_p ).full );
     FSL_CHECK( !boost::spirit::parse( L"http://.www/", url_hostpart_p ).full );
@@ -140,6 +142,9 @@ FSL_TEST_FUNCTION( parse ) {
         url("http://bmf.miro.felspar.net:8000/rest/email/new_subscription/123821/").pathspec(),
         url::filepath_string("/rest/email/new_subscription/123821/")
     );
+    FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/echo/*Afsk1YSP"));
+    FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data"));
+    FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data?__="));
 }
 
 #define TEST_COERCION(u) \
