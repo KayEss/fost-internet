@@ -20,13 +20,16 @@
 namespace fostlib {
 
 
+    /// Tag type for an email address
     struct FOST_INET_DECLSPEC rfc822_address_tag {
-        static void do_encode( fostlib::nliteral from, ascii_string &into );
-        static void do_encode( const ascii_string &from, ascii_string &into );
-        static void check_encoded( const ascii_string &s );
+        static void do_encode( fostlib::nliteral from, ascii_printable_string &into );
+        static void do_encode( const ascii_printable_string &from, ascii_printable_string &into );
+        static void check_encoded( const ascii_printable_string &s );
     };
-    typedef tagged_string< rfc822_address_tag, ascii_string > rfc822_address;
+    /// A string type for email addresses
+    typedef tagged_string< rfc822_address_tag, ascii_printable_string > rfc822_address;
 
+    /// A full email address with recipient name
     struct FOST_INET_DECLSPEC email_address {
         fostlib::accessors< rfc822_address > email;
         fostlib::accessors< nullable< string > > name;
@@ -34,10 +37,20 @@ namespace fostlib {
         email_address();
         email_address( const rfc822_address &address, const nullable< string > &name = null );
         email_address(
-            const ascii_string &address,
+            const ascii_printable_string &address,
             const nullable< string > &name = null
         );
     };
+
+
+    /// Returns true if the email message is a bounce delivery report (NDR)
+    FOST_INET_DECLSPEC bool email_is_an_ndr( const text_body & );
+
+    /// Returns true if the email message is a delayed delivery report
+    FOST_INET_DECLSPEC bool email_is_a_delay_report( const text_body & );
+
+    /// Returns true if the email message is an "Out of office" or vacation auto-response
+    FOST_INET_DECLSPEC bool email_is_out_of_office( const text_body & );
 
 
     template<>
@@ -50,13 +63,14 @@ namespace fostlib {
     };
 
     template<>
-    struct FOST_INET_DECLSPEC coercer< utf8string, email_address > {
-        utf8string coerce( const email_address &e ) {
-            return fostlib::coerce< utf8string >( fostlib::coerce< string >( e ) );
+    struct FOST_INET_DECLSPEC coercer< utf8_string, email_address > {
+        utf8_string coerce( const email_address &e ) {
+            return fostlib::coerce< utf8_string >( fostlib::coerce< string >( e ) );
         }
     };
 
 
+    /// An SMTP client for sending emails
     class FOST_INET_DECLSPEC smtp_client : boost::noncopyable {
         struct implementation;
         implementation *m_impl;
@@ -72,6 +86,7 @@ namespace fostlib {
 
 
 namespace std {
+    /// Allow email addresses to be used as keys in std::map and to be stored in a std::set.
     template<>
     struct less< fostlib::email_address > : public std::binary_function< bool, fostlib::email_address, fostlib::email_address > {
         bool operator ()( const fostlib::email_address &l, const fostlib::email_address &r ) const {

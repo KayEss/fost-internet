@@ -46,8 +46,18 @@ namespace {
     }
 
 
-    const fostlib::utf8string g_url_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
-    const fostlib::utf8string g_query_string_allowed( ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+    const fostlib::utf8_string g_url_allowed(
+        ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
+    const fostlib::utf8_string g_url_allowed_lax(
+        ".,:/\\_-@*+~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
+    const fostlib::utf8_string g_url_part_allowed( // Slightly safer without the backslash and / : ~
+        ".,_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
+    const fostlib::utf8_string g_query_string_allowed(
+        ".,:/\\_-*~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    );
 
 
     /*
@@ -91,10 +101,10 @@ namespace {
         for( pathlist_type::const_iterator P=pathlist.begin(); P!=pathlist.end(); ++P ) {
             t_path += '/' + (*P);
         }
-        return replaceAll( t_path, "//", "/" );
+        return replaceAll( t_path, "//", "/" ).underlying();
     }
     url::filepath_string normalise_path( const url::filepath_string &path ) {
-        return url::filepath_string( ascii_string( normalise_path( path.underlying().underlying() ) ) );
+        return url::filepath_string( ascii_printable_string( normalise_path( path.underlying().underlying() ) ) );
     }
 
 
@@ -106,26 +116,26 @@ namespace {
 */
 
 
-void fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_string &into ) {
-    throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_string &into )" );
+void fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_printable_string &into ) {
+    throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_printable_string &into )" );
 }
 
 
-void fostlib::url::filepath_string_tag::do_encode( const ascii_string &from, ascii_string &into ) {
+void fostlib::url::filepath_string_tag::do_encode( const ascii_printable_string &from, ascii_printable_string &into, const bool encode_slash ) {
     into.clear();
     std::size_t length = from.underlying().length();
     into.reserve( length + length / 2);
-    for ( ascii_string::const_iterator i(from.begin()); i != from.end(); ++i )
-        if ( g_url_allowed.find( *i ) == utf8string::npos )
-            into += hex< ascii_string >(*i);
+    for ( ascii_printable_string::const_iterator i(from.begin()); i != from.end(); ++i )
+        if ( (encode_slash ? g_url_part_allowed : g_url_allowed).underlying().find( *i ) == std::string::npos )
+            into += hex< ascii_printable_string >(*i);
         else
             into += *i;
 }
 
 
-void fostlib::url::filepath_string_tag::check_encoded( const ascii_string &s ) {
-    for ( ascii_string::const_iterator c( s.begin() ); c != s.end(); ++c )
-        if ( g_url_allowed.find( *c ) == utf8string::npos ) {
+void fostlib::url::filepath_string_tag::check_encoded( const ascii_printable_string &s ) {
+    for ( ascii_printable_string::const_iterator c( s.begin() ); c != s.end(); ++c )
+        if ( g_url_allowed_lax.underlying().find( *c ) == std::string::npos ) {
             if ( *c == '%' )
                 for ( std::size_t p = 0; p != 2; ++p ) {
                     if ( ++c == s.end() )
@@ -142,10 +152,10 @@ void fostlib::url::filepath_string_tag::check_encoded( const ascii_string &s ) {
 
 
 url::filepath_string fostlib::coercer< url::filepath_string, string >::coerce( const string &str ) {
-    utf8string narrowed( fostlib::coerce< utf8string >( str ) );
+    utf8_string narrowed( fostlib::coerce< utf8_string >( str ) );
     url::filepath_string encoded;
-    for ( utf8string::const_iterator it( narrowed.begin() ); it != narrowed.end(); ++it )
-        if ( g_url_allowed.find( *it ) == utf8string::npos )
+    for ( utf8_string::const_iterator it( narrowed.begin() ); it != narrowed.end(); ++it )
+        if ( g_url_allowed.underlying().find( *it ) == std::string::npos )
             encoded += hex< url::filepath_string >( *it );
         else
             encoded += *it;
@@ -184,29 +194,29 @@ void fostlib::url::query_string::remove( const string &name ) {
 }
 
 namespace {
-    ascii_string query_string_encode( const string &s ) {
-        ascii_string r; utf8string i( coerce< utf8string >( s ) );
-        for ( utf8string::const_iterator c( i.begin() ); c != i.end(); ++c )
-            if ( g_query_string_allowed.find( *c ) == utf8string::npos )
-                r += hex< ascii_string >( *c );
+    ascii_printable_string query_string_encode( const string &s ) {
+        ascii_printable_string r; utf8_string i( coerce< utf8_string >( s ) );
+        for ( utf8_string::const_iterator c( i.begin() ); c != i.end(); ++c )
+            if ( g_query_string_allowed.underlying().find( *c ) == std::string::npos )
+                r += hex< ascii_printable_string >( *c );
             else
                 r += *c;
         return r;
     }
-    nullable< ascii_string > query_string_encode( const nullable< string > &s ) {
+    nullable< ascii_printable_string > query_string_encode( const nullable< string > &s ) {
         if ( s.isnull() )
             return null;
         else
             return query_string_encode( s.value() );
     }
 }
-nullable< ascii_string > fostlib::url::query_string::as_string() const {
-    nullable< ascii_string > r;
+nullable< ascii_printable_string > fostlib::url::query_string::as_string() const {
+    nullable< ascii_printable_string > r;
     for ( std::map< string, std::list< nullable< string > > >::const_iterator it( m_query.begin() ); it != m_query.end(); ++it )
         for ( std::list< nullable< string > >::const_iterator v( it->second.begin() ); v != it->second.end(); ++v )
             r = concat(
-                r, ascii_string( "&" ), concat(
-                    query_string_encode( it->first ) + ascii_string( "=" ), query_string_encode( *v )
+                r, ascii_printable_string( "&" ), concat(
+                    query_string_encode( it->first ) + ascii_printable_string( "=" ), query_string_encode( *v )
                 )
             );
     return r;
@@ -222,23 +232,23 @@ setting< string > fostlib::url::s_default_host( L"fost-base/Cpp/fost-inet/url.cp
 
 
 fostlib::url::url()
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
+: protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const url& url, const filepath_string &path )
-: protocol( ascii_string( "http" ) ), m_host( url.server() ), m_pathspec( "/" ) {
+: protocol( "http" ), m_host( url.server() ), m_pathspec( "/" ) {
     pathspec( path );
 }
 fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
-: protocol( ascii_string( "http" ) ), m_host( url.server() ), m_pathspec( "/" ) {
+: protocol( "http" ), m_host( url.server() ), m_pathspec( "/" ) {
     pathspec( coerce< filepath_string >( path ) );
 }
 fostlib::url::url( const t_form form, const string &str )
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
+: protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
     std::pair< string, nullable< string > > anchor_parts( partition( str, L"#" ) );
     std::pair< string, nullable< string > > query_parts( partition( anchor_parts.first, L"?" ) );
     switch ( form ) {
     case e_pathname:
-        m_pathspec = url::filepath_string( ascii_string( normalise_path( coerce< url::filepath_string >( str ).underlying().underlying() ) ) );
+        m_pathspec = url::filepath_string( ascii_printable_string( normalise_path( coerce< url::filepath_string >( str ).underlying().underlying() ) ) );
         break;
     case e_encoded:
         for ( string::const_iterator it( str.begin() ); it != str.end(); ++it )
@@ -250,20 +260,23 @@ fostlib::url::url( const t_form form, const string &str )
     if ( !query_parts.second.isnull() )
         query( query_string( query_parts.second.value() ) );
     if ( !anchor_parts.second.isnull() )
-        anchor( ascii_string( coerce< utf8string >( anchor_parts.second.value() ) ) );
+        anchor( coerce< ascii_printable_string >( anchor_parts.second.value() ) );
 }
 fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw )
-: protocol( ascii_string( "http" ) ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
+: protocol( "http" ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const string &a_url )
-: protocol( ascii_string( "http" ) ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
+: protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
     try {
-        url u; ascii_string fs;
+        url u; ascii_printable_string fs; query_string qs;
         if ( !boost::spirit::parse( a_url.c_str(),
             url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
             >> !(
                 boost::spirit::chlit< wchar_t >( '/' )
                 >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+            ) >> !(
+                boost::spirit::chlit< wchar_t >( '?' )
+                >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
             )
         ).full )
             throw exceptions::parse_error( L"Could not parse URL" );
@@ -274,37 +287,45 @@ fostlib::url::url( const string &a_url )
         throw;
     }
 }
-fostlib::url::url( const ascii_string &protocol, const host &h,
+fostlib::url::url( const ascii_printable_string &protocol, const host &h,
     const nullable< string > &username,
     const nullable< string > &password
 ) : protocol( protocol ), user( username ), password( password ), m_host( h ), m_pathspec( "/" ) {
 }
 
-ascii_string fostlib::url::as_string() const {
-    ascii_string url( protocol() + ascii_string( "://" ) );
+ascii_printable_string fostlib::url::as_string() const {
+    ascii_printable_string url( protocol() + ascii_printable_string( "://" ) );
     if ( !user().isnull() )
-        url += ascii_string( coerce< utf8string >( user().value() + L":" + password().value( string() ) + L"@" ) );
+        url += coerce< ascii_printable_string >( user().value() + L":" + password().value( string() ) + L"@" );
     else if ( !password().isnull() )
-        url += ascii_string( coerce< utf8string >( L":" + password().value() + L"@" ) );
-    url += ascii_string( coerce< utf8string >( m_host.name() ) ) + pathspec().underlying();
-    url = concat( url, ascii_string( "?" ), query().as_string() ).value();
-    return concat( url, ascii_string( "#" ), anchor() ).value();
+        url += coerce< ascii_printable_string >( L":" + password().value() + L"@" );
+    url += coerce< ascii_printable_string >( m_host.name() ) + pathspec().underlying();
+    url = concat( url, ascii_printable_string( "?" ), query().as_string() ).value();
+    return concat( url, ascii_printable_string( "#" ), anchor() ).value();
 }
 
-ascii_string fostlib::url::as_string( const url &relative_from ) const {
+ascii_printable_string fostlib::url::as_string( const url &relative_from ) const {
     if ( g_allow_relative.value() &&
-        ( protocol() == ascii_string( "http" ) || protocol() == ascii_string( "https" ) ) &&
+        ( protocol() == ascii_printable_string( "http" ) || protocol() == ascii_printable_string( "https" ) ) &&
         relative_from.server().service() == server().service() &&
         relative_from.server().name() == server().name()
     )
-        return concat( concat( m_pathspec.underlying(), ascii_string( "?" ), query().as_string() ), ascii_string( "#" ), anchor() ).value();
+        return concat(
+            concat(
+                m_pathspec.underlying(),
+                ascii_printable_string( "?" ),
+                query().as_string()
+            ),
+            ascii_printable_string( "#" ),
+            anchor()
+        ).value();
     else
         return as_string();
 }
 
 fostlib::port_number fostlib::url::port() const {
     if ( server().service().isnull() )
-        return protocol() == ascii_string("http") ? 80 : 443;
+        return protocol() == ascii_printable_string("http") ? 80 : 443;
     else
         return coerce< port_number >( server().service().value() );
 }

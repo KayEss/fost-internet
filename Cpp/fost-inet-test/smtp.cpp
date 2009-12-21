@@ -27,7 +27,7 @@ FSL_TEST_FUNCTION( to_string ) {
     FSL_CHECK_EQ(coerce< string >(addy), "<address@example.com>");
     addy.name(L"Mr. Address");
     FSL_CHECK_EQ(coerce< string >(addy), "Mr. Address <address@example.com>");
-    FSL_CHECK_EQ(coerce< utf8string >(addy), "Mr. Address <address@example.com>");
+    FSL_CHECK_EQ(coerce< utf8_string >(addy), "Mr. Address <address@example.com>");
 }
 
 #define PARSE_PLAIN(s) \

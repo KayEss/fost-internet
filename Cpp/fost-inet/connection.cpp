@@ -77,15 +77,21 @@ namespace {
     void connect(boost::asio::ip::tcp::socket &socket, const host &host, port_number port) {
         using namespace boost::asio::ip;
         tcp::resolver resolver(g_io_service);
-        tcp::resolver::query q(coerce<std::string>(host.name()), coerce<std::string>(coerce<string>(port)));
-        tcp::resolver::iterator endpoint = resolver.resolve(q), end;
-        boost::system::error_code error = boost::asio::error::host_not_found;
-        while ( error && endpoint != end ) {
+        tcp::resolver::query q(
+            coerce<ascii_string>(host.name()).underlying(),
+            coerce<ascii_string>(coerce<string>(port)).underlying()
+        );
+        boost::system::error_code host_error;
+        tcp::resolver::iterator endpoint = resolver.resolve(q, host_error), end;
+        if ( host_error == boost::asio::error::host_not_found )
+            throw exceptions::host_not_found( host.name() );
+        boost::system::error_code connect_error = boost::asio::error::host_not_found;
+        while ( connect_error && endpoint != end ) {
             socket.close();
-            socket.connect(*endpoint++, error);
+            socket.connect(*endpoint++, connect_error);
         }
-        if ( error )
-            throw boost::system::system_error(error);
+        if ( connect_error )
+            throw boost::system::system_error(connect_error);
     }
 }
 
@@ -150,10 +156,10 @@ network_connection &fostlib::network_connection::operator << ( const const_memor
     }
     return *this;
 }
-network_connection &fostlib::network_connection::operator << ( const utf8string &s ) {
+network_connection &fostlib::network_connection::operator << ( const utf8_string &s ) {
     boost::asio::streambuf b;
     std::ostream os(&b);
-    os << s;
+    os << s.underlying();
     std::size_t length(send(*m_socket, m_ssl_data, b));
     b.consume(length);
     return *this;
@@ -163,7 +169,13 @@ network_connection &fostlib::network_connection::operator << ( const std::string
 }
 
 
-network_connection &fostlib::network_connection::operator >> ( utf8string &s ) {
+network_connection &fostlib::network_connection::operator >> ( utf8_string &s ) {
+    std::string next;
+    (*this) >> next;
+    s += utf8_string(next);
+    return *this;
+}
+network_connection &fostlib::network_connection::operator >> ( std::string &s ) {
     std::size_t length(read_until(*m_socket, m_ssl_data, m_input_buffer, "\r\n"));
     if ( length >= 2 ) {
         for ( std::size_t c = 0; c < length - 2; ++c )

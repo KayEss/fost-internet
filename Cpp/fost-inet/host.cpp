@@ -25,7 +25,8 @@ namespace {
         boost::asio::io_service io_service;
         boost::asio::ip::tcp::resolver resolver( io_service );
         boost::asio::ip::tcp::resolver::query query(
-            coerce< std::string >( host.name() ), coerce< std::string >( host.service().value("0") )
+            coerce< ascii_string >( host.name() ).underlying(),
+            coerce< ascii_string >( host.service().value("0") ).underlying()
         );
         boost::system::error_code error;
         boost::asio::ip::tcp::resolver::iterator it( resolver.resolve( query, error ) );
@@ -81,15 +82,15 @@ host fostlib::coercer< host, string >::coerce( const string &h ) {
         throw exceptions::not_implemented("fostlib::coercer< host, string >::coerce( const string &h ) -- where the host name didn't parse");
 }
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
-    return fostlib::coerce< string >( address.to_string() );
+    return fostlib::coerce< string >( fostlib::coerce< ascii_string >( address.to_string() ) );
 }
 ascii_string fostlib::coercer< ascii_string, host >::coerce( const host &h ) {
     if ( h.service().isnull() )
-        return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded );
+        return fostlib::coerce< ascii_string >( h.name() );
     else
-        return ascii_string( fostlib::coerce< utf8string >( h.name() ).c_str(), ascii_string::encoded ) +
-            ascii_string(":") +
-            ascii_string( fostlib::coerce< utf8string >( h.service().value() ).c_str(), ascii_string::encoded )
+        return fostlib::coerce< ascii_string >( h.name() )
+            + ascii_string(":")
+            + fostlib::coerce< ascii_string >( h.service().value() )
         ;
 }
 

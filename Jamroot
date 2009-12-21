@@ -1,14 +1,32 @@
 path-constant TOP : . ;
 include $(TOP)/../boost-version.jam ;
+include ../fost-base/fost.jam ;
 
 use-project fost-base : ../fost-base/ ;
-include ../fost-base/fost.jam ;
 fost-project fost-internet ;
 
-build-project Cpp/fost-aws ;
-build-project Cpp/fost-aws-test ;
-build-project Cpp/fost-inet ;
-build-project Cpp/fost-inet-test ;
+alias fost
+    :
+        Cpp/fost-inet
+    ;
+
+alias tests
+    :
+        Cpp/fost-inet-test
+    ;
+explicit tests ;
+
+alias aws
+    :
+        Cpp/fost-aws
+    ;
+explicit aws ;
+
+alias docs
+    :
+        Docs//fost-internet.html
+    ;
+explicit docs ;
 
 alias examples
     :
