@@ -1,3 +1,3 @@
 @echo off
-echo fost-internet
+echo fost-internet %*
 ..\bjam preserve-test-targets=on %*
