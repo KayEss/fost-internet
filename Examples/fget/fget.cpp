@@ -19,6 +19,7 @@ FSL_MAIN(
     L"Simple HTTP client\nCopyright (C) 2008-2009, Felspar Co. Ltd."
 )( fostlib::ostream &o, fostlib::arguments &args ) {
     args.commandSwitch("socks", "Network settings", "Socks version");
+    args.commandSwitch("text", L"HTTP", L"Force text downloads" );
 
     // The URL to be fetched (default to localhost)
     string location = args[ 1 ].value( L"http://localhost/" );
