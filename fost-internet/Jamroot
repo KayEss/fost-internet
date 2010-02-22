@@ -16,11 +16,11 @@ alias docs :
 explicit docs ;
 
 alias examples :
-        Examples/host/
-        Examples/fget/
-        Examples/s3put/
-        Examples/webserver-simple/
-        Examples/webserver-threaded/
+        Examples/host
+        Examples/fget
+        Examples/s3put
+        Examples/webserver-simple
+        Examples/webserver-threaded
     ;
 explicit examples ;
 
@@ -30,7 +30,7 @@ alias fost :
     ;
 
 alias tests :
-        ../fost-base//fost
+        ../fost-base//tests
         Cpp/fost-inet-test
     ;
 explicit tests ;
