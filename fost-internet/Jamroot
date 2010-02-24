@@ -5,35 +5,42 @@ include ../fost-base/fost.jam ;
 use-project fost-base : ../fost-base/ ;
 fost-project fost-internet ;
 
-alias fost
-    :
-        Cpp/fost-inet
-    ;
-
-alias tests
-    :
-        Cpp/fost-inet-test
-    ;
-explicit tests ;
-
-alias aws
-    :
+alias aws :
         Cpp/fost-aws
     ;
 explicit aws ;
 
-alias docs
-    :
+alias docs :
         Docs//fost-internet.html
     ;
 explicit docs ;
 
-alias examples
-    :
-        Examples/host/
-        Examples/fget/
-        Examples/s3put/
-        Examples/webserver-simple/
-        Examples/webserver-threaded/
+alias examples :
+        Examples/host
+        Examples/fget
+        Examples/s3put
+        Examples/webserver-simple
+        Examples/webserver-threaded
     ;
 explicit examples ;
+
+alias fost :
+        ../fost-base//fost
+        Cpp/fost-inet
+    ;
+
+alias tests :
+        ../fost-base//tests
+        Cpp/fost-inet-test
+    ;
+explicit tests ;
+
+alias all :
+        ../fost-base//examples
+        aws
+        docs
+        examples
+        fost
+        tests
+    ;
+explicit all ;

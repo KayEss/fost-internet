@@ -58,7 +58,7 @@ void fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const b
         case 200:
             break;
         default:
-            exceptions::not_implemented exception(L"fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const -- with response status" + fostlib::coerce< fostlib::string >( response->status() ));
+            exceptions::not_implemented exception(L"fostlib::aws::s3::bucket::put(const boost::filesystem::wpath &file, const boost::filesystem::wpath &location) const -- with response status " + fostlib::coerce< fostlib::string >( response->status() ));
             exception.info() << response->body() << std::endl;
             throw exception;
     }
