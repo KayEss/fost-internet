@@ -5,11 +5,6 @@ include ../fost-base/fost.jam ;
 use-project fost-base : ../fost-base/ ;
 fost-project fost-internet ;
 
-alias aws :
-        Cpp/fost-aws
-    ;
-explicit aws ;
-
 alias docs :
         Docs//fost-internet.html
     ;
@@ -18,7 +13,6 @@ explicit docs ;
 alias examples :
         Examples/host
         Examples/fget
-        Examples/s3put
         Examples/webserver-simple
         Examples/webserver-threaded
     ;
@@ -37,7 +31,6 @@ explicit tests ;
 
 alias all :
         ../fost-base//examples
-        aws
         docs
         examples
         fost
