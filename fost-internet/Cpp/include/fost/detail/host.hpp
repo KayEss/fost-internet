@@ -6,9 +6,11 @@
 */
 
 
-// Boost.ASIO causes unused return value warnings and we can't do other
-// than completely remove them. TODO remove the asio.hpp from our headers
-#pragma GCC diagnostic ignored "-Wunused-result"
+#ifdef FOST_OS_OSX
+    // Boost.ASIO causes unused return value warnings and we can't do other
+    // than completely remove them. TODO remove the asio.hpp from our headers
+    #pragma GCC diagnostic ignored "-Wunused-result"
+#endif
 
 
 #ifndef FOST_HOST_HPP
