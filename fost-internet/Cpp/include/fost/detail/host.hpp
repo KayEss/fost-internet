@@ -1,9 +1,14 @@
 /*
-    Copyright 1999-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
 */
+
+
+// Boost.ASIO causes unused return value warnings and we can't do other
+// than completely remove them. TODO remove the asio.hpp from our headers
+#pragma GCC diagnostic ignored "-Wunused-result"
 
 
 #ifndef FOST_HOST_HPP
@@ -15,11 +20,12 @@
 
 #ifdef _MSC_VER
     #pragma warning ( push )
-    #pragma warning ( disable : 4267 ) // conversion from 'size_t' to 'DWORD', possible loss of data
-	#include <boost/asio.hpp>
+    // conversion from 'size_t' to 'DWORD', possible loss of data
+    #pragma warning ( disable : 4267 )
+    #include <boost/asio.hpp>
     #pragma warning ( pop )
 #else
-	#include <boost/asio.hpp>
+    #include <boost/asio.hpp>
 #endif
 
 
