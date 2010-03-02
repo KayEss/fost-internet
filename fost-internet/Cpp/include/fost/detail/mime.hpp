@@ -86,7 +86,7 @@ namespace fostlib {
             accessors< mime_headers, fostlib::lvalue > headers;
 
             virtual bool boundary_is_ok( const string &boundary ) const = 0;
-            virtual std::ostream &print_on( std::ostream & ) const = 0;
+            virtual std::ostream &print_on( fostlib::ostream & ) const = 0;
 
             class FOST_INET_DECLSPEC const_iterator {
                 friend class fostlib::mime;
@@ -117,7 +117,7 @@ namespace fostlib {
         public:
             empty_mime(const mime_headers &headers = mime_headers());
 
-            std::ostream &print_on( std::ostream &o ) const;
+            std::ostream &print_on( fostlib::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
     };
 
@@ -127,7 +127,7 @@ namespace fostlib {
         public:
             mime_envelope(const mime_headers &headers = mime_headers());
 
-            std::ostream &print_on( std::ostream &o ) const;
+            std::ostream &print_on( fostlib::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue > items;
@@ -155,7 +155,7 @@ namespace fostlib {
                 const string &mime = L"text/plain"
             );
 
-            std::ostream &print_on( std::ostream &o ) const;
+            std::ostream &print_on( fostlib::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< const utf8_string > text;
@@ -172,25 +172,22 @@ namespace fostlib {
                 const string &mime = "binary/octet-stream"
             );
 
-            std::ostream &print_on( std::ostream &o ) const;
+            std::ostream &print_on( fostlib::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< const boost::filesystem::wpath > filename;
     };
 
 
-    FOST_INET_DECLSPEC std::ostream &operator <<( std::ostream &o, const headers_base &headers );
-    FOST_INET_DECLSPEC std::ostream &operator <<( std::ostream &o, const headers_base::content &value );
-    inline std::ostream &operator << ( std::ostream &o, const mime &m ) {
+    FOST_INET_DECLSPEC fostlib::ostream &operator << (
+        fostlib::ostream &o, const headers_base &headers
+    );
+    FOST_INET_DECLSPEC fostlib::ostream &operator << (
+        fostlib::ostream &o, const headers_base::content &value
+    );
+    inline fostlib::ostream &operator << ( fostlib::ostream &o, const mime &m ) {
         return m.print_on( o );
     }
-#ifdef WIN32
-    inline std::wostream &operator << ( std::wostream &o, const mime &m ) {
-        std::stringstream ss;
-        ss << m;
-        return o << coerce< string >( utf8_string( ss.str() ) );
-    }
-#endif
 
 
 }
