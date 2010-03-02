@@ -17,7 +17,10 @@ FSL_TEST_SUITE( headers );
 
 
 FSL_TEST_FUNCTION( ostream ) {
-    fostlib::stringstream ss;
+    // Use a std::stringstream here because all of these MIME types need to be
+    // printable on a narrow character stream as that is what all network connections
+    // are.
+    std::stringstream ss;
     fostlib::headers_base::content c;
     ss << c;
 }
