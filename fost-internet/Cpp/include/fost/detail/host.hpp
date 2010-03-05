@@ -12,13 +12,14 @@
 
 
 #include <fost/string>
+
 #ifdef _MSC_VER
     #pragma warning ( push )
     #pragma warning ( disable : 4267 ) // conversion from 'size_t' to 'DWORD', possible loss of data
-#endif
-#include <boost/asio.hpp>
-#ifdef _MSC_VER
+	#include <boost/asio.hpp>
     #pragma warning ( pop )
+#else
+	#include <boost/asio.hpp>
 #endif
 
 

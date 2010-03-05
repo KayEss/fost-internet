@@ -1,7 +1,0 @@
-
-fost-lib-autotest fost-aws
-    : Cpp/fost-aws
-    :
-        ../../../fost-base/Cpp/fost-crypto/
-        ../fost-inet/
-    ;

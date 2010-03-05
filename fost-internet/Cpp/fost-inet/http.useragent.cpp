@@ -26,6 +26,8 @@ namespace {
     boost::asio::io_service g_io_service;
 
     const fostlib::setting< fostlib::string > c_user_agent( L"fost-internet/Cpp/fost-inet/http.useragent.cpp", L"HTTP", L"UserAgent", L"Felspar user agent", true );
+
+    const fostlib::setting< bool > c_force_text( L"fost-internet/Cpp/fost-inet/http.useragent.cpp", L"HTTP", L"Force text downloads", false, true );
 }
 
 
@@ -135,6 +137,7 @@ const mime &fostlib::http::user_agent::response::body() const {
         if ( !length.isnull() && length.value() == 0 )
             m_body.reset(new empty_mime(m_headers));
         else if ( ( length.isnull() || length.value() ) && (
+            c_force_text.value() ||
             m_headers[ L"Content-Type" ].value().substr(0, 5) == "text/" ||
             m_headers[ L"Content-Type" ].value() == "application/xml"
         )) {
