@@ -1,5 +1,5 @@
 /*
-    Copyright 2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -22,25 +22,29 @@ namespace {
     ) {
         mime::mime_headers headers;
 
-        utf8_string line;
+        std::string line;
         the_network_connection >> line;
 
         while ( !line.empty() ) {
-            utf8_string header(line);
+            std::string header(line);
 
             line = "";
             the_network_connection >> line;
 
-            while (
-                (line.underlying().substr(0,1) == " ") ||
-                (line.underlying().substr(0,1) == "\t")
-            ) {
+            while (line.substr(0,1) == " " || line.substr(0,1) == "\t") {
                 header += line;
                 line = "";
                 the_network_connection >> line;
             }
 
-            headers.parse(coerce< string >(header));
+            string safe;
+            for ( std::string::const_iterator c = header.begin(); c != header.end(); ++c )
+                if ( *c > 127 || * c < 0 )
+                    safe += '?';
+                else
+                    safe += *c;
+
+            headers.parse(safe);
         }
         return headers;
     }
@@ -166,14 +170,16 @@ namespace {
                 utf8_string server_response;
                 m_cnx >> server_response;
 
-                std::stringstream server_response_stringstream(server_response.underlying().substr(3));
+                std::stringstream server_response_stringstream(
+                    server_response.underlying().substr(3)
+                );
                 server_response_stringstream >> message_count;
                 size_t octets;
                 server_response_stringstream >> octets;
             }
             ~pop3cnx()
             try {
-                send_and_check_OK(m_cnx, "quit");
+                send(m_cnx, "quit");
             } catch ( ... ) {
                 absorbException();
             }
@@ -202,7 +208,9 @@ void fostlib::pop3::iterate_mailbox(
     const string &username,
     const string &password
 ) {
-    boost::scoped_ptr< pop3cnx > mailbox( new pop3cnx(host, username, password) );
+    boost::scoped_ptr< pop3cnx > mailbox(
+        new pop3cnx(host, username, password)
+    );
     const size_t messages = mailbox->message_count;
 
     // Loop from the end so we always process the latest bounce messages first
@@ -214,7 +222,8 @@ void fostlib::pop3::iterate_mailbox(
             mailbox.reset( new pop3cnx(host, username, password) );
             if ( mailbox->message_count < i )
                 throw fostlib::exceptions::out_of_range< size_t >(
-                    "The number of messages on the server can't go down below the ones we've processed!",
+                    "The number of messages on the server can't go down "
+                        "below the ones we've processed!",
                     i, messages, mailbox->message_count
                 );
         }
