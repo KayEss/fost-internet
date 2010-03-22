@@ -161,6 +161,27 @@ namespace fostlib {
             accessors< const utf8_string > text;
     };
 
+    /// A MIME container which represents binary data in memory
+    class FOST_INET_DECLSPEC binary_body : public mime {
+        struct binary_body_iterator;
+        std::auto_ptr< iterator_implementation > iterator() const;
+        public:
+            /// Construct from a data block
+            binary_body(
+                const std::vector< unsigned char > &data,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream"
+            );
+
+            /// Display the data on a stream
+            std::ostream &print_on( std::ostream &o ) const;
+            /// Check that the boundary can be used
+            bool boundary_is_ok( const string &boundary ) const;
+
+            /// Allow direct read access to the data
+            accessors< const std::vector< unsigned char > > data;
+    };
+
     /// A MIME container which represents a file on disk
     class FOST_INET_DECLSPEC file_body : public mime {
         struct file_body_iteration;

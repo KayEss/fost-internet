@@ -250,6 +250,37 @@ std::auto_ptr< mime::iterator_implementation > fostlib::text_body::iterator() co
 
 
 /*
+    fostlib::binary_body
+*/
+
+
+fostlib::binary_body::binary_body(
+    const std::vector< unsigned char > &data,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(data) {
+}
+
+std::ostream &fostlib::binary_body::print_on( std::ostream &o ) const {
+    throw exceptions::not_implemented(
+        "fostlib::binary_body::print_on( std::ostream &o ) const"
+    );
+}
+
+bool fostlib::binary_body::boundary_is_ok( const string &boundary ) const {
+    throw exceptions::not_implemented(
+        "fostlib::binary_body::boundary_is_ok( const string &boundary ) const"
+    );
+}
+
+std::auto_ptr< mime::iterator_implementation > fostlib::binary_body::iterator() const {
+    throw exceptions::not_implemented(
+        "fostlib::binary_body::iterator() const"
+    );
+}
+
+
+/*
     fostlib::file_body
 */
 
