@@ -13,7 +13,7 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/detail/connection.hpp>
+#include <fost/connection.hpp>
 #include <boost/asio/ssl.hpp>
 
 #include <fost/exception/unexpected_eof.hpp>

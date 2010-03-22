@@ -6,7 +6,7 @@
 */
 
 #include "fost-inet.hpp"
-#include <fost/detail/pop3.hpp>
+#include <fost/pop3.hpp>
 
 #include <boost/regex.hpp>
 

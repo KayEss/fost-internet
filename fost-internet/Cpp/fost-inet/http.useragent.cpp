@@ -9,7 +9,7 @@
 #include "fost-inet.hpp"
 #include <fost/datetime>
 
-#include <fost/detail/http.useragent.hpp>
+#include <fost/http.useragent.hpp>
 #include <fost/parse/parse.hpp>
 
 #include <fost/exception/unexpected_eof.hpp>

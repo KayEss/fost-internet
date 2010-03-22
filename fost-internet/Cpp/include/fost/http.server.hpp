@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -11,8 +11,8 @@
 #pragma once
 
 
-#include <fost/detail/url.hpp>
-#include <fost/detail/http.hpp>
+#include <fost/url.hpp>
+#include <fost/http.hpp>
 
 
 namespace fostlib {
@@ -30,9 +30,9 @@ namespace fostlib {
                 boost::scoped_ptr< mime > m_mime;
 
                 public:
-                    // This constructor initialises a server request from a socket connection
+                    /// This constructor initialises a server request from a socket connection
                     request( std::auto_ptr< boost::asio::ip::tcp::socket > connection );
-                    // This constructor is useful for mocking the request for code that interacts with a server
+                    /// This constructor is useful for mocking the request for code that interacts with a server
                     request(
                         const string &method, const url::filepath_string &filespec,
                         std::auto_ptr< mime > headers_and_body

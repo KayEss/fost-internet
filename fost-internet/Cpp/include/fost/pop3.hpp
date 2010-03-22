@@ -1,5 +1,5 @@
 /*
-    Copyright 2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -10,10 +10,10 @@
 #pragma once
 
 #include <fost/string>
-#include <fost/detail/host.hpp>
-#include <fost/detail/connection.hpp>
-#include <fost/detail/smtp.hpp>
-#include <fost/detail/mime.hpp>
+#include <fost/host.hpp>
+#include <fost/connection.hpp>
+#include <fost/smtp.hpp>
+#include <fost/mime.hpp>
 
 
 

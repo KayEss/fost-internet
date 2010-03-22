@@ -7,7 +7,7 @@
 
 
 #include "fost-inet-test.hpp"
-#include <fost/detail/mime.hpp>
+#include <fost/mime.hpp>
 
 
 using namespace fostlib;

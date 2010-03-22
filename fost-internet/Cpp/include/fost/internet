@@ -14,8 +14,8 @@
 
 
 #include <fost/core>
-#include <fost/detail/connection.hpp>
-#include <fost/detail/host.hpp>
-#include <fost/detail/http.useragent.hpp>
-#include <fost/detail/smtp.hpp>
-#include <fost/detail/url.hpp>
+#include <fost/connection.hpp>
+#include <fost/host.hpp>
+#include <fost/http.useragent.hpp>
+#include <fost/smtp.hpp>
+#include <fost/url.hpp>
