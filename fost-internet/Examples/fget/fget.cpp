@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,6 +9,8 @@
 #include <fost/cli>
 #include <fost/main.hpp>
 #include <fost/internet>
+
+#include <boost/filesystem/fstream.hpp>
 
 
 using namespace fostlib;
@@ -26,7 +28,22 @@ FSL_MAIN(
     // Create a user agent and request the URL
     http::user_agent browser;
     std::auto_ptr< http::user_agent::response > response( browser.get( url( location ) ) );
-    // Display the body
-    o << response->body() << std::endl;
+    if ( args[2].isnull() ) {
+        // Display the body
+        o << response->body() << std::endl;
+    } else {
+        boost::filesystem::ofstream file(
+            coerce< boost::filesystem::wpath >(args[2].value()), std::ios::binary
+        );
+        for (
+            mime::const_iterator chunk( response->body().begin() );
+            chunk != response->body().end(); ++chunk
+        ) {
+            const char
+                *first = reinterpret_cast< const char * >((*chunk).first),
+                *second = reinterpret_cast< const char * >((*chunk).second);
+            file.write(first, second - first);
+        }
+    }
     return 0;
 }

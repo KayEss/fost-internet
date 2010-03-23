@@ -277,9 +277,25 @@ bool fostlib::binary_body::boundary_is_ok( const string &boundary ) const {
     );
 }
 
+struct fostlib::binary_body::binary_body_iterator :
+    public mime::iterator_implementation
+{
+    const std::vector< unsigned char > &data; bool sent;
+    binary_body_iterator(const std::vector< unsigned char > &d)
+    : data(d), sent(false) {
+    }
+    const_memory_block operator () () {
+        if ( data.size() == 0 || sent )
+            return const_memory_block(NULL , NULL );
+        else {
+            sent = true;
+            return const_memory_block(data.data(), data.data() + data.size());
+        }
+    }
+};
 std::auto_ptr< mime::iterator_implementation > fostlib::binary_body::iterator() const {
-    throw exceptions::not_implemented(
-        "fostlib::binary_body::iterator() const"
+    return std::auto_ptr< mime::iterator_implementation >(
+        new binary_body_iterator(data())
     );
 }
 
