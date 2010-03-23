@@ -262,9 +262,13 @@ fostlib::binary_body::binary_body(
 }
 
 std::ostream &fostlib::binary_body::print_on( std::ostream &o ) const {
-    throw exceptions::not_implemented(
-        "fostlib::binary_body::print_on( std::ostream &o ) const"
-    );
+    for (
+        std::vector< unsigned char >::const_iterator i(data().begin());
+        i != data().end();
+        ++i
+    )
+        o << int(*i) << ' ';
+    return o;
 }
 
 bool fostlib::binary_body::boundary_is_ok( const string &boundary ) const {
@@ -298,7 +302,9 @@ std::ostream &fostlib::file_body::print_on( std::ostream &o ) const {
 }
 
 bool fostlib::file_body::boundary_is_ok( const string &boundary ) const {
-    throw exceptions::not_implemented("fostlib::file_body::boundary_is_ok( const string &boundary ) const");
+    throw exceptions::not_implemented(
+        "fostlib::file_body::boundary_is_ok( const string &boundary ) const"
+    );
 }
 
 

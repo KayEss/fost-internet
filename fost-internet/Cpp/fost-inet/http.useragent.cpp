@@ -211,13 +211,20 @@ const mime &fostlib::http::user_agent::response::body() const {
                     "fostlib::http::user_agent::response::body() -- "
                     "where the encoding is not UTF-8", charset.value()
                 );
-        } else if ( length.isnull() || length.value() )
+        } else if ( length.isnull() ) {
             throw exceptions::not_implemented(
                 "fostlib::http::user_agent::response::body() -- "
-                "where the content is not text and we have to download something",
+                "where the content is not text and we have to download something "
+                "and the length is not known",
                 m_headers[ L"Content-Type" ].value().empty() ?
                     L"No content type specified" : m_headers[ L"Content-Type" ].value()
             );
+        } else if ( length.value() ) {
+            std::vector< unsigned char > body(length.value());
+            *m_cnx >> body;
+            m_body.reset(new binary_body(body, m_headers));
+        } else
+            ; // We have a length, but it is zero
     }
     return *m_body;
 }

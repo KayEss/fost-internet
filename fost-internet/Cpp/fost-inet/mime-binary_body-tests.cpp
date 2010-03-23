@@ -21,4 +21,5 @@ FSL_TEST_FUNCTION( constructor ) {
     std::vector< unsigned char > data(256, 123);
 
     fostlib::binary_body body(data);
+    FSL_CHECK(body.data() == data);
 }
