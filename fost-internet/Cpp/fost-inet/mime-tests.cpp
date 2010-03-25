@@ -34,6 +34,11 @@ FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
     mime::mime_headers headers;
     // from an Exchange bounced message:
     headers.parse( L"X-MS-TNEF-Correlator: \r\n" );
+    headers.set("TE");
+
+    std::ostringstream ss;
+    ss << headers;
+    FSL_CHECK_EQ("TE: \r\nX-MS-TNEF-Correlator: \r\n", ss.str());
 }
 
 FSL_TEST_FUNCTION( empty_mime ) {

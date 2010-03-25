@@ -29,10 +29,15 @@ namespace fostlib {
 
         void parse( const string &headers );
 
+        /// Returns true if a specified header exists
         bool exists( const string & ) const;
+        /// Allows a header to be set, but without any value
+        content &set( const string &name );
+        /// Allows a header to be given a specified value
         content &set( const string &name, const content & );
         /// Allow a specified sub-value on the specified header to be set
         content &set_subvalue( const string &name, const string &k, const string &v );
+        /// Fetches a header throwing if the header doesn't exist
         const content &operator [] ( const string & ) const;
 
         typedef std::map< string, content >::const_iterator const_iterator;
@@ -60,7 +65,9 @@ namespace fostlib {
         };
 
     protected:
-        virtual std::pair< string, content > value( const string &name, const string &value ) = 0;
+        virtual std::pair< string, content > value(
+            const string &name, const string &value
+        ) = 0;
 
     private:
         std::map< string, content > m_headers;

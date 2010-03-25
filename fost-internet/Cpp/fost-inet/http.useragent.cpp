@@ -47,6 +47,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     req.headers().set("Host", req.address().server().name());
     if ( !req.headers().exists("User-Agent") )
         req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4.09.09");
+    req.headers().set("TE");
 
     if ( !authentication().isnull() )
         authentication().value()( req );

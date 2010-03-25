@@ -26,12 +26,16 @@ fostlib::headers_base::~headers_base() {
 
 
 void fostlib::headers_base::parse( const string &headers ) {
-    // This implementation ignores character encodings - assumes UTF-8 which won't work for mail headers
-    for ( std::pair< string, fostlib::nullable< string > > lines( partition( headers, L"\r\n" ) ); !lines.first.empty(); lines = partition( lines.second, L"\r\n" ) ) {
-        std::pair< string, fostlib::nullable< string > > line( partition( lines.first, L": " ) );
-        if ( line.second.isnull() ) {
-        } else
-            m_headers.insert( value( line.first, line.second.value() ) );
+    // This implementation ignores character encodings
+    // - assumes UTF-8 which won't work for mail headers
+    for (
+        std::pair< string, fostlib::nullable< string > > lines( partition( headers, L"\r\n" ) );
+        !lines.first.empty(); lines = partition( lines.second, L"\r\n" )
+    ) {
+        const std::pair< string, fostlib::nullable< string > > line(
+            partition( lines.first, L":" )
+        );
+        m_headers.insert( value( line.first, line.second.value( fostlib::string() ) ) );
     }
 }
 
@@ -44,10 +48,13 @@ bool fostlib::headers_base::exists( const fostlib::string &n ) const {
 }
 namespace {
     // Done here so it is initialised on DLL loading.
-    // Should g'tee no multithreading problem as this isn't going to be used in the DLL initialisation
+    // Should g'tee no multithreading problem as this isn't going to be used
+    // in the DLL initialisation
     const headers_base::content g_stat;
 }
-const headers_base::content &fostlib::headers_base::operator [] ( const fostlib::string &n ) const {
+const headers_base::content &fostlib::headers_base::operator [] (
+    const fostlib::string &n
+) const {
     std::map< fostlib::string, content >::const_iterator p( m_headers.find( n ) );
     if ( p == m_headers.end() )
         return g_stat;
@@ -55,10 +62,17 @@ const headers_base::content &fostlib::headers_base::operator [] ( const fostlib:
         return (*p).second;
 }
 
-headers_base::content &fostlib::headers_base::set( const string &n, const content &v ) {
+headers_base::content &fostlib::headers_base::set( const string &n ) {
+    return set(n, content());
+}
+headers_base::content &fostlib::headers_base::set(
+    const string &n, const content &v
+) {
     return m_headers[n] = v;
 }
-headers_base::content &fostlib::headers_base::set_subvalue( const string &n, const string &k, const string &v ) {
+headers_base::content &fostlib::headers_base::set_subvalue(
+    const string &n, const string &k, const string &v
+) {
     return m_headers[n].subvalue(k, v);
 }
 
