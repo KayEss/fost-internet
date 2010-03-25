@@ -289,7 +289,7 @@ struct fostlib::binary_body::binary_body_iterator :
             return const_memory_block(NULL , NULL );
         else {
             sent = true;
-            return const_memory_block(data.data(), data.data() + data.size());
+            return const_memory_block(&data[0], &data[0] + data.size());
         }
     }
 };
