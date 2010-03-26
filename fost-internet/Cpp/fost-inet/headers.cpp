@@ -91,11 +91,14 @@ std::ostream &fostlib::operator << ( std::ostream &o, const fostlib::headers_bas
 
 
 /*
-    fostlib::headers_base::Value
+    fostlib::headers_base::content
 */
 
 
 fostlib::headers_base::content::content() {
+}
+fostlib::headers_base::content::content( nliteral val )
+: value( val ) {
 }
 fostlib::headers_base::content::content( wliteral val )
 : value( val ) {

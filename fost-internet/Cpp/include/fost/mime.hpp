@@ -46,11 +46,18 @@ namespace fostlib {
 
         class FOST_INET_DECLSPEC content {
         public:
+            /// Create empty content for a header value
             content();
+            /// Create header value content from a narrow character literal
+            content( nliteral );
+            /// Create header value content from a wide character literal
             content( wliteral );
+            /// Create header value content from a string
             content( const string & );
+            /// Create header value content from a string with sub-values
             content( const string &, const std::map< string, string > & );
 
+            /// The main value of the header field
             accessors< string > value;
 
             content &subvalue( const string &k, const string &v );
