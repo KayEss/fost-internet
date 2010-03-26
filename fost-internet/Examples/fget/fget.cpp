@@ -7,7 +7,7 @@
 
 
 #include <fost/cli>
-#include <fost/main.hpp>
+#include <fost/main>
 #include <fost/internet>
 
 #include <boost/filesystem/fstream.hpp>
@@ -18,7 +18,8 @@ using namespace fostlib;
 
 FSL_MAIN(
     L"fget",
-    L"Simple HTTP client\nCopyright (C) 2008-2009, Felspar Co. Ltd."
+    L"Simple HTTP client\n"
+        L"Copyright (C) 2008-2010, Felspar Co. Ltd."
 )( fostlib::ostream &o, fostlib::arguments &args ) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 
@@ -27,7 +28,9 @@ FSL_MAIN(
     o << location << std::endl;
     // Create a user agent and request the URL
     http::user_agent browser;
-    std::auto_ptr< http::user_agent::response > response( browser.get( url( location ) ) );
+    std::auto_ptr< http::user_agent::response > response(
+        browser.get( url( location ) )
+    );
     if ( args[2].isnull() ) {
         // Display the body
         o << response->body() << std::endl;
