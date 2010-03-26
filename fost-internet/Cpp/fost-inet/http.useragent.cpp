@@ -46,8 +46,9 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     ));
     req.headers().set("Host", req.address().server().name());
     if ( !req.headers().exists("User-Agent") )
-        req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4.09.09");
+        req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4");
     req.headers().set("TE");
+    req.headers().set("Connection", "close");
 
     if ( !authentication().isnull() )
         authentication().value()( req );
@@ -126,19 +127,29 @@ fostlib::http::user_agent::request::request(
     fostlib::http::user_agent::response
 */
 
+
+namespace {
+    void read_headers(
+        network_connection &cnx, mime::mime_headers &headers
+    ) {
+        while ( true ) {
+            utf8_string line;
+            cnx >> line;
+            if (line.empty())
+                break;
+            headers.parse(coerce< string >(line));
+        }
+    }
+}
+
+
 fostlib::http::user_agent::response::response(
     std::auto_ptr< network_connection > connection,
     const string &method, const url &url,
     const string &protocol, int status, const string &message
 ) : method(method), address(url), protocol(protocol),
 status(status), message(message), m_cnx(connection) {
-    while ( true ) {
-        utf8_string line;
-        *m_cnx >> line;
-        if (line.empty())
-            break;
-        m_headers.parse(coerce< string >(line));
-    }
+    read_headers(*m_cnx, m_headers);
 }
 
 
