@@ -8,9 +8,10 @@
 
 #include <fost/cli>
 #include <fost/main>
-#include <fost/internet>
+#include <fost/http>
 
 #include <boost/filesystem/fstream.hpp>
+#include <boost/lambda/bind.hpp>
 
 
 using namespace fostlib;
@@ -28,13 +29,33 @@ FSL_MAIN(
     o << location << std::endl;
     // Create a user agent and request the URL
     http::user_agent browser;
-    std::auto_ptr< http::user_agent::response > response(
-        browser.get( url( location ) )
-    );
+    http::user_agent::request request("GET", url(location));
+    if ( args.commandSwitch( "authenticate" ) == "FOST" ) {
+        std::set< fostlib::string > tosign;
+        if ( !args.commandSwitch( "user" ).isnull() ) {
+            request.headers().set("X-FOST-User", args.commandSwitch("user").value());
+            tosign.insert("X-FOST-User");
+        }
+        if ( args.commandSwitch("key").isnull() || args.commandSwitch("secret").isnull() )
+            throw exceptions::null(
+                "With FOST authentication both -key and -secret must be passed in"
+            );
+        browser.authentication(
+            boost::function< void ( fostlib::http::user_agent::request& )
+            >(boost::lambda::bind(
+                fostlib::http::fost_authentication,
+                args.commandSwitch("key").value(),
+                args.commandSwitch("secret").value(),
+                tosign, boost::lambda::_1
+            ))
+        );
+    }
+    std::auto_ptr< http::user_agent::response > response(browser(request));
     if ( args[2].isnull() ) {
         // Display the body
         o << response->body() << std::endl;
     } else {
+        // Save the body to disk
         boost::filesystem::ofstream file(
             coerce< boost::filesystem::wpath >(args[2].value()), std::ios::binary
         );
