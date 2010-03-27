@@ -11,75 +11,10 @@
 #pragma once
 
 
-#include <fost/core>
-#include <fost/pointers>
-#include <boost/filesystem.hpp>
+#include <fost/headers.hpp>
 
 
 namespace fostlib {
-
-
-    /// An abstract base class used to describe headers as they appear in protocols like SMTP and HTTP.
-    class FOST_INET_DECLSPEC FSL_ABSTRACT headers_base {
-    public:
-        class content;
-
-        headers_base();
-        virtual ~headers_base();
-
-        void parse( const string &headers );
-
-        /// Returns true if a specified header exists
-        bool exists( const string & ) const;
-        /// Allows a header to be set, but without any value
-        content &set( const string &name );
-        /// Allows a header to be given a specified value
-        content &set( const string &name, const content & );
-        /// Allow a specified sub-value on the specified header to be set
-        content &set_subvalue( const string &name, const string &k, const string &v );
-        /// Fetches a header throwing if the header doesn't exist
-        const content &operator [] ( const string & ) const;
-
-        typedef std::map< string, content >::const_iterator const_iterator;
-        const_iterator begin() const;
-        const_iterator end() const;
-
-        class FOST_INET_DECLSPEC content {
-        public:
-            /// Create empty content for a header value
-            content();
-            /// Create header value content from a narrow character literal
-            content( nliteral );
-            /// Create header value content from a wide character literal
-            content( wliteral );
-            /// Create header value content from a string
-            content( const string & );
-            /// Create header value content from a string with sub-values
-            content( const string &, const std::map< string, string > & );
-
-            /// The main value of the header field
-            accessors< string > value;
-
-            content &subvalue( const string &k, const string &v );
-            nullable< string > subvalue( const string &k ) const;
-
-            typedef std::map< string, string >::const_iterator const_iterator;
-            const_iterator begin() const;
-            const_iterator end() const;
-
-        private:
-            std::map< string, string > m_subvalues;
-        };
-
-    protected:
-        virtual std::pair< string, content > value(
-            const string &name, const string &value
-        ) = 0;
-
-    private:
-        std::map< string, content > m_headers;
-    };
-
 
 
     /// An abstract base class for MIME containers
@@ -214,8 +149,6 @@ namespace fostlib {
     };
 
 
-    FOST_INET_DECLSPEC std::ostream &operator <<( std::ostream &o, const headers_base &headers );
-    FOST_INET_DECLSPEC std::ostream &operator <<( std::ostream &o, const headers_base::content &value );
     inline std::ostream &operator << ( std::ostream &o, const mime &m ) {
         return m.print_on( o );
     }
