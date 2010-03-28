@@ -106,11 +106,14 @@ fostlib::headers_base::content::content( wliteral val )
 fostlib::headers_base::content::content( const string &val )
 : value( val ) {
 }
-fostlib::headers_base::content::content( const string &val, const std::map< string, string > &args )
-: value( val ), m_subvalues( args ) {
+fostlib::headers_base::content::content(
+    const string &val, const std::map< string, string > &args
+) : m_subvalues( args ), value( val ) {
 }
 
-headers_base::content &fostlib::headers_base::content::subvalue( const string &k, const string &v ) {
+headers_base::content &fostlib::headers_base::content::subvalue(
+    const string &k, const string &v
+) {
     m_subvalues[ k ] = v;
     return *this;
 }
@@ -130,9 +133,12 @@ headers_base::content::const_iterator fostlib::headers_base::content::end() cons
     return m_subvalues.end();
 }
 
-std::ostream &fostlib::operator << ( std::ostream &o, const headers_base::content &value ) {
+std::ostream &fostlib::operator << (
+    std::ostream &o, const headers_base::content &value
+) {
     o << coerce< utf8_string >( value.value() ).underlying();
     for ( headers_base::content::const_iterator i( value.begin() ); i != value.end(); ++i )
-        o << "; " << coerce< utf8_string >( i->first ).underlying() << "=\"" << coerce< utf8_string >( i->second ).underlying() << "\"";
+        o << "; " << coerce< utf8_string >( i->first ).underlying() << "="
+            "\"" << coerce< utf8_string >( i->second ).underlying() << "\"";
     return o;
 }

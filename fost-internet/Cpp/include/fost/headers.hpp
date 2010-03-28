@@ -24,9 +24,12 @@ namespace fostlib {
     public:
         class content;
 
+        /// Construct empty headers
         headers_base();
+        /// Allow the headers to be sub-classed
         virtual ~headers_base();
 
+        /// Parse the string and add the found headers
         void parse( const string &headers );
 
         /// Returns true if a specified header exists
@@ -40,35 +43,42 @@ namespace fostlib {
         /// Fetches a header throwing if the header doesn't exist
         const content &operator [] ( const string & ) const;
 
+        /// Allow the fields to be iterated
         typedef std::map< string, content >::const_iterator const_iterator;
+        /// The beginning of the header fields
         const_iterator begin() const;
+        /// The end of the header fields
         const_iterator end() const;
 
+        /// The content of header fields
         class FOST_INET_DECLSPEC content {
-        public:
-            /// Create empty content for a header value
-            content();
-            /// Create header value content from a narrow character literal
-            content( nliteral );
-            /// Create header value content from a wide character literal
-            content( wliteral );
-            /// Create header value content from a string
-            content( const string & );
-            /// Create header value content from a string with sub-values
-            content( const string &, const std::map< string, string > & );
-
-            /// The main value of the header field
-            accessors< string > value;
-
-            content &subvalue( const string &k, const string &v );
-            nullable< string > subvalue( const string &k ) const;
-
-            typedef std::map< string, string >::const_iterator const_iterator;
-            const_iterator begin() const;
-            const_iterator end() const;
-
-        private:
             std::map< string, string > m_subvalues;
+            public:
+                /// Create empty content for a header value
+                content();
+                /// Create header value content from a narrow character literal
+                content( nliteral );
+                /// Create header value content from a wide character literal
+                content( wliteral );
+                /// Create header value content from a string
+                content( const string & );
+                /// Create header value content from a string with sub-values
+                content( const string &, const std::map< string, string > & );
+
+                /// The main value of the header field
+                accessors< string > value;
+
+                /// Set a field's sub-value
+                content &subvalue( const string &k, const string &v );
+                /// Access a field's sub-value
+                nullable< string > subvalue( const string &k ) const;
+
+                /// Allows the sub-values to be iterated
+                typedef std::map< string, string >::const_iterator const_iterator;
+                /// The start of the sub-values
+                const_iterator begin() const;
+                /// The end of the sub-values
+                const_iterator end() const;
         };
 
     protected:
