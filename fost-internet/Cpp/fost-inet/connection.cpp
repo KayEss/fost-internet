@@ -192,9 +192,19 @@ network_connection &fostlib::network_connection::operator >> ( std::string &s ) 
     return *this;
 }
 network_connection &fostlib::network_connection::operator >> ( std::vector< utf8 > &v ) {
-    read(*m_socket, m_ssl_data, m_input_buffer, boost::asio::transfer_at_least(v.size() - m_input_buffer.size()));
-    if ( m_input_buffer.size() != v.size() )
-        throw fostlib::exceptions::unexpected_eof("Could not read all of the requested bytes from the network connection");
+    read(
+        *m_socket, m_ssl_data, m_input_buffer,
+        boost::asio::transfer_at_least(v.size() - m_input_buffer.size())
+    );
+    if ( m_input_buffer.size() < v.size() ) {
+        fostlib::exceptions::unexpected_eof exception(
+            "Could not read all of the requested bytes from the network connection"
+        );
+        exception.info()
+            << "Read " << m_input_buffer.size()
+            << " bytes out of " << v.size() << std::endl;
+        throw exception;
+    }
     for ( std::size_t p = 0; p <  v.size(); ++p )
         v[p] = m_input_buffer.sbumpc();
     return *this;
