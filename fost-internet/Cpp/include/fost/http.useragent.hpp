@@ -22,10 +22,13 @@ namespace fostlib {
 
         class FOST_INET_DECLSPEC user_agent : boost::noncopyable {
             public:
+                /// Construct a new user agent
                 user_agent();
+                /// Construct a new user agent given a base URL
                 explicit user_agent(const url &base);
 
 
+                /// Describe a HTTP response
                 class FOST_INET_DECLSPEC response : boost::noncopyable {
                     friend class user_agent;
                     mime::mime_headers m_headers;
@@ -35,51 +38,83 @@ namespace fostlib {
                         const string &protocol, int status, const string &message
                     );
                     public:
-                        // What we asked for
+                        /// The request method
                         accessors< const string > method;
+                        /// The request URL
                         accessors< const url > address;
 
-                        // What we got
+                        /// The response protocol
                         accessors< const string > protocol;
+                        /// The response status
                         accessors< const int > status;
+                        /// The response message text
                         accessors< const string > message;
 
+                        /// The response body
                         const mime &body() const;
+
                     private:
                         std::auto_ptr< network_connection > m_cnx;
                         mutable boost::scoped_ptr< mime > m_body;
                 };
+                /// Describe a HTTP request
                 class FOST_INET_DECLSPEC request {
                     boost::shared_ptr< mime > m_data;
                     public:
+                        /// Construct a request for a URL
                         request(const string &method, const url &url);
+                        /// Construct a request for a URL with body data
                         request(const string &method, const url &url, const string &data);
-                        request(const string &method, const url &url, const boost::filesystem::wpath &data);
+                        /// Construct a request for a URL with body data from a file
+                        request(
+                            const string &method, const url &url,
+                            const boost::filesystem::wpath &data
+                        );
 
-                        mime::mime_headers &headers() { return m_data->headers(); }
-                        const mime::mime_headers & headers() const { return m_data->headers(); }
-                        std::ostream &print_on( std::ostream &o ) const { return m_data->print_on( o ); }
+                        /// Allow manipulation of the request headers
+                        mime::mime_headers &headers() {
+                            return m_data->headers();
+                        }
+                        /// Allow reading of the request headers
+                        const mime::mime_headers & headers() const {
+                            return m_data->headers();
+                        }
+                        /// Print the request on a narrow stream
+                        std::ostream &print_on( std::ostream &o ) const {
+                            return m_data->print_on( o );
+                        }
 
+                        /// The request method
                         accessors< string > method;
+                        /// The full request URL
                         accessors< url > address;
+                        /// The request data
                         mime &data() const { return *m_data; }
                 };
 
 
-                accessors< nullable< boost::function< void ( request & ) > > > authentication;
+                /// A function that will authenticate the request
+                accessors< nullable<
+                    boost::function< void ( request & ) >
+                > > authentication;
+                /// The base URL used for new requests
                 accessors< url > base;
 
 
+                /// Perform the request and return the response
                 std::auto_ptr< response > operator () (request &) const;
 
+                /// Perform a GET request
                 std::auto_ptr< response > get( const url &url ) const {
                     request r(L"GET", url);
                     return (*this)(r);
                 }
+                /// Perform a POST request
                 std::auto_ptr< response > post( const url &url, const string &data ) const {
                     request r(L"POST", url, data);
                     return (*this)(r);
                 }
+                /// Perform a PUT request
                 std::auto_ptr< response > put( const url &url, const string &data ) const {
                     request r(L"PUT", url, data);
                     return (*this)(r);
