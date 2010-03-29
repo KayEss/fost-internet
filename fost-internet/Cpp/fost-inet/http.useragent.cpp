@@ -47,8 +47,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
     req.headers().set("Host", req.address().server().name());
     if ( !req.headers().exists("User-Agent") )
         req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4");
-    //req.headers().set("TE", "trailers");
-    req.headers().set("Connection", "close");
+    req.headers().set("TE", "trailers");
 
     if ( !authentication().isnull() )
         authentication().value()( req );
@@ -67,7 +66,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
         if ( !q.isnull() )
             buffer << "?" << q.value().underlying();
     }
-    buffer << " HTTP/1.0\r\n" << req.headers() << "\r\n";
+    buffer << " HTTP/1.1\r\n" << req.headers() << "\r\n";
     *cnx << buffer;
 
     for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i )
@@ -153,7 +152,7 @@ status(status), message(message), m_cnx(connection) {
 }
 
 
-const mime &fostlib::http::user_agent::response::body() const {
+const binary_body &fostlib::http::user_agent::response::body() {
     if ( !m_body ) {
         nullable< int64_t > length;
         if ( method() == L"HEAD" )
@@ -162,81 +161,39 @@ const mime &fostlib::http::user_agent::response::body() const {
             length = coerce< int64_t >(m_headers["Content-Length"].value());
 
         if ( !length.isnull() && length.value() == 0 )
-            m_body.reset(new empty_mime(m_headers));
-        else if ( ( length.isnull() || length.value() ) && (
-            m_headers[ L"Content-Type" ].value().substr(0, 5) == "text/" ||
-            m_headers[ L"Content-Type" ].value() == "application/xml" ||
-            m_headers[ L"Content-Type" ].value() == "application/json"
-        )) {
-            const nullable< string > charset(
-                m_headers["Content-Type"].subvalue("charset")
-            );
-            if ( charset.isnull() || charset == "utf-8" || charset == "UTF-8" ) {
-                try {
-                    if ( !length.isnull() ) {
-                        std::vector< utf8 > body_text(length.value());
-                        *m_cnx >> body_text;
-                        m_body.reset(new text_body(
-                            &body_text[0], &body_text[0] + length.value(), m_headers
-                        ));
-                    } else {
-                        boost::asio::streambuf body_buffer;
-                        *m_cnx >> body_buffer;
-                        utf8_string body_text;
-                        body_text.reserve(body_buffer.size());
-                        while ( body_buffer.size() )
-                            body_text += body_buffer.sbumpc();
-                        m_body.reset(new text_body(body_text, m_headers));
-                    }
-                } catch ( fostlib::exceptions::exception &e ) {
-                    if ( charset.isnull() )
-                        e.info() << L"Assumed that the page was UTF-8 "
-                            L"as the charset from the Content-Type header was blank\n";
-                    else
-                        e.info() << L"Charset in Content-Type header given as "
-                            << charset.value() << L"\n";
-                    throw;
-                }
-            } else if ( charset == "iso-8859-1" ) {
-                /*
-                    ISO-8859-1 has the same code points as Unicode. We can interpret
-                    each byte coming in as a Unicode code point
-                */
-                if ( !length.isnull() ) {
-                    std::vector< unsigned char > body(length.value()); string text;
-                    *m_cnx >> body;
-                    for (
-                        std::vector< unsigned char >::const_iterator i( body.begin() );
-                        i != body.end();
-                        ++i
-                    )
-                        text += utf32( *i );
-                    m_body.reset(new text_body(coerce< utf8_string >(text), m_headers));
-                } else {
-                    throw exceptions::not_implemented(
-                        "fostlib::http::user_agent::response::body() -- for iso-8859-1 "
-                        "-- length is not known"
+            m_body.reset(new binary_body(m_headers));
+        else if ( length.isnull() ) {
+            if ( m_headers["Transfer-Encoding"].value() == "chunked" ) {
+                std::vector< unsigned char > data;
+                while ( true ) {
+                    std::string length, ignore;
+                    *m_cnx >> length;
+                    std::size_t chunk_size = fostlib::coerce< std::size_t >(
+                        hex_string(length)
                     );
+                    if ( chunk_size == 0 )
+                        break;
+                    std::vector< unsigned char > chunk( chunk_size );
+                    *m_cnx >> chunk >> ignore;
+                    data.insert(data.begin(), chunk.begin(), chunk.end());
                 }
-            } else
-                throw exceptions::not_implemented(
-                    "fostlib::http::user_agent::response::body() -- "
-                    "where the encoding is not UTF-8", charset.value()
-                );
-        } else if ( length.isnull() ) {
-            throw exceptions::not_implemented(
-                "fostlib::http::user_agent::response::body() -- "
-                "where the content is not text and we have to download something "
-                "and the length is not known",
-                m_headers[ L"Content-Type" ].value().empty() ?
-                    L"No content type specified" : m_headers[ L"Content-Type" ].value()
-            );
-        } else if ( length.value() ) {
+                // Read trailing headers
+                read_headers(*m_cnx, m_headers);
+                m_body.reset(new binary_body(data, m_headers));
+            } else {
+                boost::asio::streambuf body_buffer;
+                *m_cnx >> body_buffer;
+                std::vector< unsigned char > body_data;
+                body_data.reserve(body_buffer.size());
+                while ( body_buffer.size() )
+                    body_data.push_back( body_buffer.sbumpc() );
+                m_body.reset(new binary_body(body_data, m_headers));
+            }
+        } else {
             std::vector< unsigned char > body(length.value());
             *m_cnx >> body;
             m_body.reset(new binary_body(body, m_headers));
-        } else
-            ; // We have a length, but it is zero
+        }
     }
     return *m_body;
 }

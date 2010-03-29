@@ -124,8 +124,9 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
 */
 
 
-fostlib::empty_mime::empty_mime( const mime_headers &headers )
-: mime( headers, "application/x-empty" ) {
+fostlib::empty_mime::empty_mime(
+    const mime_headers &headers, const string &mime_type
+) : mime( headers, mime_type ) {
     if ( !this->headers().exists(L"Content-Length") )
         this->headers().set("Content-Length", L"0");
 }
@@ -254,6 +255,11 @@ std::auto_ptr< mime::iterator_implementation > fostlib::text_body::iterator() co
 */
 
 
+fostlib::binary_body::binary_body(
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type) {
+}
 fostlib::binary_body::binary_body(
     const std::vector< unsigned char > &data,
     const mime_headers &headers,

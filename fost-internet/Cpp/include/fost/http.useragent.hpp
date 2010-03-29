@@ -51,11 +51,11 @@ namespace fostlib {
                         accessors< const string > message;
 
                         /// The response body
-                        const mime &body() const;
+                        const binary_body &body();
 
                     private:
                         std::auto_ptr< network_connection > m_cnx;
-                        mutable boost::scoped_ptr< mime > m_body;
+                        boost::scoped_ptr< binary_body > m_body;
                 };
                 /// Describe a HTTP request
                 class FOST_INET_DECLSPEC request {

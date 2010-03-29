@@ -64,7 +64,11 @@ namespace fostlib {
         struct empty_mime_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
-            empty_mime(const mime_headers &headers = mime_headers());
+            /// Construct an empty MIME body that cannot have data
+            empty_mime(
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "application/x-empty"
+            );
 
             std::ostream &print_on( std::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
@@ -115,6 +119,11 @@ namespace fostlib {
         struct binary_body_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
+            /// Construct an empty body
+            binary_body(
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "application/x-empty"
+            );
             /// Construct from a data block
             binary_body(
                 const std::vector< unsigned char > &data,
