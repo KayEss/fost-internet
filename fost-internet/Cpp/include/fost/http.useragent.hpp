@@ -70,13 +70,18 @@ namespace fostlib {
                             const string &method, const url &url,
                             const boost::filesystem::wpath &data
                         );
+                        /// Construct a request for a URL with MIME data
+                        request(
+                            const string &method, const url &url,
+                            boost::shared_ptr< mime > mime_data
+                        );
 
                         /// Allow manipulation of the request headers
                         mime::mime_headers &headers() {
                             return m_data->headers();
                         }
                         /// Allow reading of the request headers
-                        const mime::mime_headers & headers() const {
+                        const mime::mime_headers &headers() const {
                             return m_data->headers();
                         }
                         /// Print the request on a narrow stream

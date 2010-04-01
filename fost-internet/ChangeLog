@@ -5,6 +5,7 @@
  HTTP client
  - Fixed a bug in chunked encoding that was causing the chunks to end up
    in the data block in the reverse order.
+ - The user agent request can now be built from passed in MIME data.
  POP3 client
  - Improved the error reporting by annotating exceptions in as many places
    as possible.
