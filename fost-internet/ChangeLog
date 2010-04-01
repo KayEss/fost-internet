@@ -1,4 +1,7 @@
 2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
+ TCP/IP
+ - Most errors should now end up with a fostlib::exceptions::exception which
+   allows the error to be annotated.
  HTTP client
  - Fixed a bug in chunked encoding that was causing the chunks to end up
    in the data block in the reverse order.
