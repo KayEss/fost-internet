@@ -5,6 +5,9 @@
  HTTP client
  - Fixed a bug in chunked encoding that was causing the chunks to end up
    in the data block in the reverse order.
+ POP3 client
+ - Improved the error reporting by annotating exceptions in as many places
+   as possible.
 
 2010-03-26  Kirit Saelensminde  <kirit@felspar.com>
  fget example
