@@ -175,7 +175,7 @@ const binary_body &fostlib::http::user_agent::response::body() {
                         break;
                     std::vector< unsigned char > chunk( chunk_size );
                     *m_cnx >> chunk >> ignore;
-                    data.insert(data.begin(), chunk.begin(), chunk.end());
+                    data.insert(data.end(), chunk.begin(), chunk.end());
                 }
                 // Read trailing headers
                 read_headers(*m_cnx, m_headers);
