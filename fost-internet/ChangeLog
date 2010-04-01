@@ -1,0 +1,27 @@
+2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
+ HTTP client
+ - Fixed a bug in chunked encoding that was causing the chunks to end up
+   in the data block in the reverse order.
+
+2010-03-26  Kirit Saelensminde  <kirit@felspar.com>
+ fget example
+ - Now supports the use of FOST authentication through the -authentication,
+   -key and -secret command line switches. There's also a -user switch to
+   handle authentication where the REST end point supports impersonation.
+
+2010-03-25  Kirit Saelensminde  <kirit@felspar.com>
+ MIME
+ - Improved handling of headers that don't have values.
+
+2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
+ User agent
+ - The fget example now allows us to save to a file by using an extra
+   parameter.
+ - There is a new MIME type binary_body for handling in-memory binary MIME
+   data.
+
+2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
+ Header files
+ - Moved all non-private headers out of include/fost/detail
+ ChangeLog
+ - Added ChangeLog
