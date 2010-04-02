@@ -42,9 +42,10 @@ namespace {
         try {
             return service_lambda(req);
         } catch ( fostlib::exceptions::exception &e ) {
-            req( text_body(
+            text_body error(
                 fostlib::coerce<fostlib::string>(e)
-            ) );
+            );
+            req( error, 500 );
             return false;
         }
     }
