@@ -3,6 +3,9 @@
  - The host and port number are now mutable fields of the URL.
  - Fixed a bug where port numbers weren't properly shown in URLs converted
    to strings.
+ - Query string values may now contain forward slashes and colons.
+ - Fixed a bug where query strings were being thrown away when URLs were
+   parsed.
  HTTP client/server
  - The response body can now be detached from the client response as can the
    request body from the server.

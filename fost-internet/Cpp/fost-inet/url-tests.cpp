@@ -69,6 +69,7 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"__=" );
     QS_PARSE( L"key=&key=" );
     QS_PARSE( L"key=value&key=" );
+    QS_PARSE( L"next=/path/" );
 }
 
 
@@ -149,11 +150,13 @@ FSL_TEST_FUNCTION( parse ) {
 
 #define TEST_COERCION(u) \
     FSL_CHECK_EQ( coerce< string >( url( u ) ), u );
-FSL_TEST_FUNCTION( coercion ) {
+FSL_TEST_FUNCTION( z_coercion ) {
     TEST_COERCION( "http://localhost/file-path.html" );
     TEST_COERCION( "http://localhost/somebody@example.com" );
     TEST_COERCION( "http://localhost/somebody+else@example.com" );
     TEST_COERCION( "http://localhost/~somebody" );
     TEST_COERCION( "http://localhost:8000/~somebody" );
+    TEST_COERCION( "http://bmf.miro.felspar.net/extranet/login/?next=/office/" );
+    TEST_COERCION( "http://bmf.miro.felspar.net:8000/extranet/login/?next=/office/" );
 }
 

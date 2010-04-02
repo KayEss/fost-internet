@@ -80,7 +80,7 @@ namespace fostlib {
                 ] )[
                     key.text = parsers::coerce< utf8_string >()( key.buffer )
                 ];
-                value = ( +boost::spirit::chset<>( L"_@a-zA-Z0-9.,%+*-" )[
+                value = ( +boost::spirit::chset<>( L"/:_@a-zA-Z0-9.,%+*-" )[
                     parsers::push_back( value.buffer, phoenix::arg1 )
                 ] )[
                     value.text = parsers::coerce< utf8_string >()( value.buffer )

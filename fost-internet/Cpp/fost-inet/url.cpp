@@ -285,6 +285,7 @@ fostlib::url::url( const string &a_url )
             throw exceptions::parse_error( L"Could not parse URL" );
         *this = u;
         pathspec( url::filepath_string( fs ) );
+        query( qs );
     } catch ( exceptions::exception &e ) {
         e.info() << L"Parsing: " << a_url << std::endl;
         throw;
