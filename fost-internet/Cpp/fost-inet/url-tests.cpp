@@ -156,29 +156,3 @@ FSL_TEST_FUNCTION( coercion ) {
     TEST_COERCION( "http://localhost/~somebody" );
 }
 
-
-/*
-FSL_TEST_FUNCTION( parse_port ) {
-    url  a( L"http://localhost:8000/" );
-    FSL_CHECK_EQ( a.server().name(), L"localhost" );
-    FSL_CHECK( a.user().isnull() );
-    FSL_CHECK_EQ( a.server().service(), L"8000" );
-}
-
-FSL_TEST_FUNCTION( parse_credentials ) {
-    url  b( L"http://user:pass@localhost/" );
-    FSL_CHECK_EQ( b.server().name(), L"localhost" );
-    FSL_CHECK( !b.user().isnull() );
-    FSL_CHECK_EQ( b.user().value(), L"user" );
-    FSL_CHECK_EQ( b.password().value(), L"pass" );
-}
-
-FSL_TEST_FUNCTION( parse_credentials_port ) {
-    url  c( L"http://user:pass@localhost:8000/" );
-    FSL_CHECK_EQ( c.server().name(), L"localhost" );
-    FSL_CHECK( !c.user().isnull() );
-    FSL_CHECK_EQ( c.user().value(), L"user" );
-    FSL_CHECK_EQ( c.password().value(), L"pass" );
-    FSL_CHECK_EQ( c.server().service(), L"8000" );
-}
-*/
