@@ -39,7 +39,14 @@ namespace {
     ) {
         std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
         http::server::request req(sock);
-        return service_lambda(req);
+        try {
+            return service_lambda(req);
+        } catch ( fostlib::exceptions::exception &e ) {
+            req( text_body(
+                fostlib::coerce<fostlib::string>(e)
+            ) );
+            return false;
+        }
     }
 }
 void fostlib::http::server::operator () ( boost::function< bool ( http::server::request & ) > service_lambda ) {
@@ -60,24 +67,32 @@ void fostlib::http::server::operator () ( boost::function< bool ( http::server::
 */
 
 
-fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::socket > socket )
-: m_cnx( new network_connection(socket) ) {
+fostlib::http::server::request::request(
+    std::auto_ptr< boost::asio::ip::tcp::socket > socket
+) : m_cnx( new network_connection(socket) ) {
     utf8_string first_line;
     (*m_cnx) >> first_line;
     if ( !boost::spirit::parse(first_line.underlying().c_str(),
         (
-            boost::spirit::strlit< nliteral >("GET")
+            +boost::spirit::chset<>( "A-Z" )
         )[
             phoenix::var(m_method) =
                 phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
         ]
         >> boost::spirit::chlit< char >( ' ' )
         >> (
-            +boost::spirit::chset<>( "a-zA-Z0-9/.,:()%-" )
+            +boost::spirit::chset<>( "a-zA-Z0-9/.,:()%=-" )
         )[
             phoenix::var(m_pathspec) =
                 phoenix::construct_< url::filepath_string >( phoenix::arg1, phoenix::arg2 )
         ]
+        >> !(
+            boost::spirit::chlit< char >('?')
+            >> (+boost::spirit::chset<>( "a-zA-Z0-9/.,:()%=-" ))[
+                phoenix::var(m_query_string) =
+                    phoenix::construct_< ascii_string >( phoenix::arg1, phoenix::arg2 )
+            ]
+        )
         >> !(
             boost::spirit::chlit< char >( ' ' )
             >> (
@@ -93,23 +108,28 @@ fostlib::http::server::request::request( std::auto_ptr< boost::asio::ip::tcp::so
     mime::mime_headers headers;
     while ( true ) {
         utf8_string line;
-        (*m_cnx) >> line;
+        *m_cnx >> line;
         if ( line.empty() )
             break;
         headers.parse(coerce< string >(line));
     }
 
-    if ( method() == L"GET" )
+    std::size_t content_length = 0;
+    if ( headers.exists("Content-Length") )
+        content_length = coerce< int64_t >(headers["Content-Length"].value());
+
+    if ( content_length ) {
+        std::vector< unsigned char > data( content_length );
+        *m_cnx >> data;
+        m_mime.reset( new binary_body(data, headers) );
+    } else
         m_mime.reset( new empty_mime(headers) );
-    else
-        throw exceptions::not_implemented(
-            L"HTTP method " + method(), coerce< string >(first_line)
-        );
 }
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
     std::auto_ptr< mime > headers_and_body
-) : m_method( method ), m_pathspec( filespec ), m_mime( headers_and_body.release() ) {
+) : m_method( method ), m_pathspec( filespec ),
+        m_mime( headers_and_body.release() ) {
 }
 
 
@@ -122,13 +142,69 @@ boost::shared_ptr< fostlib::mime > fostlib::http::server::request::data() const 
 }
 
 
-void fostlib::http::server::request::operator() ( const mime &response ) {
+namespace {
+    nliteral status_text( int code ) {
+        switch (code) {
+            case 100: return "Continue";
+            case 101: return "Switching Protocols";
+
+            case 200: return "OK";
+            case 201: return "Created";
+            case 202: return "Accepted";
+            case 203: return "Non-Authoritative Information";
+            case 204: return "No Content";
+            case 205: return "Reset Content";
+            case 206: return "Partial Content";
+
+            case 300: return "Multiple Choices";
+            case 301: return "Moved Permanently";
+            case 302: return "Found";
+            case 303: return "See Other";
+            case 304: return "Not Modified";
+            case 305: return "Use Proxy";
+            case 306: return "(Unused)";
+            case 307: return "Temporary Redirect";
+
+            case 400: return "Bad Request";
+            case 401: return "Unauthorized";
+            case 402: return "Payment Required";
+            case 403: return "Forbidden";
+            case 404: return "Not Found";
+            case 405: return "Method Not Allowed";
+            case 406: return "Not Acceptable";
+            case 407: return "Proxy Authentication Required";
+            case 408: return "Request Timeout";
+            case 409: return "Conflict";
+            case 410: return "Gone";
+            case 411: return "Length Required";
+            case 412: return "Precondition Failed";
+            case 413: return "Request Entity Too Large";
+            case 414: return "Request-URI Too Long";
+            case 415: return "Unsupported Media Type";
+            case 416: return "Requested Range Not Satisfiable";
+            case 417: return "Expectation Failed";
+
+            case 500: return "Internal Server Error";
+            case 501: return "Not Implemented";
+            case 502: return "Bad Gateway";
+            case 503: return "Service Unavailable";
+            case 504: return "Gateway Timeout";
+            case 506: return "HTTP Version Not Supported";
+
+            default: return "(unknown status code)";
+        }
+    }
+}
+void fostlib::http::server::request::operator() (
+    const mime &response, const int status
+) {
     if ( !m_cnx.get() )
         throw exceptions::null(
             "This is a mock server request. It cannot send a response to any client"
         );
     std::stringstream buffer;
-    buffer << "HTTP/1.0 200 OK\r\n" << response.headers() << "\r\n";
+    buffer << "HTTP/1.0 " << status << " " << status_text(status)
+        << "\r\n" << response.headers() << "\r\n";
     (*m_cnx) << buffer;
     for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
         (*m_cnx) << *i;

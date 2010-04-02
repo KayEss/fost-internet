@@ -2,6 +2,8 @@
  HTTP client/server
  - The response body can now be detached from the client response as can the
    request body from the server.
+ - The HTTP server now accepts additional verbs, more correct resource paths
+   and can return all status codes supported by HTTP 1.1.
 
 2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
  TCP/IP

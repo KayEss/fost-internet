@@ -28,7 +28,9 @@ namespace fostlib {
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
-                string m_method; url::filepath_string m_pathspec;
+                string m_method;
+                url::filepath_string m_pathspec;
+                nullable< ascii_string > m_query_string;
                 boost::shared_ptr< mime > m_mime;
 
                 public:
@@ -44,11 +46,18 @@ namespace fostlib {
                     const string &method() const { return m_method; }
                     /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
+                    /// The query string
+                    const nullable< ascii_string > query_string() const {
+                        return m_query_string;
+                    }
                     /// The request body and headers
                     boost::shared_ptr< mime > data() const;
 
                     /// Used to pass the response back to the user agent.This will throw on a mocked connection
-                    void operator () ( const mime &response );
+                    void operator () (
+                        const mime &response,
+                        const int status = 200
+                    );
             };
 
             /// Create a server bound to a host and port
