@@ -58,6 +58,12 @@ namespace fostlib {
                         const mime &response,
                         const int status = 200
                     );
+
+                    /// Used to pass the response back to the user agent.This will throw on a mocked connection
+                    void operator () (
+                        const mime &response,
+                        const ascii_string &status_text
+                    );
             };
 
             /// Create a server bound to a host and port

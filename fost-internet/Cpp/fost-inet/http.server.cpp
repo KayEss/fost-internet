@@ -142,6 +142,22 @@ boost::shared_ptr< fostlib::mime > fostlib::http::server::request::data() const 
 }
 
 
+void fostlib::http::server::request::operator() (
+    const mime &response, const ascii_string &status
+) {
+    if ( !m_cnx.get() )
+        throw exceptions::null(
+            "This is a mock server request. It cannot send a response to any client"
+        );
+    std::stringstream buffer;
+    buffer << "HTTP/1.0 " << status.underlying()
+        << "\r\n" << response.headers() << "\r\n";
+    (*m_cnx) << buffer;
+    for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
+        (*m_cnx) << *i;
+}
+
+
 namespace {
     nliteral status_text( int code ) {
         switch (code) {
@@ -198,14 +214,5 @@ namespace {
 void fostlib::http::server::request::operator() (
     const mime &response, const int status
 ) {
-    if ( !m_cnx.get() )
-        throw exceptions::null(
-            "This is a mock server request. It cannot send a response to any client"
-        );
-    std::stringstream buffer;
-    buffer << "HTTP/1.0 " << status << " " << status_text(status)
-        << "\r\n" << response.headers() << "\r\n";
-    (*m_cnx) << buffer;
-    for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
-        (*m_cnx) << *i;
+    (*this)( response, status_text(status) );
 }
