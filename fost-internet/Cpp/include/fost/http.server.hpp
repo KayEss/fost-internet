@@ -21,8 +21,10 @@ namespace fostlib {
     namespace http {
 
 
+        /// A minimal HTTP server
         class FOST_INET_DECLSPEC server : boost::noncopyable {
         public:
+            /// The request from a user agent
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
@@ -38,24 +40,28 @@ namespace fostlib {
                         std::auto_ptr< mime > headers_and_body
                     );
 
-                    // Accessors for the request data
+                    /// The request method
                     const string &method() const { return m_method; }
+                    /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
+                    /// The request body and headers
                     const mime &data() const;
 
-                    // Used to pass the response back to the user agent.
-                    // This will throw on a mocked connection
+                    /// Used to pass the response back to the user agent.This will throw on a mocked connection
                     void operator () ( const mime &response );
             };
 
+            /// Create a server bound to a host and port
             explicit server( const host &h, uint16_t port = 80 );
 
+            /// The host the server is bound to
             accessors< const host > binding;
+            /// The port the server is bound to
             accessors< const uint16_t > port;
 
-            // Return the next request on the underlying socket
+            /// Return the next request on the underlying socket
             std::auto_ptr< request > operator() ();
-            // Run the provided lambda to service requests forever
+            /// Run the provided lambda to service requests forever
             void operator () ( boost::function< bool ( request & ) > service_lambda );
 
         private:
