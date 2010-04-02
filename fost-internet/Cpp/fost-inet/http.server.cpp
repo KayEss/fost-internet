@@ -214,5 +214,7 @@ namespace {
 void fostlib::http::server::request::operator() (
     const mime &response, const int status
 ) {
-    (*this)( response, status_text(status) );
+    std::stringstream ss;
+    ss << status << " " << status_text(status);
+    (*this)(response, ss.str());
 }
