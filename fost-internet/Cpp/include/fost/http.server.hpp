@@ -31,7 +31,7 @@ namespace fostlib {
                 string m_method;
                 url::filepath_string m_pathspec;
                 nullable< ascii_string > m_query_string;
-                boost::shared_ptr< mime > m_mime;
+                boost::shared_ptr< binary_body > m_mime;
 
                 public:
                     /// This constructor initialises a server request from a socket connection
@@ -39,7 +39,7 @@ namespace fostlib {
                     /// This constructor is useful for mocking the request for code that interacts with a server
                     request(
                         const string &method, const url::filepath_string &filespec,
-                        std::auto_ptr< mime > headers_and_body
+                        std::auto_ptr< binary_body > headers_and_body
                     );
 
                     /// The request method
@@ -51,14 +51,13 @@ namespace fostlib {
                         return m_query_string;
                     }
                     /// The request body and headers
-                    boost::shared_ptr< mime > data() const;
+                    boost::shared_ptr< binary_body > data() const;
 
                     /// Used to pass the response back to the user agent.This will throw on a mocked connection
                     void operator () (
                         const mime &response,
                         const int status = 200
                     );
-
                     /// Used to pass the response back to the user agent.This will throw on a mocked connection
                     void operator () (
                         const mime &response,

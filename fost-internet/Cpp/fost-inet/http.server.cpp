@@ -123,17 +123,17 @@ fostlib::http::server::request::request(
         *m_cnx >> data;
         m_mime.reset( new binary_body(data, headers) );
     } else
-        m_mime.reset( new empty_mime(headers) );
+        m_mime.reset( new binary_body(headers) );
 }
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
-    std::auto_ptr< mime > headers_and_body
+    std::auto_ptr< binary_body > headers_and_body
 ) : m_method( method ), m_pathspec( filespec ),
         m_mime( headers_and_body.release() ) {
 }
 
 
-boost::shared_ptr< fostlib::mime > fostlib::http::server::request::data() const {
+boost::shared_ptr< fostlib::binary_body > fostlib::http::server::request::data() const {
     if ( !m_mime.get() )
         throw exceptions::null(
             "This server request has no MIME data, not even headers"
