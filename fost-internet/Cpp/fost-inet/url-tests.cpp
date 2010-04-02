@@ -154,5 +154,6 @@ FSL_TEST_FUNCTION( coercion ) {
     TEST_COERCION( "http://localhost/somebody@example.com" );
     TEST_COERCION( "http://localhost/somebody+else@example.com" );
     TEST_COERCION( "http://localhost/~somebody" );
+    TEST_COERCION( "http://localhost:8000/~somebody" );
 }
 

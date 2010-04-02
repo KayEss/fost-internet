@@ -304,18 +304,25 @@ ascii_printable_string fostlib::url::as_string() const {
         );
     else if ( !password().isnull() )
         url += coerce< ascii_printable_string >( L":" + password().value() + L"@" );
-    url += coerce< ascii_printable_string >(
-        server().name()
-    ) + pathspec().underlying();
+    url += coerce< ascii_printable_string >(server().name());
+    if ( !server().service().isnull() && (
+            ( protocol() == ascii_printable_string("http")
+                && server().service() != "80" )
+            || ( protocol() == ascii_printable_string("https")
+                && server().service() != L"443" )
+    ) ) url += coerce< ascii_printable_string >(L":" + server().service().value());
+    url += pathspec().underlying();
     url = concat( url, ascii_printable_string( "?" ), query().as_string() ).value();
     return concat( url, ascii_printable_string( "#" ), anchor() ).value();
 }
 
 ascii_printable_string fostlib::url::as_string( const url &relative_from ) const {
     if ( g_allow_relative.value() &&
-        ( protocol() == ascii_printable_string( "http" ) || protocol() == ascii_printable_string( "https" ) ) &&
-        relative_from.server().service() == server().service() &&
-        relative_from.server().name() == server().name()
+        (
+            protocol() == ascii_printable_string( "http" )
+            || protocol() == ascii_printable_string( "https" )
+        ) && relative_from.server().service() == server().service()
+        && relative_from.server().name() == server().name()
     )
         return concat(
             concat(
