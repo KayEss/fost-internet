@@ -36,7 +36,7 @@ FSL_MAIN(
             mime::mime_headers(), L"text/html"
         );
         (*req)( response );
-        if ( req->data().headers()[L"Host"].value() == L"localhost" )
+        if ( req->data()->headers()[L"Host"].value() == L"localhost" )
             process = false;
     }
     o << L"Told to exit" << std::endl;
