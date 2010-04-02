@@ -163,7 +163,7 @@ status(status), message(message), m_cnx(connection) {
 }
 
 
-const binary_body &fostlib::http::user_agent::response::body() {
+boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body() {
     if ( !m_body ) {
         nullable< int64_t > length;
         if ( method() == L"HEAD" )
@@ -172,7 +172,9 @@ const binary_body &fostlib::http::user_agent::response::body() {
             length = coerce< int64_t >(m_headers["Content-Length"].value());
 
         if ( !length.isnull() && length.value() == 0 )
-            m_body.reset(new binary_body(m_headers));
+            m_body = boost::shared_ptr< binary_body >(
+                new binary_body(m_headers)
+            );
         else if ( length.isnull() ) {
             if ( m_headers["Transfer-Encoding"].value() == "chunked" ) {
                 std::vector< unsigned char > data;
@@ -195,7 +197,9 @@ const binary_body &fostlib::http::user_agent::response::body() {
                 }
                 // Read trailing headers
                 read_headers(*m_cnx, m_headers, "Whilst reading trailing headers");
-                m_body.reset(new binary_body(data, m_headers));
+                m_body = boost::shared_ptr< binary_body >(
+                    new binary_body(data, m_headers)
+                );
             } else {
                 boost::asio::streambuf body_buffer;
                 *m_cnx >> body_buffer;
@@ -203,13 +207,17 @@ const binary_body &fostlib::http::user_agent::response::body() {
                 body_data.reserve(body_buffer.size());
                 while ( body_buffer.size() )
                     body_data.push_back( body_buffer.sbumpc() );
-                m_body.reset(new binary_body(body_data, m_headers));
+                m_body = boost::shared_ptr< binary_body >(
+                    new binary_body(body_data, m_headers)
+                );
             }
         } else {
             std::vector< unsigned char > body(length.value());
             *m_cnx >> body;
-            m_body.reset(new binary_body(body, m_headers));
+            m_body = boost::shared_ptr< binary_body >(
+                new binary_body(body, m_headers)
+            );
         }
     }
-    return *m_body;
+    return m_body;
 }

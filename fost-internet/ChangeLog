@@ -1,3 +1,7 @@
+2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
+ HTTP client
+ - The response body can now be detached from the response.
+
 2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
  TCP/IP
  - Most errors should now end up with a fostlib::exceptions::exception which

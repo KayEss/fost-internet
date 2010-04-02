@@ -50,12 +50,12 @@ namespace fostlib {
                         /// The response message text
                         accessors< const string > message;
 
-                        /// The response body
-                        const binary_body &body();
+                        /// The response body and headers
+                        boost::shared_ptr< const binary_body > body();
 
                     private:
                         std::auto_ptr< network_connection > m_cnx;
-                        boost::scoped_ptr< binary_body > m_body;
+                        boost::shared_ptr< binary_body > m_body;
                 };
                 /// Describe a HTTP request
                 class FOST_INET_DECLSPEC request {

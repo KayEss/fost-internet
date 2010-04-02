@@ -60,8 +60,8 @@ FSL_MAIN(
             coerce< boost::filesystem::wpath >(args[2].value()), std::ios::binary
         );
         for (
-            mime::const_iterator chunk( response->body().begin() );
-            chunk != response->body().end(); ++chunk
+            mime::const_iterator chunk( response->body()->begin() );
+            chunk != response->body()->end(); ++chunk
         ) {
             const char
                 *first = reinterpret_cast< const char * >((*chunk).first),
