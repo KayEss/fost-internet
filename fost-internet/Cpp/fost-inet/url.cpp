@@ -232,18 +232,18 @@ setting< string > fostlib::url::s_default_host( L"fost-base/Cpp/fost-inet/url.cp
 
 
 fostlib::url::url()
-: protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
+: protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const url& url, const filepath_string &path )
-: protocol( "http" ), m_host( url.server() ), m_pathspec( "/" ) {
+: protocol( "http" ), server( url.server() ), m_pathspec( "/" ) {
     pathspec( path );
 }
 fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
-: protocol( "http" ), m_host( url.server() ), m_pathspec( "/" ) {
+: protocol( "http" ), server( url.server() ), m_pathspec( "/" ) {
     pathspec( coerce< filepath_string >( path ) );
 }
 fostlib::url::url( const t_form form, const string &str )
-: protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
+: protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
     std::pair< string, nullable< string > > anchor_parts( partition( str, L"#" ) );
     std::pair< string, nullable< string > > query_parts( partition( anchor_parts.first, L"?" ) );
     switch ( form ) {
@@ -253,7 +253,9 @@ fostlib::url::url( const t_form form, const string &str )
     case e_encoded:
         for ( string::const_iterator it( str.begin() ); it != str.end(); ++it )
             if ( *it < 0x20 || *it > 0x7f )
-                throw fostlib::exceptions::parse_error( L"The encoded url contains an invalid character (" + str + L")" );
+                throw fostlib::exceptions::parse_error(
+                    L"The encoded url contains an invalid character (" + str + L")"
+                );
         m_pathspec = coerce< url::filepath_string >( query_parts.first );
         break;
     }
@@ -262,11 +264,12 @@ fostlib::url::url( const t_form form, const string &str )
     if ( !anchor_parts.second.isnull() )
         anchor( coerce< ascii_printable_string >( anchor_parts.second.value() ) );
 }
-fostlib::url::url( const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw )
-: protocol( "http" ), user( u ), password( pw ), m_host( h ), m_pathspec( "/" ) {
+fostlib::url::url(
+    const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw
+) : protocol( "http" ), server( h ), user( u ), password( pw ), m_pathspec( "/" ) {
 }
 fostlib::url::url( const string &a_url )
-: protocol( "http" ), m_host( s_default_host.value() ), m_pathspec( "/" ) {
+: protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
     try {
         url u; ascii_printable_string fs; query_string qs;
         if ( !boost::spirit::parse( a_url.c_str(),
@@ -290,16 +293,20 @@ fostlib::url::url( const string &a_url )
 fostlib::url::url( const ascii_printable_string &protocol, const host &h,
     const nullable< string > &username,
     const nullable< string > &password
-) : protocol( protocol ), user( username ), password( password ), m_host( h ), m_pathspec( "/" ) {
+) : protocol( protocol ), server( h ), user( username ), password( password ), m_pathspec( "/" ) {
 }
 
 ascii_printable_string fostlib::url::as_string() const {
     ascii_printable_string url( protocol() + ascii_printable_string( "://" ) );
     if ( !user().isnull() )
-        url += coerce< ascii_printable_string >( user().value() + L":" + password().value( string() ) + L"@" );
+        url += coerce< ascii_printable_string >(
+            user().value() + L":" + password().value( string() ) + L"@"
+        );
     else if ( !password().isnull() )
         url += coerce< ascii_printable_string >( L":" + password().value() + L"@" );
-    url += coerce< ascii_printable_string >( m_host.name() ) + pathspec().underlying();
+    url += coerce< ascii_printable_string >(
+        server().name()
+    ) + pathspec().underlying();
     url = concat( url, ascii_printable_string( "?" ), query().as_string() ).value();
     return concat( url, ascii_printable_string( "#" ), anchor() ).value();
 }
@@ -328,10 +335,6 @@ fostlib::port_number fostlib::url::port() const {
         return protocol() == ascii_printable_string("http") ? 80 : 443;
     else
         return coerce< port_number >( server().service().value() );
-}
-
-fostlib::host fostlib::url::server() const {
-    return m_host;
 }
 
 const url::filepath_string &fostlib::url::pathspec() const {

@@ -1,4 +1,6 @@
 2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
+ URL
+ - The host and port number are now mutable fields of the URL.
  HTTP client/server
  - The response body can now be detached from the client response as can the
    request body from the server.

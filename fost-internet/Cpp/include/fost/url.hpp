@@ -58,7 +58,7 @@ namespace fostlib {
         );
 
         accessors< ascii_printable_string > protocol;
-        host server() const;
+        accessors< host > server;
         port_number port() const;
         accessors< nullable< string > > user;
         accessors< nullable< string > > password;
@@ -73,7 +73,6 @@ namespace fostlib {
         ascii_printable_string as_string( const url &relative_from ) const;
 
     private:
-        fostlib::host m_host;
         filepath_string m_pathspec;
     };
 
