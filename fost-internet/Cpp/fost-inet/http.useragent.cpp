@@ -12,6 +12,7 @@
 #include <fost/http.useragent.hpp>
 #include <fost/parse/parse.hpp>
 
+#include <fost/exception/not_null.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
 
@@ -66,7 +67,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
         if ( !q.isnull() )
             buffer << "?" << q.value().underlying();
     }
-    buffer << " HTTP/1.1\r\n" << req.headers() << "\r\n";
+    buffer << " HTTP/1.0\r\n" << req.headers() << "\r\n";
     *cnx << buffer;
 
     for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i )
@@ -133,14 +134,20 @@ fostlib::http::user_agent::request::request(
 
 namespace {
     void read_headers(
-        network_connection &cnx, mime::mime_headers &headers
+        network_connection &cnx, mime::mime_headers &headers,
+        nliteral error_message
     ) {
-        while ( true ) {
-            utf8_string line;
-            cnx >> line;
-            if (line.empty())
-                break;
-            headers.parse(coerce< string >(line));
+        try {
+            while ( true ) {
+                utf8_string line;
+                cnx >> line;
+                if (line.empty())
+                    break;
+                headers.parse(coerce< string >(line));
+            }
+        } catch ( fostlib::exceptions::exception &e ) {
+            e.info() << error_message << std::endl;
+            throw;
         }
     }
 }
@@ -152,7 +159,7 @@ fostlib::http::user_agent::response::response(
     const string &protocol, int status, const string &message
 ) : method(method), address(url), protocol(protocol),
 status(status), message(message), m_cnx(connection) {
-    read_headers(*m_cnx, m_headers);
+    read_headers(*m_cnx, m_headers, "Whilst fetching headers");
 }
 
 
@@ -170,7 +177,7 @@ const binary_body &fostlib::http::user_agent::response::body() {
             if ( m_headers["Transfer-Encoding"].value() == "chunked" ) {
                 std::vector< unsigned char > data;
                 while ( true ) {
-                    std::string length, ignore;
+                    std::string length, ignore_crlf;
                     *m_cnx >> length;
                     std::size_t chunk_size = fostlib::coerce< std::size_t >(
                         hex_string(length)
@@ -178,11 +185,16 @@ const binary_body &fostlib::http::user_agent::response::body() {
                     if ( chunk_size == 0 )
                         break;
                     std::vector< unsigned char > chunk( chunk_size );
-                    *m_cnx >> chunk >> ignore;
+                    *m_cnx >> chunk >> ignore_crlf;
+                    if ( !ignore_crlf.empty() )
+                        throw fostlib::exceptions::not_null(
+                            "Expected CRLF after chunk data, but found something else",
+                            ignore_crlf
+                        );
                     data.insert(data.end(), chunk.begin(), chunk.end());
                 }
                 // Read trailing headers
-                read_headers(*m_cnx, m_headers);
+                read_headers(*m_cnx, m_headers, "Whilst reading trailing headers");
                 m_body.reset(new binary_body(data, m_headers));
             } else {
                 boost::asio::streambuf body_buffer;
