@@ -29,7 +29,7 @@ namespace fostlib {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
                 string m_method; url::filepath_string m_pathspec;
-                boost::scoped_ptr< mime > m_mime;
+                boost::shared_ptr< mime > m_mime;
 
                 public:
                     /// This constructor initialises a server request from a socket connection
@@ -45,7 +45,7 @@ namespace fostlib {
                     /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
                     /// The request body and headers
-                    const mime &data() const;
+                    boost::shared_ptr< mime > data() const;
 
                     /// Used to pass the response back to the user agent.This will throw on a mocked connection
                     void operator () ( const mime &response );

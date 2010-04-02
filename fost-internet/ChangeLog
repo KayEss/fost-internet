@@ -1,6 +1,7 @@
 2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
- HTTP client
- - The response body can now be detached from the response.
+ HTTP client/server
+ - The response body can now be detached from the client response as can the
+   request body from the server.
 
 2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
  TCP/IP

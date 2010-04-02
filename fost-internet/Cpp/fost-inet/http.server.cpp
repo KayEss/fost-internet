@@ -113,12 +113,12 @@ fostlib::http::server::request::request(
 }
 
 
-const mime &fostlib::http::server::request::data() const {
+boost::shared_ptr< fostlib::mime > fostlib::http::server::request::data() const {
     if ( !m_mime.get() )
         throw exceptions::null(
             "This server request has no MIME data, not even headers"
         );
-    return *m_mime;
+    return m_mime;
 }
 
 
