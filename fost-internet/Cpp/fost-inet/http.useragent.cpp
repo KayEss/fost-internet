@@ -158,7 +158,7 @@ fostlib::http::user_agent::response::response(
     const string &method, const url &url,
     const string &protocol, int status, const string &message
 ) : method(method), address(url), protocol(protocol),
-status(status), message(message), m_cnx(connection) {
+        status(status), message(message), m_cnx(connection) {
     read_headers(*m_cnx, m_headers, "Whilst fetching headers");
 }
 
@@ -191,7 +191,7 @@ boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body
                     if ( !ignore_crlf.empty() )
                         throw fostlib::exceptions::not_null(
                             "Expected CRLF after chunk data, but found something else",
-                            ignore_crlf
+                            coerce<string>(utf8_string(ignore_crlf))
                         );
                     data.insert(data.end(), chunk.begin(), chunk.end());
                 }
