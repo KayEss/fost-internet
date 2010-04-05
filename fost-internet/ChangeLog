@@ -9,6 +9,8 @@
    supported by the request.
  - Changed the type of the server request query string to match that of the
    URL.
+ Host
+ - Added JSON coercions for fostlib::host.
 
 2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
  URL
