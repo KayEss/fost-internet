@@ -34,12 +34,19 @@ namespace fostlib {
                 boost::shared_ptr< binary_body > m_mime;
 
                 public:
-                    /// This constructor initialises a server request from a socket connection
-                    request( std::auto_ptr< boost::asio::ip::tcp::socket > connection );
+                    /// Create an empty request
+                    request();
+                    /// Create a request from data on the provided socket
+                    request(std::auto_ptr< boost::asio::ip::tcp::socket > connection);
                     /// This constructor is useful for mocking the request for code that interacts with a server
                     request(
                         const string &method, const url::filepath_string &filespec,
                         std::auto_ptr< binary_body > headers_and_body
+                    );
+
+                    /// Parse a request on the provided socket
+                    void operator () (
+                        std::auto_ptr< boost::asio::ip::tcp::socket > connection
                     );
 
                     /// The request method

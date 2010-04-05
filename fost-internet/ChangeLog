@@ -1,6 +1,7 @@
 2010-04-05  Kirit Saelensminde  <kirit@felspar.com>
  HTTP server
  - Added more allowable characters to the resource parser for HTTP requests.
+ - The server request now supports handling of bad requests.
 
 2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
  URL
