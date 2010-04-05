@@ -1,4 +1,7 @@
 2010-04-05  Kirit Saelensminde  <kirit@felspar.com>
+ URL
+ - The query string can now be any sequence rather than only a map of
+ - key/value pairs.
  HTTP client/server
  - Added more allowable characters to the resource parser for HTTP requests.
  - The server request now supports handling of bad requests.

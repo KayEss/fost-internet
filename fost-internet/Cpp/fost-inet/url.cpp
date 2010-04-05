@@ -69,12 +69,6 @@ namespace {
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
-    const fostlib::utf8_string g_query_string_allowed(
-        ".,:/\\_-*~"
-        "0123456789"
-        "abcdefghijklmnopqrstuvwxyz"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    );
 
 
     /*
@@ -220,76 +214,6 @@ url::filepath_string fostlib::coercer<
 
 
 /*
-    fostlib::url::query_string
-*/
-
-
-fostlib::url::query_string::query_string() {
-}
-fostlib::url::query_string::query_string( const string &q ) {
-    split_type items( split( q, L"&" ) );
-    for ( split_type::const_iterator it( items.begin() ); it != items.end(); ++it ) {
-        std::pair< string, nullable< string > > parsed( partition( *it, L"=" ) );
-        m_query[ parsed.first ].push_back( parsed.second );
-    }
-}
-
-void fostlib::url::query_string::append(
-    const string &name, const nullable< string > &value
-) {
-    m_query[ name ].push_back( value );
-}
-
-void fostlib::url::query_string::remove( const string &name ) {
-    std::map< string, std::list< nullable< string > > >::iterator p(
-        m_query.find( name )
-    );
-    if ( p != m_query.end() )
-        m_query.erase( p );
-}
-
-namespace {
-    ascii_printable_string query_string_encode( const string &s ) {
-        ascii_printable_string r; utf8_string i( coerce< utf8_string >( s ) );
-        for ( utf8_string::const_iterator c( i.begin() ); c != i.end(); ++c )
-            if ( g_query_string_allowed.underlying().find( *c ) == std::string::npos )
-                r += hex< ascii_printable_string >( *c );
-            else
-                r += *c;
-        return r;
-    }
-    nullable< ascii_printable_string > query_string_encode(
-        const nullable< string > &s
-    ) {
-        if ( s.isnull() )
-            return null;
-        else
-            return query_string_encode( s.value() );
-    }
-}
-nullable< ascii_printable_string > fostlib::url::query_string::as_string() const {
-    nullable< ascii_printable_string > r;
-    for (
-        std::map< string, std::list< nullable< string > > >::const_iterator it(
-            m_query.begin()
-        );
-        it != m_query.end(); ++it
-    )
-        for (
-            std::list< nullable< string > >::const_iterator v( it->second.begin() );
-            v != it->second.end(); ++v
-        )
-            r = concat(
-                r, ascii_printable_string( "&" ), concat(
-                    query_string_encode( it->first ) + ascii_printable_string( "=" ),
-                    query_string_encode( *v )
-                )
-            );
-    return r;
-}
-
-
-/*
     fostlib::url
 */
 
@@ -335,7 +259,9 @@ fostlib::url::url( const t_form form, const string &str )
         break;
     }
     if ( !query_parts.second.isnull() )
-        query( query_string( query_parts.second.value() ) );
+        query( query_string( coerce< ascii_printable_string >(
+            query_parts.second.value()
+        ) ) );
     if ( !anchor_parts.second.isnull() )
         anchor( coerce< ascii_printable_string >( anchor_parts.second.value() ) );
 }
