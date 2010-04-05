@@ -9,6 +9,8 @@
    supported by the request.
  - Changed the type of the server request query string to match that of the
    URL.
+ - The parsing of the beginning of the HTTP request by the server is now
+   protected by a mutex because Boost.Spirit is not thread safe.
  Host
  - Added JSON coercions for fostlib::host.
 
