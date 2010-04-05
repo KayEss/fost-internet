@@ -26,14 +26,18 @@ const url_filespec_parser fostlib::url_filespec_p;
 namespace {
 
 
-    const setting< bool > g_allow_relative( L"fost-base/Cpp/fost-inet/url.cpp", L"url", L"Allow relative urls", true, true );
+    const setting< bool > g_allow_relative(
+        L"fost-base/Cpp/fost-inet/url.cpp", L"url", L"Allow relative urls", true, true
+    );
 
 
     template< typename C >
     C digit( utf8 dig ) {
         if ( dig < 0x0a ) return dig + '0';
         if ( dig < 0x10 ) return dig + 'A' - 0x0a;
-        throw fostlib::exceptions::out_of_range< int >( L"Number to convert to hex digit is too big", 0, 0x10, dig );
+        throw fostlib::exceptions::out_of_range< int >(
+            L"Number to convert to hex digit is too big", 0, 0x10, dig
+        );
     }
     template< typename S >
     S hex( utf8 ch ) {
@@ -47,22 +51,36 @@ namespace {
 
 
     const fostlib::utf8_string g_url_allowed(
-        ".,:/\\_-~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        ".,:/\\_-~"
+        "0123456789"
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_allowed_lax(
-        ".,:/\\_-@*+~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        ".,:/\\_-@*+~"
+        "0123456789"
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
-    const fostlib::utf8_string g_url_part_allowed( // Slightly safer without the backslash and / : ~
-        ".,_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    const fostlib::utf8_string g_url_part_allowed(
+        // Slightly safer without the backslash and / : ~
+        ".,_-"
+        "0123456789"
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_query_string_allowed(
-        ".,:/\\_-*~0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        ".,:/\\_-*~"
+        "0123456789"
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
 
 
     /*
      * Note that given a pathSpec ending in '/', this will leave it like that.
-     * What actually happens is that a blank entry gets shoved into the list, and this recreates it later.
+     * What actually happens is that a blank entry gets shoved into the list,
+     * and this recreates it later.
      * All good stuff, and exactly what we want.
      */
     std::string normalise_path( std::string t_path ) {
@@ -70,7 +88,8 @@ namespace {
             t_path.replace( t_path.find( "//" ), 2, "/" );
 
         if( t_path[0] == '/' )
-            t_path = t_path.substr( 1 ); // Trim off any leading / - otherwise we get a blank entry at the beginning.
+            // Trim off any leading / - otherwise we get a blank entry at the beginning
+            t_path = t_path.substr( 1 );
 
         typedef std::list< std::string > pathlist_type;
         pathlist_type pathlist;
@@ -104,7 +123,9 @@ namespace {
         return replaceAll( t_path, "//", "/" ).underlying();
     }
     url::filepath_string normalise_path( const url::filepath_string &path ) {
-        return url::filepath_string( ascii_printable_string( normalise_path( path.underlying().underlying() ) ) );
+        return url::filepath_string(
+            ascii_printable_string( normalise_path( path.underlying().underlying() ) )
+        );
     }
 
 
@@ -116,45 +137,71 @@ namespace {
 */
 
 
-void fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_printable_string &into ) {
-    throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode( fostlib::nliteral from, ascii_printable_string &into )" );
+void fostlib::url::filepath_string_tag::do_encode(
+    fostlib::nliteral from, ascii_printable_string &into
+) {
+    throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode("
+    L"fostlib::nliteral from, ascii_printable_string &into )" );
 }
 
 
-void fostlib::url::filepath_string_tag::do_encode( const ascii_printable_string &from, ascii_printable_string &into, const bool encode_slash ) {
+void fostlib::url::filepath_string_tag::do_encode(
+    const ascii_printable_string &from, ascii_printable_string &into,
+    const bool encode_slash
+) {
     into.clear();
     std::size_t length = from.underlying().length();
     into.reserve( length + length / 2);
-    for ( ascii_printable_string::const_iterator i(from.begin()); i != from.end(); ++i )
-        if ( (encode_slash ? g_url_part_allowed : g_url_allowed).underlying().find( *i ) == std::string::npos )
+    for (
+        ascii_printable_string::const_iterator i(from.begin()); i != from.end(); ++i
+    )
+        if ( (encode_slash ? g_url_part_allowed : g_url_allowed)
+                .underlying().find( *i ) == std::string::npos )
             into += hex< ascii_printable_string >(*i);
         else
             into += *i;
 }
 
 
-void fostlib::url::filepath_string_tag::check_encoded( const ascii_printable_string &s ) {
+void fostlib::url::filepath_string_tag::check_encoded(
+    const ascii_printable_string &s
+) {
     for ( ascii_printable_string::const_iterator c( s.begin() ); c != s.end(); ++c )
         if ( g_url_allowed_lax.underlying().find( *c ) == std::string::npos ) {
             if ( *c == '%' )
                 for ( std::size_t p = 0; p != 2; ++p ) {
                     if ( ++c == s.end() )
-                        throw fostlib::exceptions::parse_error( L"File specification escape sequence is truncated" );
-                    if ( ( *c >= '0' && *c <= '9' ) || ( *c >= 'a' && *c <= 'f' ) || ( *c >= 'A' && *c <= 'F' ) )
-                        ; // This is fine
+                        throw fostlib::exceptions::parse_error(
+                            L"File specification escape sequence is truncated"
+                        );
+                    if (
+                        ( *c >= '0' && *c <= '9' )
+                        || ( *c >= 'a' && *c <= 'f' )
+                        || ( *c >= 'A' && *c <= 'F' )
+                    ) ; // This is fine
                     else
-                        throw fostlib::exceptions::parse_error( L"File specification contains an illegal character in an escape sequence", string( 1, *c ) );
+                        throw fostlib::exceptions::parse_error(
+                            L"File specification contains an illegal character in"
+                            L"an escape sequence", string( 1, *c )
+                        );
                 }
             else
-                throw fostlib::exceptions::parse_error( L"File specification contains an illegal character", string( 1, *c ) );
+                throw fostlib::exceptions::parse_error(
+                    L"File specification contains an illegal character", string( 1, *c )
+                );
         }
 }
 
 
-url::filepath_string fostlib::coercer< url::filepath_string, string >::coerce( const string &str ) {
+url::filepath_string fostlib::coercer<
+    url::filepath_string, string
+>::coerce( const string &str ) {
     utf8_string narrowed( fostlib::coerce< utf8_string >( str ) );
     url::filepath_string encoded;
-    for ( utf8_string::const_iterator it( narrowed.begin() ); it != narrowed.end(); ++it )
+    for (
+        utf8_string::const_iterator it( narrowed.begin() );
+        it != narrowed.end(); ++it
+    )
         if ( g_url_allowed.underlying().find( *it ) == std::string::npos )
             encoded += hex< url::filepath_string >( *it );
         else
@@ -163,8 +210,12 @@ url::filepath_string fostlib::coercer< url::filepath_string, string >::coerce( c
 }
 
 
-url::filepath_string fostlib::coercer< url::filepath_string, boost::filesystem::wpath >::coerce( const boost::filesystem::wpath &p ) {
-    return fostlib::coerce< url::filepath_string >( fostlib::coerce< string >(p.string()) );
+url::filepath_string fostlib::coercer<
+    url::filepath_string, boost::filesystem::wpath
+>::coerce( const boost::filesystem::wpath &p ) {
+    return fostlib::coerce< url::filepath_string >(
+        fostlib::coerce< string >(p.string())
+    );
 }
 
 
@@ -183,12 +234,16 @@ fostlib::url::query_string::query_string( const string &q ) {
     }
 }
 
-void fostlib::url::query_string::append( const string &name, const nullable< string > &value ) {
+void fostlib::url::query_string::append(
+    const string &name, const nullable< string > &value
+) {
     m_query[ name ].push_back( value );
 }
 
 void fostlib::url::query_string::remove( const string &name ) {
-    std::map< string, std::list< nullable< string > > >::iterator p( m_query.find( name ) );
+    std::map< string, std::list< nullable< string > > >::iterator p(
+        m_query.find( name )
+    );
     if ( p != m_query.end() )
         m_query.erase( p );
 }
@@ -203,7 +258,9 @@ namespace {
                 r += *c;
         return r;
     }
-    nullable< ascii_printable_string > query_string_encode( const nullable< string > &s ) {
+    nullable< ascii_printable_string > query_string_encode(
+        const nullable< string > &s
+    ) {
         if ( s.isnull() )
             return null;
         else
@@ -212,11 +269,20 @@ namespace {
 }
 nullable< ascii_printable_string > fostlib::url::query_string::as_string() const {
     nullable< ascii_printable_string > r;
-    for ( std::map< string, std::list< nullable< string > > >::const_iterator it( m_query.begin() ); it != m_query.end(); ++it )
-        for ( std::list< nullable< string > >::const_iterator v( it->second.begin() ); v != it->second.end(); ++v )
+    for (
+        std::map< string, std::list< nullable< string > > >::const_iterator it(
+            m_query.begin()
+        );
+        it != m_query.end(); ++it
+    )
+        for (
+            std::list< nullable< string > >::const_iterator v( it->second.begin() );
+            v != it->second.end(); ++v
+        )
             r = concat(
                 r, ascii_printable_string( "&" ), concat(
-                    query_string_encode( it->first ) + ascii_printable_string( "=" ), query_string_encode( *v )
+                    query_string_encode( it->first ) + ascii_printable_string( "=" ),
+                    query_string_encode( *v )
                 )
             );
     return r;
@@ -228,7 +294,10 @@ nullable< ascii_printable_string > fostlib::url::query_string::as_string() const
 */
 
 
-setting< string > fostlib::url::s_default_host( L"fost-base/Cpp/fost-inet/url.cpp", L"Site", L"Host", L"localhost", true );
+setting< string > fostlib::url::s_default_host(
+    L"fost-base/Cpp/fost-inet/url.cpp",
+    L"Site", L"Host", L"localhost", true
+);
 
 
 fostlib::url::url()
@@ -245,10 +314,16 @@ fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
 fostlib::url::url( const t_form form, const string &str )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
     std::pair< string, nullable< string > > anchor_parts( partition( str, L"#" ) );
-    std::pair< string, nullable< string > > query_parts( partition( anchor_parts.first, L"?" ) );
+    std::pair< string, nullable< string > > query_parts(
+        partition( anchor_parts.first, L"?" )
+    );
     switch ( form ) {
     case e_pathname:
-        m_pathspec = url::filepath_string( ascii_printable_string( normalise_path( coerce< url::filepath_string >( str ).underlying().underlying() ) ) );
+        m_pathspec = url::filepath_string( ascii_printable_string(
+            normalise_path(
+                coerce< url::filepath_string >( str ).underlying().underlying()
+            )
+        ) );
         break;
     case e_encoded:
         for ( string::const_iterator it( str.begin() ); it != str.end(); ++it )
@@ -294,7 +369,8 @@ fostlib::url::url( const string &a_url )
 fostlib::url::url( const ascii_printable_string &protocol, const host &h,
     const nullable< string > &username,
     const nullable< string > &password
-) : protocol( protocol ), server( h ), user( username ), password( password ), m_pathspec( "/" ) {
+) : protocol( protocol ), server( h ),
+user( username ), password( password ), m_pathspec( "/" ) {
 }
 
 ascii_printable_string fostlib::url::as_string() const {
@@ -353,23 +429,30 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
     url::filepath_string pathName( a_pathName );
     // First, formalise the new path.
     if( pathName.underlying().underlying().length() == 0 ) {
-        pathName = url::filepath_string( "/" ); // Assume that if it's blank, the caller means '/'
+        // Assume that if it's blank, the caller means '/'
+        pathName = url::filepath_string( "/" ); 
     }
     // Obvious directory fixes.
-    if( pathName.underlying().underlying().find( "/." )==(pathName.underlying().underlying().length()-2) ) {
+    if( pathName.underlying().underlying().find( "/." )
+            ==(pathName.underlying().underlying().length()-2) ) {
         pathName += '/'; // Add terminating slash if it ends with /.
-    } else if( pathName.underlying().underlying().find( "/.." )==(pathName.underlying().underlying().length()-3) ) {
+    } else if( pathName.underlying().underlying().find( "/.." )
+            ==(pathName.underlying().underlying().length()-3) ) {
         pathName += url::filepath_string( "/" ); // Or /..
     } else if( pathName==url::filepath_string( "." ) ) {
         pathName += url::filepath_string( "/" );
     } else if( pathName==url::filepath_string( ".." ) ) {
-        pathName += url::filepath_string( "/" ); // Or if it's simply '..' or '.', both of which really mean '../' or './' anyway.
+        // Or if it's simply '..' or '.', both of which really mean '../' or './' anyway.
+        pathName += url::filepath_string( "/" ); 
     }
     // Now do we add or replace?
     if ( pathName.underlying().underlying()[ 0 ] != '/' ) {
-        if( m_pathspec.underlying().underlying()[ m_pathspec.underlying().underlying().length() - 1 ] != '/' )
+        if( m_pathspec.underlying().underlying()[
+                m_pathspec.underlying().underlying().length() - 1
+        ] != '/' )
             m_pathspec += url::filepath_string( "/../" );
-        // Whatever happens, we don't need the last part of the pathSpec anymore - the file name.
+        // Whatever happens, we don't need the last part of the
+        // pathSpec anymore - the file name.
         m_pathspec = normalise_path( m_pathspec + pathName );
     } else // It begins with a /, so we replace.
         m_pathspec = normalise_path( pathName );
@@ -381,9 +464,13 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
 */
 
 
-fostlib::exceptions::relative_path_error::relative_path_error( const string &base, const string &rel, const string &error ) throw () {
+fostlib::exceptions::relative_path_error::relative_path_error(
+    const string &base, const string &rel, const string &error
+) throw () {
     try {
-        info() << error << std::endl << L"Base comes from : " << base << std::endl << L"Relative pathname : " << rel << std::endl;
+        info() << error << std::endl
+            << L"Base comes from : " << base << std::endl
+            << L"Relative pathname : " << rel << std::endl;
     } catch ( ... ) {
         absorbException();
     }
