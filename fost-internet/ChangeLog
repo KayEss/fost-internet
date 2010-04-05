@@ -7,6 +7,8 @@
  - The server request now supports handling of bad requests.
  - The HTTP client post and put short cuts now accept all data types
    supported by the request.
+ - Changed the type of the server request query string to match that of the
+   URL.
 
 2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
  URL
