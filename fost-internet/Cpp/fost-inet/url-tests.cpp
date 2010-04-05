@@ -33,7 +33,12 @@ FSL_TEST_FUNCTION( filepath_string ) {
 
 FSL_TEST_FUNCTION( query_string ) {
     url::query_string q1, q2;
-    FSL_CHECK_EQ( q1.as_string().value( ascii_printable_string() ), q2.as_string().value( ascii_printable_string() ) );
+    FSL_CHECK( q1.as_string().isnull() );
+    FSL_CHECK( q2.as_string().isnull() );
+    FSL_CHECK_EQ(
+        q1.as_string().value( ascii_printable_string() ),
+        q2.as_string().value( ascii_printable_string() )
+    );
     q1 = q2;
     q1.append( L"key", null );
     FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=" ) );
@@ -42,11 +47,23 @@ FSL_TEST_FUNCTION( query_string ) {
     q2 = q1;
     FSL_CHECK_EQ( q2.as_string().value(), ascii_printable_string( "key=&key=" ) );
     q1.append( L"key", L"(.)" );
-    FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=&key=&key=%28.%29" ) );
-    FSL_CHECK_EQ( q2.as_string().value(), ascii_printable_string( "key=&key=" ) );
+    FSL_CHECK_EQ(
+        q1.as_string().value(),
+        ascii_printable_string( "key=&key=&key=%28.%29" )
+    );
+    FSL_CHECK_EQ(
+        q2.as_string().value(),
+        ascii_printable_string( "key=&key=" )
+    );
     q2.append( L"key", L"\x2014" );
-    FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=&key=&key=%28.%29" ) );
-    FSL_CHECK_EQ( q2.as_string().value(), ascii_printable_string( "key=&key=&key=%E2%80%94" ) );
+    FSL_CHECK_EQ(
+        q1.as_string().value(),
+        ascii_printable_string( "key=&key=&key=%28.%29" )
+    );
+    FSL_CHECK_EQ(
+        q2.as_string().value(),
+        ascii_printable_string( "key=&key=&key=%E2%80%94" )
+    );
 }
 
 
@@ -57,11 +74,14 @@ FSL_TEST_FUNCTION( url ) {
 
 
 #define QS_PARSE( str ) \
-    FSL_CHECK( boost::spirit::parse( (str), query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
-    FSL_CHECK_EQ( qs.as_string().value(), coerce< ascii_printable_string >(string(str)) );
+    FSL_CHECK( boost::spirit::parse( (str), \
+            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK_EQ( qs.as_string().value(), \
+            coerce< ascii_printable_string >(string(str)) );
 FSL_TEST_FUNCTION( query_string_parser ) {
     url::query_string qs;
-    FSL_CHECK( boost::spirit::parse( L"", query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
+    FSL_CHECK( boost::spirit::parse( L"",
+            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
     FSL_CHECK( qs.as_string().isnull() );
     QS_PARSE( L"key=value&key=value" );
     QS_PARSE( L"key=value" );
@@ -82,7 +102,8 @@ FSL_TEST_FUNCTION( url_parser_protocol ) {
 
 
 #define URL_PARSE_HOSTPART( str, u_ ) \
-    FSL_CHECK( boost::spirit::parse( str, url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK( boost::spirit::parse( str, \
+        url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( u.as_string(), u_.as_string() );
 FSL_TEST_FUNCTION( url_parser_hostpart ) {
     url u;
