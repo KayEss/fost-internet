@@ -28,35 +28,6 @@ namespace fostlib {
                 explicit user_agent(const url &base);
 
 
-                /// Describe a HTTP response
-                class FOST_INET_DECLSPEC response : boost::noncopyable {
-                    friend class user_agent;
-                    mime::mime_headers m_headers;
-                    response(
-                        std::auto_ptr< network_connection > connection,
-                        const string &m, const url &u,
-                        const string &protocol, int status, const string &message
-                    );
-                    public:
-                        /// The request method
-                        accessors< const string > method;
-                        /// The request URL
-                        accessors< const url > address;
-
-                        /// The response protocol
-                        accessors< const string > protocol;
-                        /// The response status
-                        accessors< const int > status;
-                        /// The response message text
-                        accessors< const string > message;
-
-                        /// The response body and headers
-                        boost::shared_ptr< const binary_body > body();
-
-                    private:
-                        std::auto_ptr< network_connection > m_cnx;
-                        boost::shared_ptr< binary_body > m_body;
-                };
                 /// Describe a HTTP request
                 class FOST_INET_DECLSPEC request {
                     boost::shared_ptr< mime > m_data;
@@ -96,6 +67,35 @@ namespace fostlib {
                         /// The request data
                         mime &data() const { return *m_data; }
                 };
+                /// Describe a HTTP response
+                class FOST_INET_DECLSPEC response : boost::noncopyable {
+                    friend class user_agent;
+                    mime::mime_headers m_headers;
+                    response(
+                        std::auto_ptr< network_connection > connection,
+                        const string &m, const url &u,
+                        const string &protocol, int status, const string &message
+                    );
+                    public:
+                        /// The request method
+                        accessors< const string > method;
+                        /// The request URL
+                        accessors< const url > address;
+
+                        /// The response protocol
+                        accessors< const string > protocol;
+                        /// The response status
+                        accessors< const int > status;
+                        /// The response message text
+                        accessors< const string > message;
+
+                        /// The response body and headers
+                        boost::shared_ptr< const binary_body > body();
+
+                    private:
+                        std::auto_ptr< network_connection > m_cnx;
+                        boost::shared_ptr< binary_body > m_body;
+                };
 
 
                 /// A function that will authenticate the request
@@ -115,12 +115,18 @@ namespace fostlib {
                     return (*this)(r);
                 }
                 /// Perform a POST request
-                std::auto_ptr< response > post( const url &url, const string &data ) const {
+                template< typename D >
+                std::auto_ptr< response > post(
+                    const url &url, const D &data
+                ) const {
                     request r(L"POST", url, data);
                     return (*this)(r);
                 }
                 /// Perform a PUT request
-                std::auto_ptr< response > put( const url &url, const string &data ) const {
+                template< typename D >
+                std::auto_ptr< response > put(
+                    const url &url, const D &data
+                ) const {
                     request r(L"PUT", url, data);
                     return (*this)(r);
                 }
