@@ -48,7 +48,7 @@ namespace fostlib {
     }
 
 
-    extern const FOST_INET_DECLSPEC struct host_parser : public boost::spirit::grammar <
+    struct FOST_INET_DECLSPEC host_parser : public boost::spirit::grammar <
         host_parser, detail::host_closure::context_t
     > {
         template< typename scanner_t >
@@ -96,7 +96,7 @@ namespace fostlib {
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
-    } host_p;
+    };
 
 
 }

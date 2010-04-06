@@ -18,11 +18,6 @@
 using namespace fostlib;
 
 
-const query_string_parser fostlib::query_string_p;
-const url_hostpart_parser fostlib::url_hostpart_p;
-const url_filespec_parser fostlib::url_filespec_p;
-
-
 namespace {
 
 
@@ -271,6 +266,9 @@ fostlib::url::url(
 }
 fostlib::url::url( const string &a_url )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
+    url_hostpart_parser url_hostpart_p;
+    url_filespec_parser url_filespec_p;
+    query_string_parser query_string_p;
     try {
         url u; ascii_printable_string fs; query_string qs;
         if ( !boost::spirit::parse( a_url.c_str(),
@@ -296,7 +294,7 @@ fostlib::url::url( const ascii_printable_string &protocol, const host &h,
     const nullable< string > &username,
     const nullable< string > &password
 ) : protocol( protocol ), server( h ),
-user( username ), password( password ), m_pathspec( "/" ) {
+        user( username ), password( password ), m_pathspec( "/" ) {
 }
 
 ascii_printable_string fostlib::url::as_string() const {

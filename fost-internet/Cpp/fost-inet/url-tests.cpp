@@ -79,6 +79,8 @@ FSL_TEST_FUNCTION( url ) {
     FSL_CHECK_EQ( qs.as_string().value(), \
             coerce< ascii_printable_string >(string(str)) );
 FSL_TEST_FUNCTION( query_string_parser ) {
+    query_string_parser query_string_p;
+
     url::query_string qs;
     FSL_CHECK( boost::spirit::parse( L"",
             query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
@@ -106,6 +108,8 @@ FSL_TEST_FUNCTION( url_parser_protocol ) {
         url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( u.as_string(), u_.as_string() );
 FSL_TEST_FUNCTION( url_parser_hostpart ) {
+    url_hostpart_parser url_hostpart_p;
+
     url u;
     URL_PARSE_HOSTPART( L"http://localhost", url() );
     URL_PARSE_HOSTPART( L"http://127.0.0.1", url( host( 127, 0, 0, 1 ) ) );
@@ -124,6 +128,8 @@ FSL_TEST_FUNCTION( url_parser_hostpart ) {
     FSL_CHECK( boost::spirit::parse( str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( s, ascii_printable_string( s_ ) )
 FSL_TEST_FUNCTION( url_parser_filespec ) {
+    url_filespec_parser url_filespec_p;
+
     ascii_printable_string s;
     URL_PARSE_FILESPEC( "/", "/" );
     URL_PARSE_FILESPEC( "/file.html", "/file.html" );

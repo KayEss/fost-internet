@@ -61,7 +61,7 @@ namespace fostlib {
     }
 
 
-    extern const FOST_INET_DECLSPEC struct query_string_parser : public boost::spirit::grammar<
+    struct FOST_INET_DECLSPEC query_string_parser : public boost::spirit::grammar<
         query_string_parser, detail::query_string_closure::context_t
     > {
         template< typename scanner_t >
@@ -91,10 +91,10 @@ namespace fostlib {
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
-    } query_string_p;
+    };
 
 
-    extern const FOST_INET_DECLSPEC struct url_hostpart_parser : public boost::spirit::grammar <
+    struct FOST_INET_DECLSPEC url_hostpart_parser : public boost::spirit::grammar <
         url_hostpart_parser, detail::url_closure::context_t
     > {
         template< typename scanner_t >
@@ -113,15 +113,17 @@ namespace fostlib {
                     moniker.text = parsers::coerce< ascii_printable_string >()( moniker.buffer )
                 ];
             }
+            host_parser host_p;
+
             boost::spirit::rule< scanner_t > top;
             boost::spirit::rule< scanner_t, ascii_printable_string_builder_closure::context_t > moniker;
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
-    } url_hostpart_p;
+    };
 
 
-    extern const FOST_INET_DECLSPEC struct url_filespec_parser : public boost::spirit::grammar <
+    struct FOST_INET_DECLSPEC url_filespec_parser : public boost::spirit::grammar <
         url_filespec_parser, detail::url_filespec_closure::context_t
     > {
         template< typename scanner_t >
@@ -131,11 +133,15 @@ namespace fostlib {
                     +boost::spirit::chset<>( "_@~a-zA-Z0-9/.,:()+%*-" )
                 )[ self.filespec = phoenix::construct_<ascii_printable_string>(phoenix::arg1, phoenix::arg2) ];
             }
+
+            url_hostpart_parser url_hostpart_p;
+            query_string_parser query_string_p;
+
             boost::spirit::rule< scanner_t > top;
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
-    } url_filespec_p;
+    };
 
 
 }

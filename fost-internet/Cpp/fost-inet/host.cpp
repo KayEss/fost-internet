@@ -14,9 +14,6 @@
 using namespace fostlib;
 
 
-const host_parser fostlib::host_p;
-
-
 namespace {
 
 
@@ -76,10 +73,14 @@ string fostlib::host::name() const {
 
 host fostlib::coercer< host, string >::coerce( const string &h ) {
     host r;
+    host_parser host_p;
     if ( boost::spirit::parse(h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
         return r;
     else
-        throw exceptions::not_implemented("fostlib::coercer< host, string >::coerce( const string &h ) -- where the host name didn't parse");
+        throw exceptions::not_implemented(
+            "fostlib::coercer< host, string >::coerce( const string &h )"
+            " -- where the host name didn't parse"
+        );
 }
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( fostlib::coerce< ascii_string >( address.to_string() ) );
