@@ -23,7 +23,9 @@ namespace fostlib {
     class FOST_INET_DECLSPEC FSL_ABSTRACT headers_base {
     public:
         class content;
-
+    private:
+        typedef std::multimap< string, content > header_store_type;
+    public:
         /// Construct empty headers
         headers_base();
         /// Allow the headers to be sub-classed
@@ -35,16 +37,16 @@ namespace fostlib {
         /// Returns true if a specified header exists
         bool exists( const string & ) const;
         /// Allows a header to be set, but without any value
-        content &set( const string &name );
+        void set( const string &name );
         /// Allows a header to be given a specified value
-        content &set( const string &name, const content & );
+        void set( const string &name, const content & );
         /// Allow a specified sub-value on the specified header to be set
-        content &set_subvalue( const string &name, const string &k, const string &v );
+        void set_subvalue( const string &name, const string &k, const string &v );
         /// Fetches a header throwing if the header doesn't exist
         const content &operator [] ( const string & ) const;
 
         /// Allow the fields to be iterated
-        typedef std::map< string, content >::const_iterator const_iterator;
+        typedef header_store_type::const_iterator const_iterator;
         /// The beginning of the header fields
         const_iterator begin() const;
         /// The end of the header fields
@@ -87,7 +89,7 @@ namespace fostlib {
         ) = 0;
 
     private:
-        std::map< string, content > m_headers;
+        header_store_type m_headers;
     };
 
 

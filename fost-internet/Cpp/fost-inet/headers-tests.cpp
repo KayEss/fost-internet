@@ -24,3 +24,28 @@ FSL_TEST_FUNCTION( ostream ) {
     fostlib::headers_base::content c;
     ss << c;
 }
+
+
+FSL_TEST_FUNCTION( field_setting ) {
+    fostlib::mime::mime_headers headers;
+    FSL_CHECK( headers.end() == headers.begin() );
+    headers.set("H1", "a");
+    FSL_CHECK( headers.end() != headers.begin() );
+    FSL_CHECK( ++headers.begin() == headers.end() );
+    headers.set("H1", "b"); // Replaces the content
+    FSL_CHECK( headers.end() != headers.begin() );
+    FSL_CHECK( ++headers.begin() == headers.end() );
+    FSL_CHECK_EQ(headers["H1"].value(), "b");
+
+    // Check sub values can be set properly
+    headers.set_subvalue("H1", "sub", "v1");
+    FSL_CHECK( headers.end() != headers.begin() );
+    FSL_CHECK( ++headers.begin() == headers.end() );
+    FSL_CHECK_EQ(headers["H1"].subvalue("sub").value(), "v1");
+
+    headers.set("H1", "c"); // Replaces the content
+    FSL_CHECK( headers.end() != headers.begin() );
+    FSL_CHECK( ++headers.begin() == headers.end() );
+    FSL_CHECK(headers["H1"].subvalue("sub").isnull());
+}
+

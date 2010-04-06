@@ -59,25 +59,33 @@ namespace {
 const headers_base::content &fostlib::headers_base::operator [] (
     const fostlib::string &n
 ) const {
-    std::map< fostlib::string, content >::const_iterator p( m_headers.find( n ) );
+    header_store_type::const_iterator p( m_headers.find( n ) );
     if ( p == m_headers.end() )
         return g_stat;
     else
         return (*p).second;
 }
 
-headers_base::content &fostlib::headers_base::set( const string &n ) {
+void fostlib::headers_base::set( const string &n ) {
     return set(n, content());
 }
-headers_base::content &fostlib::headers_base::set(
+void fostlib::headers_base::set(
     const string &n, const content &v
 ) {
-    return m_headers[n] = v;
+    m_headers.erase(m_headers.lower_bound(n), m_headers.upper_bound(n));
+    m_headers.insert(m_headers.upper_bound(n), std::make_pair(n, v));
 }
-headers_base::content &fostlib::headers_base::set_subvalue(
+void fostlib::headers_base::set_subvalue(
     const string &n, const string &k, const string &v
 ) {
-    return m_headers[n].subvalue(k, v);
+    header_store_type::iterator lower( m_headers.lower_bound(n) );
+    if ( lower == m_headers.end() ) {
+        set(n);
+        lower = m_headers.lower_bound(n);
+    }
+    header_store_type::iterator upper( m_headers.upper_bound(n) );
+    for ( header_store_type::iterator h( lower ); h != upper; ++h )
+        (*h).second.subvalue(k, v);
 }
 
 fostlib::headers_base::const_iterator fostlib::headers_base::begin() const {
