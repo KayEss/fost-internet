@@ -1,6 +1,8 @@
 2010-04-06  Kirit Saelensminde  <kirit@felspar.com>
  Parsers
  - Removed the parser instances because they're not thread safe.
+ MIME
+ - Added support for multiple headers of the same name.
  HTTP client
  - Corrected behaviour for 304 responses.
 

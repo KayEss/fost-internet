@@ -47,5 +47,10 @@ FSL_TEST_FUNCTION( field_setting ) {
     FSL_CHECK( headers.end() != headers.begin() );
     FSL_CHECK( ++headers.begin() == headers.end() );
     FSL_CHECK(headers["H1"].subvalue("sub").isnull());
+
+    headers.add("H1", "d"); // Adds a second H1 header
+    FSL_CHECK( headers.end() != headers.begin() );
+    FSL_CHECK( ++headers.begin() != headers.end() );
+    FSL_CHECK( ++ ++headers.begin() == headers.end() );
 }
 

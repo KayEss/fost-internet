@@ -40,6 +40,8 @@ namespace fostlib {
         void set( const string &name );
         /// Allows a header to be given a specified value
         void set( const string &name, const content & );
+        /// Adds a header with a given name and content
+        void add( const string &name, const content & );
         /// Allow a specified sub-value on the specified header to be set
         void set_subvalue( const string &name, const string &k, const string &v );
         /// Fetches a header throwing if the header doesn't exist

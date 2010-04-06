@@ -73,6 +73,11 @@ void fostlib::headers_base::set(
     const string &n, const content &v
 ) {
     m_headers.erase(m_headers.lower_bound(n), m_headers.upper_bound(n));
+    add(n, v);
+}
+void fostlib::headers_base::add(
+    const string &n, const content &v
+) {
     m_headers.insert(m_headers.upper_bound(n), std::make_pair(n, v));
 }
 void fostlib::headers_base::set_subvalue(
