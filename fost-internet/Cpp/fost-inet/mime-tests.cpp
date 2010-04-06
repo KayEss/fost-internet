@@ -116,7 +116,11 @@ FSL_TEST_FUNCTION( mime_attachment ) {
     std::stringstream ss;
     ss << envelope;
     mime::mime_headers headers;
-    headers.parse( coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first ) );
+    FSL_CHECK_NOTHROW(
+        headers.parse(
+            coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first )
+        )
+    );
     try {
         FSL_CHECK_EQ( utf8_string( ss.str() ), coerce< utf8_string>( L"\
 Content-Type: multipart/mixed; boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\

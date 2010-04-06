@@ -32,12 +32,16 @@ void fostlib::headers_base::parse( const string &headers ) {
         std::pair< string, fostlib::nullable< string > > lines(
             partition( headers, L"\r\n" )
         );
-        !lines.first.empty(); lines = partition( lines.second, L"\r\n" )
+        !lines.first.empty();
+        lines = partition( lines.second, L"\r\n" )
     ) {
         const std::pair< string, fostlib::nullable< string > > line(
             partition( lines.first, L":" )
         );
-        m_headers.insert( value( line.first, line.second.value( fostlib::string() ) ) );
+        const std::pair< string, content > parsed(
+            value( line.first, line.second.value( fostlib::string() ) )
+        );
+        add( parsed.first, parsed.second );
     }
 }
 
