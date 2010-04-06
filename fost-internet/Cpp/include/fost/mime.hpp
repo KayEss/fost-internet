@@ -27,7 +27,9 @@ namespace fostlib {
         public:
             class FOST_INET_DECLSPEC mime_headers : public fostlib::headers_base {
                 protected:
-                    std::pair< string, headers_base::content > value( const string &name, const string &value );
+                    std::pair< string, headers_base::content > value(
+                        const string &name, const string &value
+                    );
             };
             virtual ~mime();
 
@@ -55,7 +57,9 @@ namespace fostlib {
         protected:
             virtual std::auto_ptr< iterator_implementation > iterator() const = 0;
 
-            explicit mime( const mime_headers &headers, const string &content_type );
+            explicit mime(
+                const mime_headers &headers, const string &content_type
+            );
     };
 
 
