@@ -1,6 +1,8 @@
 2010-04-06  Kirit Saelensminde  <kirit@felspar.com>
  Parsers
  - Removed the parser instances because they're not thread safe.
+ HTTP client
+ - Corrected behaviour for 304 responses.
 
 2010-04-05  Kirit Saelensminde  <kirit@felspar.com>
  URL

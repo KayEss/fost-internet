@@ -171,7 +171,7 @@ boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body
         else if (m_headers.exists("Content-Length"))
             length = coerce< int64_t >(m_headers["Content-Length"].value());
 
-        if ( !length.isnull() && length.value() == 0 )
+        if ( status() == 304 || (!length.isnull() && length.value() == 0) )
             m_body = boost::shared_ptr< binary_body >(
                 new binary_body(m_headers)
             );
