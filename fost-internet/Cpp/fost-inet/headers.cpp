@@ -29,7 +29,9 @@ void fostlib::headers_base::parse( const string &headers ) {
     // This implementation ignores character encodings
     // - assumes UTF-8 which won't work for mail headers
     for (
-        std::pair< string, fostlib::nullable< string > > lines( partition( headers, L"\r\n" ) );
+        std::pair< string, fostlib::nullable< string > > lines(
+            partition( headers, L"\r\n" )
+        );
         !lines.first.empty(); lines = partition( lines.second, L"\r\n" )
     ) {
         const std::pair< string, fostlib::nullable< string > > line(
@@ -39,7 +41,9 @@ void fostlib::headers_base::parse( const string &headers ) {
     }
 }
 
-std::pair< fostlib::string, headers_base::content > fostlib::headers_base::value( const fostlib::string &name, const fostlib::string &value ) {
+std::pair< fostlib::string, headers_base::content > fostlib::headers_base::value(
+    const fostlib::string &name, const fostlib::string &value
+) {
     return std::make_pair( name, content( value ) );
 }
 
@@ -83,9 +87,12 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
     return m_headers.end();
 }
 
-std::ostream &fostlib::operator << ( std::ostream &o, const fostlib::headers_base &headers ) {
+std::ostream &fostlib::operator << (
+    std::ostream &o, const fostlib::headers_base &headers
+) {
     for ( headers_base::const_iterator i( headers.begin() ); i != headers.end(); ++i )
-        o << coerce< utf8_string >( i->first ).underlying() << ": " << i->second << "\r\n";
+        o << coerce< utf8_string >( i->first ).underlying() << ": "
+            << i->second << "\r\n";
     return o;
 }
 
@@ -137,7 +144,10 @@ std::ostream &fostlib::operator << (
     std::ostream &o, const headers_base::content &value
 ) {
     o << coerce< utf8_string >( value.value() ).underlying();
-    for ( headers_base::content::const_iterator i( value.begin() ); i != value.end(); ++i )
+    for (
+        headers_base::content::const_iterator i( value.begin() );
+        i != value.end(); ++i
+    )
         o << "; " << coerce< utf8_string >( i->first ).underlying() << "="
             "\"" << coerce< utf8_string >( i->second ).underlying() << "\"";
     return o;
