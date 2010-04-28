@@ -123,7 +123,7 @@ void fostlib::http::server::request::operator () (
                     phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
             ]
             >> boost::spirit::chlit< char >( ' ' )
-            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=-" ))[
+            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=~!-" ))[
                 phoenix::var(m_pathspec) =
                     phoenix::construct_< url::filepath_string >(
                         phoenix::arg1, phoenix::arg2

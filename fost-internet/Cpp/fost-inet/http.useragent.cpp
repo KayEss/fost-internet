@@ -88,7 +88,7 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
             [ phoenix::var(status) = phoenix::arg1 ]
         >> boost::spirit::chlit< wchar_t >( ' ' )
         >> (
-            +boost::spirit::chset<>( L"a-zA-Z " )
+            +boost::spirit::chset<>( L"a-zA-Z -" )
         )[ phoenix::var(message) =
             phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
     ).full )

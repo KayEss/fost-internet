@@ -46,20 +46,20 @@ namespace {
 
 
     const fostlib::utf8_string g_url_allowed(
-        ".,:/\\_-~"
+        ".,:/\\_-~!"
         "0123456789"
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_allowed_lax(
-        ".,:/\\_-@*+~"
+        ".,:/\\_-@*+~!"
         "0123456789"
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_part_allowed(
         // Slightly safer without the backslash and / : ~
-        ".,_-"
+        ".,_-!"
         "0123456789"
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

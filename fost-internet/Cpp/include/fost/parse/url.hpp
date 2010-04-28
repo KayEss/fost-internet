@@ -130,7 +130,7 @@ namespace fostlib {
         struct definition {
             definition( url_filespec_parser const &self ) {
                 top = (
-                    +boost::spirit::chset<>( "_@~a-zA-Z0-9/.,:()+%*-" )
+                    +boost::spirit::chset<>( "_@~!a-zA-Z0-9/.,:()+%*-" )
                 )[ self.filespec = phoenix::construct_<ascii_printable_string>(phoenix::arg1, phoenix::arg2) ];
             }
 
