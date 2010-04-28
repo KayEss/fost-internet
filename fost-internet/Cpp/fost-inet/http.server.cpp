@@ -212,6 +212,7 @@ namespace {
             case 204: return "No Content";
             case 205: return "Reset Content";
             case 206: return "Partial Content";
+            case 207: return "Multi-Status";
 
             case 300: return "Multiple Choices";
             case 301: return "Moved Permanently";
