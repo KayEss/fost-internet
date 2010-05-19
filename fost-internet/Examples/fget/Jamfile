@@ -34,11 +34,3 @@ run fget
         fget-google-secure
     ;
 
-run fget
-    :
-        http://urquell-fn.appspot.com/lib/http/headers
-    :
-    :
-    :
-        fget-urquel
-    ;
