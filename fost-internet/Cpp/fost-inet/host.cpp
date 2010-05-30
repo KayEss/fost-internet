@@ -38,19 +38,21 @@ namespace {
 
 fostlib::host::host() {
 }
-
-
-fostlib::host::host( const fostlib::string &name, const nullable< string > &service )
-: service( service ), m_name( name ) {
+fostlib::host::host( const fostlib::string &name )
+: m_name( name ) {
 }
-
+fostlib::host::host(
+    const fostlib::string &name, const nullable< string > &service
+) : service( service ), m_name( name ) {
+}
+fostlib::host::host( const fostlib::string &name, port_number service )
+: service( coerce< string >(service) ), m_name( name ) {
+}
 
 fostlib::host::host( uint32_t address, const nullable< string > &service )
 : service( service ), m_address( boost::asio::ip::address_v4( address ) ) {
     m_name = coerce< string >( m_address.value() );
 }
-
-
 fostlib::host::host( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, const nullable< string > &service )
 : service( service ), m_address(
     boost::asio::ip::address_v4( ( b1 << 24 ) + ( b2 << 16 ) + ( b3 << 8 ) + b4 )

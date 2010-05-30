@@ -41,7 +41,9 @@ namespace fostlib {
     class FOST_INET_DECLSPEC host {
     public:
         host();
-        explicit host( const string &host, const nullable< string > &service = null );
+        explicit host( const string &host );
+        host( const string &host, const nullable< string > &service );
+        host( const string &host, port_number service );
         explicit host( uint32_t ipv4, const nullable< string > &service = null );
         host( uint8_t, uint8_t, uint8_t, uint8_t,
             const nullable< string > &service = null
@@ -52,7 +54,7 @@ namespace fostlib {
         accessors< nullable< string > > service;
 
     private:
-        fostlib::string m_name, m_service;
+        fostlib::string m_name;
         mutable nullable< boost::asio::ip::address > m_address;
     };
 
