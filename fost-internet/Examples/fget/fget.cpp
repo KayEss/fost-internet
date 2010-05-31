@@ -33,22 +33,19 @@ FSL_MAIN(
     if ( args.commandSwitch( "authenticate" ) == "FOST" ) {
         std::set< fostlib::string > tosign;
         if ( !args.commandSwitch( "user" ).isnull() ) {
-            request.headers().set("X-FOST-User", args.commandSwitch("user").value());
+            request.headers().set(
+                "X-FOST-User", args.commandSwitch("user").value());
             tosign.insert("X-FOST-User");
         }
-        if ( args.commandSwitch("key").isnull() || args.commandSwitch("secret").isnull() )
+        if ( args.commandSwitch("key").isnull()
+                || args.commandSwitch("secret").isnull() )
             throw exceptions::null(
                 "With FOST authentication both -key and -secret must be passed in"
             );
-        browser.authentication(
-            boost::function< void ( fostlib::http::user_agent::request& )
-            >(boost::lambda::bind(
-                fostlib::http::fost_authentication,
+        fost_authentication(browser, 
                 args.commandSwitch("key").value(),
                 args.commandSwitch("secret").value(),
-                tosign, boost::lambda::_1
-            ))
-        );
+                tosign);
     }
     std::auto_ptr< http::user_agent::response > response(browser(request));
     if ( args[2].isnull() ) {

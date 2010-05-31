@@ -20,11 +20,17 @@ namespace fostlib {
     namespace http {
 
 
+        /// Signs a request with the specified key and secret.
         void FOST_INET_DECLSPEC fost_authentication(
-            const fostlib::string &api_key,
-            const fostlib::string &secret,
-            const std::set< fostlib::string > &headers_to_sign,
+            const string &api_key, const string &secret,
+            const std::set< string > &headers_to_sign,
             user_agent::request &request
+        );
+        /// Adds authentication to the specified user agent
+        void FOST_INET_DECLSPEC fost_authentication(
+            user_agent &ua,
+            const string &api_key, const string &secret,
+            const std::set< string > &headers_to_sign = std::set< string >()
         );
 
 
