@@ -46,11 +46,16 @@ namespace {
             signd += L" " + *i;
         }
         signature << signd << to_sign << "\n";
-        for (
-            mime::const_iterator i(request.data().begin());
-            i != request.data().end(); ++i
-        )
-            signature << *i;
+        if ( request.data().begin() != request.data().end() )
+            for (
+                mime::const_iterator i(request.data().begin());
+                i != request.data().end(); ++i
+            )
+                signature << *i;
+        else
+            signature << fostlib::utf8_string(
+                request.address().query().as_string().value("").underlying()
+            );
 
         request.headers().set( L"X-FOST-Headers", signd );
         request.headers().set( L"Authorization", L"FOST " + api_key + L":" +
