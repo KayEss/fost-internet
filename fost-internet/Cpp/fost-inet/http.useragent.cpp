@@ -122,7 +122,8 @@ fostlib::http::user_agent::request::request(
 ) : m_data(new file_body(data)), method(method), address(url) {
 }
 fostlib::http::user_agent::request::request(
-    const string &method, const url &url, boost::shared_ptr< mime > mime_data
+    const string &method, const url &url,
+    boost::shared_ptr< mime > mime_data
 ) : m_data(mime_data), method(method), address(url) {
 }
 

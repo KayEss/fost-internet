@@ -35,7 +35,10 @@ namespace fostlib {
                         /// Construct a request for a URL
                         request(const string &method, const url &url);
                         /// Construct a request for a URL with body data
-                        request(const string &method, const url &url, const string &data);
+                        request(
+                            const string &method, const url &url,
+                            const string &data
+                        );
                         /// Construct a request for a URL with body data from a file
                         request(
                             const string &method, const url &url,

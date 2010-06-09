@@ -39,19 +39,26 @@ namespace fostlib {
             virtual bool boundary_is_ok( const string &boundary ) const = 0;
             virtual std::ostream &print_on( std::ostream & ) const = 0;
 
+            /// An iterator that allows MIME data to be traversed
             class FOST_INET_DECLSPEC const_iterator {
                 friend class fostlib::mime;
                 boost::shared_ptr< iterator_implementation > underlying;
                 const_memory_block current;
                 const_iterator( std::auto_ptr< iterator_implementation > p );
                 public:
+                    /// Allow comparison for equality
                     bool operator == ( const const_iterator & ) const;
+                    /// Allow comparison for inequality
                     bool operator != ( const const_iterator & ) const;
+                    /// Allow the memory block to be accessed
                     const_memory_block operator * () const;
-                    const const_iterator &operator ++();
+                    /// Move to the next chunk of data
+                    const const_iterator &operator ++ ();
             };
 
+            /// Fetch the start of the MIME data
             const_iterator begin() const;
+            /// Fetch the end of the MIME data
             const_iterator end() const;
 
         protected:
