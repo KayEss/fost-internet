@@ -66,6 +66,10 @@ User-Agent: Fake agent\r\n\
 \r\n\
 " );
 }
+FSL_TEST_FUNCTION( empty_mime_iterators ) {
+    empty_mime empty;
+    FSL_CHECK( empty.begin() == empty.end() );
+}
 
 FSL_TEST_FUNCTION(text1) {
     text_body ta(L"Test text document");
@@ -107,6 +111,14 @@ Content-Transfer-Encoding: 8bit\r\n\
 Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document" );
+}
+FSL_TEST_FUNCTION(text_iterators) {
+    text_body ta(utf8_string("Test text document"));
+    FSL_CHECK( ta.begin() != ta.end() );
+    FSL_CHECK_EQ(fostlib::string("Test text document"), fostlib::string(
+        reinterpret_cast<const char *>((*ta.begin()).first),
+        reinterpret_cast<const char *>((*ta.begin()).second)
+    ));
 }
 
 
