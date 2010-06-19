@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -7,7 +7,7 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/detail/mime.hpp>
+#include <fost/mime.hpp>
 #include <fost/string>
 
 #include <fost/exception/parse_error.hpp>
@@ -124,8 +124,9 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
 */
 
 
-fostlib::empty_mime::empty_mime( const mime_headers &headers )
-: mime( headers, "application/x-empty" ) {
+fostlib::empty_mime::empty_mime(
+    const mime_headers &headers, const string &mime_type
+) : mime( headers, mime_type ) {
     if ( !this->headers().exists(L"Content-Length") )
         this->headers().set("Content-Length", L"0");
 }
@@ -250,6 +251,62 @@ std::auto_ptr< mime::iterator_implementation > fostlib::text_body::iterator() co
 
 
 /*
+    fostlib::binary_body
+*/
+
+
+fostlib::binary_body::binary_body(
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type) {
+}
+fostlib::binary_body::binary_body(
+    const std::vector< unsigned char > &data,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(data) {
+}
+
+std::ostream &fostlib::binary_body::print_on( std::ostream &o ) const {
+    for (
+        std::vector< unsigned char >::const_iterator i(data().begin());
+        i != data().end();
+        ++i
+    )
+        o << int(*i) << ' ';
+    return o;
+}
+
+bool fostlib::binary_body::boundary_is_ok( const string &boundary ) const {
+    throw exceptions::not_implemented(
+        "fostlib::binary_body::boundary_is_ok( const string &boundary ) const"
+    );
+}
+
+struct fostlib::binary_body::binary_body_iterator :
+    public mime::iterator_implementation
+{
+    const std::vector< unsigned char > &data; bool sent;
+    binary_body_iterator(const std::vector< unsigned char > &d)
+    : data(d), sent(false) {
+    }
+    const_memory_block operator () () {
+        if ( data.size() == 0 || sent )
+            return const_memory_block(NULL , NULL );
+        else {
+            sent = true;
+            return const_memory_block(&data[0], &data[0] + data.size());
+        }
+    }
+};
+std::auto_ptr< mime::iterator_implementation > fostlib::binary_body::iterator() const {
+    return std::auto_ptr< mime::iterator_implementation >(
+        new binary_body_iterator(data())
+    );
+}
+
+
+/*
     fostlib::file_body
 */
 
@@ -267,7 +324,9 @@ std::ostream &fostlib::file_body::print_on( std::ostream &o ) const {
 }
 
 bool fostlib::file_body::boundary_is_ok( const string &boundary ) const {
-    throw exceptions::not_implemented("fostlib::file_body::boundary_is_ok( const string &boundary ) const");
+    throw exceptions::not_implemented(
+        "fostlib::file_body::boundary_is_ok( const string &boundary ) const"
+    );
 }
 
 

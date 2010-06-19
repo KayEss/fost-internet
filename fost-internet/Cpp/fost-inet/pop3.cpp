@@ -1,12 +1,12 @@
 /*
-    Copyright 2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
 */
 
 #include "fost-inet.hpp"
-#include <fost/detail/pop3.hpp>
+#include <fost/pop3.hpp>
 #include <fost/exception/out_of_range.hpp>
 #include <fost/exception/unicode_encoding.hpp>
 
@@ -20,60 +20,74 @@ namespace {
     mime::mime_headers read_headers(
         network_connection &the_network_connection
     ) {
-        mime::mime_headers headers;
+        try {
+            mime::mime_headers headers;
 
-        utf8_string line;
-        the_network_connection >> line;
-
-        while ( !line.empty() ) {
-            utf8_string header(line);
-
-            line = "";
+            std::string line;
             the_network_connection >> line;
 
-            while (
-                (line.underlying().substr(0,1) == " ") ||
-                (line.underlying().substr(0,1) == "\t")
-            ) {
-                header += line;
+            while ( !line.empty() ) {
+                std::string header(line);
+
                 line = "";
                 the_network_connection >> line;
-            }
 
-            headers.parse(coerce< string >(header));
+                while (line.substr(0,1) == " " || line.substr(0,1) == "\t") {
+                    header += line;
+                    line = "";
+                    the_network_connection >> line;
+                }
+
+                string safe;
+                for ( std::string::const_iterator c = header.begin(); c != header.end(); ++c )
+                    if ( *c > 127 || * c < 0 )
+                        safe += '?';
+                    else
+                        safe += *c;
+
+                headers.parse(safe);
+            }
+            return headers;
+        } catch ( fostlib::exceptions::exception &e ) {
+            e.info() << "Whilst reading MIME headers" << std::endl;
+            throw;
         }
-        return headers;
     }
 
     std::string read_body(
         network_connection &the_network_connection
     ) {
-        std::string content;
-        std::string line;
+        try {
+            std::string content;
+            std::string line;
 
-        the_network_connection >> line;
-        while (
-            true
-        ) {
-            if (
-                (line.length() > 0) &&
-                (line[0] == '.')
+            the_network_connection >> line;
+            while (
+                true
             ) {
                 if (
-                    (line.length() > 1) &&
-                    (line[1] == '.')
+                    (line.length() > 0) &&
+                    (line[0] == '.')
                 ) {
-                    line = line.substr(1);
+                    if (
+                        (line.length() > 1) &&
+                        (line[1] == '.')
+                    ) {
+                        line = line.substr(1);
+                    } else
+                        break;
                 } else
-                    break;
-            } else
-                content += line+"\n";
+                    content += line+"\n";
 
-            line = "";
-            the_network_connection >> line;
+                line = "";
+                the_network_connection >> line;
+            }
+
+            return content;
+        } catch ( fostlib::exceptions::exception &e ) {
+            e.info() << "Whilst reading message body" << std::endl;
+            throw;
         }
-
-        return content;
     }
 
 
@@ -81,14 +95,19 @@ namespace {
         network_connection &the_network_connection,
         string command
     ) {
-        utf8_string server_response;
-        the_network_connection >> server_response;
+        try {
+            utf8_string server_response;
+            the_network_connection >> server_response;
 
-        if (server_response.underlying().substr(0,3) != "+OK") {
-            throw exceptions::not_implemented(
-                command,
-                coerce< string >(server_response)
-            );
+            if (server_response.underlying().substr(0,3) != "+OK") {
+                throw exceptions::not_implemented(
+                    command,
+                    coerce< string >(server_response)
+                );
+            }
+        } catch ( fostlib::exceptions::exception &e ) {
+            e.info() << "Whilst waiting for +OK..." << std::endl;
+            throw;
         }
     }
 
@@ -97,12 +116,17 @@ namespace {
         const string command,
         const nullable< string > parameter = null
     ) {
-        the_network_connection << coerce< utf8_string >(command);
-        if ( !parameter.isnull() ) {
-            the_network_connection << " ";
-            the_network_connection << coerce< utf8_string >(parameter);
+        try {
+            the_network_connection << coerce< utf8_string >(command);
+            if ( !parameter.isnull() ) {
+                the_network_connection << " ";
+                the_network_connection << coerce< utf8_string >(parameter);
+            }
+            the_network_connection << "\r\n";
+        } catch ( fostlib::exceptions::exception &e ) {
+            e.info() << "Whilst sending command: " << command << std::endl;
+            throw;
         }
-        the_network_connection << "\r\n";
     }
 
     void send(
@@ -155,40 +179,52 @@ namespace {
             size_t message_count;
             pop3cnx( const host &h, const string &username, const string &password )
             : m_cnx( h, 110 ) {
-                utf8_string server_status;
-                m_cnx >> server_status;
+                try {
+                    utf8_string server_status;
+                    m_cnx >> server_status;
 
-                send_and_check_OK(m_cnx, "user", username);
-                send_and_check_OK(m_cnx, "pass", password);
+                    send_and_check_OK(m_cnx, "user", username);
+                    send_and_check_OK(m_cnx, "pass", password);
 
-                send(m_cnx, "stat");
+                    send(m_cnx, "stat");
 
-                utf8_string server_response;
-                m_cnx >> server_response;
+                    utf8_string server_response;
+                    m_cnx >> server_response;
 
-                std::stringstream server_response_stringstream(server_response.underlying().substr(3));
-                server_response_stringstream >> message_count;
-                size_t octets;
-                server_response_stringstream >> octets;
+                    std::stringstream server_response_stringstream(
+                        server_response.underlying().substr(3)
+                    );
+                    server_response_stringstream >> message_count;
+                    size_t octets;
+                    server_response_stringstream >> octets;
+                } catch ( fostlib::exceptions::exception &e ) {
+                    e.info() << "Whilst establishing POP3 connection" << std::endl;
+                    throw;
+                }
             }
             ~pop3cnx()
             try {
-                send_and_check_OK(m_cnx, "quit");
+                send(m_cnx, "quit");
             } catch ( ... ) {
                 absorbException();
             }
             std::auto_ptr< text_body > message( size_t i ) {
-                send_and_check_OK(m_cnx, "retr", i);
-                mime::mime_headers h = read_headers(m_cnx);
-                utf8_string content;
                 try {
-                    content = read_body(m_cnx);
-                } catch ( fostlib::exceptions::unicode_encoding & ) {
-                    return std::auto_ptr< text_body >();
+                    send_and_check_OK(m_cnx, "retr", i);
+                    mime::mime_headers h = read_headers(m_cnx);
+                    utf8_string content;
+                    try {
+                        content = read_body(m_cnx);
+                    } catch ( fostlib::exceptions::unicode_encoding & ) {
+                        return std::auto_ptr< text_body >();
+                    }
+                    return std::auto_ptr<text_body>(
+                        new text_body( coerce< string >( content ), h, "text/plain" )
+                    );
+                } catch ( fostlib::exceptions::exception &e ) {
+                    e.info() << "Whilst retrieving a message" << std::endl;
+                    throw;
                 }
-                return std::auto_ptr<text_body>(
-                    new text_body( coerce< string >( content ), h, "text/plain" )
-                );
             }
             void remove( size_t i ) {
                 send_and_check_OK(m_cnx, "dele", i);
@@ -202,7 +238,9 @@ void fostlib::pop3::iterate_mailbox(
     const string &username,
     const string &password
 ) {
-    boost::scoped_ptr< pop3cnx > mailbox( new pop3cnx(host, username, password) );
+    boost::scoped_ptr< pop3cnx > mailbox(
+        new pop3cnx(host, username, password)
+    );
     const size_t messages = mailbox->message_count;
 
     // Loop from the end so we always process the latest bounce messages first
@@ -214,7 +252,8 @@ void fostlib::pop3::iterate_mailbox(
             mailbox.reset( new pop3cnx(host, username, password) );
             if ( mailbox->message_count < i )
                 throw fostlib::exceptions::out_of_range< size_t >(
-                    "The number of messages on the server can't go down below the ones we've processed!",
+                    "The number of messages on the server can't go down "
+                        "below the ones we've processed!",
                     i, messages, mailbox->message_count
                 );
         }

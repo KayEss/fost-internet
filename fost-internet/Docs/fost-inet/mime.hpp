@@ -21,6 +21,10 @@
 
 /** \class fostlib::headers_base fost/detail/mime.hpp fost/internet
     \ingroup fost_inet_mime
+
+    MIME headers may have multiple entries for a given header name. For example, mail headers will contain multiple "Received" headers, one for each mail server the email has been processed by.
+
+    The <code>set</code> members will delete any old headers with the same value. The <code>add</code> members will add additional headers of a given name.
 */
 
 

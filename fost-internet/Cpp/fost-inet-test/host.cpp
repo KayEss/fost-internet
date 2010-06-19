@@ -29,6 +29,7 @@ FSL_TEST_FUNCTION( constructors ) {
     FSL_CHECK( boost::spirit::parse( (s), host_p[ phoenix::var(h) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( fostlib::coerce< ascii_string >( h ), fostlib::ascii_string(s) );
 FSL_TEST_FUNCTION( parse ) {
+    host_parser host_p;
     host h;
     HOST_PARSE("localhost");
     HOST_PARSE("www.felspar.com");

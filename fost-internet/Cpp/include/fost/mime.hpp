@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -11,61 +11,10 @@
 #pragma once
 
 
-#include <fost/core>
-#include <fost/pointers>
-#include <boost/filesystem.hpp>
+#include <fost/headers.hpp>
 
 
 namespace fostlib {
-
-
-    /// An abstract base class used to describe headers as they appear in protocols like SMTP and HTTP.
-    class FOST_INET_DECLSPEC FSL_ABSTRACT headers_base {
-    public:
-        class content;
-
-        headers_base();
-        virtual ~headers_base();
-
-        void parse( const string &headers );
-
-        bool exists( const string & ) const;
-        content &set( const string &name, const content & );
-        /// Allow a specified sub-value on the specified header to be set
-        content &set_subvalue( const string &name, const string &k, const string &v );
-        const content &operator [] ( const string & ) const;
-
-        typedef std::map< string, content >::const_iterator const_iterator;
-        const_iterator begin() const;
-        const_iterator end() const;
-
-        class FOST_INET_DECLSPEC content {
-        public:
-            content();
-            content( wliteral );
-            content( const string & );
-            content( const string &, const std::map< string, string > & );
-
-            accessors< string > value;
-
-            content &subvalue( const string &k, const string &v );
-            nullable< string > subvalue( const string &k ) const;
-
-            typedef std::map< string, string >::const_iterator const_iterator;
-            const_iterator begin() const;
-            const_iterator end() const;
-
-        private:
-            std::map< string, string > m_subvalues;
-        };
-
-    protected:
-        virtual std::pair< string, content > value( const string &name, const string &value ) = 0;
-
-    private:
-        std::map< string, content > m_headers;
-    };
-
 
 
     /// An abstract base class for MIME containers
@@ -78,7 +27,9 @@ namespace fostlib {
         public:
             class FOST_INET_DECLSPEC mime_headers : public fostlib::headers_base {
                 protected:
-                    std::pair< string, headers_base::content > value( const string &name, const string &value );
+                    std::pair< string, headers_base::content > value(
+                        const string &name, const string &value
+                    );
             };
             virtual ~mime();
 
@@ -88,25 +39,34 @@ namespace fostlib {
             virtual bool boundary_is_ok( const string &boundary ) const = 0;
             virtual std::ostream &print_on( std::ostream & ) const = 0;
 
+            /// An iterator that allows MIME data to be traversed
             class FOST_INET_DECLSPEC const_iterator {
                 friend class fostlib::mime;
                 boost::shared_ptr< iterator_implementation > underlying;
                 const_memory_block current;
                 const_iterator( std::auto_ptr< iterator_implementation > p );
                 public:
+                    /// Allow comparison for equality
                     bool operator == ( const const_iterator & ) const;
+                    /// Allow comparison for inequality
                     bool operator != ( const const_iterator & ) const;
+                    /// Allow the memory block to be accessed
                     const_memory_block operator * () const;
-                    const const_iterator &operator ++();
+                    /// Move to the next chunk of data
+                    const const_iterator &operator ++ ();
             };
 
+            /// Fetch the start of the MIME data
             const_iterator begin() const;
+            /// Fetch the end of the MIME data
             const_iterator end() const;
 
         protected:
             virtual std::auto_ptr< iterator_implementation > iterator() const = 0;
 
-            explicit mime( const mime_headers &headers, const string &content_type );
+            explicit mime(
+                const mime_headers &headers, const string &content_type
+            );
     };
 
 
@@ -115,7 +75,11 @@ namespace fostlib {
         struct empty_mime_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
-            empty_mime(const mime_headers &headers = mime_headers());
+            /// Construct an empty MIME body that cannot have data
+            empty_mime(
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "application/x-empty"
+            );
 
             std::ostream &print_on( std::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
@@ -161,6 +125,32 @@ namespace fostlib {
             accessors< const utf8_string > text;
     };
 
+    /// A MIME container which represents binary data in memory
+    class FOST_INET_DECLSPEC binary_body : public mime {
+        struct binary_body_iterator;
+        std::auto_ptr< iterator_implementation > iterator() const;
+        public:
+            /// Construct an empty body
+            binary_body(
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "application/x-empty"
+            );
+            /// Construct from a data block
+            binary_body(
+                const std::vector< unsigned char > &data,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream"
+            );
+
+            /// Display the data on a stream
+            std::ostream &print_on( std::ostream &o ) const;
+            /// Check that the boundary can be used
+            bool boundary_is_ok( const string &boundary ) const;
+
+            /// Allow direct read access to the data
+            accessors< const std::vector< unsigned char > > data;
+    };
+
     /// A MIME container which represents a file on disk
     class FOST_INET_DECLSPEC file_body : public mime {
         struct file_body_iteration;
@@ -179,8 +169,6 @@ namespace fostlib {
     };
 
 
-    FOST_INET_DECLSPEC std::ostream &operator <<( std::ostream &o, const headers_base &headers );
-    FOST_INET_DECLSPEC std::ostream &operator <<( std::ostream &o, const headers_base::content &value );
     inline std::ostream &operator << ( std::ostream &o, const mime &m ) {
         return m.print_on( o );
     }

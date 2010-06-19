@@ -1,5 +1,5 @@
 /*
-    Copyright 2007-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2007-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -10,7 +10,7 @@
 #define FOST_PARSE_HOST_HPP
 
 
-#include <fost/detail/host.hpp>
+#include <fost/host.hpp>
 #include <fost/parse/parse.hpp>
 
 
@@ -48,7 +48,7 @@ namespace fostlib {
     }
 
 
-    extern const FOST_INET_DECLSPEC struct host_parser : public boost::spirit::grammar <
+    struct FOST_INET_DECLSPEC host_parser : public boost::spirit::grammar <
         host_parser, detail::host_closure::context_t
     > {
         template< typename scanner_t >
@@ -96,7 +96,7 @@ namespace fostlib {
 
             boost::spirit::rule< scanner_t > const &start() const { return top; }
         };
-    } host_p;
+    };
 
 
 }

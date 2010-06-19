@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -7,14 +7,11 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/detail/host.hpp>
+#include <fost/host.hpp>
 #include <fost/parse/host.hpp>
 
 
 using namespace fostlib;
-
-
-const host_parser fostlib::host_p;
 
 
 namespace {
@@ -41,19 +38,21 @@ namespace {
 
 fostlib::host::host() {
 }
-
-
-fostlib::host::host( const fostlib::string &name, const nullable< string > &service )
-: service( service ), m_name( name ) {
+fostlib::host::host( const fostlib::string &name )
+: m_name( name ) {
 }
-
+fostlib::host::host(
+    const fostlib::string &name, const nullable< string > &service
+) : service( service ), m_name( name ) {
+}
+fostlib::host::host( const fostlib::string &name, port_number service )
+: service( coerce< string >(service) ), m_name( name ) {
+}
 
 fostlib::host::host( uint32_t address, const nullable< string > &service )
 : service( service ), m_address( boost::asio::ip::address_v4( address ) ) {
     m_name = coerce< string >( m_address.value() );
 }
-
-
 fostlib::host::host( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, const nullable< string > &service )
 : service( service ), m_address(
     boost::asio::ip::address_v4( ( b1 << 24 ) + ( b2 << 16 ) + ( b3 << 8 ) + b4 )
@@ -76,10 +75,14 @@ string fostlib::host::name() const {
 
 host fostlib::coercer< host, string >::coerce( const string &h ) {
     host r;
+    host_parser host_p;
     if ( boost::spirit::parse(h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
         return r;
     else
-        throw exceptions::not_implemented("fostlib::coercer< host, string >::coerce( const string &h ) -- where the host name didn't parse");
+        throw exceptions::not_implemented(
+            "fostlib::coercer< host, string >::coerce( const string &h )"
+            " -- where the host name didn't parse"
+        );
 }
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( fostlib::coerce< ascii_string >( address.to_string() ) );

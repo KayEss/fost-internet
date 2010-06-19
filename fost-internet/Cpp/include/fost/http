@@ -14,8 +14,8 @@
 
 
 #include <fost/core>
-#include <fost/detail/connection.hpp>
-#include <fost/detail/host.hpp>
-#include <fost/detail/http.authentication.fost.hpp>
-#include <fost/detail/http.useragent.hpp>
-#include <fost/detail/url.hpp>
+#include <fost/connection.hpp>
+#include <fost/host.hpp>
+#include <fost/http.authentication.fost.hpp>
+#include <fost/http.useragent.hpp>
+#include <fost/url.hpp>

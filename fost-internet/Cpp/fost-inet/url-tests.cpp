@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -33,7 +33,12 @@ FSL_TEST_FUNCTION( filepath_string ) {
 
 FSL_TEST_FUNCTION( query_string ) {
     url::query_string q1, q2;
-    FSL_CHECK_EQ( q1.as_string().value( ascii_printable_string() ), q2.as_string().value( ascii_printable_string() ) );
+    FSL_CHECK( q1.as_string().isnull() );
+    FSL_CHECK( q2.as_string().isnull() );
+    FSL_CHECK_EQ(
+        q1.as_string().value( ascii_printable_string() ),
+        q2.as_string().value( ascii_printable_string() )
+    );
     q1 = q2;
     q1.append( L"key", null );
     FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=" ) );
@@ -42,11 +47,23 @@ FSL_TEST_FUNCTION( query_string ) {
     q2 = q1;
     FSL_CHECK_EQ( q2.as_string().value(), ascii_printable_string( "key=&key=" ) );
     q1.append( L"key", L"(.)" );
-    FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=&key=&key=%28.%29" ) );
-    FSL_CHECK_EQ( q2.as_string().value(), ascii_printable_string( "key=&key=" ) );
+    FSL_CHECK_EQ(
+        q1.as_string().value(),
+        ascii_printable_string( "key=&key=&key=%28.%29" )
+    );
+    FSL_CHECK_EQ(
+        q2.as_string().value(),
+        ascii_printable_string( "key=&key=" )
+    );
     q2.append( L"key", L"\x2014" );
-    FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=&key=&key=%28.%29" ) );
-    FSL_CHECK_EQ( q2.as_string().value(), ascii_printable_string( "key=&key=&key=%E2%80%94" ) );
+    FSL_CHECK_EQ(
+        q1.as_string().value(),
+        ascii_printable_string( "key=&key=&key=%28.%29" )
+    );
+    FSL_CHECK_EQ(
+        q2.as_string().value(),
+        ascii_printable_string( "key=&key=&key=%E2%80%94" )
+    );
 }
 
 
@@ -57,11 +74,16 @@ FSL_TEST_FUNCTION( url ) {
 
 
 #define QS_PARSE( str ) \
-    FSL_CHECK( boost::spirit::parse( (str), query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
-    FSL_CHECK_EQ( qs.as_string().value(), coerce< ascii_printable_string >(string(str)) );
+    FSL_CHECK( boost::spirit::parse( (str), \
+            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK_EQ( qs.as_string().value(), \
+            coerce< ascii_printable_string >(string(str)) );
 FSL_TEST_FUNCTION( query_string_parser ) {
+    query_string_parser query_string_p;
+
     url::query_string qs;
-    FSL_CHECK( boost::spirit::parse( L"", query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
+    FSL_CHECK( boost::spirit::parse( L"",
+            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
     FSL_CHECK( qs.as_string().isnull() );
     QS_PARSE( L"key=value&key=value" );
     QS_PARSE( L"key=value" );
@@ -69,6 +91,7 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"__=" );
     QS_PARSE( L"key=&key=" );
     QS_PARSE( L"key=value&key=" );
+    QS_PARSE( L"next=/path/" );
 }
 
 
@@ -81,9 +104,12 @@ FSL_TEST_FUNCTION( url_parser_protocol ) {
 
 
 #define URL_PARSE_HOSTPART( str, u_ ) \
-    FSL_CHECK( boost::spirit::parse( str, url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK( boost::spirit::parse( str, \
+        url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( u.as_string(), u_.as_string() );
 FSL_TEST_FUNCTION( url_parser_hostpart ) {
+    url_hostpart_parser url_hostpart_p;
+
     url u;
     URL_PARSE_HOSTPART( L"http://localhost", url() );
     URL_PARSE_HOSTPART( L"http://127.0.0.1", url( host( 127, 0, 0, 1 ) ) );
@@ -102,6 +128,8 @@ FSL_TEST_FUNCTION( url_parser_hostpart ) {
     FSL_CHECK( boost::spirit::parse( str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( s, ascii_printable_string( s_ ) )
 FSL_TEST_FUNCTION( url_parser_filespec ) {
+    url_filespec_parser url_filespec_p;
+
     ascii_printable_string s;
     URL_PARSE_FILESPEC( "/", "/" );
     URL_PARSE_FILESPEC( "/file.html", "/file.html" );
@@ -149,36 +177,13 @@ FSL_TEST_FUNCTION( parse ) {
 
 #define TEST_COERCION(u) \
     FSL_CHECK_EQ( coerce< string >( url( u ) ), u );
-FSL_TEST_FUNCTION( coercion ) {
+FSL_TEST_FUNCTION( z_coercion ) {
     TEST_COERCION( "http://localhost/file-path.html" );
     TEST_COERCION( "http://localhost/somebody@example.com" );
     TEST_COERCION( "http://localhost/somebody+else@example.com" );
     TEST_COERCION( "http://localhost/~somebody" );
+    TEST_COERCION( "http://localhost:8000/~somebody" );
+    TEST_COERCION( "http://bmf.miro.felspar.net/extranet/login/?next=/office/" );
+    TEST_COERCION( "http://bmf.miro.felspar.net:8000/extranet/login/?next=/office/" );
 }
 
-
-/*
-FSL_TEST_FUNCTION( parse_port ) {
-    url  a( L"http://localhost:8000/" );
-    FSL_CHECK_EQ( a.server().name(), L"localhost" );
-    FSL_CHECK( a.user().isnull() );
-    FSL_CHECK_EQ( a.server().service(), L"8000" );
-}
-
-FSL_TEST_FUNCTION( parse_credentials ) {
-    url  b( L"http://user:pass@localhost/" );
-    FSL_CHECK_EQ( b.server().name(), L"localhost" );
-    FSL_CHECK( !b.user().isnull() );
-    FSL_CHECK_EQ( b.user().value(), L"user" );
-    FSL_CHECK_EQ( b.password().value(), L"pass" );
-}
-
-FSL_TEST_FUNCTION( parse_credentials_port ) {
-    url  c( L"http://user:pass@localhost:8000/" );
-    FSL_CHECK_EQ( c.server().name(), L"localhost" );
-    FSL_CHECK( !c.user().isnull() );
-    FSL_CHECK_EQ( c.user().value(), L"user" );
-    FSL_CHECK_EQ( c.password().value(), L"pass" );
-    FSL_CHECK_EQ( c.server().service(), L"8000" );
-}
-*/

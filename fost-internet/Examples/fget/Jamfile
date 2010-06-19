@@ -18,9 +18,19 @@ run fget
 
 run fget
     :
+        http://static.felspar.com/felspar-180x53.png
+    :
+    :
+    :
+        fget-image
+    ;
+
+run fget
+    :
         https://www.google.com/
     :
     :
     :
         fget-google-secure
     ;
+

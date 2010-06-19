@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -7,7 +7,7 @@
 
 
 #include "fost-inet-test.hpp"
-#include <fost/detail/mime.hpp>
+#include <fost/mime.hpp>
 
 
 using namespace fostlib;
@@ -34,6 +34,11 @@ FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
     mime::mime_headers headers;
     // from an Exchange bounced message:
     headers.parse( L"X-MS-TNEF-Correlator: \r\n" );
+    headers.set("TE");
+
+    std::ostringstream ss;
+    ss << headers;
+    FSL_CHECK_EQ("TE: \r\nX-MS-TNEF-Correlator: \r\n", ss.str());
 }
 
 FSL_TEST_FUNCTION( empty_mime ) {
@@ -60,6 +65,10 @@ Host: localhost\r\n\
 User-Agent: Fake agent\r\n\
 \r\n\
 " );
+}
+FSL_TEST_FUNCTION( empty_mime_iterators ) {
+    empty_mime empty;
+    FSL_CHECK( empty.begin() == empty.end() );
 }
 
 FSL_TEST_FUNCTION(text1) {
@@ -103,6 +112,14 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document" );
 }
+FSL_TEST_FUNCTION(text_iterators) {
+    text_body ta(utf8_string("Test text document"));
+    FSL_CHECK( ta.begin() != ta.end() );
+    FSL_CHECK_EQ(fostlib::string("Test text document"), fostlib::string(
+        reinterpret_cast<const char *>((*ta.begin()).first),
+        reinterpret_cast<const char *>((*ta.begin()).second)
+    ));
+}
 
 
 FSL_TEST_FUNCTION( mime_attachment ) {
@@ -111,7 +128,11 @@ FSL_TEST_FUNCTION( mime_attachment ) {
     std::stringstream ss;
     ss << envelope;
     mime::mime_headers headers;
-    headers.parse( coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first ) );
+    FSL_CHECK_NOTHROW(
+        headers.parse(
+            coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first )
+        )
+    );
     try {
         FSL_CHECK_EQ( utf8_string( ss.str() ), coerce< utf8_string>( L"\
 Content-Type: multipart/mixed; boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\

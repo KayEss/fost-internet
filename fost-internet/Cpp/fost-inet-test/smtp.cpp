@@ -7,7 +7,7 @@
 
 
 #include "fost-inet-test.hpp"
-#include <fost/detail/smtp.hpp>
+#include <fost/smtp.hpp>
 
 
 using namespace fostlib;

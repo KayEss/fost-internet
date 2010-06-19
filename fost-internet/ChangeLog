@@ -1,0 +1,90 @@
+2010-06-02  Kirit Saelensminde  <kirit@felspar.com>
+ Fost authentication
+ - Fixed the signature so that it signs the query string when there is
+   no post data.
+
+2010-05-31  Kirit Saelensminde  <kirit@felspar.com>
+ Fost authentication
+ - Added a utility function to add the authentication to a user agent.
+
+2010-05-30  Kirit Saelensminde  <kirit@felspar.com>
+ Host
+ - A host can now be configured with a port number as the service.
+
+2010-04-28  Kirit Saelensminde  <kirit@felspar.com>
+ Web server
+ - Added the 207 response code
+ - URLs may contain bangs (!)
+
+2010-04-06  Kirit Saelensminde  <kirit@felspar.com>
+ Parsers
+ - Removed the parser instances because they're not thread safe.
+ MIME
+ - Added support for multiple headers of the same name.
+ HTTP client
+ - Corrected behaviour for 304 responses.
+
+2010-04-05  Kirit Saelensminde  <kirit@felspar.com>
+ URL
+ - The query string can now be any sequence rather than only a map of
+ - key/value pairs.
+ HTTP client/server
+ - Added more allowable characters to the resource parser for HTTP requests.
+ - The server request now supports handling of bad requests.
+ - The HTTP client post and put short cuts now accept all data types
+   supported by the request.
+ - Changed the type of the server request query string to match that of the
+   URL.
+ - The parsing of the beginning of the HTTP request by the server is now
+   protected by a mutex because Boost.Spirit is not thread safe.
+ Host
+ - Added JSON coercions for fostlib::host.
+
+2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
+ URL
+ - The host and port number are now mutable fields of the URL.
+ - Fixed a bug where port numbers weren't properly shown in URLs converted
+   to strings.
+ - Query string values may now contain forward slashes and colons.
+ - Fixed a bug where query strings were being thrown away when URLs were
+   parsed.
+ HTTP client/server
+ - The response body can now be detached from the client response as can the
+   request body from the server.
+ - The HTTP server now accepts additional verbs, more correct resource paths
+   and can return all status codes supported by HTTP 1.1.
+
+2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
+ TCP/IP
+ - Most errors should now end up with a fostlib::exceptions::exception which
+   allows the error to be annotated.
+ HTTP client
+ - Fixed a bug in chunked encoding that was causing the chunks to end up
+   in the data block in the reverse order.
+ - The user agent request can now be built from passed in MIME data.
+ POP3 client
+ - Improved the error reporting by annotating exceptions in as many places
+   as possible.
+
+2010-03-26  Kirit Saelensminde  <kirit@felspar.com>
+ fget example
+ - Now supports the use of FOST authentication through the -authentication,
+   -key and -secret command line switches. There's also a -user switch to
+   handle authentication where the REST end point supports impersonation.
+
+2010-03-25  Kirit Saelensminde  <kirit@felspar.com>
+ MIME
+ - Improved handling of headers that don't have values.
+
+2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
+ User agent
+ - The fget example now allows us to save to a file by using an extra
+   parameter.
+ - There is a new MIME type binary_body for handling in-memory binary MIME
+   data.
+
+2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
+ Header files
+ - Moved all non-private headers out of include/fost/detail
+ ChangeLog
+ - Added ChangeLog
