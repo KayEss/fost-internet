@@ -53,15 +53,18 @@ namespace fostlib {
     FOST_INET_DECLSPEC bool email_is_out_of_office( const text_body & );
 
 
+    /// Allow a full email address to be coerced to a string
     template<>
     struct FOST_INET_DECLSPEC coercer< string, email_address > {
         string coerce( const email_address & );
     };
+    /// Allow a string to be interpreted as an email address
     template<>
     struct FOST_INET_DECLSPEC coercer< email_address, string > {
         email_address coerce( const string & );
     };
 
+    /// Allow email aadresses to be turned into UTF-8 strings
     template<>
     struct FOST_INET_DECLSPEC coercer< utf8_string, email_address > {
         utf8_string coerce( const email_address &e ) {
@@ -75,9 +78,11 @@ namespace fostlib {
         struct implementation;
         implementation *m_impl;
         public:
+            /// Create a client which connects to the specified server
             smtp_client( const host &server );
             ~smtp_client();
 
+            /// Send an email to the specified recipient from the specified sender
             void send( const mime &email, const rfc822_address &to, const rfc822_address &from );
     };
 
@@ -88,9 +93,12 @@ namespace fostlib {
 namespace std {
     /// Allow email addresses to be used as keys in std::map and to be stored in a std::set.
     template<>
-    struct less< fostlib::email_address > : public std::binary_function< bool, fostlib::email_address, fostlib::email_address > {
+    struct less< fostlib::email_address > : public std::binary_function<
+            bool, fostlib::email_address, fostlib::email_address > {
+        /// Answer the collation question
         bool operator ()( const fostlib::email_address &l, const fostlib::email_address &r ) const {
-            return less< fostlib::rfc822_address >()( l.email(), r.email() );
+            return less< fostlib::rfc822_address >()(
+                    l.email(), r.email());
         }
     };
 }
