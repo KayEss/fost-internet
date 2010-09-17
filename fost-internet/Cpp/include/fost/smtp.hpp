@@ -58,6 +58,13 @@ namespace fostlib {
     struct FOST_INET_DECLSPEC coercer< string, email_address > {
         string coerce( const email_address & );
     };
+    /// Allow a full email address to be coerced to JSON
+    template<>
+    struct FOST_INET_DECLSPEC coercer< json, email_address > {
+        json coerce( const email_address &a ) {
+            return fostlib::json(fostlib::coerce< fostlib::string >(a));
+        }
+    };
     /// Allow a string to be interpreted as an email address
     template<>
     struct FOST_INET_DECLSPEC coercer< email_address, string > {
