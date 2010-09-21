@@ -163,6 +163,15 @@ namespace fostlib {
         url::filepath_string coerce( const boost::filesystem::wpath &s );
     };
 
+    /// Allow a string to be turned into a URL query object
+    template<>
+    struct coercer< url::query_string, string > {
+        /// Performs the coercion
+        url::query_string coerce(const string &s) {
+            return url::query_string(fostlib::coerce<ascii_printable_string>(s));
+        }
+    };
+
 
 }
 
