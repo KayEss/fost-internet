@@ -18,9 +18,26 @@ FSL_TEST_SUITE( connection );
 
 FSL_TEST_FUNCTION( connect ) {
     FSL_CHECK_EXCEPTION(
-        network_connection cnx(host("localhost"), 64544),
+        network_connection cnx(host("localhost"), 64545),
         exceptions::connect_failure&);
     FSL_CHECK_EXCEPTION(
-        network_connection cnx(host("1.1.1.1"), 64544),
+        network_connection cnx(host("1.1.1.1"), 64545),
         exceptions::connect_failure&);
+}
+
+
+FSL_TEST_FUNCTION( read_timeouts ) {
+    boost::asio::io_service service;
+    host localhost;
+    uint16_t port = 64544u;
+
+    // Set up a server on a socket
+    boost::asio::ip::tcp::acceptor server(service,
+        boost::asio::ip::tcp::endpoint(localhost.address(), port));
+
+    // Connect to it and try to read from it
+    network_connection cnx(localhost, port);
+    utf8_string s;
+    FSL_CHECK_EXCEPTION(cnx >> s,
+        fostlib::exceptions::not_implemented&);
 }
