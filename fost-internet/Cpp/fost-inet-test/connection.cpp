@@ -37,7 +37,12 @@ FSL_TEST_FUNCTION( read_timeouts ) {
 
     // Connect to it and try to read from it
     network_connection cnx(localhost, port);
+
     utf8_string s;
     FSL_CHECK_EXCEPTION(cnx >> s,
+        fostlib::exceptions::not_implemented&);
+
+    std::vector< unsigned char > data(256);
+    FSL_CHECK_EXCEPTION(cnx >> data,
         fostlib::exceptions::not_implemented&);
 }

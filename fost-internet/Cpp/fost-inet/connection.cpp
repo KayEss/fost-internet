@@ -128,10 +128,37 @@ namespace {
         boost::asio::streambuf &b, F f,
         boost::system::error_code &e
     ) {
+        boost::asio::deadline_timer timer(sock.io_service());
+        timer.expires_from_now(boost::posix_time::seconds(5));
+        std::size_t received = 0;
+
+        nullable_error timer_result;
+        nullable< std::pair< boost::system::error_code, std::size_t > > async_result;
+
+        timer.async_wait(boost::bind(
+            set_result, boost::ref(timer_result), boost::lambda::_1));
         if ( ssl )
-            return boost::asio::read(ssl->ssl_sock, b, f, e);
+            boost::asio::async_read(ssl->ssl_sock, b, f,
+                boost::bind(
+                    record_set, boost::ref(async_result),
+                    boost::lambda::_1, boost::lambda::_2));
         else
-            return boost::asio::read(sock, b, f, e);
+            boost::asio::async_read(sock, b, f,
+                boost::bind(
+                    record_set, boost::ref(async_result),
+                    boost::lambda::_1, boost::lambda::_2));
+        sock.io_service().reset();
+        while ( sock.io_service().run_one() ) {
+            if ( !async_result.isnull() ) {
+                timer.cancel();
+                e = async_result.value().first;
+                received = async_result.value().second;
+            } else if ( !timer_result.isnull() ) {
+                sock.cancel();
+                e = timer_result.value();
+            }
+        }
+        return received;
     }
 
     inline std::size_t read_until(
