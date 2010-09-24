@@ -115,7 +115,7 @@ namespace {
                 e = async_result.value().first;
                 received = async_result.value().second;
             } else if ( !timer_result.isnull() ) {
-                sock.cancel();
+                sock.close();
                 e = timer_result.value();
             }
         }
@@ -154,7 +154,7 @@ namespace {
                 e = async_result.value().first;
                 received = async_result.value().second;
             } else if ( !timer_result.isnull() ) {
-                sock.cancel();
+                sock.close();
                 e = timer_result.value();
             }
         }
