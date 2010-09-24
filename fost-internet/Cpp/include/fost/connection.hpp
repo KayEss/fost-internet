@@ -63,7 +63,7 @@ namespace fostlib {
 
 
         /// Thrown for errors during connection to a socket
-        class FOST_CORE_DECLSPEC connect_failure : public exception {
+        class FOST_INET_DECLSPEC connect_failure : public exception {
         public:
             /// Construct a connect failure exception
             connect_failure(boost::system::error_code) throw();
