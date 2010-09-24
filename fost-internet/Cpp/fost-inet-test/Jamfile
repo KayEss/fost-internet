@@ -3,6 +3,7 @@ fost-smoke-test fost-inet-test-smoke
     :
         ../fost-inet/
     :
+        connect.cpp
         host.cpp
         pop3.cpp
         smtp.cpp

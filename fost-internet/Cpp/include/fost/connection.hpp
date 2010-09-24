@@ -59,6 +59,22 @@ namespace fostlib {
     };
 
 
+    namespace exceptions {
+
+
+        /// Thrown for errors during connection to a socket
+        class FOST_CORE_DECLSPEC connect_failure : public exception {
+        public:
+            /// Construct a connect failure exception
+            connect_failure(boost::system::error_code) throw();
+
+            accessors< const boost::system::error_code > error;
+        protected:
+            const wchar_t * const message() const throw ();
+        };
+    }
+
+
 }
 
 

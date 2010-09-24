@@ -126,23 +126,19 @@ namespace {
         tcp::resolver resolver(g_io_service);
         tcp::resolver::query q(
             coerce<ascii_string>(host.name()).underlying(),
-            coerce<ascii_string>(coerce<string>(port)).underlying()
-        );
+            coerce<ascii_string>(coerce<string>(port)).underlying());
         boost::system::error_code host_error;
         tcp::resolver::iterator endpoint = resolver.resolve(q, host_error), end;
         if ( host_error == boost::asio::error::host_not_found )
             throw exceptions::host_not_found( host.name() );
-        boost::system::error_code connect_error = boost::asio::error::host_not_found;
+        boost::system::error_code connect_error =
+            boost::asio::error::host_not_found;
         while ( connect_error && endpoint != end ) {
             socket.close();
             socket.connect(*endpoint++, connect_error);
         }
         if ( connect_error )
-            throw fostlib::exceptions::not_implemented(
-                "connect(boost::asio::ip::tcp::socket &socket, const host &host, port_number port)",
-                connect_error,
-                "Connecting to host"
-            );
+            throw fostlib::exceptions::connect_failure(connect_error);
     }
 }
 
@@ -266,6 +262,24 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
     if ( error != boost::asio::error::eof )
         throw fostlib::exceptions::not_implemented(
             "fostlib::network_connection::operator >> ( boost::asio::streambuf &b )",
-            "Whilst reading into an Asio streambuf"
-        );
+            "Whilst reading into an Asio streambuf");
+}
+
+
+/*
+    fostlib::exceptions::connect_failure
+*/
+
+
+fostlib::exceptions::connect_failure::connect_failure(
+    boost::system::error_code error
+) throw ()
+: error(error) {
+    info() << error << std::endl;
+}
+
+
+fostlib::wliteral const fostlib::exceptions::connect_failure::message()
+        const throw () {
+    return L"Network connection failure";
 }

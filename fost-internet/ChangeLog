@@ -1,3 +1,6 @@
+2010-09-24  Kirit Saelensminde  <kirit@felspar.com>
+ Errors connecting to sockets are now reported as instances of fostlib::exceptions::connect_failure.
+
 2010-09-19  Kirit Saelensminde  <kirit@felspar.com>
  fostlib::url::query_string objects can now be coerced from fostlib::string objects.
 
