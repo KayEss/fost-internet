@@ -1,5 +1,5 @@
 2010-09-24  Kirit Saelensminde  <kirit@felspar.com>
- Errors connecting to sockets are now reported as instances of fostlib::exceptions::connect_failure. Reads now also time out, but are still reported as fostlib::exceptions::not_implemented.
+ Errors connecting to sockets are now reported as instances of fostlib::exceptions::connect_failure. Socket errors are now all sub-classes of fostlib::exceptions::socket_error. Reads now also time out and throw a fostlib::exceptions::read_timout exception.
 
 2010-09-19  Kirit Saelensminde  <kirit@felspar.com>
  fostlib::url::query_string objects can now be coerced from fostlib::string objects.

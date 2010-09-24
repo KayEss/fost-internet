@@ -40,9 +40,9 @@ FSL_TEST_FUNCTION( read_timeouts ) {
 
     utf8_string s;
     FSL_CHECK_EXCEPTION(cnx >> s,
-        fostlib::exceptions::not_implemented&);
+        fostlib::exceptions::read_timeout&);
 
     std::vector< unsigned char > data(256);
     FSL_CHECK_EXCEPTION(cnx >> data,
-        fostlib::exceptions::not_implemented&);
+        fostlib::exceptions::read_timeout&);
 }

@@ -60,18 +60,40 @@ namespace fostlib {
     namespace exceptions {
 
 
+        /// The base exception type for all kinds of transmission errors
+        class FOST_INET_DECLSPEC socket_error : public exception {
+            protected:
+                /// Construct a socket error
+                socket_error() throw();
+                /// Construct a connect failure exception
+                socket_error(boost::system::error_code) throw();
+
+            public:
+                /// Allow access to the error code that caused the exception
+                accessors< const nullable< boost::system::error_code > > error;
+        };
+
+
         /// Thrown for errors during connection to a socket
-        class FOST_INET_DECLSPEC connect_failure : public exception {
-        public:
-            /// Construct a connect failure exception
-            connect_failure(boost::system::error_code) throw();
+        class FOST_INET_DECLSPEC connect_failure : public socket_error {
+            public:
+                /// Construct a connect failure exception
+                connect_failure(boost::system::error_code) throw();
 
-            /// Allow access to the error code that caused the exception
-            accessors< const boost::system::error_code > error;
+            protected:
+                /// The error message title
+                const wchar_t * const message() const throw ();
+        };
 
-        protected:
-            /// The error message title
-            const wchar_t * const message() const throw ();
+        /// Thrown for errors during connection to a socket
+        class FOST_INET_DECLSPEC read_timeout : public socket_error {
+            public:
+                /// Construct a connect failure exception
+                read_timeout() throw();
+
+            protected:
+                /// The error message title
+                const wchar_t * const message() const throw ();
         };
 
 

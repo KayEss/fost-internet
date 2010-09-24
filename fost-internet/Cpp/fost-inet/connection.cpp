@@ -90,7 +90,7 @@ namespace {
         boost::system::error_code &e
     ) {
         boost::asio::deadline_timer timer(sock.io_service());
-        timer.expires_from_now(boost::posix_time::seconds(5));
+        timer.expires_from_now(boost::posix_time::seconds(10));
         std::size_t received = 0;
 
         nullable_error timer_result;
@@ -116,9 +116,11 @@ namespace {
                 received = async_result.value().second;
             } else if ( !timer_result.isnull() ) {
                 sock.close();
-                e = timer_result.value();
             }
         }
+        if ( async_result.value().first &&
+                async_result.value().first != boost::asio::error::eof )
+            throw exceptions::read_timeout();
         return received;
     }
 
@@ -129,7 +131,7 @@ namespace {
         boost::system::error_code &e
     ) {
         boost::asio::deadline_timer timer(sock.io_service());
-        timer.expires_from_now(boost::posix_time::seconds(5));
+        timer.expires_from_now(boost::posix_time::seconds(10));
         std::size_t received = 0;
 
         nullable_error timer_result;
@@ -155,9 +157,11 @@ namespace {
                 received = async_result.value().second;
             } else if ( !timer_result.isnull() ) {
                 sock.close();
-                e = timer_result.value();
             }
         }
+        if ( async_result.value().first &&
+                async_result.value().first != boost::asio::error::eof )
+            throw exceptions::read_timeout();
         return received;
     }
 
@@ -187,23 +191,6 @@ namespace {
         return bytes;
     }
 
-    struct timeout {
-        timeval to;
-        int name_;
-        timeout(int name)
-        : name_(name) {
-            to.tv_sec = 5;
-            to.tv_usec = 0;
-        }
-        template< typename p >
-        int level(p) const { return SOL_SOCKET; }
-        template< typename p >
-        int name(p) const { return name_; }
-        template< typename p >
-        const void *data(p) const { return &to; }
-        template< typename p >
-        std::size_t size(p) const { return sizeof(timeval); }
-    };
     void connect(
         boost::asio::io_service &io_service,
         boost::asio::ip::tcp::socket &socket,
@@ -226,8 +213,6 @@ namespace {
         }
         if ( connect_error )
             throw fostlib::exceptions::connect_failure(connect_error);
-        socket.set_option(timeout(SO_RCVTIMEO));
-        socket.set_option(timeout(SO_SNDTIMEO));
     }
 }
 
@@ -356,11 +341,14 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
 
 
 /*
-    fostlib::exceptions::connect_failure
+    fostlib::exceptions::socket_error
 */
 
 
-fostlib::exceptions::connect_failure::connect_failure(
+fostlib::exceptions::socket_error::socket_error() throw () {
+}
+
+fostlib::exceptions::socket_error::socket_error(
     boost::system::error_code error
 ) throw ()
 : error(error) {
@@ -368,7 +356,34 @@ fostlib::exceptions::connect_failure::connect_failure(
 }
 
 
+/*
+    fostlib::exceptions::connect_failure
+*/
+
+
+fostlib::exceptions::connect_failure::connect_failure(
+    boost::system::error_code error
+) throw ()
+: socket_error(error) {
+}
+
+
 fostlib::wliteral const fostlib::exceptions::connect_failure::message()
         const throw () {
     return L"Network connection failure";
+}
+
+
+/*
+    fostlib::exceptions::read_timeout
+*/
+
+
+fostlib::exceptions::read_timeout::read_timeout() throw () {
+}
+
+
+fostlib::wliteral const fostlib::exceptions::read_timeout::message()
+        const throw () {
+    return L"Read time out";
 }
