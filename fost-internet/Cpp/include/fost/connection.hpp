@@ -19,6 +19,7 @@
 namespace fostlib {
 
 
+    /// A TCP/IP network connection from either a server or client
     class FOST_INET_DECLSPEC network_connection : boost::noncopyable {
         struct ssl;
         boost::asio::io_service io_service;
@@ -38,22 +39,20 @@ namespace fostlib {
         /// Start SSL on this connection. After a succesful handshake all traffic will be over SSL.
         void start_ssl();
 
-        /*
-            These methods just drop the data straight out to the network.
-        */
+        /// Immediately push data over the network
         network_connection &operator << ( const const_memory_block & );
+        /// Immediately push data over the network
         network_connection &operator << ( const utf8_string &s );
+        /// Immediately push data over the network
         network_connection &operator << ( const std::stringstream &ss );
 
-        /*
-            These methods allow the socket to be read from.
-        */
-        // Read up until the next \r\n which is discarded
+        /// Read up until the next \r\n which is discarded
         network_connection &operator >> ( std::string &s );
+        /// Read up until the next \r\n which is discarded and decode the line as UTF-8
         network_connection &operator >> ( utf8_string &s );
-        // Read into the vector. The vector size must match the number of bytes expected.
+        /// Read into the vector. The vector size must match the number of bytes expected.
         network_connection &operator >> ( std::vector< utf8 > &v );
-        // Read everything until the connection is dropped by the server
+        /// Read everything until the connection is dropped by the server
         void operator >> ( boost::asio::streambuf &b );
     };
 
