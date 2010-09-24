@@ -24,9 +24,14 @@ using namespace fostlib;
 
 
 namespace {
-    setting< json > c_socks_version("fost-internet/Cpp/fost-inet/connection.cpp",
+    setting< int64_t > c_read_timeout(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Read time out", 30, true);
+    setting< json > c_socks_version(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Socks version", json(), true);
-    setting< string > c_socks_host("fost-internet/Cpp/fost-inet/connection.cpp",
+    setting< string > c_socks_host(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Socks host", L"localhost:8888", true);
 }
 
@@ -90,7 +95,8 @@ namespace {
         boost::system::error_code &e
     ) {
         boost::asio::deadline_timer timer(sock.io_service());
-        timer.expires_from_now(boost::posix_time::seconds(10));
+        timer.expires_from_now(boost::posix_time::seconds(
+            c_read_timeout.value()));
         std::size_t received = 0;
 
         nullable_error timer_result;
@@ -131,7 +137,8 @@ namespace {
         boost::system::error_code &e
     ) {
         boost::asio::deadline_timer timer(sock.io_service());
-        timer.expires_from_now(boost::posix_time::seconds(10));
+        timer.expires_from_now(boost::posix_time::seconds(
+            c_read_timeout.value()));
         std::size_t received = 0;
 
         nullable_error timer_result;
