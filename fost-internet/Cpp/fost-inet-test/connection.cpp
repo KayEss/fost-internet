@@ -13,7 +13,7 @@
 using namespace fostlib;
 
 
-FSL_TEST_SUITE( connect );
+FSL_TEST_SUITE( connection );
 
 
 FSL_TEST_FUNCTION( connect ) {
