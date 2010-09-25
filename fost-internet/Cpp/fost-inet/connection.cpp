@@ -82,52 +82,79 @@ namespace {
         }
     }
 
-    typedef nullable< boost::system::error_code >nullable_error;
-    void set_result(nullable_error &n, boost::system::error_code e) {
-        n = e;
-    }
-    void record_set(nullable< std::pair< boost::system::error_code, std::size_t > > &n, boost::system::error_code e, std::size_t s) {
-        n = std::make_pair(e, s);
-    }
+    struct timeout_wrapper {
+        typedef nullable< boost::system::error_code > timeout_error;
+        typedef nullable< std::pair< boost::system::error_code, std::size_t > >
+            read_error;
+        typedef boost::function<
+            void (boost::system::error_code, std::size_t)
+        > read_async_function_type;
+
+        boost::asio::ip::tcp::socket &sock;
+        boost::system::error_code &error;
+        boost::asio::deadline_timer timer;
+        timeout_error timeout_result;
+        read_error read_result;
+        std::size_t received;
+
+        static void timedout(timeout_error &n, boost::system::error_code e) {
+            n = e;
+        }
+        static void read_done(
+            read_error &n, boost::system::error_code e, std::size_t s
+        ) {
+            n = std::make_pair(e, s);
+        }
+
+        timeout_wrapper(
+            boost::asio::ip::tcp::socket &sock, boost::system::error_code &e
+        ) : sock(sock), error(e), timer(sock.io_service()), received(0) {
+            reschedule();
+        }
+
+        void reschedule() {
+            timer.expires_from_now(boost::posix_time::seconds(
+                c_read_timeout.value()));
+            timer.async_wait(boost::bind(
+                timedout, boost::ref(timeout_result), boost::lambda::_1));
+        }
+
+        read_async_function_type read_async_function() {
+            return boost::bind(
+                read_done, boost::ref(read_result),
+                boost::lambda::_1, boost::lambda::_2);
+        }
+
+        std::size_t complete() {
+            sock.io_service().reset();
+            while ( sock.io_service().run_one() ) {
+                if ( !read_result.isnull() ) {
+                    timer.cancel();
+                    error = read_result.value().first;
+                    received = read_result.value().second;
+                } else if ( !timeout_result.isnull() )
+                    sock.close();
+            }
+            if ( read_result.value().first &&
+                    read_result.value().first != boost::asio::error::eof )
+                throw exceptions::read_timeout();
+            return received;
+        }
+    };
+
     inline std::size_t read_until(
         boost::asio::ip::tcp::socket &sock, ssl_data *ssl,
         boost::asio::streambuf &b, const char *term,
         boost::system::error_code &e
     ) {
-        boost::asio::deadline_timer timer(sock.io_service());
-        timer.expires_from_now(boost::posix_time::seconds(
-            c_read_timeout.value()));
-        std::size_t received = 0;
-
-        nullable_error timer_result;
-        nullable< std::pair< boost::system::error_code, std::size_t > > async_result;
-
-        timer.async_wait(boost::bind(
-            set_result, boost::ref(timer_result), boost::lambda::_1));
+        timeout_wrapper timeout(sock, e);
         if ( ssl )
             boost::asio::async_read_until(ssl->ssl_sock, b, term,
-                boost::bind(
-                    record_set, boost::ref(async_result),
-                    boost::lambda::_1, boost::lambda::_2));
+                timeout.read_async_function());
         else
             boost::asio::async_read_until(sock, b, term,
-                boost::bind(
-                    record_set, boost::ref(async_result),
-                    boost::lambda::_1, boost::lambda::_2));
-        sock.io_service().reset();
-        while ( sock.io_service().run_one() ) {
-            if ( !async_result.isnull() ) {
-                timer.cancel();
-                e = async_result.value().first;
-                received = async_result.value().second;
-            } else if ( !timer_result.isnull() ) {
-                sock.close();
-            }
-        }
-        if ( async_result.value().first &&
-                async_result.value().first != boost::asio::error::eof )
-            throw exceptions::read_timeout();
-        return received;
+                timeout.read_async_function());
+        return timeout.complete();
     }
 
     template< typename F >
@@ -136,40 +163,14 @@ namespace {
         boost::asio::streambuf &b, F f,
         boost::system::error_code &e
     ) {
-        boost::asio::deadline_timer timer(sock.io_service());
-        timer.expires_from_now(boost::posix_time::seconds(
-            c_read_timeout.value()));
-        std::size_t received = 0;
-
-        nullable_error timer_result;
-        nullable< std::pair< boost::system::error_code, std::size_t > > async_result;
-
-        timer.async_wait(boost::bind(
-            set_result, boost::ref(timer_result), boost::lambda::_1));
+        timeout_wrapper timeout(sock, e);
         if ( ssl )
             boost::asio::async_read(ssl->ssl_sock, b, f,
-                boost::bind(
-                    record_set, boost::ref(async_result),
-                    boost::lambda::_1, boost::lambda::_2));
+                timeout.read_async_function());
         else
             boost::asio::async_read(sock, b, f,
-                boost::bind(
-                    record_set, boost::ref(async_result),
-                    boost::lambda::_1, boost::lambda::_2));
-        sock.io_service().reset();
-        while ( sock.io_service().run_one() ) {
-            if ( !async_result.isnull() ) {
-                timer.cancel();
-                e = async_result.value().first;
-                received = async_result.value().second;
-            } else if ( !timer_result.isnull() ) {
-                sock.close();
-            }
-        }
-        if ( async_result.value().first &&
-                async_result.value().first != boost::asio::error::eof )
-            throw exceptions::read_timeout();
-        return received;
+                timeout.read_async_function());
+        return timeout.complete();
     }
 
     inline std::size_t read_until(
