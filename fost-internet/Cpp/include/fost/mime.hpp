@@ -88,6 +88,7 @@ namespace fostlib {
 
     /// A MIME envelope can contain a nested structure of other MIME containers
     class FOST_INET_DECLSPEC mime_envelope : public mime {
+        struct mime_envelope_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
             /// Construct the MIME envelope with optional headers
@@ -99,9 +100,10 @@ namespace fostlib {
             /// Check that the boundary can be used
             bool boundary_is_ok( const string &boundary ) const;
 
+            /// The type of the attachments
+            typedef std::list< boost::shared_ptr< mime > > items_type;
             /// The embedded MIME items
-            accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue >
-                items;
+            accessors< items_type, fostlib::lvalue > items;
 
             /// Attach a MIME type
             template< typename M, typename P1 >

@@ -86,7 +86,7 @@ struct fostlib::smtp_client::implementation {
     network_connection cnx;
 
     implementation( const host &h )
-    : cnx( h, 25 ), can_send(false) {
+    : can_send(false), cnx( h, 25 ) {
         check(220, L"Initial connection");
         cnx << "HELO FSIP\r\n";
         check(250, L"HELO");

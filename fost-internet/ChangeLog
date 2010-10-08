@@ -1,7 +1,7 @@
 2010-10-08  Kirit Saelensminde  <kirit@felspar.com>
  fostlib::email_address instances can now be coerced from their JSON representation.
  A new attach member on fostlib::mime_envelope allows for easier addition of mime types into the envelope.
- The MIME type for MIME envelopes can now be set.
+ The MIME type for MIME envelopes can now be set and the iterator for the data is now implemented.
  The SMTP client now tracks its state and doesn't try to close the connection if it's not in a proper idle state.
 
 2010-09-24  Kirit Saelensminde  <kirit@felspar.com>

@@ -189,10 +189,57 @@ std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
 }
 
 
-namespace {
-}
-std::auto_ptr< mime::iterator_implementation > fostlib::mime_envelope::iterator() const {
-    throw exceptions::not_implemented("fostlib::mime_envelope::iterator() const");
+struct fostlib::mime_envelope::mime_envelope_iterator :
+        public mime::iterator_implementation {
+    enum { e_start, e_attachments, e_final } stage;
+
+    mime_envelope::items_type::const_iterator
+        current_attachment, end_attachment;
+
+    boost::scoped_ptr< mime::const_iterator > current, end;
+
+    utf8_string internal_buffer, boundary;
+
+    mime_envelope_iterator(const string &boundary,
+        mime_envelope::items_type::const_iterator b,
+        mime_envelope::items_type::const_iterator e)
+    : stage(e_start), current_attachment(b), end_attachment(e),
+            boundary(fostlib::coerce<utf8_string>(boundary)) {
+    }
+
+    const_memory_block operator () () {
+        static utf8_string dashes("--"), crlf("\r\n");
+        switch ( stage ) {
+            case e_start:
+                internal_buffer = dashes + boundary + crlf;
+                stage = e_attachments;
+                break;
+            case e_attachments:
+                if ( current_attachment == end_attachment ) {
+                    internal_buffer = dashes + boundary + dashes + crlf;
+                    stage = e_final;
+                } else if ( !current.get() ) {
+                    std::stringstream ss;
+                    ss << (*current_attachment)->headers();
+                    internal_buffer = utf8_string(ss.str()) + crlf;
+                    current.reset(new mime::const_iterator(
+                        (*current_attachment)->begin()));
+                    end.reset(new mime::const_iterator(
+                        (*current_attachment)->end()));
+                } else
+                    throw exceptions::not_implemented("XX");
+                break;
+            default:
+                throw exceptions::not_implemented("Fetching anything but the first part of a mime envelope");
+        }
+        const std::string &u(internal_buffer.underlying());
+        return const_memory_block(u.c_str(), u.c_str() + u.length());
+    }
+};
+std::auto_ptr< mime::iterator_implementation >
+        fostlib::mime_envelope::iterator() const {
+    return std::auto_ptr< mime::iterator_implementation >(
+        new mime_envelope_iterator(guid(), items().begin(), items().end()));
 }
 
 
