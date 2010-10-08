@@ -226,6 +226,10 @@ struct fostlib::mime_envelope::mime_envelope_iterator :
                         (*current_attachment)->begin()));
                     end.reset(new mime::const_iterator(
                         (*current_attachment)->end()));
+                } else if ( *current != *end ) {
+                    const_memory_block r = **current;
+                    ++(*current);
+                    return r;
                 } else
                     throw exceptions::not_implemented("XX");
                 break;
