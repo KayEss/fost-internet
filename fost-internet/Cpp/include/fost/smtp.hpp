@@ -60,7 +60,7 @@ namespace fostlib {
     };
     /// Allow a full email address to be coerced to JSON
     template<>
-    struct FOST_INET_DECLSPEC coercer< json, email_address > {
+    struct coercer< json, email_address > {
         json coerce( const email_address &a ) {
             return fostlib::json(fostlib::coerce< fostlib::string >(a));
         }
@@ -69,6 +69,14 @@ namespace fostlib {
     template<>
     struct FOST_INET_DECLSPEC coercer< email_address, string > {
         email_address coerce( const string & );
+    };
+    /// Allow a JSON blob to be interpreted as an email address
+    template<>
+    struct FOST_INET_DECLSPEC coercer< email_address, json > {
+        email_address coerce( const json &js ) {
+            return fostlib::coerce<fostlib::email_address>(
+                fostlib::coerce<fostlib::string>(js));
+        }
     };
 
     /// Allow email aadresses to be turned into UTF-8 strings
