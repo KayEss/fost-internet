@@ -89,12 +89,38 @@ namespace fostlib {
     class FOST_INET_DECLSPEC mime_envelope : public mime {
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
+            /// Construct the MIME envelope with optional headers
             mime_envelope(const mime_headers &headers = mime_headers());
 
             std::ostream &print_on( std::ostream &o ) const;
             bool boundary_is_ok( const string &boundary ) const;
 
-            accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue > items;
+            /// The embedded MIME items
+            accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue >
+                items;
+
+            /// Attach a MIME type
+            template< typename M, typename P1 >
+            boost::shared_ptr< M > attach(const P1 &p1) {
+                boost::shared_ptr< M > attachment( new M(p1) );
+                items().push_back(attachment);
+                return attachment;
+            }
+            /// Attach a MIME type
+            template< typename M, typename P1, typename P2 >
+            boost::shared_ptr< M > attach(const P1 &p1, const P2 &p2) {
+                boost::shared_ptr< M > attachment( new M(p1, p2) );
+                items().push_back(attachment);
+                return attachment;
+            }
+            /// Attach a MIME type
+            template< typename M, typename P1, typename P2, typename P3 >
+            boost::shared_ptr< M > attach(const P1 &p1, const P2 &p2,
+                    const P3 &p3) {
+                boost::shared_ptr< M > attachment( new M(p1, p2, p3) );
+                items().push_back(attachment);
+                return attachment;
+            }
     };
 
     /// A MIME container which always stores text
