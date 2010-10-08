@@ -2,6 +2,7 @@
  fostlib::email_address instances can now be coerced from their JSON representation.
  A new attach member on fostlib::mime_envelope allows for easier addition of mime types into the envelope.
  The MIME type for MIME envelopes can now be set.
+ The SMTP client now tracks its state and doesn't try to close the connection if it's not in a proper idle state.
 
 2010-09-24  Kirit Saelensminde  <kirit@felspar.com>
  Errors connecting to sockets are now reported as instances of fostlib::exceptions::connect_failure. Socket errors are now all sub-classes of fostlib::exceptions::socket_error. Reads now also time out and throw a fostlib::exceptions::read_timout exception. The configuration setting

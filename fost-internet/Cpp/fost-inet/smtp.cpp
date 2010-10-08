@@ -82,10 +82,23 @@ email_address fostlib::coercer< email_address, string >::coerce( const string &s
 
 
 struct fostlib::smtp_client::implementation {
+    bool can_send;
     network_connection cnx;
+
     implementation( const host &h )
-    : cnx( h, 25 ) {
+    : cnx( h, 25 ), can_send(false) {
+        check(220, L"Initial connection");
+        cnx << "HELO FSIP\r\n";
+        check(250, L"HELO");
+        can_send = true;
     }
+    ~implementation() {
+        if ( can_send ) {
+            cnx << "QUIT\r\n";
+            check(221, L"QUIT");
+        }
+    }
+
     void check( int code, const string &command ) {
         utf8_string response, number = coerce< utf8_string >( coerce< string >( code ) );
         cnx >> response;
@@ -104,22 +117,20 @@ struct fostlib::smtp_client::implementation {
 
 fostlib::smtp_client::smtp_client( const host &server )
 : m_impl( new implementation( server ) ) {
-    m_impl->check(220, L"Initial connection");
-    m_impl->cnx << "HELO FSIP\r\n";
-    m_impl->check(250, L"HELO");
 }
 
 fostlib::smtp_client::~smtp_client()
 try {
-    m_impl->cnx << "QUIT\r\n";
-    m_impl->check(221, L"QUIT");
     delete m_impl;
 } catch ( ... ) {
     absorbException();
 }
 
 
-void fostlib::smtp_client::send(const mime &email, const rfc822_address &to, const rfc822_address &from) {
+void fostlib::smtp_client::send(const mime &email,
+    const rfc822_address &to, const rfc822_address &from
+) {
+    m_impl->can_send = false;
     m_impl->cnx << "MAIL FROM:<" + from.underlying().underlying() + ">\r\n";
     m_impl->check(250, L"MAIL FROM");
     m_impl->cnx << "RCPT TO:<" + to.underlying().underlying() + ">\r\n";
@@ -141,5 +152,6 @@ void fostlib::smtp_client::send(const mime &email, const rfc822_address &to, con
         m_impl->cnx << *d;
     m_impl->cnx << "\r\n.\r\n";
     m_impl->check(250, L"Data spooling");
+    m_impl->can_send = true;
 }
 
