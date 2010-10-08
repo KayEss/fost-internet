@@ -156,8 +156,9 @@ std::auto_ptr< mime::iterator_implementation > fostlib::empty_mime::iterator() c
 */
 
 
-fostlib::mime_envelope::mime_envelope( const mime_headers &headers )
-: mime( headers, "multipart/mixed" ) {
+fostlib::mime_envelope::mime_envelope( const mime_headers &headers,
+        const string &type )
+: mime( headers, type ) {
 }
 
 
