@@ -92,6 +92,11 @@ namespace fostlib {
                         /// The response message text
                         accessors< const string > message;
 
+                        /// Allow reading of the request headers
+                        const mime::mime_headers &headers() const {
+                            return m_headers;
+                        }
+                    
                         /// The response body and headers
                         boost::shared_ptr< const binary_body > body();
 
