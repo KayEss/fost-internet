@@ -90,6 +90,7 @@ namespace fostlib {
     class FOST_INET_DECLSPEC mime_envelope : public mime {
         struct mime_envelope_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
+        string m_boundary;
         public:
             /// Construct the MIME envelope with optional headers
             mime_envelope(const mime_headers &headers = mime_headers(),
@@ -127,6 +128,9 @@ namespace fostlib {
                 items().push_back(attachment);
                 return attachment;
             }
+
+            /// After all attachments have been added, use this to find a boundary
+            const string &boundary();
     };
 
     /// A MIME container which always stores text

@@ -124,15 +124,14 @@ FSL_TEST_FUNCTION(text_iterators) {
 
 FSL_TEST_FUNCTION( mime_attachment ) {
     mime_envelope envelope;
-    envelope.items().push_back( boost::shared_ptr< mime >( new text_body( L"Test text document" ) ) );
+    envelope.items().push_back(
+        boost::shared_ptr< mime >( new text_body( L"Test text document" ) ));
+    envelope.boundary();
     std::stringstream ss;
     ss << envelope;
     mime::mime_headers headers;
-    FSL_CHECK_NOTHROW(
-        headers.parse(
-            coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first )
-        )
-    );
+    FSL_CHECK_NOTHROW(headers.parse(
+        coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first )));
     try {
         FSL_CHECK_EQ( utf8_string( ss.str() ), coerce< utf8_string>( L"\
 Content-Type: multipart/mixed; boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\

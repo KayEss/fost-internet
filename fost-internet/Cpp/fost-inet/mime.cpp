@@ -162,6 +162,19 @@ fostlib::mime_envelope::mime_envelope( const mime_headers &headers,
 }
 
 
+const fostlib::string &fostlib::mime_envelope::boundary() {
+    if ( m_boundary.empty() ) {
+        do {
+            m_boundary = guid();
+        } while ( !boundary_is_ok(m_boundary) );
+        mime_headers::content with_boundary(headers()["Content-Type"]);
+        with_boundary.subvalue("boundary", boundary());
+        headers().set("Content-Type", with_boundary);
+    }
+    return m_boundary;
+}
+
+
 bool fostlib::mime_envelope::boundary_is_ok( const string &boundary ) const {
     bool ok = true;
     for ( std::list< boost::shared_ptr< mime > >::const_iterator part( items().begin() ); ok && part != items().end(); ++part )
@@ -170,22 +183,13 @@ bool fostlib::mime_envelope::boundary_is_ok( const string &boundary ) const {
 }
 
 std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
-    string boundary;
-    do {
-        boundary = guid();
-    } while ( !boundary_is_ok( boundary ) );
-
-    mime_headers local_headers = headers();
-    mime_headers::content with_boundary(headers()["Content-Type"]);
-    with_boundary.subvalue("boundary", boundary);
-    local_headers.set("Content-Type", with_boundary);
-
-    o << local_headers;
-    for ( std::list< boost::shared_ptr< mime > >::const_iterator part( items().begin() ) ;part != items().end(); ++part ) {
-        o << "\r\n--" << coerce< utf8_string >( boundary ).underlying() << "\r\n";
-        (*part)->print_on( o );
+    o << headers() << "\r\n";
+    for ( const_iterator c(begin()); c != end(); ++c ) {
+        const char *first = reinterpret_cast<const char *>((*c).first);
+        const char *second = reinterpret_cast<const char *>((*c).second);
+        o.write(first, second - first);
     }
-    return o << "\r\n--" << coerce< utf8_string >( boundary ).underlying() << "--\r\n";
+    return o;
 }
 
 
@@ -250,7 +254,7 @@ struct fostlib::mime_envelope::mime_envelope_iterator :
 std::auto_ptr< mime::iterator_implementation >
         fostlib::mime_envelope::iterator() const {
     return std::auto_ptr< mime::iterator_implementation >(
-        new mime_envelope_iterator(guid(), items().begin(), items().end()));
+        new mime_envelope_iterator(m_boundary, items().begin(), items().end()));
 }
 
 
