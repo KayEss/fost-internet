@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2010, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -215,10 +215,7 @@ struct fostlib::mime_envelope::mime_envelope_iterator :
                 stage = e_attachments;
                 break;
             case e_attachments:
-                if ( current_attachment == end_attachment ) {
-                    internal_buffer = dashes + boundary + dashes + crlf;
-                    stage = e_final;
-                } else if ( !current.get() ) {
+                if ( !current.get() ) {
                     std::stringstream ss;
                     ss << (*current_attachment)->headers();
                     internal_buffer = utf8_string(ss.str()) + crlf;
@@ -230,11 +227,21 @@ struct fostlib::mime_envelope::mime_envelope_iterator :
                     const_memory_block r = **current;
                     ++(*current);
                     return r;
-                } else
-                    throw exceptions::not_implemented("XX");
+                } else {
+                    current_attachment++;
+                    current.reset(NULL); end.reset(NULL);
+                    internal_buffer = crlf + dashes + boundary;
+                    if ( current_attachment == end_attachment ) {
+                        internal_buffer += dashes + crlf;
+                        stage = e_final;
+                    } else
+                        internal_buffer += crlf;
+                }
                 break;
+            case e_final:
+                return const_memory_block();
             default:
-                throw exceptions::not_implemented("Fetching anything but the first part of a mime envelope");
+                throw exceptions::not_implemented("Impossible MIME envelope write state");
         }
         const std::string &u(internal_buffer.underlying());
         return const_memory_block(u.c_str(), u.c_str() + u.length());
