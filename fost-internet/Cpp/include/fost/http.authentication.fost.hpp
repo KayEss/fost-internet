@@ -37,11 +37,11 @@ namespace fostlib {
 
         /// Returns whether or not an HTTP server request is properly signed, and if it is, which headers are signed
         FOST_INET_DECLSPEC
-        std::pair< bool, std::auto_ptr<mime::mime_headers> > fost_authenticated(
+        std::pair< bool, std::auto_ptr<mime::mime_headers> > fost_authentication(
             boost::function< nullable< string > ( string ) > key_mapping, server::request &request);
         /// Returns whether or not an HTTP server request is properly signed, and if it is, which headers are signed
         FOST_INET_DECLSPEC
-        std::pair< bool, std::auto_ptr<mime::mime_headers> > fost_authenticated(
+        std::pair< bool, std::auto_ptr<mime::mime_headers> > fost_authentication(
             const std::map< string, string > key_mapping, server::request &request);
 
 
