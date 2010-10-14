@@ -90,3 +90,21 @@ void fostlib::http::fost_authentication(
         ))
     );
 }
+
+
+fostlib::http::fost_authn::fost_authn(const string &m)
+: error(m), authenticated(false) {
+}
+
+
+fostlib::http::fost_authn fostlib::http::fost_authentication(
+    boost::function< fostlib::nullable< fostlib::string > ( fostlib::string ) > key_mapping,
+    server::request &request
+) {
+    return fost_authn("Not implemented");
+}
+fostlib::http::fost_authn fostlib::http::fost_authentication(
+    const std::map< string, string > &keys, fostlib::http::server::request &request
+) {
+    return fost_authn("Not implemented");
+}

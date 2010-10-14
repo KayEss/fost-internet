@@ -17,9 +17,18 @@ FSL_TEST_SUITE( authentication );
 
 
 FSL_TEST_FUNCTION( fost_authentication ) {
-    fostlib::http::user_agent::request r("GET", fostlib::url());
-    fostlib::http::fost_authentication("Not a key", "Not a secret", std::set< fostlib::string >(), r);
+    std::map<string, string> keys;
+    keys["Not a key"] = "Not a secret";
+
+    http::user_agent::request r("GET", fostlib::url());
+    http::fost_authentication("Not a key", "Not a secret", std::set<string>(), r);
     FSL_CHECK(r.headers().exists("Authorization"));
     FSL_CHECK(r.headers().exists("X-FOST-Timestamp"));
     FSL_CHECK_EQ(r.headers()["X-FOST-Headers"].value(), L"X-FOST-Headers");
+
+    std::auto_ptr<binary_body> body(new binary_body(r.headers()));
+    http::server::request request(r.method(), r.address().pathspec(), body);
+    http::fost_authn authn(http::fost_authentication(keys, request));
+    FSL_CHECK(authn.authenticated());
 }
+

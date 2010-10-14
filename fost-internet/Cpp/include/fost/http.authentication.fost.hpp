@@ -35,14 +35,30 @@ namespace fostlib {
             const std::set< string > &headers_to_sign = std::set< string >());
 
 
+        /// Structure returned to describe the result of FOST authentication of a HTTP request
+        struct fost_authn {
+            /// May contain an error message describing authentication problems
+            accessors<const nullable<string> > error;
+            /// True only if the authentication method worked
+            accessors<const bool> authenticated;
+            /// The set of headers that were properly signed as part of the request
+            boost::shared_ptr<const mime::mime_headers> signed_headers;
+            private:
+                fost_authn(const string &);
+                fost_authn(mime::mime_headers*);
+                friend fost_authn fost_authentication(
+                        boost::function< nullable< string > ( string ) >, server::request &);
+                friend fost_authn fost_authentication(
+                        const std::map< string, string > &, server::request &);
+        };
         /// Returns whether or not an HTTP server request is properly signed, and if it is, which headers are signed
         FOST_INET_DECLSPEC
-        std::pair< bool, std::auto_ptr<mime::mime_headers> > fost_authentication(
+        fost_authn fost_authentication(
             boost::function< nullable< string > ( string ) > key_mapping, server::request &request);
         /// Returns whether or not an HTTP server request is properly signed, and if it is, which headers are signed
         FOST_INET_DECLSPEC
-        std::pair< bool, std::auto_ptr<mime::mime_headers> > fost_authentication(
-            const std::map< string, string > key_mapping, server::request &request);
+        fost_authn fost_authentication(
+            const std::map< string, string > &key_mapping, server::request &request);
 
 
     }
