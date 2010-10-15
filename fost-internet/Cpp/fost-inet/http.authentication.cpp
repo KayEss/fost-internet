@@ -98,6 +98,10 @@ void fostlib::http::fost_authentication(
 fostlib::http::fost_authn::fost_authn(const string &m, bool a)
 : error(m), authenticated(false), under_attack(a) {
 }
+fostlib::http::fost_authn::fost_authn(
+    boost::shared_ptr<const mime::mime_headers> h
+) : authenticated(true), under_attack(true), signed_headers(h) {
+}
 
 
 fostlib::http::fost_authn fostlib::http::fost_authentication(
@@ -151,7 +155,26 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
                 return fost_authn("Key not found", true);
             else {
                 const string &secret = found_secret.value();
-                return fost_authn("Not implemented", true);
+                boost::shared_ptr<mime::mime_headers> headers(
+                    new mime::mime_headers);
+                hmac document(&sha1, secret);
+                document << request.method() << " "
+                    << request.file_spec().underlying().underlying().c_str() << "\n"
+                    << request.data()->headers()["X-FOST-Timestamp"].value() << "\n";
+                headers->add("X-FOST-Timestamp",
+                    request.data()->headers()["X-FOST-Timestamp"]);
+                for ( split_type::const_iterator h(signed_headers.begin());
+                        h != signed_headers.end(); ++h ) {
+                    std::stringstream ss;
+                    ss << request.data()->headers()[*h];
+                    document << ss.str().c_str() << "\n";
+                    headers->add(*h, request.data()->headers()[*h]);
+                }
+                if ( coerce<string>(coerce<base64_string>(document.digest()))
+                        == signature )
+                    return fost_authn(headers);
+                else
+                    return fost_authn("Signature mismatch", true);
             }
         }
     }

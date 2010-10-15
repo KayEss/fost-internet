@@ -94,7 +94,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
         FSL_CHECK(authn.under_attack());
-        FSL_CHECK_EQ(authn.error().value(), "Not implemented");
+        FSL_CHECK_EQ(authn.error().value(), "Signature mismatch");
     }
 }
 
@@ -112,7 +112,8 @@ FSL_TEST_FUNCTION( fost_authentication ) {
     std::auto_ptr<binary_body> body(new binary_body(r.headers()));
     http::server::request request(r.method(), r.address().pathspec(), body);
     http::fost_authn authn(http::fost_authentication(keys, request));
-    FSL_CHECK(!authn.authenticated());
-    FSL_CHECK_EQ(authn.error().value(), "Not implemented");
+    FSL_CHECK(authn.authenticated());
+    FSL_CHECK(authn.under_attack());
+    FSL_CHECK(authn.error().isnull());
 }
 
