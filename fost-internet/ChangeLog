@@ -1,3 +1,6 @@
+2010-10-15  Kirit Saelensminde  <kirit@felspar.com>
+ FOST authentication for the server version of requests is now supported.
+
 2010-10-08  Kirit Saelensminde  <kirit@felspar.com>
  fostlib::email_address instances can now be coerced from their JSON representation.
  A new attach member on fostlib::mime_envelope allows for easier addition of mime types into the envelope.
