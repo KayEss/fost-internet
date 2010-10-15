@@ -59,6 +59,14 @@ FSL_TEST_FUNCTION( no_authentication ) {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
         FSL_CHECK(!authn.under_attack());
+        FSL_CHECK_EQ(authn.error().value(), "No X-FOST-Timestamp header found");
+    }
+
+    request.data()->headers().set("X-FOST-Timestamp");
+    {
+        http::fost_authn authn(http::fost_authentication(keys, request));
+        FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "No FOST key:signature pair found");
     }
 
