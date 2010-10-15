@@ -95,8 +95,8 @@ void fostlib::http::fost_authentication(
 }
 
 
-fostlib::http::fost_authn::fost_authn(const string &m)
-: error(m), authenticated(false) {
+fostlib::http::fost_authn::fost_authn(const string &m, bool a)
+: error(m), authenticated(false), under_attack(a) {
 }
 
 
@@ -126,9 +126,9 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
             nullable<string> found_secret = key_mapping(key);
             if ( !found_secret.isnull() ) {
                 const string &secret = found_secret.value();
-                return fost_authn("Not implemented");
+                return fost_authn("Not implemented", true);
             } else
-                return fost_authn("Key not found");
+                return fost_authn("Key not found", true);
         } else
             return fost_authn("No FOST key:signature pair found");
     } else

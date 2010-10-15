@@ -26,6 +26,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "No authorization header");
     }
 
@@ -33,6 +34,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "Non FOST authentication not implemented");
     }
 
@@ -40,6 +42,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "No signed headers found");
     }
 
@@ -47,6 +50,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "No signed headers found");
     }
 
@@ -54,6 +58,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "No FOST key:signature pair found");
     }
 
@@ -61,6 +66,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "Key not found");
     }
 
@@ -69,6 +75,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(authn.under_attack());
         FSL_CHECK_EQ(authn.error().value(), "Not implemented");
     }
 }

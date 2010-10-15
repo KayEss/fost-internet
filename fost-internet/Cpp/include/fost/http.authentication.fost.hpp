@@ -41,10 +41,12 @@ namespace fostlib {
             accessors<const nullable<string> > error;
             /// True only if the authentication method worked
             accessors<const bool> authenticated;
+            /// Returns true if the server appears to be under attack
+            accessors<const bool> under_attack;
             /// The set of headers that were properly signed as part of the request
             boost::shared_ptr<const mime::mime_headers> signed_headers;
             private:
-                fost_authn(const string &);
+                fost_authn(const string &, bool under_attack = false);
                 fost_authn(mime::mime_headers*);
                 friend fost_authn fost_authentication(
                         boost::function< nullable< string > ( string ) >, server::request &);
