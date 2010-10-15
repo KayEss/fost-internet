@@ -109,10 +109,17 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
     std::pair< string, nullable<string> > authorization =
         partition(request.data()->headers()["Authorization"].value());
     if ( authorization.first == "FOST" && !authorization.second.isnull() ) {
-        std::pair< string, nullable<string> > signature =
+        std::pair< string, nullable<string> > signature_partition =
             partition(authorization.second.value(), ":");
-        if ( !signature.second.isnull() ) {
-            return fost_authn("Not implemented");
+        if ( !signature_partition.second.isnull() ) {
+            const string &key = signature_partition.first;
+            const string &signature = signature_partition.second.value();
+            nullable<string> found_secret = key_mapping(key);
+            if ( !found_secret.isnull() ) {
+                const string &secret = found_secret.value();
+                return fost_authn("Not implemented");
+            } else
+                return fost_authn("Key not found");
         } else
             return fost_authn("No FOST key:signature pair found");
     } else

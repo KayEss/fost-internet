@@ -42,6 +42,13 @@ FSL_TEST_FUNCTION( no_authentication ) {
         FSL_CHECK(!authn.authenticated());
         FSL_CHECK_EQ(authn.error().value(), "No FOST key:signature pair found");
     }
+
+    request.data()->headers().set("Authorization", "FOST invalid:invalid");
+    {
+        http::fost_authn authn(http::fost_authentication(keys, request));
+        FSL_CHECK(!authn.authenticated());
+        FSL_CHECK_EQ(authn.error().value(), "Key not found");
+    }
 }
 
 
