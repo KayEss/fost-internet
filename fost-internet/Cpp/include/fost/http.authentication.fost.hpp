@@ -36,7 +36,7 @@ namespace fostlib {
 
 
         /// Structure returned to describe the result of FOST authentication of a HTTP request
-        struct fost_authn {
+        struct FOST_INET_DECLSPEC fost_authn {
             /// May contain an error message describing authentication problems
             accessors<const nullable<string> > error;
             /// True only if the authentication method worked
@@ -48,9 +48,9 @@ namespace fostlib {
             private:
                 fost_authn(const string &, bool under_attack = false);
                 fost_authn(boost::shared_ptr<const mime::mime_headers>);
-                friend fost_authn fost_authentication(
+                friend FOST_INET_DECLSPEC fost_authn fost_authentication(
                         boost::function< nullable<string>(string) >, server::request &);
-                friend fost_authn fost_authentication(
+                friend FOST_INET_DECLSPEC fost_authn fost_authentication(
                         const std::map< string, string > &, server::request &);
         };
         /// Returns whether or not an HTTP server request is properly signed, and if it is, which headers are signed
