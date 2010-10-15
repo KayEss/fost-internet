@@ -128,19 +128,25 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
         if ( !request.data()->headers().exists("X-FOST-Timestamp") )
             return fost_authn("No X-FOST-Timestamp header found");
 
+        // TODO Switch to using a proper parser here so errors can be caught
+        timestamp time_signed = coerce<timestamp>(
+            json(request.data()->headers()["X-FOST-Timestamp"].value()));
+
         std::pair< string, nullable<string> > signature_partition =
             partition(authorization.second.value(), ":");
-        if ( !signature_partition.second.isnull() ) {
+        if ( signature_partition.second.isnull() )
+            return fost_authn("No FOST key:signature pair found");
+        else {
             const string &key = signature_partition.first;
             const string &signature = signature_partition.second.value();
             nullable<string> found_secret = key_mapping(key);
-            if ( !found_secret.isnull() ) {
+            if ( found_secret.isnull() )
+                return fost_authn("Key not found", true);
+            else {
                 const string &secret = found_secret.value();
                 return fost_authn("Not implemented", true);
-            } else
-                return fost_authn("Key not found", true);
-        } else
-            return fost_authn("No FOST key:signature pair found");
+            }
+        }
     }
 }
 namespace {

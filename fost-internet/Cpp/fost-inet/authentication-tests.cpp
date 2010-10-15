@@ -62,7 +62,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
         FSL_CHECK_EQ(authn.error().value(), "No X-FOST-Timestamp header found");
     }
 
-    request.data()->headers().set("X-FOST-Timestamp");
+    request.data()->headers().set("X-FOST-Timestamp", "2010-01-01 00:00:00");
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
