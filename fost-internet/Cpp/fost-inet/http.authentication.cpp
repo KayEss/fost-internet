@@ -129,8 +129,15 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
             return fost_authn("No X-FOST-Timestamp header found");
 
         // TODO Switch to using a proper parser here so errors can be caught
-        timestamp time_signed = coerce<timestamp>(
-            json(request.data()->headers()["X-FOST-Timestamp"].value()));
+        boost::posix_time::ptime time_signed =
+            coerce<boost::posix_time::ptime>(coerce<timestamp>(
+                json(request.data()->headers()["X-FOST-Timestamp"].value())));
+        boost::posix_time::ptime now =
+            coerce<boost::posix_time::ptime>(timestamp::now());
+        boost::posix_time::ptime oldest(now - boost::posix_time::minutes(5));
+        boost::posix_time::ptime youngest(now + boost::posix_time::minutes(5));
+        if ( time_signed < oldest || time_signed > youngest )
+            return fost_authn("Clock skew is too high");
 
         std::pair< string, nullable<string> > signature_partition =
             partition(authorization.second.value(), ":");

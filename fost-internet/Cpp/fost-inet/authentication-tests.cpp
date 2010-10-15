@@ -8,6 +8,7 @@
 
 #include "fost-inet-test.hpp"
 #include <fost/http>
+#include <fost/datetime>
 
 
 using namespace fostlib;
@@ -63,6 +64,15 @@ FSL_TEST_FUNCTION( no_authentication ) {
     }
 
     request.data()->headers().set("X-FOST-Timestamp", "2010-01-01 00:00:00");
+    {
+        http::fost_authn authn(http::fost_authentication(keys, request));
+        FSL_CHECK(!authn.authenticated());
+        FSL_CHECK(!authn.under_attack());
+        FSL_CHECK_EQ(authn.error().value(), "Clock skew is too high");
+    }
+
+    request.data()->headers().set("X-FOST-Timestamp",
+        coerce<string>(timestamp::now()));
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
