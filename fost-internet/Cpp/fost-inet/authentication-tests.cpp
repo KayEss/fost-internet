@@ -50,7 +50,7 @@ FSL_TEST_FUNCTION( no_authentication ) {
         FSL_CHECK_EQ(authn.error().value(), "No signed headers found");
     }
 
-    request.data()->headers().set("X-FOST-Headers", "Host");
+    request.data()->headers().set("X-FOST-Headers", "X-FOST-Headers");
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());

@@ -115,6 +115,9 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
             request.data()->headers()["X-FOST-Headers"].value(), " ");
         if ( !signed_headers.size() )
             return fost_authn("No signed headers found");
+        if ( std::find(signed_headers.begin(), signed_headers.end(),
+                "X-FOST-Headers") == signed_headers.end() )
+            return fost_authn("X-FOST-Headers must be one of the signed headers");
         std::pair< string, nullable<string> > signature_partition =
             partition(authorization.second.value(), ":");
         if ( !signature_partition.second.isnull() ) {
