@@ -16,6 +16,9 @@
 #include <boost/lambda/bind.hpp>
 
 
+using namespace fostlib;
+
+
 namespace {
 
 
@@ -98,13 +101,22 @@ fostlib::http::fost_authn::fost_authn(const string &m)
 
 
 fostlib::http::fost_authn fostlib::http::fost_authentication(
-    boost::function< fostlib::nullable< fostlib::string > ( fostlib::string ) > key_mapping,
+    boost::function< nullable< string > ( string ) > key_mapping,
     server::request &request
 ) {
     return fost_authn("Not implemented");
 }
+namespace {
+    nullable<string> lookup(const std::map<string, string> &keys, const string &key) {
+        std::map<string, string>::const_iterator p = keys.find(key);
+        if ( p == keys.end() )
+            return null;
+        else
+            return p->second;
+    }
+}
 fostlib::http::fost_authn fostlib::http::fost_authentication(
     const std::map< string, string > &keys, fostlib::http::server::request &request
 ) {
-    return fost_authn("Not implemented");
+    return fost_authentication(boost::lambda::bind(lookup, keys, boost::lambda::_1), request);
 }
