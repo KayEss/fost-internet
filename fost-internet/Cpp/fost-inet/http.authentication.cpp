@@ -104,6 +104,8 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
     boost::function< nullable< string > ( string ) > key_mapping,
     server::request &request
 ) {
+    if ( !request.data()->headers().exists("Authorization") )
+        return fost_authn("No authorization header");
     return fost_authn("Not implemented");
 }
 namespace {
