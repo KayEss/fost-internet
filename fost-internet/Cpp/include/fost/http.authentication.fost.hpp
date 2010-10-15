@@ -49,7 +49,7 @@ namespace fostlib {
                 fost_authn(const string &, bool under_attack = false);
                 fost_authn(mime::mime_headers*);
                 friend fost_authn fost_authentication(
-                        boost::function< nullable< string > ( string ) >, server::request &);
+                        boost::function< nullable<string>(string) >, server::request &);
                 friend fost_authn fost_authentication(
                         const std::map< string, string > &, server::request &);
         };
