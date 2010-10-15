@@ -22,9 +22,26 @@ FSL_TEST_FUNCTION( no_authentication ) {
 
     std::auto_ptr<binary_body> body(new binary_body(r.headers()));
     http::server::request request(r.method(), r.address().pathspec(), body);
-    http::fost_authn authn(http::fost_authentication(keys, request));
-    FSL_CHECK(!authn.authenticated());
-    FSL_CHECK_EQ(authn.error().value(), "No authorization header");
+
+    {
+        http::fost_authn authn(http::fost_authentication(keys, request));
+        FSL_CHECK(!authn.authenticated());
+        FSL_CHECK_EQ(authn.error().value(), "No authorization header");
+    }
+
+    request.data()->headers().set("Authorization", "Invalid");
+    {
+        http::fost_authn authn(http::fost_authentication(keys, request));
+        FSL_CHECK(!authn.authenticated());
+        FSL_CHECK_EQ(authn.error().value(), "Non FOST authentication not implemented");
+    }
+
+    request.data()->headers().set("Authorization", "FOST invalid");
+    {
+        http::fost_authn authn(http::fost_authentication(keys, request));
+        FSL_CHECK(!authn.authenticated());
+        FSL_CHECK_EQ(authn.error().value(), "No FOST key:signature pair found");
+    }
 }
 
 
@@ -41,6 +58,7 @@ FSL_TEST_FUNCTION( fost_authentication ) {
     std::auto_ptr<binary_body> body(new binary_body(r.headers()));
     http::server::request request(r.method(), r.address().pathspec(), body);
     http::fost_authn authn(http::fost_authentication(keys, request));
-    //FSL_CHECK(authn.authenticated());
+    FSL_CHECK(!authn.authenticated());
+    FSL_CHECK_EQ(authn.error().value(), "Not implemented");
 }
 

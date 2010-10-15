@@ -106,7 +106,17 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
 ) {
     if ( !request.data()->headers().exists("Authorization") )
         return fost_authn("No authorization header");
-    return fost_authn("Not implemented");
+    std::pair< string, nullable<string> > authorization =
+        partition(request.data()->headers()["Authorization"].value());
+    if ( authorization.first == "FOST" && !authorization.second.isnull() ) {
+        std::pair< string, nullable<string> > signature =
+            partition(authorization.second.value(), ":");
+        if ( !signature.second.isnull() ) {
+            return fost_authn("Not implemented");
+        } else
+            return fost_authn("No FOST key:signature pair found");
+    } else
+        return fost_authn("Non FOST authentication not implemented");
 }
 namespace {
     nullable<string> lookup(const std::map<string, string> &keys, const string &key) {
