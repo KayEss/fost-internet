@@ -186,6 +186,15 @@ namespace std {
         return o << fostlib::coerce< fostlib::string >( u );
     }
 
+    /// Allow URLs to be used as keys in STL containers
+    template<>
+    struct less<fostlib::url> : binary_function <fostlib::url, fostlib::url, bool> {
+        /// Performs the comparison of two URL instances
+        bool operator () ( const fostlib::url &l, const fostlib::url &r ) const {
+            return l.as_string().underlying() < r.as_string().underlying();
+        }
+    };
+
 
 }
 
