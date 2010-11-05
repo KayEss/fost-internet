@@ -271,7 +271,7 @@ fostlib::url::url( const string &a_url )
     query_string_parser query_string_p;
     try {
         url u; ascii_printable_string fs; query_string qs;
-        if ( !boost::spirit::parse( a_url.c_str(),
+        if ( !fostlib::parse( a_url.c_str(),
             url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
             >> !(
                 boost::spirit::chlit< wchar_t >( '/' )
@@ -354,7 +354,7 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
     // First, formalise the new path.
     if( pathName.underlying().underlying().length() == 0 ) {
         // Assume that if it's blank, the caller means '/'
-        pathName = url::filepath_string( "/" ); 
+        pathName = url::filepath_string( "/" );
     }
     // Obvious directory fixes.
     if( pathName.underlying().underlying().find( "/." )
@@ -367,7 +367,7 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
         pathName += url::filepath_string( "/" );
     } else if( pathName==url::filepath_string( ".." ) ) {
         // Or if it's simply '..' or '.', both of which really mean '../' or './' anyway.
-        pathName += url::filepath_string( "/" ); 
+        pathName += url::filepath_string( "/" );
     }
     // Now do we add or replace?
     if ( pathName.underlying().underlying()[ 0 ] != '/' ) {

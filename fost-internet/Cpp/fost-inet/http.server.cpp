@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -100,56 +100,46 @@ fostlib::http::server::request::request(
 }
 
 
-namespace {
-    /*
-        This is really nasty, but we have to do it as Boost.Spirit is not
-        thread safe.
-    */
-    boost::mutex g_parser_mutex;
-}
 void fostlib::http::server::request::operator () (
     std::auto_ptr< boost::asio::ip::tcp::socket > socket
 ) {
     m_cnx.reset( new network_connection(socket) );
     utf8_string first_line;
     (*m_cnx) >> first_line;
-    {
-        boost::mutex::scoped_lock lock(g_parser_mutex);
-        if ( !boost::spirit::parse(first_line.underlying().c_str(),
-            (
-                +boost::spirit::chset<>( "A-Z" )
-            )[
-                phoenix::var(m_method) =
-                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-            ]
-            >> boost::spirit::chlit< char >( ' ' )
-            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=~!-" ))[
-                phoenix::var(m_pathspec) =
-                    phoenix::construct_< url::filepath_string >(
+    if ( !fostlib::parse(first_line.underlying().c_str(),
+        (
+            +boost::spirit::chset<>( "A-Z" )
+        )[
+            phoenix::var(m_method) =
+                phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+        ]
+        >> boost::spirit::chlit< char >( ' ' )
+        >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=~!-" ))[
+            phoenix::var(m_pathspec) =
+                phoenix::construct_< url::filepath_string >(
+                    phoenix::arg1, phoenix::arg2
+                )
+        ]
+        >> !(
+            boost::spirit::chlit< char >('?')
+            >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,%+*=-" ))[
+                phoenix::var(m_query_string) =
+                    phoenix::construct_< ascii_printable_string >(
                         phoenix::arg1, phoenix::arg2
                     )
             ]
-            >> !(
-                boost::spirit::chlit< char >('?')
-                >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,%+*=-" ))[
-                    phoenix::var(m_query_string) =
-                        phoenix::construct_< ascii_printable_string >(
-                            phoenix::arg1, phoenix::arg2
-                        )
-                ]
+        )
+        >> !(
+            boost::spirit::chlit< char >( ' ' )
+            >> (
+                boost::spirit::strlit< nliteral >("HTTP/1.0") |
+                boost::spirit::strlit< nliteral >("HTTP/1.1")
             )
-            >> !(
-                boost::spirit::chlit< char >( ' ' )
-                >> (
-                    boost::spirit::strlit< nliteral >("HTTP/1.0") |
-                    boost::spirit::strlit< nliteral >("HTTP/1.1")
-                )
-            )
-        ).full )
-            throw exceptions::not_implemented(
-                "Expected a HTTP request", coerce< string >(first_line)
-            );
-    }
+        )
+    ).full )
+        throw exceptions::not_implemented(
+            "Expected a HTTP request", coerce< string >(first_line)
+        );
 
     mime::mime_headers headers;
     while ( true ) {

@@ -76,7 +76,7 @@ string fostlib::host::name() const {
 host fostlib::coercer< host, string >::coerce( const string &h ) {
     host r;
     host_parser host_p;
-    if ( boost::spirit::parse(h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
+    if ( fostlib::parse(h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
         return r;
     else
         throw exceptions::not_implemented(
