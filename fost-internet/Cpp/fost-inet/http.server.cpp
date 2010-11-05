@@ -72,8 +72,7 @@ void fostlib::http::server::operator () (
         // Use a raw pointer here for minimum overhead -- if it all goes wrong
         // and a socket leaks, we don't care (for now)
         boost::asio::ip::tcp::socket *sock(
-            new boost::asio::ip::tcp::socket( m_service )
-        );
+            new boost::asio::ip::tcp::socket( m_service ));
         m_server.accept( *sock );
         pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
     }
@@ -167,8 +166,7 @@ boost::shared_ptr< fostlib::binary_body > fostlib::http::server::request::data(
 ) const {
     if ( !m_mime.get() )
         throw exceptions::null(
-            "This server request has no MIME data, not even headers"
-        );
+            "This server request has no MIME data, not even headers");
     return m_mime;
 }
 
@@ -178,8 +176,7 @@ void fostlib::http::server::request::operator() (
 ) {
     if ( !m_cnx.get() )
         throw exceptions::null(
-            "This is a mock server request. It cannot send a response to any client"
-        );
+            "This is a mock server request. It cannot send a response to any client");
     std::stringstream buffer;
     buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
         << response.headers() << "\r\n";
