@@ -6,7 +6,7 @@ use-project fost-base : ../fost-base/ ;
 fost-project fost-internet ;
 
 alias docs :
-        Docs//fost-internet.html
+        Docs
     ;
 explicit docs ;
 
