@@ -97,47 +97,49 @@ namespace {
         read_error read_result;
         std::size_t received;
 
-        static void timedout(timeout_error &n, boost::system::error_code e) {
+        static void timedout(
+            boost::asio::ip::tcp::socket &sock,
+            timeout_error &n, boost::system::error_code e
+        ) {
+            if ( e != boost::asio::error::operation_aborted ) {
+                boost::system::error_code cancel_error; // We ignore this
+                sock.cancel(cancel_error);
+            }
             n = e;
         }
         static void read_done(
-            read_error &n, boost::system::error_code e, std::size_t s
+            boost::asio::deadline_timer &timer, read_error &n,
+            boost::system::error_code e, std::size_t s
         ) {
+            if ( !e )
+                timer.cancel();
             n = std::make_pair(e, s);
         }
 
         timeout_wrapper(
             boost::asio::ip::tcp::socket &sock, boost::system::error_code &e
         ) : sock(sock), error(e), timer(sock.io_service()), received(0) {
-            reschedule();
-        }
-
-        void reschedule() {
             timer.expires_from_now(boost::posix_time::seconds(
                 c_read_timeout.value()));
-            timer.async_wait(boost::bind(
-                timedout, boost::ref(timeout_result), boost::lambda::_1));
+            timer.async_wait(boost::bind(timedout,
+                boost::ref(sock), boost::ref(timeout_result),
+                boost::lambda::_1));
         }
 
         read_async_function_type read_async_function() {
-            return boost::bind(
-                read_done, boost::ref(read_result),
+            return boost::bind(read_done,
+                boost::ref(timer), boost::ref(read_result),
                 boost::lambda::_1, boost::lambda::_2);
         }
 
         std::size_t complete() {
             sock.io_service().reset();
-            while ( sock.io_service().run_one() ) {
-                if ( !read_result.isnull() ) {
-                    timer.cancel();
-                    error = read_result.value().first;
-                    received = read_result.value().second;
-                } else if ( !timeout_result.isnull() )
-                    sock.close();
-            }
+            sock.io_service().run();
             if ( read_result.value().first &&
                     read_result.value().first != boost::asio::error::eof )
                 throw exceptions::read_timeout();
+            error = read_result.value().first;
+            received = read_result.value().second;
             return received;
         }
     };
