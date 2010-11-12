@@ -102,8 +102,12 @@ namespace {
             timeout_error &n, boost::system::error_code e
         ) {
             if ( e != boost::asio::error::operation_aborted ) {
+#ifdef FOST_OS_WINDOWS
+                sock.close();
+#else
                 boost::system::error_code cancel_error; // We ignore this
                 sock.cancel(cancel_error);
+#endif // FOST_OS_WINDOWS
             }
             n = e;
         }
