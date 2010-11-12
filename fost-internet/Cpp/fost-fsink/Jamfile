@@ -1,0 +1,4 @@
+
+fost-exe fsink :
+        fsink.cpp
+    ;
