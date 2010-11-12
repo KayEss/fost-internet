@@ -31,7 +31,11 @@ FSL_MAIN(
         std::auto_ptr< http::server::request > req( server() );
         if ( req->method() == "PUT" ) {
             text_body response(L"Accepted\n", mime::mime_headers(), L"text/plain");
-            out << *req->data() << std::endl;
+            typedef mime::const_iterator cit;
+            for ( cit d(req->data()->begin()); d != req->data()->end(); ++d )
+                out << string(reinterpret_cast<const char *>((*d).first),
+                    reinterpret_cast<const char *>((*d).second));
+            out << std::endl;
             (*req)(response);
         } else {
             out << req->method() << L" " << req->file_spec() << std::endl;
