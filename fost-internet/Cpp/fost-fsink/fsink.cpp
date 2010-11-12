@@ -30,11 +30,12 @@ FSL_MAIN(
     for ( bool process( true ); process; ) {
         std::auto_ptr< http::server::request > req( server() );
         if ( req->method() == "PUT" ) {
-            text_body response(L"Accepted", mime::mime_headers(), L"text/plain");
+            text_body response(L"Accepted\n", mime::mime_headers(), L"text/plain");
+            out << *req->data() << std::endl;
             (*req)(response);
         } else {
             out << req->method() << L" " << req->file_spec() << std::endl;
-            text_body response(L"Message?", mime::mime_headers(), "text/plain");
+            text_body response(L"Message?\n", mime::mime_headers(), "text/plain");
             (*req)(response);
         }
     }
