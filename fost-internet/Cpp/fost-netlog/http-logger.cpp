@@ -39,8 +39,9 @@ http_logger::http_logger(const json &) {
 }
 
 
-bool http_logger::operator () (const logging::message &) {
-    boost::shared_ptr<mime> body(new text_body(L"Some sort of body goes here"));
+bool http_logger::operator () (const logging::message &m) {
+    boost::shared_ptr<mime> body(new text_body(
+        json::unparse(coerce<json>(m), true)));
     http::user_agent::request req("PUT", url("http://localhost:23456/"), body);
     ua(req);
     return true;
