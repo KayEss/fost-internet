@@ -115,8 +115,7 @@ namespace {
             boost::asio::deadline_timer &timer, read_error &n,
             boost::system::error_code e, std::size_t s
         ) {
-            if ( !e )
-                timer.cancel();
+            timer.cancel();
             n = std::make_pair(e, s);
         }
 
