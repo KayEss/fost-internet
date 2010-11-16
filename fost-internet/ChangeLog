@@ -1,3 +1,6 @@
+2010-11-16  Kirit Saelensminde  <kirit@felspar.com>
+ Added a very simple HTTP PUT based log sink for shipping logs to another machine.
+
 2010-11-04  Kirit Saelensminde  <kirit@felspar.com>
  URLs are now usable directly as keys in STL containers as std::less is supported.
 
