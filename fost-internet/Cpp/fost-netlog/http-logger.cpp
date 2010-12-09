@@ -11,6 +11,11 @@
 #include <fost/http>
 
 
+#ifdef FOST_OS_WINDOWS
+__declspec(dllexport) int force_lib_file = 0;
+#endif
+
+
 using namespace fostlib;
 
 
