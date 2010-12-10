@@ -92,6 +92,7 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"key=&key=" );
     QS_PARSE( L"key=value&key=" );
     QS_PARSE( L"next=/path/" );
+    QS_PARSE( L"key1&key2" );
 }
 
 

@@ -67,13 +67,18 @@ namespace fostlib {
         template< typename scanner_t >
         struct definition {
             definition( query_string_parser const& self ) {
-                top = !boost::spirit::list_p( (
+                top = (
+                    !boost::spirit::list_p( (
                         key[ self.key = phoenix::arg1 ] >>
                         boost::spirit::chlit< wchar_t >( '=' )[ self.value = utf8_string() ] >>
                         !value[ self.value = phoenix::arg1 ]
                     )[
                         detail::query_string_insert( self.qs, self.key, self.value )
-                    ], boost::spirit::chlit< wchar_t >( '&' )
+                    ], boost::spirit::chlit< wchar_t >( '&' ) )
+                ) || (
+                    (+boost::spirit::chset<>( L"&/:_@a-zA-Z0-9.,%+*-" ))
+                        [self.qs = phoenix::construct_<ascii_printable_string>(
+                            phoenix::arg1, phoenix::arg2)]
                 );
                 key = ( +boost::spirit::chset<>( L"_@a-zA-Z0-9.+*-" )[
                     parsers::push_back( key.buffer, phoenix::arg1 )
