@@ -174,6 +174,21 @@ FSL_TEST_FUNCTION( parse ) {
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/echo/*Afsk1YSP"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data?__="));
+    FSL_CHECK_NOTHROW(url("http://l.yimg.com/a/combo?arc/yui/reset_2.6.7.css&"
+        "arc/yui/fonts_2.6.4.css&metro/uiplugins/generic_0.1.13.css&"
+        "metro/error/error_0.1.18.css&metro/fp/fp_zindex_0.0.34.css&"
+        "metro/fp/fp_0.1.101.css&metro/uiplugins/tablist_service_0.1.7.css&"
+        "metro/uiplugins/iframeshim_service_0.0.5.css&"
+        "metro/uiplugins/menu_service_0.1.4.css&"
+        "metro/masthead/masthead_0.2.101.css&"
+        "metro/navbar/navbar_0.1.119.css&metro/navbar/navbar_pageoptions_0.0.44.css&"
+        "metro/sda/sda_0.1.37.css&metro/tuc/tuc_outboxlite_common_0.0.24.css&"
+        "metro/tuc/tuc_outboxlite_embedded_0.0.12.css&metro/pa/pa_0.1.196.css&"
+        "metro/pa/pa_detached_0.1.84.css&metro/uiplugins/tooltip_service_1.0.5.css&"
+        "metro/uiplugins/tooltip_default_0.1.19.css&metro/pa/tooltip_pa_dialog_1.0.12.css&"
+        "metro/uiplugins/sortable_service_0.1.9.css&metro/pa/pa_add_0.1.55.css&"
+        "metro/uiplugins/tablist_news_0.0.16.css&metro2/simplenews/simplenews_0.1.19.css&"
+        "metro/footer/footer_0.1.68.css&metro/footer/subfooter_0.0.11.css"));
 }
 
 #define TEST_COERCION(u) \
