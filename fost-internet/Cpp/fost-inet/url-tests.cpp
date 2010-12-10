@@ -198,6 +198,7 @@ FSL_TEST_FUNCTION( parse ) {
         "metro/uiplugins/tablist_news_0.0.16.css&"
         "metro2/simplenews/simplenews_0.1.19.css&"
         "metro/footer/footer_0.1.68.css&metro/footer/subfooter_0.0.11.css"));
+    //FSL_CHECK_NOTHROW(url("http://www.google.com/coop/cse/brand?form=cse-search-box%26%2312296%3B=th"));
 }
 
 #define TEST_COERCION(u) \
