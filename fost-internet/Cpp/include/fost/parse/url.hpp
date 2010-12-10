@@ -68,28 +68,36 @@ namespace fostlib {
         struct definition {
             definition( query_string_parser const& self ) {
                 top = (
-                    !boost::spirit::list_p( (
+                    boost::spirit::list_p( (
                         key[ self.key = phoenix::arg1 ] >>
                         boost::spirit::chlit< wchar_t >( '=' )[ self.value = utf8_string() ] >>
                         !value[ self.value = phoenix::arg1 ]
                     )[
                         detail::query_string_insert( self.qs, self.key, self.value )
                     ], boost::spirit::chlit< wchar_t >( '&' ) )
-                ) || (
-                    (+boost::spirit::chset<>( L"&/:_@a-zA-Z0-9.,%+*-" ))
+                ) | (
+                    (+boost::spirit::chset<>( L"&/:_@a-zA-Z0-9.,%+*%=!-" ))
                         [self.qs = phoenix::construct_<ascii_printable_string>(
                             phoenix::arg1, phoenix::arg2)]
+                ) | (
+                    boost::spirit::nothing_p
+                        [self.qs = phoenix::construct_<url::query_string>()]
                 );
-                key = ( +boost::spirit::chset<>( L"_@a-zA-Z0-9.+*-" )[
+                key = ( +boost::spirit::chset<>( L"_@a-zA-Z0-9.+*!-" )[
                     parsers::push_back( key.buffer, phoenix::arg1 )
                 ] )[
                     key.text = parsers::coerce< utf8_string >()( key.buffer )
                 ];
-                value = ( +boost::spirit::chset<>( L"/:_@a-zA-Z0-9.,%+*-" )[
-                    parsers::push_back( value.buffer, phoenix::arg1 )
-                ] )[
-                    value.text = parsers::coerce< utf8_string >()( value.buffer )
-                ];
+                value = (+(
+                        (
+                            boost::spirit::chset<>( L"/:_@a-zA-Z0-9.,+*!=-" )
+                                [parsers::push_back( value.buffer, phoenix::arg1 )]
+                        ) | (
+                            boost::spirit::chlit<wchar_t>( '%' )
+                            >> boost::spirit::uint_parser<char, 16, 2, 2>()
+                                [parsers::push_back( value.buffer, phoenix::arg1 )]
+                        )
+                    ))[value.text = parsers::coerce< utf8_string >()( value.buffer )];
             }
             boost::spirit::rule< scanner_t > top;
             boost::spirit::rule< scanner_t, utf8_string_builder_closure::context_t > key, value;

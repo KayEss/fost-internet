@@ -1,5 +1,5 @@
 2010-12-10  Kirit Saelensminde  <kirit@felspar.com>
- The URL parser now supports (at least some) custom query string formats.
+ The URL parser now supports (at least some) custom query string formats. Also added in limited %XX decoding in the query string values.
 
 2010-11-16  Kirit Saelensminde  <kirit@felspar.com>
  Added a very simple HTTP PUT based log sink for shipping logs to another machine.
