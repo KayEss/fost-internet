@@ -25,11 +25,12 @@ namespace fostlib {
                 virtual const_memory_block operator () () = 0;
             };
         public:
-            class FOST_INET_DECLSPEC mime_headers : public fostlib::headers_base {
+            /// MIME headers
+            class FOST_INET_DECLSPEC mime_headers :
+                    public fostlib::headers_base {
                 protected:
                     std::pair< string, headers_base::content > value(
-                        const string &name, const string &value
-                    );
+                        const string &name, const string &value);
             };
             virtual ~mime();
 
@@ -76,25 +77,60 @@ namespace fostlib {
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
             /// Construct an empty MIME body that cannot have data
-            empty_mime(
-                const mime_headers &headers = mime_headers(),
-                const string &mime = "application/x-empty"
-            );
+            empty_mime(const mime_headers &headers = mime_headers(),
+                const string &mime = "application/x-empty");
 
+            /// Print the MIME out on the stream
             std::ostream &print_on( std::ostream &o ) const;
+            /// Check to see if the boundary is OK
             bool boundary_is_ok( const string &boundary ) const;
     };
 
     /// A MIME envelope can contain a nested structure of other MIME containers
     class FOST_INET_DECLSPEC mime_envelope : public mime {
+        struct mime_envelope_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
+        string m_boundary;
         public:
-            mime_envelope(const mime_headers &headers = mime_headers());
+            /// Construct the MIME envelope with optional headers
+            mime_envelope(const mime_headers &headers = mime_headers(),
+                const string &mime = "multipart/mixed");
 
+            /// Print the MIME out on the stream
             std::ostream &print_on( std::ostream &o ) const;
+            /// Check that the boundary can be used
             bool boundary_is_ok( const string &boundary ) const;
 
-            accessors< std::list< boost::shared_ptr< mime > >, fostlib::lvalue > items;
+            /// The type of the attachments
+            typedef std::list< boost::shared_ptr< mime > > items_type;
+            /// The embedded MIME items
+            accessors< items_type, fostlib::lvalue > items;
+
+            /// Attach a MIME type
+            template< typename M, typename P1 >
+            boost::shared_ptr< M > attach(const P1 &p1) {
+                boost::shared_ptr< M > attachment( new M(p1) );
+                items().push_back(attachment);
+                return attachment;
+            }
+            /// Attach a MIME type
+            template< typename M, typename P1, typename P2 >
+            boost::shared_ptr< M > attach(const P1 &p1, const P2 &p2) {
+                boost::shared_ptr< M > attachment( new M(p1, p2) );
+                items().push_back(attachment);
+                return attachment;
+            }
+            /// Attach a MIME type
+            template< typename M, typename P1, typename P2, typename P3 >
+            boost::shared_ptr< M > attach(const P1 &p1, const P2 &p2,
+                    const P3 &p3) {
+                boost::shared_ptr< M > attachment( new M(p1, p2, p3) );
+                items().push_back(attachment);
+                return attachment;
+            }
+
+            /// After all attachments have been added, use this to find a boundary
+            const string &boundary();
     };
 
     /// A MIME container which always stores text
@@ -119,7 +155,9 @@ namespace fostlib {
                 const string &mime = L"text/plain"
             );
 
+            /// Print the MIME out on the stream
             std::ostream &print_on( std::ostream &o ) const;
+            /// Check that the boundary can be used
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< const utf8_string > text;
@@ -162,7 +200,9 @@ namespace fostlib {
                 const string &mime = "binary/octet-stream"
             );
 
+            /// Print the MIME out on the stream
             std::ostream &print_on( std::ostream &o ) const;
+            /// Check that the boundary can be used
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< const boost::filesystem::wpath > filename;

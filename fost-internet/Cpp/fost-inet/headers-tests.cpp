@@ -21,8 +21,11 @@ FSL_TEST_FUNCTION( ostream ) {
     // printable on a narrow character stream as that is what all network connections
     // are.
     std::stringstream ss;
-    fostlib::headers_base::content c;
-    ss << c;
+    fostlib::headers_base::content c1,
+        c2("applicaton/long_mime_type");
+    c2.subvalue("long-sub-key1", "long key value with long value and a long value");
+    c2.subvalue("long-sub-key2", "long key value with long value and a long value");
+    ss << c1 << "\n" << c2;
 }
 
 

@@ -6,7 +6,7 @@ use-project fost-base : ../fost-base/ ;
 fost-project fost-internet ;
 
 alias docs :
-        Docs//fost-internet.html
+        Docs
     ;
 explicit docs ;
 
@@ -19,8 +19,9 @@ alias examples :
 explicit examples ;
 
 alias fost :
-        ../fost-base//fost
+        Cpp/fost-fsink
         Cpp/fost-inet
+        Cpp/fost-netlog
     ;
 
 alias tests :
@@ -31,6 +32,7 @@ explicit tests ;
 
 alias all :
         ../fost-base//examples
+        ../fost-base//fost
         docs
         examples
         fost

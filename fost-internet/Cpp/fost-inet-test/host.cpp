@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -26,7 +26,7 @@ FSL_TEST_FUNCTION( constructors ) {
 
 
 #define HOST_PARSE( s ) \
-    FSL_CHECK( boost::spirit::parse( (s), host_p[ phoenix::var(h) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK( fostlib::parse( (s), host_p[ phoenix::var(h) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( fostlib::coerce< ascii_string >( h ), fostlib::ascii_string(s) );
 FSL_TEST_FUNCTION( parse ) {
     host_parser host_p;

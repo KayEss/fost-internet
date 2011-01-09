@@ -1,3 +1,27 @@
+2010-12-10  Kirit Saelensminde  <kirit@felspar.com>
+ The URL parser now supports (at least some) custom query string formats. Also added in limited %XX decoding in the query string values.
+
+2010-11-16  Kirit Saelensminde  <kirit@felspar.com>
+ Added a very simple HTTP PUT based log sink for shipping logs to another machine.
+
+2010-11-04  Kirit Saelensminde  <kirit@felspar.com>
+ URLs are now usable directly as keys in STL containers as std::less is supported.
+
+2010-10-15  Kirit Saelensminde  <kirit@felspar.com>
+ FOST authentication for the server version of requests is now supported.
+
+2010-10-08  Kirit Saelensminde  <kirit@felspar.com>
+ fostlib::email_address instances can now be coerced from their JSON representation.
+ A new attach member on fostlib::mime_envelope allows for easier addition of mime types into the envelope.
+ The MIME type for MIME envelopes can now be set and the iterator for the data is now implemented.
+ The SMTP client now tracks its state and doesn't try to close the connection if it's not in a proper idle state.
+
+2010-09-24  Kirit Saelensminde  <kirit@felspar.com>
+ Errors connecting to sockets are now reported as instances of fostlib::exceptions::connect_failure. Socket errors are now all sub-classes of fostlib::exceptions::socket_error. Reads now also time out and throw a fostlib::exceptions::read_timout exception. The configuration setting
+     [Network settings]
+     Read time out=30
+ sets the number of seconds that the read time out value should have.
+
 2010-09-19  Kirit Saelensminde  <kirit@felspar.com>
  fostlib::url::query_string objects can now be coerced from fostlib::string objects.
 

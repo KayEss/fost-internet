@@ -15,6 +15,7 @@
 #include "fost-inet.hpp"
 #include <fost/connection.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/lambda/bind.hpp>
 
 #include <fost/exception/unexpected_eof.hpp>
 
@@ -23,22 +24,22 @@ using namespace fostlib;
 
 
 namespace {
-    boost::asio::io_service g_io_service;
-
-    setting< json > c_socks_version("fost-internet/Cpp/fost-inet/connection.cpp",
-        "Network settings", "Socks version", json(),
-        true
-    );
-    setting< string > c_socks_host("fost-internet/Cpp/fost-inet/connection.cpp",
-        "Network settings", "Socks host", L"localhost:8888",
-        true
-    );
+    setting< int64_t > c_read_timeout(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Read time out", 30, true);
+    setting< json > c_socks_version(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Socks version", json(), true);
+    setting< string > c_socks_host(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Socks host", L"localhost:8888", true);
 }
 
 
 struct ssl_data {
-    ssl_data(boost::asio::ip::tcp::socket &sock)
-    : ctx(g_io_service, boost::asio::ssl::context::sslv23_client),
+    ssl_data(
+        boost::asio::io_service &io_service, boost::asio::ip::tcp::socket &sock
+    ) : ctx(io_service, boost::asio::ssl::context::sslv23_client),
     ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
@@ -47,8 +48,8 @@ struct ssl_data {
     boost::asio::ssl::stream< boost::asio::ip::tcp::socket& > ssl_sock;
 };
 struct network_connection::ssl : public ssl_data {
-    ssl(boost::asio::ip::tcp::socket &sock)
-    : ssl_data(sock) {
+    ssl(boost::asio::io_service &io_service, boost::asio::ip::tcp::socket &sock)
+    : ssl_data(io_service, sock) {
     }
 };
 namespace {
@@ -58,11 +59,9 @@ namespace {
         const boost::system::error_code &error
     ) {
         if ( error == boost::asio::error::eof )
-            throw fostlib::exceptions::unexpected_eof(
-                fostlib::string(msg)
-            );
+            throw exceptions::unexpected_eof(string(msg));
         else if ( error )
-            throw fostlib::exceptions::not_implemented(func, error, msg);
+            throw exceptions::not_implemented(func, error, msg);
     }
 
     std::size_t send(
@@ -76,73 +75,157 @@ namespace {
                 return sock.send(b.data());
         } catch ( boost::system::system_error &e ) {
             throw fostlib::exceptions::not_implemented(
-                "send(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, boost::asio::streambuf &b)",
+                "send(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, "
+                    "boost::asio::streambuf &b)",
                 e.code()
             );
         }
     }
-    std::size_t read_until(
+
+    struct timeout_wrapper {
+        typedef nullable< boost::system::error_code > timeout_error;
+        typedef nullable< std::pair< boost::system::error_code, std::size_t > >
+            read_error;
+        typedef boost::function<
+            void (boost::system::error_code, std::size_t)
+        > read_async_function_type;
+
+        boost::asio::ip::tcp::socket &sock;
+        boost::system::error_code &error;
+        boost::asio::deadline_timer timer;
+        timeout_error timeout_result;
+        read_error read_result;
+        std::size_t received;
+
+        static void timedout(
+            boost::asio::ip::tcp::socket &sock,
+            timeout_error &n, boost::system::error_code e
+        ) {
+            if ( e != boost::asio::error::operation_aborted ) {
+#ifdef FOST_OS_WINDOWS
+                sock.close();
+#else
+                boost::system::error_code cancel_error; // We ignore this
+                sock.cancel(cancel_error);
+#endif // FOST_OS_WINDOWS
+            }
+            n = e;
+        }
+        static void read_done(
+            boost::asio::deadline_timer &timer, read_error &n,
+            boost::system::error_code e, std::size_t s
+        ) {
+            timer.cancel();
+            n = std::make_pair(e, s);
+        }
+
+        timeout_wrapper(
+            boost::asio::ip::tcp::socket &sock, boost::system::error_code &e
+        ) : sock(sock), error(e), timer(sock.io_service()), received(0) {
+            timer.expires_from_now(boost::posix_time::seconds(
+                c_read_timeout.value()));
+            timer.async_wait(boost::bind(timedout,
+                boost::ref(sock), boost::ref(timeout_result),
+                boost::lambda::_1));
+        }
+
+        read_async_function_type read_async_function() {
+            return boost::bind(read_done,
+                boost::ref(timer), boost::ref(read_result),
+                boost::lambda::_1, boost::lambda::_2);
+        }
+
+        std::size_t complete() {
+            sock.io_service().reset();
+            sock.io_service().run();
+            if ( read_result.value().first &&
+                    read_result.value().first != boost::asio::error::eof )
+                throw exceptions::read_timeout();
+            error = read_result.value().first;
+            received = read_result.value().second;
+            return received;
+        }
+    };
+
+    inline std::size_t read_until(
         boost::asio::ip::tcp::socket &sock, ssl_data *ssl,
-        boost::asio::streambuf &b, const char *term
+        boost::asio::streambuf &b, const char *term,
+        boost::system::error_code &e
     ) {
-        boost::system::error_code error;
+        timeout_wrapper timeout(sock, e);
         if ( ssl )
-            return boost::asio::read_until(ssl->ssl_sock, b, term, error);
+            boost::asio::async_read_until(ssl->ssl_sock, b, term,
+                timeout.read_async_function());
         else
-            return boost::asio::read_until(sock, b, term, error);
-        handle_error(
-            "read_until(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, boost::asio::streambuf &b, const char *term)",
-            "Whilst reading data from a socket", error
-        );
+            boost::asio::async_read_until(sock, b, term,
+                timeout.read_async_function());
+        return timeout.complete();
     }
+
     template< typename F >
-    std::size_t read(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, boost::asio::streambuf &b, F f) {
-        boost::system::error_code error;
-        if ( ssl )
-            return boost::asio::read(ssl->ssl_sock, b, f, error);
-        else
-            return boost::asio::read(sock, b, f, error);
-        handle_error(
-            "read<F>(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, boost::asio::streambuf &b, F f)",
-            "Whilst reading data from a socket", error
-        );
-    }
-    template< typename F >
-    std::size_t read(
+    inline std::size_t read(
         boost::asio::ip::tcp::socket &sock, ssl_data *ssl,
         boost::asio::streambuf &b, F f,
         boost::system::error_code &e
     ) {
+        timeout_wrapper timeout(sock, e);
         if ( ssl )
-            return boost::asio::read(ssl->ssl_sock, b, f, e);
+            boost::asio::async_read(ssl->ssl_sock, b, f,
+                timeout.read_async_function());
         else
-            return boost::asio::read(sock, b, f, e);
+            boost::asio::async_read(sock, b, f,
+                timeout.read_async_function());
+        return timeout.complete();
+    }
+
+    inline std::size_t read_until(
+        boost::asio::ip::tcp::socket &sock, ssl_data *ssl,
+        boost::asio::streambuf &b, const char *term
+    ) {
+        boost::system::error_code error;
+        std::size_t bytes = read_until(sock, ssl, b, term, error);
+        handle_error(
+            "read_until(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, "
+                "boost::asio::streambuf &b, const char *term)",
+            "Whilst reading data from a socket", error);
+        return bytes;
+    }
+    template< typename F >
+    inline std::size_t read(
+        boost::asio::ip::tcp::socket &sock, ssl_data *ssl,
+        boost::asio::streambuf &b, F f
+    ) {
+        boost::system::error_code error;
+        std::size_t bytes = read(sock, ssl, b, f, error);
+        handle_error(
+            "read<F>(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, "
+                "boost::asio::streambuf &b, F f)",
+            "Whilst reading data from a socket", error);
+        return bytes;
     }
 
     void connect(
-        boost::asio::ip::tcp::socket &socket, const host &host, port_number port
+        boost::asio::io_service &io_service,
+        boost::asio::ip::tcp::socket &socket,
+        const host &host, port_number port
     ) {
         using namespace boost::asio::ip;
-        tcp::resolver resolver(g_io_service);
+        tcp::resolver resolver(io_service);
         tcp::resolver::query q(
             coerce<ascii_string>(host.name()).underlying(),
-            coerce<ascii_string>(coerce<string>(port)).underlying()
-        );
+            coerce<ascii_string>(coerce<string>(port)).underlying());
         boost::system::error_code host_error;
         tcp::resolver::iterator endpoint = resolver.resolve(q, host_error), end;
         if ( host_error == boost::asio::error::host_not_found )
             throw exceptions::host_not_found( host.name() );
-        boost::system::error_code connect_error = boost::asio::error::host_not_found;
+        boost::system::error_code connect_error =
+            boost::asio::error::host_not_found;
         while ( connect_error && endpoint != end ) {
             socket.close();
             socket.connect(*endpoint++, connect_error);
         }
         if ( connect_error )
-            throw fostlib::exceptions::not_implemented(
-                "connect(boost::asio::ip::tcp::socket &socket, const host &host, port_number port)",
-                connect_error,
-                "Connecting to host"
-            );
+            throw fostlib::exceptions::connect_failure(connect_error);
     }
 }
 
@@ -152,13 +235,13 @@ fostlib::network_connection::network_connection(std::auto_ptr< boost::asio::ip::
 }
 
 fostlib::network_connection::network_connection(const host &h, nullable< port_number > p)
-: m_socket(new boost::asio::ip::tcp::socket(g_io_service)), m_ssl_data(NULL) {
+: m_socket(new boost::asio::ip::tcp::socket(io_service)), m_ssl_data(NULL) {
     const port_number port = p.value(coerce< port_number >(h.service().value("0")));
     json socks(c_socks_version.value());
 
     if ( !socks.isnull() ) {
         const host socks_host( coerce< host >( c_socks_host.value() ) );
-        connect(*m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
+        connect(io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
         if ( c_socks_version.value() == json(4) ) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection
@@ -179,7 +262,7 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
         } else
             throw exceptions::not_implemented("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
     } else
-        connect(*m_socket, h, port);
+        connect(io_service, *m_socket, h, port);
 }
 
 fostlib::network_connection::~network_connection() {
@@ -188,7 +271,7 @@ fostlib::network_connection::~network_connection() {
 
 
 void fostlib::network_connection::start_ssl() {
-    m_ssl_data = new ssl(*m_socket);
+    m_ssl_data = new ssl(io_service, *m_socket);
 }
 
 
@@ -266,6 +349,54 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
     if ( error != boost::asio::error::eof )
         throw fostlib::exceptions::not_implemented(
             "fostlib::network_connection::operator >> ( boost::asio::streambuf &b )",
-            "Whilst reading into an Asio streambuf"
-        );
+            "Whilst reading into an Asio streambuf");
+}
+
+
+/*
+    fostlib::exceptions::socket_error
+*/
+
+
+fostlib::exceptions::socket_error::socket_error() throw () {
+}
+
+fostlib::exceptions::socket_error::socket_error(
+    boost::system::error_code error
+) throw ()
+: error(error) {
+    info() << error << std::endl;
+}
+
+
+/*
+    fostlib::exceptions::connect_failure
+*/
+
+
+fostlib::exceptions::connect_failure::connect_failure(
+    boost::system::error_code error
+) throw ()
+: socket_error(error) {
+}
+
+
+fostlib::wliteral const fostlib::exceptions::connect_failure::message()
+        const throw () {
+    return L"Network connection failure";
+}
+
+
+/*
+    fostlib::exceptions::read_timeout
+*/
+
+
+fostlib::exceptions::read_timeout::read_timeout() throw () {
+}
+
+
+fostlib::wliteral const fostlib::exceptions::read_timeout::message()
+        const throw () {
+    return L"Read time out";
 }

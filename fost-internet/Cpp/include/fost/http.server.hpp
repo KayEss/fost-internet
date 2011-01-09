@@ -41,13 +41,11 @@ namespace fostlib {
                     /// This constructor is useful for mocking the request for code that interacts with a server
                     request(
                         const string &method, const url::filepath_string &filespec,
-                        std::auto_ptr< binary_body > headers_and_body
-                    );
+                        std::auto_ptr< binary_body > headers_and_body);
 
                     /// Parse a request on the provided socket
                     void operator () (
-                        std::auto_ptr< boost::asio::ip::tcp::socket > connection
-                    );
+                        std::auto_ptr< boost::asio::ip::tcp::socket > connection);
 
                     /// The request method
                     const string &method() const { return m_method; }
@@ -63,13 +61,11 @@ namespace fostlib {
                     /// Used to pass the response back to the user agent.This will throw on a mocked connection
                     void operator () (
                         const mime &response,
-                        const int status = 200
-                    );
+                        const int status = 200);
                     /// Used to pass the response back to the user agent.This will throw on a mocked connection
                     void operator () (
                         const mime &response,
-                        const ascii_string &status_text
-                    );
+                        const ascii_string &status_text);
             };
 
             /// Create a server bound to a host and port

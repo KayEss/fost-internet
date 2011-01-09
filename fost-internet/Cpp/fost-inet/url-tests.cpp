@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -74,7 +74,7 @@ FSL_TEST_FUNCTION( url ) {
 
 
 #define QS_PARSE( str ) \
-    FSL_CHECK( boost::spirit::parse( (str), \
+    FSL_CHECK( fostlib::parse( (str), \
             query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( qs.as_string().value(), \
             coerce< ascii_printable_string >(string(str)) );
@@ -82,9 +82,9 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     query_string_parser query_string_p;
 
     url::query_string qs;
-    FSL_CHECK( boost::spirit::parse( L"",
+/*    FSL_CHECK( fostlib::parse( L"",
             query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
-    FSL_CHECK( qs.as_string().isnull() );
+    FSL_CHECK( qs.as_string().isnull() );*/
     QS_PARSE( L"key=value&key=value" );
     QS_PARSE( L"key=value" );
     QS_PARSE( L"key=" );
@@ -92,6 +92,10 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"key=&key=" );
     QS_PARSE( L"key=value&key=" );
     QS_PARSE( L"next=/path/" );
+    QS_PARSE( L"key1&key2" );
+    QS_PARSE( L"key2&key1" ); // Ensure order is preserved
+    QS_PARSE( L"key1=value1&key2=value=2&key3=value3" );
+    QS_PARSE( L"key=%26%2312296%3B" );
 }
 
 
@@ -104,7 +108,7 @@ FSL_TEST_FUNCTION( url_parser_protocol ) {
 
 
 #define URL_PARSE_HOSTPART( str, u_ ) \
-    FSL_CHECK( boost::spirit::parse( str, \
+    FSL_CHECK( fostlib::parse( str, \
         url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( u.as_string(), u_.as_string() );
 FSL_TEST_FUNCTION( url_parser_hostpart ) {
@@ -116,16 +120,16 @@ FSL_TEST_FUNCTION( url_parser_hostpart ) {
     URL_PARSE_HOSTPART( L"http://10.0.2.2", url( host( 10, 0, 2, 2 ) ) );
     URL_PARSE_HOSTPART( L"http://www.felspar.com", url( host( L"www.felspar.com" ) ) );
     URL_PARSE_HOSTPART( L"http://urquell-fn.appspot.com", url( host( L"urquell-fn.appspot.com" ) ) );
-    FSL_CHECK( !boost::spirit::parse( L"http://www..felspar.com/", url_hostpart_p ).full );
-    FSL_CHECK( !boost::spirit::parse( L"http://www./", url_hostpart_p ).full );
-    FSL_CHECK( !boost::spirit::parse( L"http://.www/", url_hostpart_p ).full );
+    FSL_CHECK( !fostlib::parse( L"http://www..felspar.com/", url_hostpart_p ).full );
+    FSL_CHECK( !fostlib::parse( L"http://www./", url_hostpart_p ).full );
+    FSL_CHECK( !fostlib::parse( L"http://.www/", url_hostpart_p ).full );
     URL_PARSE_HOSTPART( L"http://123.45", url( host( L"123.45" ) ) );
     URL_PARSE_HOSTPART( L"http://12345", url( host( 12345 ) ) );
     URL_PARSE_HOSTPART( L"http://localhost:80", url( host( L"localhost", L"80" ) ) );
     URL_PARSE_HOSTPART( L"http://localhost:8080", url( host( L"localhost", L"8080" ) ) );
 }
 #define URL_PARSE_FILESPEC( str, s_ ) \
-    FSL_CHECK( boost::spirit::parse( str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK( fostlib::parse( str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( s, ascii_printable_string( s_ ) )
 FSL_TEST_FUNCTION( url_parser_filespec ) {
     url_filespec_parser url_filespec_p;
@@ -173,6 +177,31 @@ FSL_TEST_FUNCTION( parse ) {
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/echo/*Afsk1YSP"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data?__="));
+    FSL_CHECK_NOTHROW(url("http://l.yimg.com/a/combo?"
+        "arc/yui/reset_2.6.7.css&"
+        "arc/yui/fonts_2.6.4.css&metro/uiplugins/generic_0.1.13.css&"
+        "metro/error/error_0.1.18.css&metro/fp/fp_zindex_0.0.34.css&"
+        "metro/fp/fp_0.1.101.css&metro/uiplugins/tablist_service_0.1.7.css&"
+        "metro/uiplugins/iframeshim_service_0.0.5.css&"
+        "metro/uiplugins/menu_service_0.1.4.css&"
+        "metro/masthead/masthead_0.2.101.css&"
+        "metro/navbar/navbar_0.1.119.css&"
+        "metro/navbar/navbar_pageoptions_0.0.44.css&"
+        "metro/sda/sda_0.1.37.css&"
+        "metro/tuc/tuc_outboxlite_common_0.0.24.css&"
+        "metro/tuc/tuc_outboxlite_embedded_0.0.12.css&"
+        "metro/pa/pa_0.1.196.css&"
+        "metro/pa/pa_detached_0.1.84.css&"
+        "metro/uiplugins/tooltip_service_1.0.5.css&"
+        "metro/uiplugins/tooltip_default_0.1.19.css&"
+        "metro/pa/tooltip_pa_dialog_1.0.12.css&"
+        "metro/uiplugins/sortable_service_0.1.9.css&"
+        "metro/pa/pa_add_0.1.55.css&"
+        "metro/uiplugins/tablist_news_0.0.16.css&"
+        "metro2/simplenews/simplenews_0.1.19.css&"
+        "metro/footer/footer_0.1.68.css&metro/footer/subfooter_0.0.11.css"));
+    FSL_CHECK_NOTHROW(url("http://www.google.com/coop/cse/brand?"
+        "form=cse-search-box%26%2312296%3B=th"));
 }
 
 #define TEST_COERCION(u) \

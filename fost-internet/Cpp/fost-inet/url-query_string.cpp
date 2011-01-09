@@ -39,7 +39,7 @@ namespace {
 
 
     const fostlib::utf8_string g_query_string_allowed(
-        ".,:/\\_-*~"
+        ".,:/\\_-*~="
         "0123456789"
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

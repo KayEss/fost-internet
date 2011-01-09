@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2010, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -156,8 +156,22 @@ std::auto_ptr< mime::iterator_implementation > fostlib::empty_mime::iterator() c
 */
 
 
-fostlib::mime_envelope::mime_envelope( const mime_headers &headers )
-: mime( headers, "multipart/mixed" ) {
+fostlib::mime_envelope::mime_envelope( const mime_headers &headers,
+        const string &type )
+: mime( headers, type ) {
+}
+
+
+const fostlib::string &fostlib::mime_envelope::boundary() {
+    if ( m_boundary.empty() ) {
+        do {
+            m_boundary = guid();
+        } while ( !boundary_is_ok(m_boundary) );
+        mime_headers::content with_boundary(headers()["Content-Type"]);
+        with_boundary.subvalue("boundary", boundary());
+        headers().set("Content-Type", with_boundary);
+    }
+    return m_boundary;
 }
 
 
@@ -169,29 +183,78 @@ bool fostlib::mime_envelope::boundary_is_ok( const string &boundary ) const {
 }
 
 std::ostream &fostlib::mime_envelope::print_on( std::ostream &o ) const {
-    string boundary;
-    do {
-        boundary = guid();
-    } while ( !boundary_is_ok( boundary ) );
-
-    mime_headers local_headers = headers();
-    mime_headers::content with_boundary(headers()["Content-Type"]);
-    with_boundary.subvalue("boundary", boundary);
-    local_headers.set("Content-Type", with_boundary);
-
-    o << local_headers;
-    for ( std::list< boost::shared_ptr< mime > >::const_iterator part( items().begin() ) ;part != items().end(); ++part ) {
-        o << "\r\n--" << coerce< utf8_string >( boundary ).underlying() << "\r\n";
-        (*part)->print_on( o );
+    o << headers() << "\r\n";
+    for ( const_iterator c(begin()); c != end(); ++c ) {
+        const char *first = reinterpret_cast<const char *>((*c).first);
+        const char *second = reinterpret_cast<const char *>((*c).second);
+        o.write(first, second - first);
     }
-    return o << "\r\n--" << coerce< utf8_string >( boundary ).underlying() << "--\r\n";
+    return o;
 }
 
 
-namespace {
-}
-std::auto_ptr< mime::iterator_implementation > fostlib::mime_envelope::iterator() const {
-    throw exceptions::not_implemented("fostlib::mime_envelope::iterator() const");
+struct fostlib::mime_envelope::mime_envelope_iterator :
+        public mime::iterator_implementation {
+    enum { e_start, e_attachments, e_final } stage;
+
+    mime_envelope::items_type::const_iterator
+        current_attachment, end_attachment;
+
+    boost::scoped_ptr< mime::const_iterator > current, end;
+
+    utf8_string internal_buffer, boundary;
+
+    mime_envelope_iterator(const string &boundary,
+        mime_envelope::items_type::const_iterator b,
+        mime_envelope::items_type::const_iterator e)
+    : stage(e_start), current_attachment(b), end_attachment(e),
+            boundary(fostlib::coerce<utf8_string>(boundary)) {
+    }
+
+    const_memory_block operator () () {
+        static utf8_string dashes("--"), crlf("\r\n");
+        switch ( stage ) {
+            case e_start:
+                internal_buffer = dashes + boundary + crlf;
+                stage = e_attachments;
+                break;
+            case e_attachments:
+                if ( !current.get() ) {
+                    std::stringstream ss;
+                    ss << (*current_attachment)->headers();
+                    internal_buffer = utf8_string(ss.str()) + crlf;
+                    current.reset(new mime::const_iterator(
+                        (*current_attachment)->begin()));
+                    end.reset(new mime::const_iterator(
+                        (*current_attachment)->end()));
+                } else if ( *current != *end ) {
+                    const_memory_block r = **current;
+                    ++(*current);
+                    return r;
+                } else {
+                    current_attachment++;
+                    current.reset(NULL); end.reset(NULL);
+                    internal_buffer = crlf + dashes + boundary;
+                    if ( current_attachment == end_attachment ) {
+                        internal_buffer += dashes + crlf;
+                        stage = e_final;
+                    } else
+                        internal_buffer += crlf;
+                }
+                break;
+            case e_final:
+                return const_memory_block();
+            default:
+                throw exceptions::not_implemented("Impossible MIME envelope write state");
+        }
+        const std::string &u(internal_buffer.underlying());
+        return const_memory_block(u.c_str(), u.c_str() + u.length());
+    }
+};
+std::auto_ptr< mime::iterator_implementation >
+        fostlib::mime_envelope::iterator() const {
+    return std::auto_ptr< mime::iterator_implementation >(
+        new mime_envelope_iterator(m_boundary, items().begin(), items().end()));
 }
 
 
