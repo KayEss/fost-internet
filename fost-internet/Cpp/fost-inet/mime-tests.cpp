@@ -130,11 +130,13 @@ FSL_TEST_FUNCTION( mime_attachment ) {
     std::stringstream ss;
     ss << envelope;
     mime::mime_headers headers;
+
     FSL_CHECK_NOTHROW(headers.parse(
         coerce< string >( partition( utf8_string( ss.str() ), "\r\n\r\n" ).first )));
     try {
         FSL_CHECK_EQ( utf8_string( ss.str() ), coerce< utf8_string>( L"\
-Content-Type: multipart/mixed; boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\
+Content-Type: multipart/mixed;\r\n\
+ boundary=\"" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\"\r\n\
 \r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"\r\n\
 Content-Length: 18\r\n\
@@ -151,3 +153,52 @@ Test text document\r\n\
     }
 }
 
+FSL_TEST_FUNCTION( wrap_long_mime_header ) {
+    text_body mail( L"A short message\n\nanother line\n" );
+    mail.headers().set(L"Subject", L"Test email");
+    mail.headers().set(L"Dummy", L"This is a long header for email which should be 'folded' according to RFC5322. The folding must happen right before whitespaces around the 78th position.");
+
+    std::stringstream ss;
+    ss << mail.headers();
+
+    FSL_CHECK_EQ(ss.str(), "Content-Length: 30\r\n"
+                           "Content-Transfer-Encoding: 8bit\r\n"
+                           "Content-Type: text/plain; charset=\"utf-8\"\r\n"
+                           "Dummy: This is a long header for email which should be 'folded' according to\r\n"
+                           " RFC5322. The folding must happen right before whitespaces around the 78th\r\n"
+                           " position.\r\n"
+                           "Subject: Test email\r\n"
+            );
+}
+
+FSL_TEST_FUNCTION( wrap_78_char_long_mime_header ) {
+    text_body mail( L"A short message\n\nanother line\n" );
+    mail.headers().set(L"Subject", L"Test email");
+    mail.headers().set(L"Dummy", L"This is a 78-char long header for eachi that should not be folded. :)");
+
+    std::stringstream ss;
+    ss << mail.headers();
+
+    FSL_CHECK_EQ(ss.str(), "Content-Length: 30\r\n"
+                           "Content-Transfer-Encoding: 8bit\r\n"
+                           "Content-Type: text/plain; charset=\"utf-8\"\r\n"
+                           "Dummy: This is a 78-char long header for eachi that should not be folded. :)\r\n"
+                           "Subject: Test email\r\n"
+            );
+}
+
+FSL_TEST_FUNCTION( wrap_empty_mime_header ) {
+    text_body mail( L"A short message\n\nanother line\n" );
+    mail.headers().set(L"Subject", L"Test email");
+    mail.headers().set(L"Dummy", L"");
+
+    std::stringstream ss;
+    ss << mail.headers();
+
+    FSL_CHECK_EQ(ss.str(), "Content-Length: 30\r\n"
+                           "Content-Transfer-Encoding: 8bit\r\n"
+                           "Content-Type: text/plain; charset=\"utf-8\"\r\n"
+                           "Dummy: \r\n"
+                           "Subject: Test email\r\n"
+            );
+}

@@ -88,7 +88,6 @@ fostlib::mime::iterator_implementation::~iterator_implementation() {
     fostlib::mime::mime_headers
 */
 
-
 std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( const string &name, const string &value ) {
     if ( name == L"Content-Disposition" || name == L"content-disposition" || name == L"Content-Type" ) {
         std::map< string, string > args;
