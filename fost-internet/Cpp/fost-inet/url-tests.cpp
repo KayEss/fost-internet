@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -70,6 +70,8 @@ FSL_TEST_FUNCTION( query_string ) {
 FSL_TEST_FUNCTION( url ) {
     FSL_CHECK_EQ( url().port(), 80 );
     FSL_CHECK_EQ( url().as_string(), ascii_printable_string( "http://localhost/" ) );
+    FSL_CHECK_EQ( url(url("https://localhost/"), "/path").as_string(),
+        ascii_printable_string("https://localhost/path") );
 }
 
 

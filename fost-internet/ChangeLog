@@ -1,3 +1,6 @@
+2011-02-11  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed a bug that was causing the protocol to be lost when a relative URL was being generated.
+
 2010-12-10  Kirit Saelensminde  <kirit@felspar.com>
  The URL parser now supports (at least some) custom query string formats. Also added in limited %XX decoding in the query string values.
 
