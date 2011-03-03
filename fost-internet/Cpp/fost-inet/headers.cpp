@@ -131,21 +131,23 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
 }
 
 // NOTE: probably better if implemented as an ostream-derived class.
-static const int c_rfc_line_limit = 78 /* characters */;
-static fostlib::string fold( const fostlib::string &s, size_t line_limit){
-    std::stringstream ss;
-    fostlib::string left_string = s;
+namespace {
+    const int c_rfc_line_limit = 78 /* characters */;
+    std::string fold( const std::string &s, size_t line_limit){
+        std::stringstream ss;
+        std::string left_string = s;
 
-    int exceed_len;
-    while((exceed_len = left_string.length() - line_limit) > 0){
-        size_t cut_point = left_string.find_last_of(" \t", left_string.length() - exceed_len);
-        if (cut_point == fostlib::string::npos)
-            break;
-        ss << left_string.substr(0, cut_point ) << "\r\n";
-        left_string = left_string.substr(cut_point);
+        int exceed_len;
+        while ((exceed_len = left_string.length() - line_limit) > 0) {
+            size_t cut_point = left_string.find_last_of(" \t", left_string.length() - exceed_len);
+            if (cut_point == std::string::npos)
+                break;
+            ss << left_string.substr(0, cut_point ) << "\r\n";
+            left_string = left_string.substr(cut_point);
+        }
+        ss << left_string;
+        return ss.str();
     }
-    ss << left_string;
-    return ss.str();
 }
 
 std::ostream &fostlib::operator << (
@@ -153,10 +155,9 @@ std::ostream &fostlib::operator << (
 ) {
     for ( headers_base::const_iterator i( headers.begin() ); i != headers.end(); ++i ) {
         std::stringstream ss;
-        ss << i->first << ": " << i->second << "\r\n";
-        fostlib::string s = fold(ss.str(), c_rfc_line_limit);
-
-        o << coerce< utf8_string >(s).underlying();
+        ss << coerce<ascii_string>(i->first).underlying()
+            << ": " << i->second << "\r\n";
+        o << fold(ss.str(), c_rfc_line_limit);
     }
     return o;
 }
@@ -206,7 +207,7 @@ headers_base::content::const_iterator fostlib::headers_base::content::end() cons
 }
 
 std::ostream &fostlib::operator << (
-    std::ostream &o, const headers_base::content &value  
+    std::ostream &o, const headers_base::content &value
 ) {
     o << coerce< utf8_string >( value.value() ).underlying();
         for (
