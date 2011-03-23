@@ -25,19 +25,45 @@ fostlib::headers_base::~headers_base() {
 }
 
 
+typedef std::pair< string, fostlib::nullable<string> > string_pair;
+static const wchar_t *c_mime_newline = L"\r\n";
+
+static bool is_whitespace( wchar_t c ){
+    return c == L' ' || c == L'\t';
+}
+
+static string_pair precise_partition( const fostlib::nullable<string> &s, const fostlib::string &separator ) {
+    if (s.isnull())
+        return string_pair();
+    size_t cut_position = s.value().find( separator );
+
+    if (cut_position == fostlib::string::npos)
+        return string_pair( s.value(), fostlib::nullable<string>() );
+    fostlib::string second = s.value().substr( cut_position + separator.length() );
+    return string_pair( s.value().substr(0, cut_position), second.empty()? fostlib::nullable<string>() : second );
+}
+
+static string_pair mime_partition( const fostlib::nullable<string> &headers ) {
+    if (headers.isnull())
+        return string_pair();
+    string_pair part = precise_partition( headers, c_mime_newline );
+    while(!part.second.isnull() && is_whitespace( part.second.value().at(0) )){
+        string_pair new_part = precise_partition( part.second.value(), c_mime_newline );
+        part.first += new_part.first;
+        part.second = new_part.second;
+    }
+    return part;
+}
+
 void fostlib::headers_base::parse( const string &headers ) {
     // This implementation ignores character encodings
     // - assumes UTF-8 which won't work for mail headers
     for (
-        std::pair< string, fostlib::nullable< string > > lines(
-            partition( headers, L"\r\n" )
-        );
+        string_pair lines( mime_partition( headers ));
         !lines.first.empty();
-        lines = partition( lines.second, L"\r\n" )
+        lines = mime_partition( lines.second )
     ) {
-        const std::pair< string, fostlib::nullable< string > > line(
-            partition( lines.first, L":" )
-        );
+        const string_pair line( partition( lines.first, L":" ));
         const std::pair< string, content > parsed(
             value( line.first, line.second.value( fostlib::string() ) )
         );
@@ -104,12 +130,35 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
     return m_headers.end();
 }
 
+// NOTE: probably better if implemented as an ostream-derived class.
+namespace {
+    const int c_rfc_line_limit = 78 /* characters */;
+    std::string fold( const std::string &s, size_t line_limit){
+        std::stringstream ss;
+        std::string left_string = s;
+
+        int exceed_len;
+        while ((exceed_len = left_string.length() - line_limit) > 0) {
+            size_t cut_point = left_string.find_last_of(" \t", left_string.length() - exceed_len);
+            if (cut_point == std::string::npos)
+                break;
+            ss << left_string.substr(0, cut_point ) << "\r\n";
+            left_string = left_string.substr(cut_point);
+        }
+        ss << left_string;
+        return ss.str();
+    }
+}
+
 std::ostream &fostlib::operator << (
     std::ostream &o, const fostlib::headers_base &headers
 ) {
-    for ( headers_base::const_iterator i( headers.begin() ); i != headers.end(); ++i )
-        o << coerce< utf8_string >( i->first ).underlying() << ": "
-            << i->second << "\r\n";
+    for ( headers_base::const_iterator i( headers.begin() ); i != headers.end(); ++i ) {
+        std::stringstream ss;
+        ss << coerce<ascii_string>(i->first).underlying()
+            << ": " << i->second << "\r\n";
+        o << fold(ss.str(), c_rfc_line_limit);
+    }
     return o;
 }
 
@@ -161,11 +210,11 @@ std::ostream &fostlib::operator << (
     std::ostream &o, const headers_base::content &value
 ) {
     o << coerce< utf8_string >( value.value() ).underlying();
-    for (
-        headers_base::content::const_iterator i( value.begin() );
-        i != value.end(); ++i
-    )
-        o << "; " << coerce< utf8_string >( i->first ).underlying() << "="
-            "\"" << coerce< utf8_string >( i->second ).underlying() << "\"";
-    return o;
+        for (
+            headers_base::content::const_iterator i( value.begin() );
+            i != value.end(); ++i
+        )
+            o << "; " << coerce< utf8_string >( i->first ).underlying() << "="
+                "\"" << coerce< utf8_string >( i->second ).underlying() << "\"";
+        return o;
 }

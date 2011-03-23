@@ -62,17 +62,25 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
         return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
 }
 email_address fostlib::coercer< email_address, string >::coerce( const string &s ) {
-    string name, address;
+    string name, address1, address2;
     if ( !fostlib::parse(s.c_str(),
-        (+boost::spirit::chset< wchar_t >( L"a-zA-Z0-9_@\\.\\+-" ))[
-            phoenix::var( address ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-        ]
+        ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_\\.\\+ -"))[
+            phoenix::var( name ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+        ] >> boost::spirit::chlit< wchar_t >( '<' )
+            >> ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_@\\.\\+-" ))[
+                phoenix::var( address1 ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+            ])
+            >> boost::spirit::chlit< wchar_t >( '>' ))
+        | ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_@\\.\\+-" ))[
+            phoenix::var( address2 ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+        ])
     ).full )
         throw exceptions::not_implemented("fostlib::coercer< email_address, string >::coerce( const string &s ) -- could not parse", s);
-    if ( name.empty() )
-        return rfc822_address( fostlib::coerce< ascii_printable_string >( address ) );
+    if ( address1.empty() )
+        return rfc822_address( fostlib::coerce< ascii_printable_string >( address2 ) );
     else
-        return email_address( rfc822_address( fostlib::coerce< ascii_printable_string >( address ) ), name );
+        return email_address( rfc822_address( fostlib::coerce< ascii_printable_string >( address1 ) ),
+            trim(name) );
 }
 
 

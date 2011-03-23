@@ -50,7 +50,6 @@ FSL_TEST_FUNCTION( from_string_plain ) {
     FSL_CHECK_EXCEPTION(PARSE_PLAIN("<address-whatever@example.com>"), exceptions::not_implemented&);
 }
 
-
 FSL_TEST_FUNCTION( smtp_send ) {
     smtp_client server( host(c_smpt_host.value()) );
 

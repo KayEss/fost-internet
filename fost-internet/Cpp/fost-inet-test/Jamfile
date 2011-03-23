@@ -1,11 +1,6 @@
 
-fost-smoke-test fost-inet-test-smoke
+fost-integration-test fost-inet-test
+    : Cpp/fost-inet-test
     :
         ../fost-inet/
-    :
-        connection.cpp
-        host.cpp
-        pop3.cpp
-        smtp.cpp
-        user_agent.cpp
     ;
