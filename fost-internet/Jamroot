@@ -11,6 +11,7 @@ alias docs :
 explicit docs ;
 
 alias examples :
+        ../fost-base//examples
         Examples/host
         Examples/fget
         Examples/webserver-simple
@@ -19,6 +20,7 @@ alias examples :
 explicit examples ;
 
 alias fost :
+        ../fost-base//fost
         Cpp/fost-fsink
         Cpp/fost-inet
         Cpp/fost-netlog
@@ -31,8 +33,6 @@ alias tests :
 explicit tests ;
 
 alias all :
-        ../fost-base//examples
-        ../fost-base//fost
         docs
         examples
         fost
