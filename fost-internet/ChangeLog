@@ -1,5 +1,6 @@
 2011-04-10  Kirit Saelensminde  <kirit@felspar.com>
  Improved the time out handling for large downloads where the download size is known in advance.
+ Added in a connect timeout which defaults to ten seconds.
 
 2011-03-02  Kirit Saelensminde  <kirit@felspar.com>
  Implemented a more full version of the email address parser so it can handle names as well as well as email addresses.

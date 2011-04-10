@@ -42,7 +42,7 @@ FSL_MAIN(
             throw exceptions::null(
                 "With FOST authentication both -key and -secret must be passed in"
             );
-        fost_authentication(browser, 
+        fost_authentication(browser,
                 args.commandSwitch("key").value(),
                 args.commandSwitch("secret").value(),
                 tosign);

@@ -19,12 +19,15 @@ FSL_TEST_SUITE( connection );
 
 
 FSL_TEST_FUNCTION( connect_failure ) {
+    setting< int64_t > c_connect_timeout(
+        "fost-internet/Cpp/fost-inet-test/connection.cpp",
+        "Network settings", "Connect time out", 1);
     FSL_CHECK_EXCEPTION(
         network_connection cnx(host("localhost"), 64545),
         exceptions::connect_failure&);
-/*    FSL_CHECK_EXCEPTION(
-        network_connection cnx(host("1.1.1.1"), 64545),
-        exceptions::connect_failure&);*/
+    FSL_CHECK_EXCEPTION(
+        network_connection cnx(host("10.45.234.124"), 64545),
+        exceptions::connect_failure&);
 }
 
 
@@ -33,7 +36,7 @@ FSL_TEST_FUNCTION( read_timeouts ) {
     host localhost;
     uint16_t port = 64544u;
     // Set a very short time out whilst running the test
-    setting< int64_t > c_read_timeout(
+    const setting< int64_t > c_read_timeout(
         "fost-internet/Cpp/fost-inet-test/connection.cpp",
         "Network settings", "Read time out", 1);
 

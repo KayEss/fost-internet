@@ -23,16 +23,19 @@ using namespace fostlib;
 
 
 namespace {
-    setting< int64_t > c_read_timeout(
+    const setting< int64_t > c_connect_timeout(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Connect time out", 10, true);
+    const setting< int64_t > c_read_timeout(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Read time out", 30, true);
-    setting< int64_t > c_large_read_chunk_size(
+    const setting< int64_t > c_large_read_chunk_size(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Large read chunk size", 1024, true);
-    setting< json > c_socks_version(
+    const setting< json > c_socks_version(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Socks version", json(), true);
-    setting< string > c_socks_host(
+    const setting< string > c_socks_host(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Socks host", L"localhost:8888", true);
 }
@@ -89,6 +92,9 @@ namespace {
         typedef nullable< std::pair< boost::system::error_code, std::size_t > >
             read_error;
         typedef boost::function<
+            void (boost::system::error_code)
+        > connect_async_function_type;
+        typedef boost::function<
             void (boost::system::error_code, std::size_t)
         > read_async_function_type;
 
@@ -113,6 +119,13 @@ namespace {
             }
             n = e;
         }
+        static void connect_done(
+            boost::asio::deadline_timer &timer, read_error &n,
+            boost::system::error_code e
+        ) {
+            timer.cancel();
+            n = std::make_pair(e, 0);
+        }
         static void read_done(
             boost::asio::deadline_timer &timer, read_error &n,
             boost::system::error_code e, std::size_t s
@@ -122,15 +135,21 @@ namespace {
         }
 
         timeout_wrapper(
-            boost::asio::ip::tcp::socket &sock, boost::system::error_code &e
+            boost::asio::ip::tcp::socket &sock, boost::system::error_code &e,
+            const setting< int64_t > &timeout = c_read_timeout
         ) : sock(sock), error(e), timer(sock.io_service()), received(0) {
             timer.expires_from_now(boost::posix_time::seconds(
-                c_read_timeout.value()));
+                timeout.value()));
             timer.async_wait(boost::bind(timedout,
                 boost::ref(sock), boost::ref(timeout_result),
                 boost::lambda::_1));
         }
 
+        connect_async_function_type connect_async_function() {
+            return boost::bind(connect_done,
+                boost::ref(timer), boost::ref(read_result),
+                boost::lambda::_1);
+        }
         read_async_function_type read_async_function() {
             return boost::bind(read_done,
                 boost::ref(timer), boost::ref(read_result),
@@ -224,7 +243,13 @@ namespace {
             boost::asio::error::host_not_found;
         while ( connect_error && endpoint != end ) {
             socket.close();
-            socket.connect(*endpoint++, connect_error);
+            timeout_wrapper timeout(socket, connect_error, c_connect_timeout);
+            socket.async_connect(*endpoint++, timeout.connect_async_function());
+            try {
+                timeout.complete();
+            } catch ( exceptions::read_timeout &e ) {
+                connect_error = boost::asio::error::timed_out;
+            }
         }
         if ( connect_error )
             throw fostlib::exceptions::connect_failure(connect_error);
