@@ -35,3 +35,16 @@ FSL_TEST_FUNCTION( mime_request ) {
     FSL_CHECK_NOTHROW(ua(r));
 }
 
+
+FSL_TEST_FUNCTION( connect_error ) {
+    http::user_agent ua;
+    {
+        http::user_agent::request r("GET",url("http://localhost:64546/"));
+        FSL_CHECK_EXCEPTION(ua(r), exceptions::connect_failure&);
+    }
+/*    {
+        http::user_agent::request r("GET",url("http://10.45.234.124:64546/"));
+        FSL_CHECK_EXCEPTION(ua(r), exceptions::connect_failure&);
+    }*/
+}
+

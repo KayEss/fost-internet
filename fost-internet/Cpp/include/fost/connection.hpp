@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -14,6 +14,8 @@
 #include <fost/core>
 #include <fost/pointers>
 #include <fost/host.hpp>
+
+#include <fost/exception/unexpected_eof.hpp>
 
 
 namespace fostlib {
