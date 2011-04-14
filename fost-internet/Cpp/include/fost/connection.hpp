@@ -87,11 +87,22 @@ namespace fostlib {
                 const wchar_t * const message() const throw ();
         };
 
-        /// Thrown for errors during connection to a socket
+        /// Thrown for errors during connection to a socket or reading from a socket
         class FOST_INET_DECLSPEC read_timeout : public socket_error {
             public:
                 /// Construct a connect failure exception
                 read_timeout() throw();
+
+            protected:
+                /// The error message title
+                const wchar_t * const message() const throw ();
+        };
+
+        /// Thrown for general errors when reading from a socket
+        class FOST_INET_DECLSPEC read_error : public socket_error {
+            public:
+                /// Construct a connect failure exception
+                read_error() throw();
 
             protected:
                 /// The error message title

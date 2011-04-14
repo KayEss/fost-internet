@@ -1,3 +1,6 @@
+2011-04-13  Kirit Saelensminde  <kirit@felspar.com>
+ Implemented a proper exception type for a particular networking error..
+
 2011-04-10  Kirit Saelensminde  <kirit@felspar.com>
  Improved the time out handling for large downloads where the download size is known in advance.
  Added in a connect timeout which defaults to ten seconds.

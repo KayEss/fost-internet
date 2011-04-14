@@ -371,9 +371,7 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
     boost::system::error_code error;
     read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
     if ( error != boost::asio::error::eof )
-        throw fostlib::exceptions::not_implemented(
-            "fostlib::network_connection::operator >> ( boost::asio::streambuf &b )",
-            "Whilst reading into an Asio streambuf");
+        fostlib::exceptions::read_error(error);
 }
 
 
@@ -423,4 +421,19 @@ fostlib::exceptions::read_timeout::read_timeout() throw () {
 fostlib::wliteral const fostlib::exceptions::read_timeout::message()
         const throw () {
     return L"Read time out";
+}
+
+
+/*
+    fostlib::exceptions::read_error
+*/
+
+
+fostlib::exceptions::read_error::read_error() throw () {
+}
+
+
+fostlib::wliteral const fostlib::exceptions::read_error::message()
+        const throw () {
+    return L"Read error";
 }
