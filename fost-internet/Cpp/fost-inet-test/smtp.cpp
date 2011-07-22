@@ -13,13 +13,6 @@
 using namespace fostlib;
 
 
-const setting< string > c_smtp_host(
-    "fost-internet/Cpp/fost-inet-tests/smtp.cpp",
-    "fost-internet tests", "SMTP server",
-    "localhost", true
-);
-
-
 FSL_TEST_SUITE( smtp );
 
 

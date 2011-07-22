@@ -13,15 +13,6 @@ using namespace fostlib::pop3;
 using namespace fostlib;
 
 
-const setting< string > c_pop3_test_account(
-    "fost-inet/Cpp/fost-inet-test/pop3.cpp",
-    "POP3 client test",
-    "Username",
-    "pop3test@felspar.net",
-    true
-);
-
-
 FSL_TEST_SUITE( pop3 );
 
 
