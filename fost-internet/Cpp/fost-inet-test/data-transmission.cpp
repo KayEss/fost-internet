@@ -65,8 +65,20 @@ namespace {
         network_connection cnx(sock);
 
         std::vector<unsigned char> data(0x8000);
-        for ( std::size_t block(0); block < 80; ++block)
-            FSL_CHECK_NOTHROW(cnx >> data);
+        for ( std::size_t block(0); block < 800; ++block )
+            try {
+                FSL_CHECK_NOTHROW(cnx >> data);
+                for ( std::size_t i(0); i != data.size(); ++i )
+                    try {
+                        FSL_CHECK_EQ(data[i], "0123456789"[block %10]);
+                    } catch ( exceptions::exception &e ) {
+                        insert(e.data(), "byte-number", i);
+                        throw;
+                    }
+            } catch ( exceptions::exception &e ) {
+                insert(e.data(), "block-number", block);
+                throw;
+            }
         FSL_CHECK_NOTHROW(cnx << "ack\r\n");
         return true;
     }
@@ -77,11 +89,17 @@ FSL_TEST_FUNCTION( large_send_ack_at_end ) {
     future<bool> ok = server.run<bool>(ack_at_end);
     sleep(1); // Give enough time for thread to start
     network_connection cnx(host("localhost"), 6217);
-    std::string data(0x8000, 'x');
-    for ( std::size_t block(0); block < 80; ++block )
-        FSL_CHECK_NOTHROW(cnx << data);
+    try {
+        for ( std::size_t block(0); block < 800; ++block ) {
+            std::string data(0x8000, "0123456789"[block %10]);
+            FSL_CHECK_NOTHROW(cnx << data);
+        }
+    } catch ( exceptions::exception &e ) {
+        insert(e.data(), "exception-in-remote-thread", coerce<json>(ok.exception()));
+        throw;
+    }
+    FSL_CHECK(ok());
     std::string ack;
     FSL_CHECK_NOTHROW(cnx >> ack);
     FSL_CHECK_EQ(ack, "ack");
-    FSL_CHECK(ok());
 }
