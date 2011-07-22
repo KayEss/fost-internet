@@ -39,7 +39,9 @@ namespace {
 FSL_TEST_FUNCTION( large_send_embed_acks ) {
     worker server;
     future<bool> ok = server.run<bool>(embed_acks);
-    sleep(1); // Give enough time for thread to start
+    // Give enough time for thread to start
+    boost::this_thread::sleep(boost::posix_time::milliseconds(250));
+
     network_connection cnx(host("localhost"), 6218);
     std::string data(0x8000, 'x');
     for ( std::size_t block(0); block < 8; ++block ) {
@@ -87,7 +89,9 @@ namespace {
 FSL_TEST_FUNCTION( large_send_ack_at_end ) {
     worker server;
     future<bool> ok = server.run<bool>(ack_at_end);
-    sleep(1); // Give enough time for thread to start
+    // Give enough time for thread to start
+    boost::this_thread::sleep(boost::posix_time::milliseconds(250));
+
     network_connection cnx(host("localhost"), 6217);
     try {
         for ( std::size_t block(0); block < 800; ++block ) {
