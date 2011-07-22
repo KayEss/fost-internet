@@ -77,7 +77,7 @@ namespace {
             if ( ssl )
                 return boost::asio::write(ssl->ssl_sock, b);
             else
-                return sock.send(b.data());
+                return boost::asio::write(sock, b);
         } catch ( boost::system::system_error &e ) {
             throw fostlib::exceptions::not_implemented(
                 "send(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, "

@@ -1,5 +1,8 @@
+2011-07-22  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed a bug that was causing occasional data packets to be lost when sending large blocks of data.
+
 2011-04-13  Kirit Saelensminde  <kirit@felspar.com>
- Implemented a proper exception type for a particular networking error..
+ Implemented a proper exception type for a particular networking error.
 
 2011-04-10  Kirit Saelensminde  <kirit@felspar.com>
  Improved the time out handling for large downloads where the download size is known in advance.
