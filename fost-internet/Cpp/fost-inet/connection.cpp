@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -13,24 +13,29 @@
 
 
 #include "fost-inet.hpp"
+#include <fost/insert>
 #include <fost/connection.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/lambda/bind.hpp>
-
-#include <fost/exception/unexpected_eof.hpp>
 
 
 using namespace fostlib;
 
 
 namespace {
-    setting< int64_t > c_read_timeout(
+    const setting< int64_t > c_connect_timeout(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Connect time out", 10, true);
+    const setting< int64_t > c_read_timeout(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Read time out", 30, true);
-    setting< json > c_socks_version(
+    const setting< int64_t > c_large_read_chunk_size(
+        "fost-internet/Cpp/fost-inet/connection.cpp",
+        "Network settings", "Large read chunk size", 1024, true);
+    const setting< json > c_socks_version(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Socks version", json(), true);
-    setting< string > c_socks_host(
+    const setting< string > c_socks_host(
         "fost-internet/Cpp/fost-inet/connection.cpp",
         "Network settings", "Socks host", L"localhost:8888", true);
 }
@@ -72,7 +77,7 @@ namespace {
             if ( ssl )
                 return boost::asio::write(ssl->ssl_sock, b);
             else
-                return sock.send(b.data());
+                return boost::asio::write(sock, b);
         } catch ( boost::system::system_error &e ) {
             throw fostlib::exceptions::not_implemented(
                 "send(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, "
@@ -86,6 +91,9 @@ namespace {
         typedef nullable< boost::system::error_code > timeout_error;
         typedef nullable< std::pair< boost::system::error_code, std::size_t > >
             read_error;
+        typedef boost::function<
+            void (boost::system::error_code)
+        > connect_async_function_type;
         typedef boost::function<
             void (boost::system::error_code, std::size_t)
         > read_async_function_type;
@@ -111,6 +119,13 @@ namespace {
             }
             n = e;
         }
+        static void connect_done(
+            boost::asio::deadline_timer &timer, read_error &n,
+            boost::system::error_code e
+        ) {
+            timer.cancel();
+            n = std::make_pair(e, 0);
+        }
         static void read_done(
             boost::asio::deadline_timer &timer, read_error &n,
             boost::system::error_code e, std::size_t s
@@ -120,15 +135,21 @@ namespace {
         }
 
         timeout_wrapper(
-            boost::asio::ip::tcp::socket &sock, boost::system::error_code &e
+            boost::asio::ip::tcp::socket &sock, boost::system::error_code &e,
+            const setting< int64_t > &timeout = c_read_timeout
         ) : sock(sock), error(e), timer(sock.io_service()), received(0) {
             timer.expires_from_now(boost::posix_time::seconds(
-                c_read_timeout.value()));
+                timeout.value()));
             timer.async_wait(boost::bind(timedout,
                 boost::ref(sock), boost::ref(timeout_result),
                 boost::lambda::_1));
         }
 
+        connect_async_function_type connect_async_function() {
+            return boost::bind(connect_done,
+                boost::ref(timer), boost::ref(read_result),
+                boost::lambda::_1);
+        }
         read_async_function_type read_async_function() {
             return boost::bind(read_done,
                 boost::ref(timer), boost::ref(read_result),
@@ -222,7 +243,13 @@ namespace {
             boost::asio::error::host_not_found;
         while ( connect_error && endpoint != end ) {
             socket.close();
-            socket.connect(*endpoint++, connect_error);
+            timeout_wrapper timeout(socket, connect_error, c_connect_timeout);
+            socket.async_connect(*endpoint++, timeout.connect_async_function());
+            try {
+                timeout.complete();
+            } catch ( exceptions::read_timeout &e ) {
+                connect_error = boost::asio::error::timed_out;
+            }
         }
         if ( connect_error )
             throw fostlib::exceptions::connect_failure(connect_error);
@@ -317,24 +344,21 @@ network_connection &fostlib::network_connection::operator >> ( std::string &s ) 
         m_input_buffer.sbumpc(); m_input_buffer.sbumpc();
     } else
         throw fostlib::exceptions::unexpected_eof(
-            "Could not find a \\r\\n sequence before network connection ended"
-        );
+            "Could not find a \\r\\n sequence before network connection ended");
     return *this;
 }
 network_connection &fostlib::network_connection::operator >> (
-    std::vector< utf8 > &v
-) {
-    read(
-        *m_socket, m_ssl_data, m_input_buffer,
-        boost::asio::transfer_at_least(v.size() - m_input_buffer.size())
-    );
+        std::vector< utf8 > &v) {
+    const std::size_t chunk = coerce<std::size_t>(c_large_read_chunk_size.value());
+    while( v.size() - m_input_buffer.size()
+            && read(*m_socket, m_ssl_data, m_input_buffer,
+                boost::asio::transfer_at_least(
+                    std::min(v.size() - m_input_buffer.size(), chunk))) );
     if ( m_input_buffer.size() < v.size() ) {
         fostlib::exceptions::unexpected_eof exception(
-            "Could not read all of the requested bytes from the network connection"
-        );
-        exception.info()
-            << "Read " << m_input_buffer.size()
-            << " bytes out of " << v.size() << std::endl;
+            "Could not read all of the requested bytes from the network connection");
+        insert(exception.data(), "bytes read", coerce<int64_t>(m_input_buffer.size()));
+        insert(exception.data(), "bytes expected", coerce<int64_t>(v.size()));
         throw exception;
     }
     for ( std::size_t p = 0; p <  v.size(); ++p )
@@ -347,9 +371,7 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
     boost::system::error_code error;
     read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
     if ( error != boost::asio::error::eof )
-        throw fostlib::exceptions::not_implemented(
-            "fostlib::network_connection::operator >> ( boost::asio::streambuf &b )",
-            "Whilst reading into an Asio streambuf");
+        fostlib::exceptions::read_error(error);
 }
 
 
@@ -399,4 +421,19 @@ fostlib::exceptions::read_timeout::read_timeout() throw () {
 fostlib::wliteral const fostlib::exceptions::read_timeout::message()
         const throw () {
     return L"Read time out";
+}
+
+
+/*
+    fostlib::exceptions::read_error
+*/
+
+
+fostlib::exceptions::read_error::read_error() throw () {
+}
+
+
+fostlib::wliteral const fostlib::exceptions::read_error::message()
+        const throw () {
+    return L"Read error";
 }

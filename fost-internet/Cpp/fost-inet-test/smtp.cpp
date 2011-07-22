@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -11,15 +11,6 @@
 
 
 using namespace fostlib;
-
-
-namespace {
-    const setting< string > c_smpt_host(
-        "fost-internet/Cpp/fost-inet-tests/smtp.cpp",
-        "fost-internet tests", "SMTP server",
-        "localhost", true
-    );
-}
 
 
 FSL_TEST_SUITE( smtp );
@@ -51,7 +42,7 @@ FSL_TEST_FUNCTION( from_string_plain ) {
 }
 
 FSL_TEST_FUNCTION( smtp_send ) {
-    smtp_client server( host(c_smpt_host.value()) );
+    smtp_client server( host(c_smtp_host.value()) );
 
     text_body mail( L"This is just a simple test email\n\nIgnore/delete it\n" );
     mail.headers().set(L"Subject", L"Test email");

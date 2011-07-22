@@ -13,19 +13,6 @@ using namespace fostlib::pop3;
 using namespace fostlib;
 
 
-namespace {
-
-    const setting< string > c_pop3_test_account(
-        "fost-inet/Cpp/fost-inet-test/pop3.cpp",
-        "POP3 client test",
-        "Username",
-        "pop3test@felspar.net",
-        true
-    );
-
-}
-
-
 FSL_TEST_SUITE( pop3 );
 
 
@@ -47,7 +34,7 @@ FSL_TEST_FUNCTION( download_messages ) {
 
 
 FSL_TEST_FUNCTION( sending_tests ) {
-    host host(L"smtp.felspar.net");
+    host host(c_smtp_host.value());
 
     smtp_client server( host );
 
