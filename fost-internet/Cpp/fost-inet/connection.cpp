@@ -137,28 +137,28 @@ namespace {
         timeout_wrapper(
             boost::asio::ip::tcp::socket &sock, boost::system::error_code &e,
             const setting< int64_t > &timeout = c_read_timeout
-        ) : sock(sock), error(e), timer(sock.io_service()), received(0) {
+        ) : sock(sock), error(e), timer(sock.get_io_service()), received(0) {
             timer.expires_from_now(boost::posix_time::seconds(
                 timeout.value()));
-            timer.async_wait(boost::bind(timedout,
+            timer.async_wait(boost::lambda::bind(timedout,
                 boost::ref(sock), boost::ref(timeout_result),
                 boost::lambda::_1));
         }
 
         connect_async_function_type connect_async_function() {
-            return boost::bind(connect_done,
+            return boost::lambda::bind(connect_done,
                 boost::ref(timer), boost::ref(read_result),
                 boost::lambda::_1);
         }
         read_async_function_type read_async_function() {
-            return boost::bind(read_done,
+            return boost::lambda::bind(read_done,
                 boost::ref(timer), boost::ref(read_result),
                 boost::lambda::_1, boost::lambda::_2);
         }
 
         std::size_t complete() {
-            sock.io_service().reset();
-            sock.io_service().run();
+            sock.get_io_service().reset();
+            sock.get_io_service().run();
             if ( read_result.value().first &&
                     read_result.value().first != boost::asio::error::eof )
                 throw exceptions::read_timeout();

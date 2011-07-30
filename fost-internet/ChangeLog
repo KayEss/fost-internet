@@ -1,3 +1,6 @@
+2011-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ Made some changes to support Boost 1.46.0.
+
 2011-07-22  Kirit Saelensminde  <kirit@felspar.com>
  Fixed a bug that was causing occasional data packets to be lost when sending large blocks of data.
 

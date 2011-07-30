@@ -203,7 +203,7 @@ url::filepath_string fostlib::coercer<
     url::filepath_string, boost::filesystem::wpath
 >::coerce( const boost::filesystem::wpath &p ) {
     return fostlib::coerce< url::filepath_string >(
-        fostlib::coerce< string >(p.string())
+        fostlib::coerce< string >(p)
     );
 }
 
@@ -221,6 +221,10 @@ setting< string > fostlib::url::s_default_host(
 
 fostlib::url::url()
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
+}
+fostlib::url::url( const url& url, const char *path )
+: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
+    pathspec( ascii_printable_string(path) );
 }
 fostlib::url::url( const url& url, const filepath_string &path )
 : protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
