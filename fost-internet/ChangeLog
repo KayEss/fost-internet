@@ -2,6 +2,7 @@
  Connection errors now report the host and port they're trying to connect to.
  The pop3 tests now allow the server to be configured, and it is more aggresive in keeping the mailbox empty.
  The pop client includes some extra logging describing what it is doing.
+ Made a change to the TCP time out handling to support the version of gcc that Macs use.
 
 2011-07-30  Kirit Saelensminde  <kirit@felspar.com>
  Made some changes to support Boost 1.46.0.
