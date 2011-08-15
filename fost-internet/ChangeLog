@@ -1,6 +1,7 @@
 2011-08-15  Kirit Saelensminde  <kirit@felspar.com>
  Connection errors now report the host and port they're trying to connect to.
- The pop3 tests now allow the server to be configured.
+ The pop3 tests now allow the server to be configured, and it is more aggresive in keeping the mailbox empty.
+ The pop client includes some extra logging describing what it is doing.
 
 2011-07-30  Kirit Saelensminde  <kirit@felspar.com>
  Made some changes to support Boost 1.46.0.
