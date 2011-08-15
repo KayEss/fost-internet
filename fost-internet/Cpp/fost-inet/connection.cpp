@@ -252,7 +252,7 @@ namespace {
             }
         }
         if ( connect_error )
-            throw fostlib::exceptions::connect_failure(connect_error);
+            throw fostlib::exceptions::connect_failure(connect_error, host, port);
     }
 }
 
@@ -397,9 +397,11 @@ fostlib::exceptions::socket_error::socket_error(
 
 
 fostlib::exceptions::connect_failure::connect_failure(
-    boost::system::error_code error
+    boost::system::error_code error, const host &h, port_number p
 ) throw ()
 : socket_error(error) {
+    insert(data(), "host", h);
+    insert(data(), "port", p);
 }
 
 

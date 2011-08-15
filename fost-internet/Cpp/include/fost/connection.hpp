@@ -80,7 +80,8 @@ namespace fostlib {
         class FOST_INET_DECLSPEC connect_failure : public socket_error {
             public:
                 /// Construct a connect failure exception
-                connect_failure(boost::system::error_code) throw();
+                connect_failure(boost::system::error_code,
+                    const host &, port_number) throw();
 
             protected:
                 /// The error message title
