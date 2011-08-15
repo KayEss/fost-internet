@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -16,20 +16,23 @@ using namespace fostlib;
 FSL_TEST_SUITE( pop3 );
 
 
+namespace {
+    bool delete_mails(std::size_t &number, const text_body &) {
+        return ++number > 10;
+    }
+}
 FSL_TEST_FUNCTION( download_messages ) {
-    host host(L"imap.felspar.net");
+    host host(c_pop3_server.value());
+    std::size_t mail_count = 0;
 
     FSL_CHECK_NOTHROW(
-        iterate_mailbox(
-            host,
-            email_is_an_ndr,
+        iterate_mailbox(host,
+            boost::lambda::bind(delete_mails,
+                boost::ref(mail_count), boost::lambda::_1),
             c_pop3_test_account.value(),
             setting<string>::value(
                 L"POP3 client test",
-                L"Password"
-            )
-        )
-    );
+                L"Password")));
 }
 
 
