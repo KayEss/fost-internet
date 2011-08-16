@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -61,6 +61,8 @@ namespace fostlib {
         url();
         /// Construct a URL by parsing a string
         explicit url( const string & );
+        /// Construct a URL from a base and a character literal path
+        url( const url &base, const char *new_path );
         /// Construct a URL from a base and a new path
         url( const url &base, const filepath_string &new_path );
         /// Construct a URL from a base and a new path

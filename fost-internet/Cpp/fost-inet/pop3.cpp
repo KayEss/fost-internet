@@ -10,6 +10,8 @@
 #include <fost/exception/out_of_range.hpp>
 #include <fost/exception/unicode_encoding.hpp>
 
+#include <fost/log>
+
 
 using namespace fostlib;
 using namespace fostlib::pop3;
@@ -106,7 +108,7 @@ namespace {
                 );
             }
         } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << "Whilst waiting for +OK..." << std::endl;
+            e.info() << "Whilst waiting for +OK after " << command << std::endl;
             throw;
         }
     }
@@ -239,9 +241,9 @@ void fostlib::pop3::iterate_mailbox(
     const string &password
 ) {
     boost::scoped_ptr< pop3cnx > mailbox(
-        new pop3cnx(host, username, password)
-    );
+        new pop3cnx(host, username, password));
     const size_t messages = mailbox->message_count;
+    logging::info("Number of messages found", messages);
 
     // Loop from the end so we always process the latest bounce messages first
     for ( std::size_t i = messages; i; --i ) {
@@ -249,13 +251,13 @@ void fostlib::pop3::iterate_mailbox(
         if (message.get() && destroy_message(*message))
             mailbox->remove(i);
         if ( i % 20 == 0 ) {
+			logging::info("Resetting mailbox connection", i);
             mailbox.reset( new pop3cnx(host, username, password) );
             if ( mailbox->message_count < i )
                 throw fostlib::exceptions::out_of_range< size_t >(
                     "The number of messages on the server can't go down "
                         "below the ones we've processed!",
-                    i, messages, mailbox->message_count
-                );
+                    i, messages, mailbox->message_count);
         }
     }
 }
