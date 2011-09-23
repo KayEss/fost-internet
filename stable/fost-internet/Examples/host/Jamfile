@@ -1,0 +1,6 @@
+
+fost-exe host
+    :
+        ../../Cpp/fost-inet/
+        host-main.cpp
+    ;

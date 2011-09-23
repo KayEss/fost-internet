@@ -1,0 +1,36 @@
+using testing ;
+
+
+fost-exe fget
+    :
+        ../../Cpp/fost-inet/
+        fget.cpp
+    ;
+
+run fget
+    :
+        http://www.google.com/
+    :
+    :
+    :
+        fget-google
+    ;
+
+run fget
+    :
+        http://static.felspar.com/felspar-180x53.png
+    :
+    :
+    :
+        fget-image
+    ;
+
+run fget
+    :
+        https://www.google.com/
+    :
+    :
+    :
+        fget-google-secure
+    ;
+

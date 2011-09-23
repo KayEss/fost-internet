@@ -1,0 +1,8 @@
+using testing ;
+
+fost-exe http-threaded
+    :
+        ../../Cpp/fost-inet/
+        threaded.cpp
+    ;
+

@@ -1,0 +1,142 @@
+2011-08-15  Kirit Saelensminde  <kirit@felspar.com>
+ Connection errors now report the host and port they're trying to connect to.
+ The pop3 tests now allow the server to be configured, and it is more aggresive in keeping the mailbox empty.
+ The pop client includes some extra logging describing what it is doing.
+ Made a change to the TCP time out handling to support the version of gcc that Macs use.
+
+2011-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ Made some changes to support Boost 1.46.0.
+
+2011-07-22  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed a bug that was causing occasional data packets to be lost when sending large blocks of data.
+
+2011-04-13  Kirit Saelensminde  <kirit@felspar.com>
+ Implemented a proper exception type for a particular networking error.
+
+2011-04-10  Kirit Saelensminde  <kirit@felspar.com>
+ Improved the time out handling for large downloads where the download size is known in advance.
+ Added in a connect timeout which defaults to ten seconds.
+
+2011-03-02  Kirit Saelensminde  <kirit@felspar.com>
+ Implemented a more full version of the email address parser so it can handle names as well as well as email addresses.
+
+2011-02-11  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed a bug that was causing the protocol to be lost when a relative URL was being generated.
+
+2010-12-10  Kirit Saelensminde  <kirit@felspar.com>
+ The URL parser now supports (at least some) custom query string formats. Also added in limited %XX decoding in the query string values.
+
+2010-11-16  Kirit Saelensminde  <kirit@felspar.com>
+ Added a very simple HTTP PUT based log sink for shipping logs to another machine.
+
+2010-11-04  Kirit Saelensminde  <kirit@felspar.com>
+ URLs are now usable directly as keys in STL containers as std::less is supported.
+
+2010-10-15  Kirit Saelensminde  <kirit@felspar.com>
+ FOST authentication for the server version of requests is now supported.
+
+2010-10-08  Kirit Saelensminde  <kirit@felspar.com>
+ fostlib::email_address instances can now be coerced from their JSON representation.
+ A new attach member on fostlib::mime_envelope allows for easier addition of mime types into the envelope.
+ The MIME type for MIME envelopes can now be set and the iterator for the data is now implemented.
+ The SMTP client now tracks its state and doesn't try to close the connection if it's not in a proper idle state.
+
+2010-09-24  Kirit Saelensminde  <kirit@felspar.com>
+ Errors connecting to sockets are now reported as instances of fostlib::exceptions::connect_failure. Socket errors are now all sub-classes of fostlib::exceptions::socket_error. Reads now also time out and throw a fostlib::exceptions::read_timout exception. The configuration setting
+     [Network settings]
+     Read time out=30
+ sets the number of seconds that the read time out value should have.
+
+2010-09-19  Kirit Saelensminde  <kirit@felspar.com>
+ fostlib::url::query_string objects can now be coerced from fostlib::string objects.
+
+2010-06-02  Kirit Saelensminde  <kirit@felspar.com>
+ Fost authentication
+ - Fixed the signature so that it signs the query string when there is
+   no post data.
+
+2010-05-31  Kirit Saelensminde  <kirit@felspar.com>
+ Fost authentication
+ - Added a utility function to add the authentication to a user agent.
+
+2010-05-30  Kirit Saelensminde  <kirit@felspar.com>
+ Host
+ - A host can now be configured with a port number as the service.
+
+2010-04-28  Kirit Saelensminde  <kirit@felspar.com>
+ Web server
+ - Added the 207 response code
+ - URLs may contain bangs (!)
+
+2010-04-06  Kirit Saelensminde  <kirit@felspar.com>
+ Parsers
+ - Removed the parser instances because they're not thread safe.
+ MIME
+ - Added support for multiple headers of the same name.
+ HTTP client
+ - Corrected behaviour for 304 responses.
+
+2010-04-05  Kirit Saelensminde  <kirit@felspar.com>
+ URL
+ - The query string can now be any sequence rather than only a map of
+ - key/value pairs.
+ HTTP client/server
+ - Added more allowable characters to the resource parser for HTTP requests.
+ - The server request now supports handling of bad requests.
+ - The HTTP client post and put short cuts now accept all data types
+   supported by the request.
+ - Changed the type of the server request query string to match that of the
+   URL.
+ - The parsing of the beginning of the HTTP request by the server is now
+   protected by a mutex because Boost.Spirit is not thread safe.
+ Host
+ - Added JSON coercions for fostlib::host.
+
+2010-04-02  Kirit Saelensminde  <kirit@felspar.com>
+ URL
+ - The host and port number are now mutable fields of the URL.
+ - Fixed a bug where port numbers weren't properly shown in URLs converted
+   to strings.
+ - Query string values may now contain forward slashes and colons.
+ - Fixed a bug where query strings were being thrown away when URLs were
+   parsed.
+ HTTP client/server
+ - The response body can now be detached from the client response as can the
+   request body from the server.
+ - The HTTP server now accepts additional verbs, more correct resource paths
+   and can return all status codes supported by HTTP 1.1.
+
+2010-04-01  Kirit Saelensminde  <kirit@felspar.com>
+ TCP/IP
+ - Most errors should now end up with a fostlib::exceptions::exception which
+   allows the error to be annotated.
+ HTTP client
+ - Fixed a bug in chunked encoding that was causing the chunks to end up
+   in the data block in the reverse order.
+ - The user agent request can now be built from passed in MIME data.
+ POP3 client
+ - Improved the error reporting by annotating exceptions in as many places
+   as possible.
+
+2010-03-26  Kirit Saelensminde  <kirit@felspar.com>
+ fget example
+ - Now supports the use of FOST authentication through the -authentication,
+   -key and -secret command line switches. There's also a -user switch to
+   handle authentication where the REST end point supports impersonation.
+
+2010-03-25  Kirit Saelensminde  <kirit@felspar.com>
+ MIME
+ - Improved handling of headers that don't have values.
+
+2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
+ User agent
+ - The fget example now allows us to save to a file by using an extra
+   parameter.
+ - There is a new MIME type binary_body for handling in-memory binary MIME
+   data.
+
+2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
+ Header files
+ - Moved all non-private headers out of include/fost/detail
+ ChangeLog
+ - Added ChangeLog

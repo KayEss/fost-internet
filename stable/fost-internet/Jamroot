@@ -1,0 +1,41 @@
+path-constant TOP : . ;
+include $(TOP)/../boost-version.jam ;
+include ../fost-base/fost.jam ;
+
+use-project fost-base : ../fost-base/ ;
+fost-project fost-internet ;
+
+alias docs :
+        Docs
+    ;
+explicit docs ;
+
+alias examples :
+        ../fost-base//examples
+        Examples/host
+        Examples/fget
+        Examples/webserver-simple
+        Examples/webserver-threaded
+    ;
+explicit examples ;
+
+alias fost :
+        ../fost-base//fost
+        Cpp/fost-fsink
+        Cpp/fost-inet
+        Cpp/fost-netlog
+    ;
+
+alias tests :
+        ../fost-base//tests
+        Cpp/fost-inet-test
+    ;
+explicit tests ;
+
+alias all :
+        docs
+        examples
+        fost
+        tests
+    ;
+explicit all ;
