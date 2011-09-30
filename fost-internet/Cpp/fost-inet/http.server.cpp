@@ -108,9 +108,9 @@ fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
-) {
+) : m_cnx( new network_connection(connection) ),
+        m_handler( boost::bind(respond_on_socket, m_cnx.get(), _1, _2) ) {
     (*this)(connection);
-    m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
 }
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
@@ -132,7 +132,6 @@ fostlib::http::server::request::request(
 void fostlib::http::server::request::operator () (
     std::auto_ptr< boost::asio::ip::tcp::socket > socket
 ) {
-    m_cnx.reset( new network_connection(socket) );
     utf8_string first_line;
     (*m_cnx) >> first_line;
     if ( !fostlib::parse(first_line.underlying().c_str(),
