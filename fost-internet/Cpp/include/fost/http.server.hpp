@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -28,6 +28,7 @@ namespace fostlib {
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
+                boost::function<void (const mime&, const ascii_string&)> m_handler;
                 string m_method;
                 url::filepath_string m_pathspec;
                 nullable< ascii_printable_string > m_query_string;
@@ -38,10 +39,15 @@ namespace fostlib {
                     request();
                     /// Create a request from data on the provided socket
                     request(std::auto_ptr< boost::asio::ip::tcp::socket > connection);
-                    /// This constructor is useful for mocking the request for code that interacts with a server
+                    /// This constructor is useful for mocking the request that doesn't get responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
                         std::auto_ptr< binary_body > headers_and_body);
+                    /// This constructor is useful for mocking the request that gets responded to
+                    request(
+                        const string &method, const url::filepath_string &filespec,
+                        std::auto_ptr< binary_body > headers_and_body,
+                        boost::function<void (const mime&, const ascii_string &)>);
 
                     /// Parse a request on the provided socket
                     void operator () (
@@ -58,11 +64,11 @@ namespace fostlib {
                     /// The request body and headers
                     boost::shared_ptr< binary_body > data() const;
 
-                    /// Used to pass the response back to the user agent.This will throw on a mocked connection
+                    /// Used to pass the response back to the user agent.
                     void operator () (
                         const mime &response,
                         const int status = 200);
-                    /// Used to pass the response back to the user agent.This will throw on a mocked connection
+                    /// Used to pass the response back to the user agent.
                     void operator () (
                         const mime &response,
                         const ascii_string &status_text);

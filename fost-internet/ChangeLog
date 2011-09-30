@@ -1,5 +1,6 @@
 2011-09-30  Kirit Saelensminde  <kirit@felspar.com>
  The host constructors now normalise to lower case any host name they are given.
+ We can now pass in a handler function to the HTTP server request for use when testing server responses.
 
 2011-08-15  Kirit Saelensminde  <kirit@felspar.com>
  Connection errors now report the host and port they're trying to connect to.

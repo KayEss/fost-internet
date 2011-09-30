@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -62,6 +62,26 @@ namespace {
             return false;
         }
     }
+
+    void respond_on_socket(
+        fostlib::network_connection *cnx,
+        const mime &response, const ascii_string &status
+    ) {
+        std::stringstream buffer;
+        buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
+            << response.headers() << "\r\n";
+        (*cnx) << buffer;
+        for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
+            (*cnx) << *i;
+    }
+
+    void raise_connection_error (
+        const mime &response, const ascii_string &status
+    ) {
+        throw exceptions::null(
+            "This is a mock server request. It cannot send a response to any client");
+    }
+
 }
 void fostlib::http::server::operator () (
     boost::function< bool ( http::server::request & ) > service_lambda
@@ -90,11 +110,21 @@ fostlib::http::server::request::request(
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
 ) {
     (*this)(connection);
+    m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
 }
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
     std::auto_ptr< binary_body > headers_and_body
-) : m_method( method ), m_pathspec( filespec ),
+) : m_handler(raise_connection_error),
+        m_method( method ), m_pathspec( filespec ),
+        m_mime( headers_and_body.release() ) {
+}
+fostlib::http::server::request::request(
+    const string &method, const url::filepath_string &filespec,
+    std::auto_ptr< binary_body > headers_and_body,
+    boost::function<void (const mime&, const ascii_string&)> handler
+) : m_handler(handler),
+        m_method( method ), m_pathspec( filespec ),
         m_mime( headers_and_body.release() ) {
 }
 
@@ -174,15 +204,7 @@ boost::shared_ptr< fostlib::binary_body > fostlib::http::server::request::data(
 void fostlib::http::server::request::operator() (
     const mime &response, const ascii_string &status
 ) {
-    if ( !m_cnx.get() )
-        throw exceptions::null(
-            "This is a mock server request. It cannot send a response to any client");
-    std::stringstream buffer;
-    buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
-        << response.headers() << "\r\n";
-    (*m_cnx) << buffer;
-    for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
-        (*m_cnx) << *i;
+    m_handler(response, status);
 }
 
 
