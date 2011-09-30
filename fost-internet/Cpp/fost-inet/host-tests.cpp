@@ -23,7 +23,13 @@ FSL_TEST_FUNCTION( coerce_string ) {
     FSL_CHECK_EQ( h1.name(), "localhost" );
     FSL_CHECK( !h1.service().isnull() );
     FSL_CHECK_EQ( h1.service().value(), "80" );
-    
+
     FSL_CHECK_EQ( fostlib::coerce< fostlib::string >(h1), "localhost:80" );
 }
 
+
+FSL_TEST_FUNCTION( normalise_case ) {
+    FSL_CHECK_EQ(fostlib::host("LOCALHOST").name(), "localhost");
+    FSL_CHECK_EQ(fostlib::host("LOCALHOST", fostlib::string("http")).name(), "localhost");
+    FSL_CHECK_EQ(fostlib::host("LOCALHOST", 80).name(), "localhost");
+}
