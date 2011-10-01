@@ -49,10 +49,6 @@ namespace fostlib {
                         std::auto_ptr< binary_body > headers_and_body,
                         boost::function<void (const mime&, const ascii_string &)>);
 
-                    /// Parse a request on the provided socket
-                    void operator () (
-                        std::auto_ptr< boost::asio::ip::tcp::socket > connection);
-
                     /// The request method
                     const string &method() const { return m_method; }
                     /// The requested resource

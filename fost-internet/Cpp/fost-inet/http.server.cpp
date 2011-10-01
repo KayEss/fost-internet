@@ -28,12 +28,10 @@ fostlib::http::server::server( const host &h, uint16_t p )
 
 std::auto_ptr< http::server::request > fostlib::http::server::operator () () {
     std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-        new boost::asio::ip::tcp::socket( m_service )
-    );
+        new boost::asio::ip::tcp::socket( m_service ));
     m_server.accept( *sock );
     return std::auto_ptr< http::server::request >(
-        new http::server::request( sock )
-    );
+        new http::server::request( sock ));
 }
 
 namespace {
@@ -42,23 +40,19 @@ namespace {
         boost::asio::ip::tcp::socket *sockp
     ) {
         std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
-        http::server::request req;
         try {
-            req(sock);
-        } catch ( fostlib::exceptions::exception &e ) {
-            text_body error(
-                fostlib::coerce<fostlib::string>(e)
-            );
-            req( error, 400 );
-            return false;
-        }
-        try {
-            return service_lambda(req);
-        } catch ( fostlib::exceptions::exception &e ) {
-            text_body error(
-                fostlib::coerce<fostlib::string>(e)
-            );
-            req( error, 500 );
+            http::server::request req(sock);
+            try {
+                return service_lambda(req);
+            } catch ( fostlib::exceptions::exception &e ) {
+                text_body error(
+                    fostlib::coerce<fostlib::string>(e)
+                );
+                req( error, 500 );
+                return false;
+            }
+        } catch ( fostlib::exceptions::exception & ) {
+            // A 400 response has already been sent by the request handler
             return false;
         }
     }
@@ -70,9 +64,9 @@ namespace {
         std::stringstream buffer;
         buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
             << response.headers() << "\r\n";
-        (*cnx) << buffer;
+        *cnx << buffer;
         for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
-            (*cnx) << *i;
+            *cnx << *i;
     }
 
     void raise_connection_error (
@@ -108,9 +102,71 @@ fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
-) : m_cnx( new network_connection(connection) ),
-        m_handler( boost::bind(respond_on_socket, m_cnx.get(), _1, _2) ) {
-    (*this)(connection);
+) : m_cnx( new network_connection(connection) ), m_handler(raise_connection_error) {
+    m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
+
+    try {
+        utf8_string first_line;
+        (*m_cnx) >> first_line;
+        if ( !fostlib::parse(first_line.underlying().c_str(),
+            (
+                +boost::spirit::chset<>( "A-Z" )
+            )[
+                phoenix::var(m_method) =
+                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+            ]
+            >> boost::spirit::chlit< char >( ' ' )
+            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=~!-" ))[
+                phoenix::var(m_pathspec) =
+                    phoenix::construct_< url::filepath_string >(
+                        phoenix::arg1, phoenix::arg2
+                    )
+            ]
+            >> !(
+                boost::spirit::chlit< char >('?')
+                >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,%+*=-" ))[
+                    phoenix::var(m_query_string) =
+                        phoenix::construct_< ascii_printable_string >(
+                            phoenix::arg1, phoenix::arg2
+                        )
+                ]
+            )
+            >> !(
+                boost::spirit::chlit< char >( ' ' )
+                >> (
+                    boost::spirit::strlit< nliteral >("HTTP/1.0") |
+                    boost::spirit::strlit< nliteral >("HTTP/1.1")
+                )
+            )
+        ).full )
+            throw exceptions::not_implemented(
+                "Expected a HTTP request", coerce< string >(first_line)
+            );
+
+        mime::mime_headers headers;
+        while ( true ) {
+            utf8_string line;
+            *m_cnx >> line;
+            if ( line.empty() )
+                break;
+            headers.parse(coerce< string >(line));
+        }
+
+        std::size_t content_length = 0;
+        if ( headers.exists("Content-Length") )
+            content_length = coerce< int64_t >(headers["Content-Length"].value());
+
+        if ( content_length ) {
+            std::vector< unsigned char > data( content_length );
+            *m_cnx >> data;
+            m_mime.reset( new binary_body(data, headers) );
+        } else
+            m_mime.reset( new binary_body(headers) );
+    } catch ( fostlib::exceptions::exception &e ) {
+        text_body error(fostlib::coerce<fostlib::string>(e));
+        (*this)( error, 400 );
+        throw;
+    }
 }
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
@@ -126,68 +182,6 @@ fostlib::http::server::request::request(
 ) : m_handler(handler),
         m_method( method ), m_pathspec( filespec ),
         m_mime( headers_and_body.release() ) {
-}
-
-
-void fostlib::http::server::request::operator () (
-    std::auto_ptr< boost::asio::ip::tcp::socket > socket
-) {
-    utf8_string first_line;
-    (*m_cnx) >> first_line;
-    if ( !fostlib::parse(first_line.underlying().c_str(),
-        (
-            +boost::spirit::chset<>( "A-Z" )
-        )[
-            phoenix::var(m_method) =
-                phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-        ]
-        >> boost::spirit::chlit< char >( ' ' )
-        >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=~!-" ))[
-            phoenix::var(m_pathspec) =
-                phoenix::construct_< url::filepath_string >(
-                    phoenix::arg1, phoenix::arg2
-                )
-        ]
-        >> !(
-            boost::spirit::chlit< char >('?')
-            >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,%+*=-" ))[
-                phoenix::var(m_query_string) =
-                    phoenix::construct_< ascii_printable_string >(
-                        phoenix::arg1, phoenix::arg2
-                    )
-            ]
-        )
-        >> !(
-            boost::spirit::chlit< char >( ' ' )
-            >> (
-                boost::spirit::strlit< nliteral >("HTTP/1.0") |
-                boost::spirit::strlit< nliteral >("HTTP/1.1")
-            )
-        )
-    ).full )
-        throw exceptions::not_implemented(
-            "Expected a HTTP request", coerce< string >(first_line)
-        );
-
-    mime::mime_headers headers;
-    while ( true ) {
-        utf8_string line;
-        *m_cnx >> line;
-        if ( line.empty() )
-            break;
-        headers.parse(coerce< string >(line));
-    }
-
-    std::size_t content_length = 0;
-    if ( headers.exists("Content-Length") )
-        content_length = coerce< int64_t >(headers["Content-Length"].value());
-
-    if ( content_length ) {
-        std::vector< unsigned char > data( content_length );
-        *m_cnx >> data;
-        m_mime.reset( new binary_body(data, headers) );
-    } else
-        m_mime.reset( new binary_body(headers) );
 }
 
 
