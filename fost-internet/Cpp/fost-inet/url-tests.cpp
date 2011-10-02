@@ -25,9 +25,15 @@ FSL_TEST_FUNCTION( filepath_string ) {
     FSL_CHECK_EXCEPTION( url::filepath_string a( "a/b%2" ), fostlib::exceptions::parse_error );
     FSL_CHECK_NOTHROW( url::filepath_string a( "a/bc%2B.html" ) );
 
-    FSL_CHECK_EQ( coerce< url::filepath_string >( string( L"abc" ) ), url::filepath_string( "abc" ) );
-    FSL_CHECK_EQ( coerce< url::filepath_string >( string( L"a/bc.html" ) ), url::filepath_string( "a/bc.html" ) );
-    FSL_CHECK_EQ( coerce< url::filepath_string >( string( L"a/b(c).html" ) ), url::filepath_string( "a/b%28c%29.html" ) );
+    FSL_CHECK_EQ( coerce< url::filepath_string >( string( L"abc" ) ),
+        url::filepath_string( "abc" ) );
+    FSL_CHECK_EQ( coerce< url::filepath_string >( string( L"a/bc.html" ) ),
+        url::filepath_string( "a/bc.html" ) );
+    FSL_CHECK_EQ( coerce< url::filepath_string >( string( L"a/b(c).html" ) ),
+        url::filepath_string( "a/b%28c%29.html" ) );
+
+    FSL_CHECK_EQ( coerce< boost::filesystem::wpath >( url::filepath_string("a") ), L"a");
+    FSL_CHECK_EQ( coerce< boost::filesystem::wpath >( url::filepath_string("%2B") ), L"+");
 }
 
 
