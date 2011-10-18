@@ -70,6 +70,9 @@ namespace fostlib {
                 /// Construct a connect failure exception
                 socket_error(boost::system::error_code) throw();
 
+                /// Destruct the exception without throwing
+                ~socket_error() throw ();
+
             public:
                 /// Allow access to the error code that caused the exception
                 accessors< const nullable< boost::system::error_code > > error;

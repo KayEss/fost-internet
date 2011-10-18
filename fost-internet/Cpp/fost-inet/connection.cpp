@@ -390,6 +390,12 @@ fostlib::exceptions::socket_error::socket_error(
     info() << error << std::endl;
 }
 
+fostlib::exceptions::socket_error::~socket_error() throw ()
+try {
+} catch ( ... ) {
+    fostlib::absorbException();
+}
+
 
 /*
     fostlib::exceptions::connect_failure
