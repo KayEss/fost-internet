@@ -1,3 +1,6 @@
+2011-10-21  Kirit Saelensminde  <kirit@felspar.com>
+ Added coercion from MIME to UTF8 strings.
+
 2011-10-01  Kirit Saelensminde  <kirit@felspar.com>
  We can now coerce from a URL file specification to a Boost filesystem wpath.
 

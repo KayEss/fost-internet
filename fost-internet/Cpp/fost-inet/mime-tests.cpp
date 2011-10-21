@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -41,7 +41,7 @@ FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
     FSL_CHECK_EQ("TE: \r\nX-MS-TNEF-Correlator: \r\n", ss.str());
 }
 
-FSL_TEST_FUNCTION( empty_mime ) {
+FSL_TEST_FUNCTION( empty_mime_output ) {
     empty_mime empty;
     std::stringstream ss;
     ss << empty;
@@ -50,6 +50,9 @@ Content-Length: 0\r\n\
 Content-Type: application/x-empty\r\n\
 \r\n\
 " );
+}
+FSL_TEST_FUNCTION( empty_mime_as_string ) {
+    FSL_CHECK_EQ(coerce<string>(empty_mime()), string());
 }
 
 FSL_TEST_FUNCTION( empty_mime_with_headers ) {
@@ -119,6 +122,10 @@ FSL_TEST_FUNCTION(text_iterators) {
         reinterpret_cast<const char *>((*ta.begin()).first),
         reinterpret_cast<const char *>((*ta.begin()).second)
     ));
+}
+FSL_TEST_FUNCTION(text_as_string) {
+    text_body ta(utf8_string("Test text document"));
+    FSL_CHECK_EQ(coerce<string>(ta), "Test text document");
 }
 
 
