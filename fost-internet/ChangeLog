@@ -1,3 +1,6 @@
+2011-10-22  Kirit Saelensminde  <kirit@felspar.com>
+ Improved some of the error handling in the HTTP server.
+
 2011-10-21  Kirit Saelensminde  <kirit@felspar.com>
  Added coercion from MIME to UTF8 strings.
 

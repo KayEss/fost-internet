@@ -7,6 +7,7 @@
 
 
 #include "fost-inet.hpp"
+#include <fost/log>
 #include <fost/threading>
 #include <fost/http.server.hpp>
 #include <fost/parse/url.hpp>
@@ -138,10 +139,12 @@ fostlib::http::server::request::request(
                     boost::spirit::strlit< nliteral >("HTTP/1.1")
                 )
             )
-        ).full )
+        ).full ) {
+            logging::error("First line failed to parse",
+                coerce<string>(first_line));
             throw exceptions::not_implemented(
-                "Expected a HTTP request", coerce< string >(first_line)
-            );
+                "Expected a HTTP request", coerce<string>(first_line));
+        }
 
         mime::mime_headers headers;
         while ( true ) {
@@ -163,8 +166,13 @@ fostlib::http::server::request::request(
         } else
             m_mime.reset( new binary_body(headers) );
     } catch ( fostlib::exceptions::exception &e ) {
-        text_body error(fostlib::coerce<fostlib::string>(e));
-        (*this)( error, 400 );
+        try {
+            text_body error(coerce<string>(e));
+            (*this)( error, 400 );
+        } catch ( ... ) {
+            fostlib::logging::critical("Exception whilst sending bad request response");
+            absorbException();
+        }
         throw;
     }
 }
