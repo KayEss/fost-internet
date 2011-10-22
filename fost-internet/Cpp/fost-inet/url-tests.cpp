@@ -153,7 +153,10 @@ FSL_TEST_FUNCTION( path_spec ) {
     u.pathspec( url::filepath_string( "/file-name" ) );
     FSL_CHECK_EQ( u.as_string(), ascii_printable_string( "http://localhost/file-name" ) );
 
-    FSL_CHECK_EQ( coerce< url::filepath_string >( boost::filesystem::wpath(L"test") ), url::filepath_string("test") );
+    FSL_CHECK_EQ(
+        coerce< url::filepath_string >( boost::filesystem::wpath(L"test") ),
+        url::filepath_string("test") );
+    FSL_CHECK_EQ(coerce<string>(u.pathspec()), "/file-name");
 }
 
 #define TEST_PATH_SPEC_ENCODING( from, to ) \

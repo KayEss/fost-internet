@@ -172,6 +172,17 @@ namespace fostlib {
         /// Performs the coercion
         boost::filesystem::wpath coerce( const url::filepath_string &s );
     };
+    /// Allow a file specification to be turned into a string.
+    template<>
+    struct FOST_INET_DECLSPEC coercer<
+        string, url::filepath_string
+    > {
+        /// Performs the coercion
+        string coerce( const url::filepath_string &s ) {
+            return fostlib::coerce<string>(
+                fostlib::coerce<boost::filesystem::wpath>(s));
+        }
+    };
 
     /// Allow a string to be turned into a URL query object
     template<>
