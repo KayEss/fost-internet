@@ -146,6 +146,9 @@ FSL_TEST_FUNCTION( url_parser_filespec ) {
     URL_PARSE_FILESPEC( "/", "/" );
     URL_PARSE_FILESPEC( "/file.html", "/file.html" );
     URL_PARSE_FILESPEC( "/Site:/file.html", "/Site:/file.html" );
+    URL_PARSE_FILESPEC( "/Site:/(file).html", "/Site:/(file).html" );
+    URL_PARSE_FILESPEC( "/Type/List:/Article%20(FSLib::::Content::::Article)",
+        "/Type/List:/Article%20(FSLib::::Content::::Article)" );
 }
 
 FSL_TEST_FUNCTION( path_spec ) {

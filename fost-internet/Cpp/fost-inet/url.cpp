@@ -64,7 +64,7 @@ namespace {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_allowed_lax(
-        ".,:/\\_-@*+~!"
+        ".,:/\\_-@*+~!()[]"
         "0123456789"
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
