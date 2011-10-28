@@ -19,7 +19,8 @@ FSL_TEST_SUITE( internet_url );
 
 FSL_TEST_FUNCTION( filepath_string ) {
     FSL_CHECK_NOTHROW( url::filepath_string a( "a/bc.html" ) );
-    FSL_CHECK_EXCEPTION( url::filepath_string a( "a/b(c).html" ), fostlib::exceptions::parse_error );
+    FSL_CHECK_EXCEPTION( url::filepath_string a( "a/b c.html" ),
+        fostlib::exceptions::parse_error );
     FSL_CHECK_EXCEPTION( url::filepath_string a( "a/b%" ), fostlib::exceptions::parse_error );
     FSL_CHECK_EXCEPTION( url::filepath_string a( "a/b%%" ), fostlib::exceptions::parse_error );
     FSL_CHECK_EXCEPTION( url::filepath_string a( "a/b%2" ), fostlib::exceptions::parse_error );
