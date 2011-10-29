@@ -27,10 +27,10 @@ run fget
 
 run fget
     :
-        https://www.google.com/
+        https://svn.felspar.com/
     :
     :
     :
-        fget-google-secure
+        fget-felspar-svn-secure
     ;
 
