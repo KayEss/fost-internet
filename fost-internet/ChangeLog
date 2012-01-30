@@ -1,3 +1,6 @@
+2012-01-30  Kirit Saelensminde  <kirit@felspar.com>
+ Disabled a test that is unreliable on Windows due to its limited network buffer.
+
 2012-01-28  Kirit Saelensminde  <kirit@felspar.com>
  Fixed up some build errors for the new null_ptr.
 
