@@ -52,7 +52,8 @@ Content-Type: application/x-empty\r\n\
 " );
 }
 FSL_TEST_FUNCTION( empty_mime_as_string ) {
-    FSL_CHECK_EQ(coerce<string>(empty_mime()), string());
+    empty_mime em;
+    FSL_CHECK_EQ(coerce<string>(em), string());
 }
 
 FSL_TEST_FUNCTION( empty_mime_with_headers ) {
