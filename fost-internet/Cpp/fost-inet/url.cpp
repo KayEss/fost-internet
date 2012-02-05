@@ -31,8 +31,7 @@ namespace {
         if ( dig < 0x0a ) return dig + '0';
         if ( dig < 0x10 ) return dig + 'A' - 0x0a;
         throw fostlib::exceptions::out_of_range< int >(
-            L"Number to convert to hex digit is too big", 0, 0x10, dig
-        );
+            L"Number to convert to hex digit is too big", 0, 0x10, dig);
     }
     template< typename S >
     S hex( utf8 ch ) {
@@ -44,6 +43,19 @@ namespace {
         return S( num );
     }
 
+    unsigned char undigit(char d) {
+        if ( d >= '0' && d <= '9' )
+            return d - '0';
+        else if ( d >= 'A' && d <= 'F' )
+            return d - 'A' + 0xa;
+        else if ( d >= 'a' && d <= 'f' )
+            return d - 'a' + 0xa;
+        throw fostlib::exceptions::out_of_range< int >(
+            "Hex digit is not valid", '0', 'F', d);
+    }
+    unsigned char unhex(char c1, char c2) {
+        return (undigit(c1) << 4) + undigit(c2);
+    }
 
     const fostlib::utf8_string g_url_allowed(
         ".,:/\\_-~!"
@@ -52,7 +64,7 @@ namespace {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
     const fostlib::utf8_string g_url_allowed_lax(
-        ".,:/\\_-@*+~!"
+        ".,:/\\_-@*+~!()[]"
         "0123456789"
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -203,8 +215,24 @@ url::filepath_string fostlib::coercer<
     url::filepath_string, boost::filesystem::wpath
 >::coerce( const boost::filesystem::wpath &p ) {
     return fostlib::coerce< url::filepath_string >(
-        fostlib::coerce< string >(p)
-    );
+        fostlib::coerce< string >(p));
+}
+
+
+boost::filesystem::wpath fostlib::coercer<
+    boost::filesystem::wpath, url::filepath_string
+>::coerce( const url::filepath_string &s ) {
+    utf8_string narrowed;
+    for ( ascii_printable_string::const_iterator p(s.underlying().begin()); p != s.underlying().end(); ++p ) {
+        if ( *p == '%' ) {
+            char d1 = *++p;
+            char d2 = *++p;
+            narrowed += unhex(d1, d2);
+        } else
+            narrowed += *p;
+    }
+    return fostlib::coerce<boost::filesystem::wpath>(
+        fostlib::coerce<string>(narrowed));
 }
 
 

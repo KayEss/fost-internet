@@ -1,3 +1,29 @@
+2012-01-30  Kirit Saelensminde  <kirit@felspar.com>
+ Disabled a test that is unreliable on Windows due to its limited network buffer.
+
+2012-01-28  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed up some build errors for the new null_ptr.
+
+2012-01-04  Kirit Saelensminde  <kirit@felspar.com>
+ Changed one of the networking tests to send less data on Windows as the test would hardly ever pass. It is still a bit unreliable though :(
+
+2011-10-24  Kirit Saelensminde  <kirit@felspar.com>
+ Allow a few more characters in the file specification for URLs.
+
+2011-10-22  Kirit Saelensminde  <kirit@felspar.com>
+ Improved some of the error handling in the HTTP server.
+ Can now convert a URL file specification directly to a string.
+
+2011-10-21  Kirit Saelensminde  <kirit@felspar.com>
+ Added coercion from MIME to UTF8 strings.
+
+2011-10-01  Kirit Saelensminde  <kirit@felspar.com>
+ We can now coerce from a URL file specification to a Boost filesystem wpath.
+
+2011-09-30  Kirit Saelensminde  <kirit@felspar.com>
+ The host constructors now normalise to lower case any host name they are given.
+ We can now pass in a handler function to the HTTP server request for use when testing server responses.
+
 2011-08-15  Kirit Saelensminde  <kirit@felspar.com>
  Connection errors now report the host and port they're trying to connect to.
  The pop3 tests now allow the server to be configured, and it is more aggresive in keeping the mailbox empty.

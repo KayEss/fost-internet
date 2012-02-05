@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -206,6 +206,34 @@ namespace fostlib {
             bool boundary_is_ok( const string &boundary ) const;
 
             accessors< const boost::filesystem::wpath > filename;
+    };
+
+
+    /// Allow the UTF8 text of a MIME wrapper to be extracted.
+    template<>
+    struct FOST_INET_DECLSPEC coercer<utf8_string, mime> {
+        /// Performs the coercion
+        utf8_string coerce( const mime & );
+    };
+
+    /// Allow the conversion of the MIME content to be extracted as a string
+    template<>
+    struct FOST_INET_DECLSPEC coercer<string, mime> {
+        /// Performs the coercion
+        string coerce( const mime &m ) {
+            return fostlib::coerce<fostlib::string>(
+                fostlib::coerce<fostlib::utf8_string>(m));
+        }
+    };
+
+    /// Allow the conversion of MIME subclasses
+    template< typename T, typename F>
+    struct coercer<T, F,
+        typename boost::enable_if< boost::is_base_of<mime, F> >::type
+    > {
+        T coerce( const F &f ) {
+            return fostlib::coerce<T, mime>( f );
+        }
     };
 
 

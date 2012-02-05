@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -52,7 +52,7 @@ fostlib::mime::const_iterator::const_iterator( std::auto_ptr< fostlib::mime::ite
     if ( underlying.get() )
         current = (*underlying)();
     else
-        current = std::pair< const unsigned char *, const unsigned char * >( NULL, NULL );
+        current = std::pair< const unsigned char *, const unsigned char * >();
 }
 
 
@@ -142,7 +142,7 @@ std::ostream &fostlib::empty_mime::print_on( std::ostream &o ) const {
 
 struct fostlib::empty_mime::empty_mime_iterator : public mime::iterator_implementation {
     const_memory_block operator () () {
-        return const_memory_block( NULL, NULL );
+        return const_memory_block();
     }
 };
 std::auto_ptr< mime::iterator_implementation > fostlib::empty_mime::iterator() const {
@@ -300,7 +300,7 @@ struct fostlib::text_body::text_body_iterator : public mime::iterator_implementa
     }
     const_memory_block operator () () {
         if ( !body.underlying().length() || sent )
-            return const_memory_block( NULL, NULL );
+            return const_memory_block();
         else {
             sent = true;
             return const_memory_block( body.underlying().c_str(), body.underlying().c_str() + body.underlying().length() );
@@ -354,7 +354,7 @@ struct fostlib::binary_body::binary_body_iterator :
     }
     const_memory_block operator () () {
         if ( data.size() == 0 || sent )
-            return const_memory_block(NULL , NULL );
+            return const_memory_block();
         else {
             sent = true;
             return const_memory_block(&data[0], &data[0] + data.size());
@@ -403,7 +403,7 @@ struct fostlib::file_body::file_body_iteration : public mime::iterator_implement
             file.read(buffer.c_array(), buffer.size());
             return const_memory_block( buffer.data(), buffer.data() + file.gcount() );
         } else
-            return const_memory_block( NULL, NULL );
+            return const_memory_block();
     }
 };
 std::auto_ptr< mime::iterator_implementation > fostlib::file_body::iterator() const {

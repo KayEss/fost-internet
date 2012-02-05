@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,6 +9,9 @@
 #include "fost-inet.hpp"
 #include <fost/host.hpp>
 #include <fost/parse/host.hpp>
+
+#include <algorithm>
+#include <cctype>
 
 
 using namespace fostlib;
@@ -32,6 +35,12 @@ namespace {
         return it->endpoint().address();
     }
 
+    fostlib::string normalise(const fostlib::string &text) {
+        fostlib::string ret;
+        for ( fostlib::string::const_iterator c(text.begin()); c != text.end(); ++c )
+            ret += std::tolower(*c);
+        return ret;
+    }
 
 }
 
@@ -39,14 +48,14 @@ namespace {
 fostlib::host::host() {
 }
 fostlib::host::host( const fostlib::string &name )
-: m_name( name ) {
+: m_name( normalise(name) ) {
 }
 fostlib::host::host(
     const fostlib::string &name, const nullable< string > &service
-) : service( service ), m_name( name ) {
+) : service( service ), m_name( normalise(name) ) {
 }
 fostlib::host::host( const fostlib::string &name, port_number service )
-: service( coerce< string >(service) ), m_name( name ) {
+: service( coerce< string >(service) ), m_name( normalise(name) ) {
 }
 
 fostlib::host::host( uint32_t address, const nullable< string > &service )
