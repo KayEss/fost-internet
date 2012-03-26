@@ -1,4 +1,7 @@
 2012-01-30  Kirit Saelensminde  <kirit@felspar.com>
+ Extended the set of allowable characters for the file specification and the query string in the HTTP server to include apostrophes.
+
+2012-01-30  Kirit Saelensminde  <kirit@felspar.com>
  Disabled a test that is unreliable on Windows due to its limited network buffer.
 
 2012-01-28  Kirit Saelensminde  <kirit@felspar.com>
