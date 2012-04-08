@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -140,7 +140,7 @@ fostlib::http::server::request::request(
                 )
             )
         ).full ) {
-            logging::error("First line failed to parse",
+            log::error("First line failed to parse",
                 coerce<string>(first_line));
             throw exceptions::not_implemented(
                 "Expected a HTTP request", coerce<string>(first_line));
@@ -170,7 +170,7 @@ fostlib::http::server::request::request(
             text_body error(coerce<string>(e));
             (*this)( error, 400 );
         } catch ( ... ) {
-            fostlib::logging::critical("Exception whilst sending bad request response");
+            log::critical("Exception whilst sending bad request response");
             absorbException();
         }
         throw;
