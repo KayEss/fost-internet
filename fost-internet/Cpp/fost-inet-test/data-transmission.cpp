@@ -45,7 +45,7 @@ FSL_TEST_FUNCTION( large_send_embed_acks ) {
     network_connection cnx(host("localhost"), 6218);
     std::string data(0x8000, 'x');
     for ( std::size_t block(0); block < 8; ++block ) {
-        fostlib::logging::debug("Sending data block", block);
+        fostlib::log::debug("Sending data block", block);
         FSL_CHECK_NOTHROW(cnx << data);
         std::string ack;
         FSL_CHECK_NOTHROW(cnx >> ack);
