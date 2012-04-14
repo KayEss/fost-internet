@@ -83,6 +83,9 @@ namespace fostlib {
             /// Run the provided lambda to service requests forever
             void operator () ( boost::function< bool ( request & ) > service_lambda );
 
+            /// Return the status text associated with a status code
+            static nliteral status_text( int code );
+
         private:
             boost::asio::io_service m_service;
             boost::asio::ip::tcp::acceptor m_server;
