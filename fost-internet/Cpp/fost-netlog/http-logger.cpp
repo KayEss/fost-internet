@@ -25,14 +25,14 @@ class http_logger {
         http_logger();
         http_logger(const json &);
 
-        bool operator () (const log::message &);
+        bool operator () (const fostlib::log::message &);
 };
 
 
 namespace {
 
 
-    const log::global_sink< http_logger > http_put("http-put");
+    const fostlib::log::global_sink< http_logger > http_put("http-put");
 
 
 }
@@ -44,7 +44,7 @@ http_logger::http_logger(const json &) {
 }
 
 
-bool http_logger::operator () (const log::message &m) {
+bool http_logger::operator () (const fostlib::log::message &m) {
     boost::shared_ptr<mime> body(new text_body(
         json::unparse(coerce<json>(m), true)));
     http::user_agent::request req("PUT", url("http://localhost:23456/"), body);
