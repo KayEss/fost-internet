@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -117,7 +117,7 @@ fostlib::http::server::request::request(
                     phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
             ]
             >> boost::spirit::chlit< char >( ' ' )
-            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:()%=~!-" ))[
+            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:'()%=~!+-" ))[
                 phoenix::var(m_pathspec) =
                     phoenix::construct_< url::filepath_string >(
                         phoenix::arg1, phoenix::arg2
@@ -125,7 +125,7 @@ fostlib::http::server::request::request(
             ]
             >> !(
                 boost::spirit::chlit< char >('?')
-                >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,%+*=-" ))[
+                >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'%+*=-" ))[
                     phoenix::var(m_query_string) =
                         phoenix::construct_< ascii_printable_string >(
                             phoenix::arg1, phoenix::arg2
@@ -140,7 +140,7 @@ fostlib::http::server::request::request(
                 )
             )
         ).full ) {
-            logging::error("First line failed to parse",
+            log::error("First line failed to parse",
                 coerce<string>(first_line));
             throw exceptions::not_implemented(
                 "Expected a HTTP request", coerce<string>(first_line));
@@ -170,7 +170,7 @@ fostlib::http::server::request::request(
             text_body error(coerce<string>(e));
             (*this)( error, 400 );
         } catch ( ... ) {
-            fostlib::logging::critical("Exception whilst sending bad request response");
+            log::critical("Exception whilst sending bad request response");
             absorbException();
         }
         throw;
@@ -209,60 +209,60 @@ void fostlib::http::server::request::operator() (
 }
 
 
-namespace {
-    nliteral status_text( int code ) {
-        switch (code) {
-            case 100: return "Continue";
-            case 101: return "Switching Protocols";
+nliteral fostlib::http::server::status_text( int code ) {
+    switch (code) {
+        case 100: return "Continue";
+        case 101: return "Switching Protocols";
 
-            case 200: return "OK";
-            case 201: return "Created";
-            case 202: return "Accepted";
-            case 203: return "Non-Authoritative Information";
-            case 204: return "No Content";
-            case 205: return "Reset Content";
-            case 206: return "Partial Content";
-            case 207: return "Multi-Status";
+        case 200: return "OK";
+        case 201: return "Created";
+        case 202: return "Accepted";
+        case 203: return "Non-Authoritative Information";
+        case 204: return "No Content";
+        case 205: return "Reset Content";
+        case 206: return "Partial Content";
+        case 207: return "Multi-Status";
 
-            case 300: return "Multiple Choices";
-            case 301: return "Moved Permanently";
-            case 302: return "Found";
-            case 303: return "See Other";
-            case 304: return "Not Modified";
-            case 305: return "Use Proxy";
-            case 306: return "(Unused)";
-            case 307: return "Temporary Redirect";
+        case 300: return "Multiple Choices";
+        case 301: return "Moved Permanently";
+        case 302: return "Found";
+        case 303: return "See Other";
+        case 304: return "Not Modified";
+        case 305: return "Use Proxy";
+        case 306: return "(Unused)";
+        case 307: return "Temporary Redirect";
 
-            case 400: return "Bad Request";
-            case 401: return "Unauthorized";
-            case 402: return "Payment Required";
-            case 403: return "Forbidden";
-            case 404: return "Not Found";
-            case 405: return "Method Not Allowed";
-            case 406: return "Not Acceptable";
-            case 407: return "Proxy Authentication Required";
-            case 408: return "Request Timeout";
-            case 409: return "Conflict";
-            case 410: return "Gone";
-            case 411: return "Length Required";
-            case 412: return "Precondition Failed";
-            case 413: return "Request Entity Too Large";
-            case 414: return "Request-URI Too Long";
-            case 415: return "Unsupported Media Type";
-            case 416: return "Requested Range Not Satisfiable";
-            case 417: return "Expectation Failed";
+        case 400: return "Bad Request";
+        case 401: return "Unauthorized";
+        case 402: return "Payment Required";
+        case 403: return "Forbidden";
+        case 404: return "Not Found";
+        case 405: return "Method Not Allowed";
+        case 406: return "Not Acceptable";
+        case 407: return "Proxy Authentication Required";
+        case 408: return "Request Timeout";
+        case 409: return "Conflict";
+        case 410: return "Gone";
+        case 411: return "Length Required";
+        case 412: return "Precondition Failed";
+        case 413: return "Request Entity Too Large";
+        case 414: return "Request-URI Too Long";
+        case 415: return "Unsupported Media Type";
+        case 416: return "Requested Range Not Satisfiable";
+        case 417: return "Expectation Failed";
 
-            case 500: return "Internal Server Error";
-            case 501: return "Not Implemented";
-            case 502: return "Bad Gateway";
-            case 503: return "Service Unavailable";
-            case 504: return "Gateway Timeout";
-            case 506: return "HTTP Version Not Supported";
+        case 500: return "Internal Server Error";
+        case 501: return "Not Implemented";
+        case 502: return "Bad Gateway";
+        case 503: return "Service Unavailable";
+        case 504: return "Gateway Timeout";
+        case 506: return "HTTP Version Not Supported";
 
-            default: return "(unknown status code)";
-        }
+        default: return "(unknown status code)";
     }
 }
+
+
 void fostlib::http::server::request::operator() (
     const mime &response, const int status
 ) {

@@ -247,7 +247,7 @@ namespace {
             socket.async_connect(*endpoint++, timeout.connect_async_function());
             try {
                 timeout.complete();
-            } catch ( exceptions::read_timeout &e ) {
+            } catch ( exceptions::read_timeout & ) {
                 connect_error = boost::asio::error::timed_out;
             }
         }

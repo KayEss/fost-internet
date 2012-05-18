@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -243,7 +243,7 @@ void fostlib::pop3::iterate_mailbox(
     boost::scoped_ptr< pop3cnx > mailbox(
         new pop3cnx(host, username, password));
     const size_t messages = mailbox->message_count;
-    logging::info("Number of messages found", messages);
+    log::info("Number of messages found", messages);
 
     // Loop from the end so we always process the latest bounce messages first
     for ( std::size_t i = messages; i; --i ) {
@@ -251,7 +251,7 @@ void fostlib::pop3::iterate_mailbox(
         if (message.get() && destroy_message(*message))
             mailbox->remove(i);
         if ( i % 20 == 0 ) {
-			logging::info("Resetting mailbox connection", i);
+			log::info("Resetting mailbox connection", i);
             mailbox.reset( new pop3cnx(host, username, password) );
             if ( mailbox->message_count < i )
                 throw fostlib::exceptions::out_of_range< size_t >(

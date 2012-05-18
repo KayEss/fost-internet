@@ -1,3 +1,9 @@
+2012-04-14  Kirit Saelensminde  <kirit@felspar.com>
+ Exposed the HTTP server's status codes as text.
+
+2012-01-30  Kirit Saelensminde  <kirit@felspar.com>
+ Extended the set of allowable characters for the file specification and the query string in the HTTP server to include apostrophes.
+
 2012-01-30  Kirit Saelensminde  <kirit@felspar.com>
  Disabled a test that is unreliable on Windows due to its limited network buffer.
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 2010, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2010-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -25,14 +25,14 @@ class http_logger {
         http_logger();
         http_logger(const json &);
 
-        bool operator () (const logging::message &);
+        bool operator () (const fostlib::log::message &);
 };
 
 
 namespace {
 
 
-    const logging::global_sink< http_logger > http_put("http-put");
+    const fostlib::log::global_sink< http_logger > http_put("http-put");
 
 
 }
@@ -44,7 +44,7 @@ http_logger::http_logger(const json &) {
 }
 
 
-bool http_logger::operator () (const logging::message &m) {
+bool http_logger::operator () (const fostlib::log::message &m) {
     boost::shared_ptr<mime> body(new text_body(
         json::unparse(coerce<json>(m), true)));
     http::user_agent::request req("PUT", url("http://localhost:23456/"), body);
