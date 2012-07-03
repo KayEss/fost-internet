@@ -1,3 +1,7 @@
+2012-07-03  Kirit Saelensminde  <kirit@felspar.com>
+ Support the clang toolset in the compile script.
+ Removed some dead code.
+
 2012-04-14  Kirit Saelensminde  <kirit@felspar.com>
  Exposed the HTTP server's status codes as text.
 
