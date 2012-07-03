@@ -144,7 +144,6 @@ namespace {
     }
 
 
-
     void send_and_check_OK(
         network_connection &the_network_connection,
         const string command,
@@ -163,13 +162,6 @@ namespace {
         check_OK(the_network_connection, command);
     }
 
-    void send_and_check_OK(
-        network_connection &the_network_connection,
-        const string command
-    ) {
-        send(the_network_connection, command);
-        check_OK(the_network_connection, command);
-    }
 
 }
 
