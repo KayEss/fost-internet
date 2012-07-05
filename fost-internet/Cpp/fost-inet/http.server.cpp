@@ -140,8 +140,9 @@ fostlib::http::server::request::request(
                 )
             )
         ).full ) {
-            log::error("First line failed to parse",
-                coerce<string>(first_line));
+            log::error()
+                ("message", "First line failed to parse")
+                ("first line", coerce<string>(first_line));
             throw exceptions::not_implemented(
                 "Expected a HTTP request", coerce<string>(first_line));
         }

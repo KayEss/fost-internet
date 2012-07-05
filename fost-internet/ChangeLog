@@ -1,3 +1,6 @@
+2012-07-05  Kirit Saelensminde  <kirit@felspar.com>
+ Changed some log output for the HTTP server to produce JSON objects rather than an array.
+
 2012-07-03  Kirit Saelensminde  <kirit@felspar.com>
  Support the clang toolset in the compile script.
  Removed some dead code.
