@@ -26,9 +26,10 @@ FSL_TEST_FUNCTION( constructors ) {
 
 
 #define HOST_PARSE( s ) \
-    FSL_CHECK( fostlib::parse( (s), host_p[ phoenix::var(h) = phoenix::arg1 ] ).full ); \
+    FSL_CHECK( fostlib::parse( lock, (s), host_p[ phoenix::var(h) = phoenix::arg1 ] ).full ); \
     FSL_CHECK_EQ( fostlib::coerce< ascii_string >( h ), fostlib::ascii_string(s) );
 FSL_TEST_FUNCTION( parse ) {
+    fostlib::parser_lock lock;
     host_parser host_p;
     host h;
     HOST_PARSE("localhost");
