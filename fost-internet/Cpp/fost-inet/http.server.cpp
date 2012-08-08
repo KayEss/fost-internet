@@ -107,9 +107,10 @@ fostlib::http::server::request::request(
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
 
     try {
+        fostlib::parser_lock lock;
         utf8_string first_line;
         (*m_cnx) >> first_line;
-        if ( !fostlib::parse(first_line.underlying().c_str(),
+        if ( !fostlib::parse(lock, first_line.underlying().c_str(),
             (
                 +boost::spirit::chset<>( "A-Z" )
             )[
