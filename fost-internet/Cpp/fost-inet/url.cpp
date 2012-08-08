@@ -298,6 +298,7 @@ fostlib::url::url(
 }
 fostlib::url::url( const string &a_url )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
+    parser_lock lock;
     url_hostpart_parser url_hostpart_p;
     url_filespec_parser url_filespec_p;
     query_string_parser query_string_p;
@@ -305,20 +306,17 @@ fostlib::url::url( const string &a_url )
         url u;
         ascii_printable_string fs;
         query_string qs;
-        { // Scope to reduce the time we hold the parser lock
-            parser_lock lock;
-            if ( !fostlib::parse( lock, a_url.c_str(),
-                url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
-                >> !(
-                    boost::spirit::chlit< wchar_t >( '/' )
-                    >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
-                ) >> !(
-                    boost::spirit::chlit< wchar_t >( '?' )
-                    >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
-                )
-            ).full )
-                throw exceptions::parse_error( L"Could not parse URL" );
-        }
+        if ( !fostlib::parse( lock, a_url.c_str(),
+                    url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
+                    >> !(
+                        boost::spirit::chlit< wchar_t >( '/' )
+                        >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+                    ) >> !(
+                        boost::spirit::chlit< wchar_t >( '?' )
+                        >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
+                    )
+                ).full )
+            throw exceptions::parse_error( L"Could not parse URL" );
         *this = u;
         pathspec( url::filepath_string( fs ) );
         query( qs );
