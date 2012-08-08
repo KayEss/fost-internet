@@ -1,3 +1,6 @@
+2012-08-08  Kirit Saelensminde  <kirit@felspar.com>
+ The URL parser (string constructor) now acquires the parser lock. This should help stop Boost Spirit failures.
+
 2012-07-05  Kirit Saelensminde  <kirit@felspar.com>
  Changed some log output for the HTTP server to produce JSON objects rather than an array.
 

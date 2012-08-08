@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -302,18 +302,23 @@ fostlib::url::url( const string &a_url )
     url_filespec_parser url_filespec_p;
     query_string_parser query_string_p;
     try {
-        url u; ascii_printable_string fs; query_string qs;
-        if ( !fostlib::parse( a_url.c_str(),
-            url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
-            >> !(
-                boost::spirit::chlit< wchar_t >( '/' )
-                >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
-            ) >> !(
-                boost::spirit::chlit< wchar_t >( '?' )
-                >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
-            )
-        ).full )
-            throw exceptions::parse_error( L"Could not parse URL" );
+        url u;
+        ascii_printable_string fs;
+        query_string qs;
+        { // Scope to reduce the time we hold the parser lock
+            parser_lock lock;
+            if ( !fostlib::parse( lock, a_url.c_str(),
+                url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
+                >> !(
+                    boost::spirit::chlit< wchar_t >( '/' )
+                    >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
+                ) >> !(
+                    boost::spirit::chlit< wchar_t >( '?' )
+                    >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
+                )
+            ).full )
+                throw exceptions::parse_error( L"Could not parse URL" );
+        }
         *this = u;
         pathspec( url::filepath_string( fs ) );
         query( qs );
