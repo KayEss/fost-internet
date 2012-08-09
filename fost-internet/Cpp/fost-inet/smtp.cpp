@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -62,8 +62,9 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
         return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
 }
 email_address fostlib::coercer< email_address, string >::coerce( const string &s ) {
+    fostlib::parser_lock lock;
     string name, address1, address2;
-    if ( !fostlib::parse(s.c_str(),
+    if ( !fostlib::parse(lock, s.c_str(),
         ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_\\.\\+ -"))[
             phoenix::var( name ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
         ] >> boost::spirit::chlit< wchar_t >( '<' )

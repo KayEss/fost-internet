@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -78,25 +78,28 @@ std::auto_ptr< http::user_agent::response > fostlib::http::user_agent::operator 
         utf8_string first_line;
         *cnx >> first_line;
         string protocol, message; int status;
-        if ( !fostlib::parse(first_line.underlying().c_str(),
-            (
-                boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
-                boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
-                boost::spirit::strlit< wliteral >(L"HTTP/1.1")
-            )[ phoenix::var(protocol) =
-                phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-            >> boost::spirit::chlit< wchar_t >( ' ' )
-            >> boost::spirit::uint_parser< int, 10, 3, 3 >()
-                [ phoenix::var(status) = phoenix::arg1 ]
-            >> boost::spirit::chlit< wchar_t >( ' ' )
-            >> (
-                +boost::spirit::chset<>( L"a-zA-Z -" )
-            )[ phoenix::var(message) =
-                phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-        ).full )
-            throw exceptions::not_implemented(
-                "Expected a HTTP response", coerce< string >(first_line)
-            );
+        {
+            fostlib::parser_lock lock;
+            if ( !fostlib::parse(lock, first_line.underlying().c_str(),
+                (
+                    boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
+                    boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
+                    boost::spirit::strlit< wliteral >(L"HTTP/1.1")
+                )[ phoenix::var(protocol) =
+                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
+                >> boost::spirit::chlit< wchar_t >( ' ' )
+                >> boost::spirit::uint_parser< int, 10, 3, 3 >()
+                    [ phoenix::var(status) = phoenix::arg1 ]
+                >> boost::spirit::chlit< wchar_t >( ' ' )
+                >> (
+                    +boost::spirit::chset<>( L"a-zA-Z -" )
+                )[ phoenix::var(message) =
+                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
+            ).full )
+                throw exceptions::not_implemented(
+                    "Expected a HTTP response", coerce< string >(first_line)
+                );
+        }
 
         return std::auto_ptr< http::user_agent::response >(
             new http::user_agent::response(

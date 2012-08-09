@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2012, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -83,9 +83,10 @@ string fostlib::host::name() const {
 
 
 host fostlib::coercer< host, string >::coerce( const string &h ) {
+    fostlib::parser_lock lock;
     host r;
     host_parser host_p;
-    if ( fostlib::parse(h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
+    if ( fostlib::parse(lock, h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
         return r;
     else
         throw exceptions::not_implemented(
