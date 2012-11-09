@@ -1,3 +1,6 @@
+2012-11-09  Kirit Saelensminde  <kirit@felspar.com>
+ Allow the SMTP port to be set on the SMTP client and the tests.
+
 2012-08-08  Kirit Saelensminde  <kirit@felspar.com>
  The URL parser (string constructor) now acquires the parser lock. This should help stop Boost Spirit failures.
 
