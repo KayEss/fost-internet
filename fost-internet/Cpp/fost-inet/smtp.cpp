@@ -86,7 +86,7 @@ email_address fostlib::coercer< email_address, string >::coerce( const string &s
 
 
 /*
-    fostlib::smtp_server
+    fostlib::smtp_client
 */
 
 
@@ -94,8 +94,8 @@ struct fostlib::smtp_client::implementation {
     bool can_send;
     network_connection cnx;
 
-    implementation( const host &h )
-    : can_send(false), cnx( h, 25 ) {
+    implementation(const host &h, const port_number p)
+    : can_send(false), cnx(h, p) {
         check(220, L"Initial connection");
         cnx << "HELO FSIP\r\n";
         check(250, L"HELO");
@@ -109,23 +109,25 @@ struct fostlib::smtp_client::implementation {
     }
 
     void check( int code, const string &command ) {
-        utf8_string response, number = coerce< utf8_string >( coerce< string >( code ) );
+        utf8_string number = coerce< utf8_string >(
+            coerce< string >( code ));
+        utf8_string response;
         cnx >> response;
         if ( response.underlying().substr( 0, number.underlying().length() ) != number.underlying() ) {
             exceptions::not_implemented exception(L"SMTP response was not the one expected");
             exception.info()
                 << L"Expected " << code << " but got "
-                << response.underlying().substr( 0, number.underlying().length() )
-                << "\nHandling command: " << command << std::endl
-            ;
+                << response.underlying().substr(0, number.underlying().length())
+                << "\nHandling command: " << command
+                << "\nFull response: " << response << std::endl;
             throw exception;
         }
     }
 };
 
 
-fostlib::smtp_client::smtp_client( const host &server )
-: m_impl( new implementation( server ) ) {
+fostlib::smtp_client::smtp_client(const host &server, const port_number p)
+: m_impl(new implementation(server, p)) {
 }
 
 fostlib::smtp_client::~smtp_client()
