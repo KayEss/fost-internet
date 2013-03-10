@@ -121,7 +121,7 @@ namespace {
         for( pathlist_type::const_iterator P=pathlist.begin(); P!=pathlist.end(); ++P ) {
             t_path += '/' + (*P);
         }
-        return replaceAll( t_path, "//", "/" ).underlying();
+        return replace_all(t_path, "//", "/").underlying();
     }
     url::filepath_string normalise_path( const url::filepath_string &path ) {
         return url::filepath_string(
