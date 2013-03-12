@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2013,Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -393,7 +393,7 @@ fostlib::exceptions::socket_error::socket_error(
 fostlib::exceptions::socket_error::~socket_error() throw ()
 try {
 } catch ( ... ) {
-    fostlib::absorbException();
+    fostlib::absorb_exception();
 }
 
 

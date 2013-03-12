@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2012, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2009-2013,Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -200,7 +200,7 @@ namespace {
             try {
                 send(m_cnx, "quit");
             } catch ( ... ) {
-                absorbException();
+                absorb_exception();
             }
             std::auto_ptr< text_body > message( size_t i ) {
                 try {
