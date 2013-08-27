@@ -9,11 +9,11 @@ fost-exe fget
 
 run fget
     :
-        http://www.google.com/
+        http://www.kirit.com/
     :
     :
     :
-        fget-google
+        fget-kirit
     ;
 
 run fget
