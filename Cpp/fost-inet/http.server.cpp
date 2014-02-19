@@ -126,7 +126,7 @@ fostlib::http::server::request::request(
             ]
             >> !(
                 boost::spirit::chlit< char >('?')
-                >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))[
+                >> !(+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))[
                     phoenix::var(m_query_string) =
                         phoenix::construct_< ascii_printable_string >(
                             phoenix::arg1, phoenix::arg2
