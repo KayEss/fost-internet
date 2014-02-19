@@ -148,6 +148,7 @@ FSL_TEST_FUNCTION( url_parser_filespec ) {
 
     ascii_printable_string s;
     URL_PARSE_FILESPEC( "/", "/" );
+    URL_PARSE_FILESPEC( "/*/", "/*/" );
     URL_PARSE_FILESPEC( "/file.html", "/file.html" );
     URL_PARSE_FILESPEC( "/Site:/file.html", "/Site:/file.html" );
     URL_PARSE_FILESPEC( "/Site:/(file).html", "/Site:/(file).html" );
