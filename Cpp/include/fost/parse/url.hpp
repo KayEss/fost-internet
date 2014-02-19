@@ -90,7 +90,7 @@ namespace fostlib {
                 ];
                 value = (+(
                         (
-                            boost::spirit::chset<>( L"/:_@a-zA-Z0-9.,+*!=-" )
+                            boost::spirit::chset<>( L"/:_@a-zA-Z0-9().,+*!=-" )
                                 [parsers::push_back( value.buffer, phoenix::arg1 )]
                         ) | (
                             boost::spirit::chlit<wchar_t>( '%' )

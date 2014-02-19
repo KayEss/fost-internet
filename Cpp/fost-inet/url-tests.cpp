@@ -106,6 +106,10 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"key2&key1" ); // Ensure order is preserved
     QS_PARSE( L"key1=value1&key2=value=2&key3=value3" );
     QS_PARSE( L"key=%26%2312296%3B" );
+    FSL_CHECK( fostlib::parse( lock, L"key=(12296)", \
+            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
+    FSL_CHECK_EQ( qs.as_string().value(), \
+            coerce< ascii_printable_string >(string(L"key=%2812296%29")) );
 }
 
 
