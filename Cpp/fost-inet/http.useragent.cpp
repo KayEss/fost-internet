@@ -69,6 +69,7 @@ std::auto_ptr< http::user_agent::response >
                 buffer << "?" << q.value().underlying();
             }
         }
+        req.headers().fold_limit(null); // Turn off line folding
         buffer << " HTTP/1.0\r\n" << req.headers() << "\r\n";
         *cnx << buffer;
 
