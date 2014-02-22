@@ -133,7 +133,6 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
 
 // NOTE: probably better if implemented as an ostream-derived class.
 namespace {
-    const int c_rfc_line_limit = 78 /* characters */;
     std::string fold( const std::string &s, size_t line_limit){
         std::stringstream ss;
         std::string left_string = s;
@@ -158,7 +157,11 @@ std::ostream &fostlib::operator << (
         std::stringstream ss;
         ss << coerce<ascii_string>(i->first).underlying()
             << ": " << i->second << "\r\n";
-        o << fold(ss.str(), c_rfc_line_limit);
+        if ( headers.fold_limit().isnull() ) {
+            o << ss.str();
+        } else {
+            o << fold(ss.str(), headers.fold_limit().value());
+        }
     }
     return o;
 }
