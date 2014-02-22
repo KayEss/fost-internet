@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2013,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014,Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -47,8 +47,7 @@ namespace {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
                 text_body error(
-                    fostlib::coerce<fostlib::string>(e)
-                );
+                    fostlib::coerce<fostlib::string>(e));
                 req( error, 500 );
                 return false;
             }
@@ -66,8 +65,9 @@ namespace {
         buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
             << response.headers() << "\r\n";
         *cnx << buffer;
-        for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
+        for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i ) {
             *cnx << *i;
+        }
     }
 
     void raise_connection_error (
