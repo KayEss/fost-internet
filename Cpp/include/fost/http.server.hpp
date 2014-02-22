@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -28,7 +28,7 @@ namespace fostlib {
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
-                boost::function<void (const mime&, const ascii_string&)> m_handler;
+                boost::function<void (mime&, const ascii_string&)> m_handler;
                 string m_method;
                 url::filepath_string m_pathspec;
                 nullable< ascii_printable_string > m_query_string;
@@ -62,11 +62,11 @@ namespace fostlib {
 
                     /// Used to pass the response back to the user agent.
                     void operator () (
-                        const mime &response,
+                        mime &response,
                         const int status = 200);
                     /// Used to pass the response back to the user agent.
                     void operator () (
-                        const mime &response,
+                        mime &response,
                         const ascii_string &status_text);
             };
 

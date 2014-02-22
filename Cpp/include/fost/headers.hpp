@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -53,6 +53,9 @@ namespace fostlib {
         const_iterator begin() const;
         /// The end of the header fields
         const_iterator end() const;
+
+        /// The character limit before folding, defaults to 78
+        accessors< nullable< std::size_t > > fold_limit;
 
         /// The content of header fields
         class FOST_INET_DECLSPEC content {
