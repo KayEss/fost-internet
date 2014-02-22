@@ -59,9 +59,10 @@ namespace {
 
     void respond_on_socket(
         fostlib::network_connection *cnx,
-        const mime &response, const ascii_string &status
+        mime &response, const ascii_string &status
     ) {
         std::stringstream buffer;
+        response.headers().fold_limit(null); // Turn off MIME line folding
         buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
             << response.headers() << "\r\n";
         *cnx << buffer;
@@ -205,7 +206,7 @@ boost::shared_ptr< fostlib::binary_body > fostlib::http::server::request::data(
 
 
 void fostlib::http::server::request::operator() (
-    const mime &response, const ascii_string &status
+    mime &response, const ascii_string &status
 ) {
     m_handler(response, status);
 }
@@ -266,7 +267,7 @@ nliteral fostlib::http::server::status_text( int code ) {
 
 
 void fostlib::http::server::request::operator() (
-    const mime &response, const int status
+    mime &response, const int status
 ) {
     std::stringstream ss;
     ss << status << " " << status_text(status);
