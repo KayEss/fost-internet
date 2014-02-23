@@ -33,6 +33,17 @@ FSL_TEST_FUNCTION( headers ) {
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"Another value" );
 }
 
+FSL_TEST_FUNCTION( headers_case_insensitive ) {
+    mime::mime_headers headers;
+    headers.set("ETag", "somevalue");
+    FSL_CHECK_EQ( headers["etag"].value(), "somevalue" );
+    headers.set("Etag", "newvalue");
+    FSL_CHECK_EQ( headers["etag"].value(), "newvalue" );
+    std::stringstream ss;
+    ss << headers;
+    FSL_CHECK_EQ(ss.str(), "Etag: newvalue\r\n");
+}
+
 FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
     mime::mime_headers headers;
     // from an Exchange bounced message:
