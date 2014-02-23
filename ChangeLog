@@ -1,3 +1,6 @@
+2014-02-23  Kirit Saelensminde  <kirit@felspar.com>
+ The MIME header names and values need to be retrievable in a case-insensitive manner as not everybody agrees on the correct case.
+
 2014-02-22  Kirit Saelensminde  <kirit@felspar.com>
  Folding of long lines in MIME headers needs to be conditional on the protocol because most MIME protocols use it, but HTTP does not and some web servers don't handle folded lines.
 
