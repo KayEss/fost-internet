@@ -185,7 +185,7 @@ fostlib::headers_base::content::content( const string &val )
 }
 fostlib::headers_base::content::content(
     const string &val, const std::map< string, string > &args
-) : m_subvalues( args ), value( val ) {
+) : m_subvalues( args.begin(), args.end() ), value( val ) {
 }
 
 headers_base::content &fostlib::headers_base::content::subvalue(

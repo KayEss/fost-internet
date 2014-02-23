@@ -44,6 +44,17 @@ FSL_TEST_FUNCTION( headers_case_insensitive ) {
     FSL_CHECK_EQ(ss.str(), "Etag: newvalue\r\n");
 }
 
+FSL_TEST_FUNCTION( subvalues_case_insensitive ) {
+    mime::mime_headers headers;
+    headers.set("Content-Type", "text/plain");
+    headers.set_subvalue("content-type", "encoding", "utf-8");
+    FSL_CHECK(!headers["Content-type"].subvalue("Encoding").isnull());
+    FSL_CHECK_EQ(headers["Content-type"].subvalue("Encoding").value(), "utf-8");
+    std::stringstream ss;
+    ss << headers;
+    FSL_CHECK_EQ(ss.str(), "Content-Type: text/plain; encoding=\"utf-8\"\r\n");
+}
+
 FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
     mime::mime_headers headers;
     // from an Exchange bounced message:

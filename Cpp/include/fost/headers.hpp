@@ -84,7 +84,7 @@ namespace fostlib {
 
         /// The content of header fields
         class FOST_INET_DECLSPEC content {
-            std::map< string, string > m_subvalues;
+            std::map< string, string, detail::ascii_iless > m_subvalues;
             public:
                 /// Create empty content for a header value
                 content();
@@ -106,7 +106,7 @@ namespace fostlib {
                 nullable< string > subvalue( const string &k ) const;
 
                 /// Allows the sub-values to be iterated
-                typedef std::map< string, string >::const_iterator const_iterator;
+                typedef std::map< string, string, detail::ascii_iless >::const_iterator const_iterator;
                 /// The start of the sub-values
                 const_iterator begin() const;
                 /// The end of the sub-values
