@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -25,6 +25,9 @@ FSL_TEST_FUNCTION( headers ) {
 
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"value" );
     FSL_CHECK_EQ( headers[ L"X-Second" ].value(), L"value" );
+
+    FSL_CHECK_EQ( headers[ L"x-first" ].value(), L"value" );
+    FSL_CHECK_EQ( headers[ L"x-second" ].value(), L"value" );
 
     headers.set("X-First", L"Another value");
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"Another value" );
