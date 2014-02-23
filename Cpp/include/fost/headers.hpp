@@ -19,12 +19,37 @@
 namespace fostlib {
 
 
+    namespace detail {
+
+
+        /// Case insensitive comparison function for ASCII letters
+        inline bool ascii_iless_compare(utf32 c1, utf32 c2) {
+            if ( c1 < 0x7f && c2 < 0x7f ) {
+                return std::tolower(c1) < std::tolower(c2);
+            } else {
+                return c1 < c2;
+            }
+        }
+
+
+        /// Case insensitive version of std::less for chars in the ASCII range
+        struct ascii_iless : std::binary_function<string, string, bool> {
+            bool operator() (const string& c1, const string& c2) const {
+                return std::lexicographical_compare(c1.begin(), c1.end(),
+                    c2.begin(), c2.end(), ascii_iless_compare);
+            }
+        };
+
+
+    }
+
+
     /// An abstract base class used to describe headers as they appear in protocols like SMTP and HTTP.
     class FOST_INET_DECLSPEC FSL_ABSTRACT headers_base {
     public:
         class content;
     private:
-        typedef std::multimap< string, content > header_store_type;
+        typedef std::multimap< string, content, detail::ascii_iless > header_store_type;
     public:
         /// Construct empty headers
         headers_base();
@@ -44,7 +69,7 @@ namespace fostlib {
         void add( const string &name, const content & );
         /// Allow a specified sub-value on the specified header to be set
         void set_subvalue( const string &name, const string &k, const string &v );
-        /// Fetches a header throwing if the header doesn't exist
+        /// Fetches a header
         const content &operator [] ( const string & ) const;
 
         /// Allow the fields to be iterated
@@ -59,7 +84,7 @@ namespace fostlib {
 
         /// The content of header fields
         class FOST_INET_DECLSPEC content {
-            std::map< string, string > m_subvalues;
+            std::map< string, string, detail::ascii_iless > m_subvalues;
             public:
                 /// Create empty content for a header value
                 content();
@@ -81,7 +106,7 @@ namespace fostlib {
                 nullable< string > subvalue( const string &k ) const;
 
                 /// Allows the sub-values to be iterated
-                typedef std::map< string, string >::const_iterator const_iterator;
+                typedef std::map< string, string, detail::ascii_iless >::const_iterator const_iterator;
                 /// The start of the sub-values
                 const_iterator begin() const;
                 /// The end of the sub-values

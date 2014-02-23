@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -26,8 +26,33 @@ FSL_TEST_FUNCTION( headers ) {
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"value" );
     FSL_CHECK_EQ( headers[ L"X-Second" ].value(), L"value" );
 
+    FSL_CHECK_EQ( headers[ L"x-first" ].value(), L"value" );
+    FSL_CHECK_EQ( headers[ L"x-second" ].value(), L"value" );
+
     headers.set("X-First", L"Another value");
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"Another value" );
+}
+
+FSL_TEST_FUNCTION( headers_case_insensitive ) {
+    mime::mime_headers headers;
+    headers.set("ETag", "somevalue");
+    FSL_CHECK_EQ( headers["etag"].value(), "somevalue" );
+    headers.set("Etag", "newvalue");
+    FSL_CHECK_EQ( headers["etag"].value(), "newvalue" );
+    std::stringstream ss;
+    ss << headers;
+    FSL_CHECK_EQ(ss.str(), "Etag: newvalue\r\n");
+}
+
+FSL_TEST_FUNCTION( subvalues_case_insensitive ) {
+    mime::mime_headers headers;
+    headers.set("Content-Type", "text/plain");
+    headers.set_subvalue("content-type", "encoding", "utf-8");
+    FSL_CHECK(!headers["Content-type"].subvalue("Encoding").isnull());
+    FSL_CHECK_EQ(headers["Content-type"].subvalue("Encoding").value(), "utf-8");
+    std::stringstream ss;
+    ss << headers;
+    FSL_CHECK_EQ(ss.str(), "Content-Type: text/plain; encoding=\"utf-8\"\r\n");
 }
 
 FSL_TEST_FUNCTION( headers_without_values_are_legit ) {
