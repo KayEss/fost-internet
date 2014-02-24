@@ -25,7 +25,8 @@ namespace fostlib {
         /// Case insensitive comparison function for ASCII letters
         inline bool ascii_iless_compare(utf32 c1, utf32 c2) {
             if ( c1 < 0x7f && c2 < 0x7f ) {
-                return std::tolower(c1) < std::tolower(c2);
+                const std::locale &loc(std::locale::classic());
+                return std::tolower(c1, loc) < std::tolower(c2, loc);
             } else {
                 return c1 < c2;
             }
