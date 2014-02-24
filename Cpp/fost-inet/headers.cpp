@@ -196,7 +196,7 @@ headers_base::content &fostlib::headers_base::content::subvalue(
 }
 
 nullable< string > fostlib::headers_base::content::subvalue( const string &k ) const {
-    std::map< string, string >::const_iterator p( m_subvalues.find( k ) );
+    std::map< string, string, detail::ascii_iless >::const_iterator p(m_subvalues.find(k));
     if ( p == m_subvalues.end() )
         return null;
     else
