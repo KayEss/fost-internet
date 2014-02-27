@@ -49,6 +49,7 @@ namespace fostlib {
             /// Remove a key from the query string
             void remove( const string &name );
 
+            /// A string representing the query, if any is specified
             nullable< ascii_printable_string > as_string() const;
 
         private:
