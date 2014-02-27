@@ -47,6 +47,8 @@ namespace {
 
 
 }
+
+
 /*
     fostlib::url::query_string
 */
@@ -58,6 +60,7 @@ fostlib::url::query_string::query_string( const ascii_printable_string &q )
 : m_string( q ) {
 }
 
+
 void fostlib::url::query_string::append(
     const string &name, const nullable< string > &value
 ) {
@@ -67,6 +70,7 @@ void fostlib::url::query_string::append(
     }
     m_query[ name ].push_back( value );
 }
+
 
 void fostlib::url::query_string::remove( const string &name ) {
     if ( !m_string.isnull() ) {
@@ -78,6 +82,44 @@ void fostlib::url::query_string::remove( const string &name ) {
     if ( p != m_query.end() )
         m_query.erase( p );
 }
+
+
+std::size_t fostlib::url::query_string::has_key(const string &key) const {
+    std::map< string, std::list< nullable< string > > >::const_iterator p(
+        m_query.find(key));
+    if ( p == m_query.end() ) {
+        return 0;
+    } else {
+        return p->second.size();
+    }
+}
+
+
+nullable< string > fostlib::url::query_string::operator [] (const string &k) const {
+    std::map< string, std::list< nullable< string > > >::const_iterator p(
+        m_query.find(k));
+    if ( p == m_query.end() || p->second.size() == 0u ) {
+        return null;
+    } else {
+        return *p->second.begin();
+    }
+}
+
+
+namespace {
+    const std::list< nullable< string > > c_empty_list;
+}
+const std::list< nullable< string > > &fostlib::url::query_string::at
+        (const string &key) const {
+    std::map< string, std::list< nullable< string > > >::const_iterator p(
+        m_query.find(key));
+    if ( p == m_query.end() ) {
+        return c_empty_list;
+    } else {
+        return p->second;
+    }
+}
+
 
 namespace {
     ascii_printable_string query_string_encode( const string &s ) {

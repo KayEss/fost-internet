@@ -52,6 +52,15 @@ namespace fostlib {
             /// A string representing the query, if any is specified
             nullable< ascii_printable_string > as_string() const;
 
+            /// Return the number of items for the requested key
+            std::size_t has_key(const string &key) const;
+
+            /// Fetch the first item at this key position, or null if none exists
+            nullable< string > operator [] (const string &key) const;
+
+            /// Fetch all items at this key position, or an empty list if none exists
+            const std::list< nullable< string > > &at(const string &key) const;
+
         private:
             nullable< ascii_printable_string > m_string;
             std::map< string, std::list< nullable< string > > > m_query;
