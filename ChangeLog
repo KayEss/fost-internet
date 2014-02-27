@@ -1,3 +1,6 @@
+2014-02-27  Kirit Saelensminde  <kirit@felspar.com>
+ The `fostlib::url::query_string` class can now also be used to parse the standard format query string on the server side.
+
 2014-02-23  Kirit Saelensminde  <kirit@felspar.com>
  The MIME header names and values need to be retrievable in a case-insensitive manner as not everybody agrees on the correct case.
 
