@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -49,7 +49,17 @@ namespace fostlib {
             /// Remove a key from the query string
             void remove( const string &name );
 
+            /// A string representing the query, if any is specified
             nullable< ascii_printable_string > as_string() const;
+
+            /// Return the number of items for the requested key
+            std::size_t has_key(const string &key) const;
+
+            /// Fetch the first item at this key position, or null if none exists
+            nullable< string > operator [] (const string &key) const;
+
+            /// Fetch all items at this key position, or an empty list if none exists
+            const std::list< nullable< string > > &at(const string &key) const;
 
         private:
             nullable< ascii_printable_string > m_string;
