@@ -106,6 +106,7 @@ fostlib::http::server::request::request(
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
 ) : m_cnx( new network_connection(connection) ), m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
+    query_string_parser qsp;
 
     try {
         fostlib::parser_lock lock;
@@ -128,8 +129,7 @@ fostlib::http::server::request::request(
             >> !(
                 boost::spirit::chlit< char >('?')
                 >> !(
-                        query_string_parser()[
-                                phoenix::var(m_query_string) = phoenix::arg1]
+                        qsp[phoenix::var(m_query_string) = phoenix::arg1]
                     |
                         (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))
                             [phoenix::var(m_query_string) =
