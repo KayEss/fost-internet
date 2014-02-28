@@ -31,7 +31,7 @@ namespace fostlib {
                 boost::function<void (mime&, const ascii_string&)> m_handler;
                 string m_method;
                 url::filepath_string m_pathspec;
-                nullable< ascii_printable_string > m_query_string;
+                url::query_string m_query_string;
                 boost::shared_ptr< binary_body > m_mime;
 
                 public:
@@ -54,7 +54,7 @@ namespace fostlib {
                     /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
                     /// The query string
-                    const nullable< ascii_printable_string > query_string() const {
+                    const url::query_string query_string() const {
                         return m_query_string;
                     }
                     /// The request body and headers
