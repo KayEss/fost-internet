@@ -1,3 +1,6 @@
+2014-03-02  Kirit Saelensminde  <kirit@felspar.com>
+ Alter the testing HTTP server request class so it can take a query string and the headers/body are optional.
+
 2014-02-27  Kirit Saelensminde  <kirit@felspar.com>
  The `fostlib::url::query_string` class can now also be used to parse the standard format query string on the server side. The HTTP server query string is also now always a `url::query_string` instance.
 

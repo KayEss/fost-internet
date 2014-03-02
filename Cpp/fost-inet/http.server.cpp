@@ -183,11 +183,15 @@ fostlib::http::server::request::request(
     }
 }
 fostlib::http::server::request::request(
-    const string &method, const url::filepath_string &filespec,
-    std::auto_ptr< binary_body > headers_and_body
+    const string &method,
+    const url::filepath_string &filespec,
+    std::auto_ptr< binary_body > headers_and_body,
+    const url::query_string &qs
 ) : m_handler(raise_connection_error),
-        m_method( method ), m_pathspec( filespec ),
-        m_mime( headers_and_body.release() ) {
+        m_method( method ), m_pathspec( filespec ), m_query_string(qs),
+        m_mime( headers_and_body.get()
+            ? headers_and_body.release()
+            : new binary_body() ) {
 }
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
