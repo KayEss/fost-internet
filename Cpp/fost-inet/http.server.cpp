@@ -194,6 +194,18 @@ fostlib::http::server::request::request(
             : new binary_body() ) {
 }
 fostlib::http::server::request::request(
+    const string &method,
+    const url::filepath_string &filespec,
+    const url::query_string &qs,
+    std::auto_ptr< binary_body > headers_and_body
+) : m_handler(raise_connection_error),
+        m_method( method ), m_pathspec( filespec ), m_query_string(qs),
+        m_mime( headers_and_body.get()
+            ? headers_and_body.release()
+            : new binary_body() ) {
+}
+
+fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
     std::auto_ptr< binary_body > headers_and_body,
     boost::function<void (const mime&, const ascii_string&)> handler

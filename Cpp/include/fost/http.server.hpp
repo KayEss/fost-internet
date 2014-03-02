@@ -45,6 +45,12 @@ namespace fostlib {
                         std::auto_ptr< binary_body > headers_and_body
                             = std::auto_ptr< binary_body >(),
                         const url::query_string &qs = url::query_string());
+                    /// This constructor is useful for mocking the request that doesn't get responded to
+                    request(
+                        const string &method, const url::filepath_string &filespec,
+                        const url::query_string &qs,
+                        std::auto_ptr< binary_body > headers_and_body
+                            = std::auto_ptr< binary_body >());
                     /// This constructor is useful for mocking the request that gets responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
