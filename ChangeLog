@@ -1,3 +1,6 @@
+2014-03-04  Kirit Saelensminde  <kirit@felspar.com>
+ Hold the parser lock for a much shorter period when parsing a HTTP request to the web server.
+
 2014-03-02  Kirit Saelensminde  <kirit@felspar.com>
  Alter the testing HTTP server request class so it can take a query string and the headers/body are optional.
 

@@ -108,48 +108,51 @@ fostlib::http::server::request::request(
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
     query_string_parser qsp;
 
+    utf8_string first_line;
+    (*m_cnx) >> first_line;
+
     try {
-        fostlib::parser_lock lock;
-        utf8_string first_line;
-        (*m_cnx) >> first_line;
-        if ( !fostlib::parse(lock, first_line.underlying().c_str(),
-            (
-                +boost::spirit::chset<>( "A-Z" )
-            )[
-                phoenix::var(m_method) =
-                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-            ]
-            >> boost::spirit::chlit< char >( ' ' )
-            >> (+boost::spirit::chset<>( "_@a-zA-Z0-9/.,:'()%=~!+*-" ))[
-                phoenix::var(m_pathspec) =
-                    phoenix::construct_< url::filepath_string >(
-                        phoenix::arg1, phoenix::arg2
-                    )
-            ]
-            >> !(
-                boost::spirit::chlit< char >('?')
+        {
+            fostlib::parser_lock lock;
+            if ( !fostlib::parse(lock, first_line.underlying().c_str(),
+                (
+                    +boost::spirit::chset<>( "A-Z" )
+                )[
+                    phoenix::var(m_method) =
+                        phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+                ]
+                >> boost::spirit::chlit< char >( ' ' )
+                >> (+boost::spirit::chset<>( "_@a-zA-Z0-9/.,:'()%=~!+*-" ))[
+                    phoenix::var(m_pathspec) =
+                        phoenix::construct_< url::filepath_string >(
+                            phoenix::arg1, phoenix::arg2
+                        )
+                ]
                 >> !(
-                        qsp[phoenix::var(m_query_string) = phoenix::arg1]
-                    |
-                        (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))
-                            [phoenix::var(m_query_string) =
-                                phoenix::construct_< ascii_printable_string >
-                                    (phoenix::arg1, phoenix::arg2)]
+                    boost::spirit::chlit< char >('?')
+                    >> !(
+                            qsp[phoenix::var(m_query_string) = phoenix::arg1]
+                        |
+                            (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))
+                                [phoenix::var(m_query_string) =
+                                    phoenix::construct_< ascii_printable_string >
+                                        (phoenix::arg1, phoenix::arg2)]
+                    )
                 )
-            )
-            >> !(
-                boost::spirit::chlit< char >( ' ' )
-                >> (
-                    boost::spirit::strlit< nliteral >("HTTP/1.0") |
-                    boost::spirit::strlit< nliteral >("HTTP/1.1")
+                >> !(
+                    boost::spirit::chlit< char >( ' ' )
+                    >> (
+                        boost::spirit::strlit< nliteral >("HTTP/1.0") |
+                        boost::spirit::strlit< nliteral >("HTTP/1.1")
+                    )
                 )
-            )
-        ).full ) {
-            log::error()
-                ("message", "First line failed to parse")
-                ("first line", coerce<string>(first_line));
-            throw exceptions::not_implemented(
-                "Expected a HTTP request", coerce<string>(first_line));
+            ).full ) {
+                log::error()
+                    ("message", "First line failed to parse")
+                    ("first line", coerce<string>(first_line));
+                throw exceptions::not_implemented(
+                    "Expected a HTTP request", coerce<string>(first_line));
+            }
         }
 
         mime::mime_headers headers;
@@ -169,8 +172,9 @@ fostlib::http::server::request::request(
             std::vector< unsigned char > data( content_length );
             *m_cnx >> data;
             m_mime.reset( new binary_body(data, headers) );
-        } else
+        } else {
             m_mime.reset( new binary_body(headers) );
+        }
     } catch ( fostlib::exceptions::exception &e ) {
         try {
             text_body error(coerce<string>(e));
