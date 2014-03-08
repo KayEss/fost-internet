@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -28,10 +28,10 @@ namespace fostlib {
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
-                boost::function<void (const mime&, const ascii_string&)> m_handler;
+                boost::function<void (mime&, const ascii_string&)> m_handler;
                 string m_method;
                 url::filepath_string m_pathspec;
-                nullable< ascii_printable_string > m_query_string;
+                url::query_string m_query_string;
                 boost::shared_ptr< binary_body > m_mime;
 
                 public:
@@ -42,7 +42,15 @@ namespace fostlib {
                     /// This constructor is useful for mocking the request that doesn't get responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
-                        std::auto_ptr< binary_body > headers_and_body);
+                        std::auto_ptr< binary_body > headers_and_body
+                            = std::auto_ptr< binary_body >(),
+                        const url::query_string &qs = url::query_string());
+                    /// This constructor is useful for mocking the request that doesn't get responded to
+                    request(
+                        const string &method, const url::filepath_string &filespec,
+                        const url::query_string &qs,
+                        std::auto_ptr< binary_body > headers_and_body
+                            = std::auto_ptr< binary_body >());
                     /// This constructor is useful for mocking the request that gets responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
@@ -54,7 +62,7 @@ namespace fostlib {
                     /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
                     /// The query string
-                    const nullable< ascii_printable_string > query_string() const {
+                    const url::query_string query_string() const {
                         return m_query_string;
                     }
                     /// The request body and headers
@@ -62,11 +70,11 @@ namespace fostlib {
 
                     /// Used to pass the response back to the user agent.
                     void operator () (
-                        const mime &response,
+                        mime &response,
                         const int status = 200);
                     /// Used to pass the response back to the user agent.
                     void operator () (
-                        const mime &response,
+                        mime &response,
                         const ascii_string &status_text);
             };
 

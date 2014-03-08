@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2013,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014,Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -47,8 +47,7 @@ namespace {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
                 text_body error(
-                    fostlib::coerce<fostlib::string>(e)
-                );
+                    fostlib::coerce<fostlib::string>(e));
                 req( error, 500 );
                 return false;
             }
@@ -60,14 +59,16 @@ namespace {
 
     void respond_on_socket(
         fostlib::network_connection *cnx,
-        const mime &response, const ascii_string &status
+        mime &response, const ascii_string &status
     ) {
         std::stringstream buffer;
+        response.headers().fold_limit(null); // Turn off MIME line folding
         buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
             << response.headers() << "\r\n";
         *cnx << buffer;
-        for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i )
+        for ( mime::const_iterator i( response.begin() ); i != response.end(); ++i ) {
             *cnx << *i;
+        }
     }
 
     void raise_connection_error (
@@ -105,47 +106,53 @@ fostlib::http::server::request::request(
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
 ) : m_cnx( new network_connection(connection) ), m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
+    query_string_parser qsp;
+
+    utf8_string first_line;
+    (*m_cnx) >> first_line;
 
     try {
-        fostlib::parser_lock lock;
-        utf8_string first_line;
-        (*m_cnx) >> first_line;
-        if ( !fostlib::parse(lock, first_line.underlying().c_str(),
-            (
-                +boost::spirit::chset<>( "A-Z" )
-            )[
-                phoenix::var(m_method) =
-                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-            ]
-            >> boost::spirit::chlit< char >( ' ' )
-            >> (+boost::spirit::chset<>( "_a-zA-Z0-9/.,:'()%=~!+-" ))[
-                phoenix::var(m_pathspec) =
-                    phoenix::construct_< url::filepath_string >(
-                        phoenix::arg1, phoenix::arg2
-                    )
-            ]
-            >> !(
-                boost::spirit::chlit< char >('?')
-                >> (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'%+*=-" ))[
-                    phoenix::var(m_query_string) =
-                        phoenix::construct_< ascii_printable_string >(
+        {
+            fostlib::parser_lock lock;
+            if ( !fostlib::parse(lock, first_line.underlying().c_str(),
+                (
+                    +boost::spirit::chset<>( "A-Z" )
+                )[
+                    phoenix::var(m_method) =
+                        phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
+                ]
+                >> boost::spirit::chlit< char >( ' ' )
+                >> (+boost::spirit::chset<>( "_@a-zA-Z0-9/.,:'()%=~!+*-" ))[
+                    phoenix::var(m_pathspec) =
+                        phoenix::construct_< url::filepath_string >(
                             phoenix::arg1, phoenix::arg2
                         )
                 ]
-            )
-            >> !(
-                boost::spirit::chlit< char >( ' ' )
-                >> (
-                    boost::spirit::strlit< nliteral >("HTTP/1.0") |
-                    boost::spirit::strlit< nliteral >("HTTP/1.1")
+                >> !(
+                    boost::spirit::chlit< char >('?')
+                    >> !(
+                            qsp[phoenix::var(m_query_string) = phoenix::arg1]
+                        |
+                            (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))
+                                [phoenix::var(m_query_string) =
+                                    phoenix::construct_< ascii_printable_string >
+                                        (phoenix::arg1, phoenix::arg2)]
+                    )
                 )
-            )
-        ).full ) {
-            log::error()
-                ("message", "First line failed to parse")
-                ("first line", coerce<string>(first_line));
-            throw exceptions::not_implemented(
-                "Expected a HTTP request", coerce<string>(first_line));
+                >> !(
+                    boost::spirit::chlit< char >( ' ' )
+                    >> (
+                        boost::spirit::strlit< nliteral >("HTTP/1.0") |
+                        boost::spirit::strlit< nliteral >("HTTP/1.1")
+                    )
+                )
+            ).full ) {
+                log::error()
+                    ("message", "First line failed to parse")
+                    ("first line", coerce<string>(first_line));
+                throw exceptions::not_implemented(
+                    "Expected a HTTP request", coerce<string>(first_line));
+            }
         }
 
         mime::mime_headers headers;
@@ -165,8 +172,9 @@ fostlib::http::server::request::request(
             std::vector< unsigned char > data( content_length );
             *m_cnx >> data;
             m_mime.reset( new binary_body(data, headers) );
-        } else
+        } else {
             m_mime.reset( new binary_body(headers) );
+        }
     } catch ( fostlib::exceptions::exception &e ) {
         try {
             text_body error(coerce<string>(e));
@@ -179,12 +187,28 @@ fostlib::http::server::request::request(
     }
 }
 fostlib::http::server::request::request(
-    const string &method, const url::filepath_string &filespec,
+    const string &method,
+    const url::filepath_string &filespec,
+    std::auto_ptr< binary_body > headers_and_body,
+    const url::query_string &qs
+) : m_handler(raise_connection_error),
+        m_method( method ), m_pathspec( filespec ), m_query_string(qs),
+        m_mime( headers_and_body.get()
+            ? headers_and_body.release()
+            : new binary_body() ) {
+}
+fostlib::http::server::request::request(
+    const string &method,
+    const url::filepath_string &filespec,
+    const url::query_string &qs,
     std::auto_ptr< binary_body > headers_and_body
 ) : m_handler(raise_connection_error),
-        m_method( method ), m_pathspec( filespec ),
-        m_mime( headers_and_body.release() ) {
+        m_method( method ), m_pathspec( filespec ), m_query_string(qs),
+        m_mime( headers_and_body.get()
+            ? headers_and_body.release()
+            : new binary_body() ) {
 }
+
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
     std::auto_ptr< binary_body > headers_and_body,
@@ -205,7 +229,7 @@ boost::shared_ptr< fostlib::binary_body > fostlib::http::server::request::data(
 
 
 void fostlib::http::server::request::operator() (
-    const mime &response, const ascii_string &status
+    mime &response, const ascii_string &status
 ) {
     m_handler(response, status);
 }
@@ -266,7 +290,7 @@ nliteral fostlib::http::server::status_text( int code ) {
 
 
 void fostlib::http::server::request::operator() (
-    const mime &response, const int status
+    mime &response, const int status
 ) {
     std::stringstream ss;
     ss << status << " " << status_text(status);

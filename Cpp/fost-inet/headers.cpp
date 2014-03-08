@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -19,7 +19,8 @@ using namespace fostlib;
 */
 
 
-fostlib::headers_base::headers_base() {
+fostlib::headers_base::headers_base()
+: fold_limit(78) {
 }
 fostlib::headers_base::~headers_base() {
 }
@@ -132,7 +133,6 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
 
 // NOTE: probably better if implemented as an ostream-derived class.
 namespace {
-    const int c_rfc_line_limit = 78 /* characters */;
     std::string fold( const std::string &s, size_t line_limit){
         std::stringstream ss;
         std::string left_string = s;
@@ -157,7 +157,11 @@ std::ostream &fostlib::operator << (
         std::stringstream ss;
         ss << coerce<ascii_string>(i->first).underlying()
             << ": " << i->second << "\r\n";
-        o << fold(ss.str(), c_rfc_line_limit);
+        if ( headers.fold_limit().isnull() ) {
+            o << ss.str();
+        } else {
+            o << fold(ss.str(), headers.fold_limit().value());
+        }
     }
     return o;
 }
@@ -181,7 +185,7 @@ fostlib::headers_base::content::content( const string &val )
 }
 fostlib::headers_base::content::content(
     const string &val, const std::map< string, string > &args
-) : m_subvalues( args ), value( val ) {
+) : m_subvalues( args.begin(), args.end() ), value( val ) {
 }
 
 headers_base::content &fostlib::headers_base::content::subvalue(
@@ -192,7 +196,7 @@ headers_base::content &fostlib::headers_base::content::subvalue(
 }
 
 nullable< string > fostlib::headers_base::content::subvalue( const string &k ) const {
-    std::map< string, string >::const_iterator p( m_subvalues.find( k ) );
+    std::map< string, string, detail::ascii_iless >::const_iterator p(m_subvalues.find(k));
     if ( p == m_subvalues.end() )
         return null;
     else

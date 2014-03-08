@@ -1,3 +1,18 @@
+2014-03-04  Kirit Saelensminde  <kirit@felspar.com>
+ Hold the parser lock for a much shorter period when parsing a HTTP request to the web server.
+
+2014-03-02  Kirit Saelensminde  <kirit@felspar.com>
+ Alter the testing HTTP server request class so it can take a query string and the headers/body are optional.
+
+2014-02-27  Kirit Saelensminde  <kirit@felspar.com>
+ The `fostlib::url::query_string` class can now also be used to parse the standard format query string on the server side. The HTTP server query string is also now always a `url::query_string` instance.
+
+2014-02-23  Kirit Saelensminde  <kirit@felspar.com>
+ The MIME header names and values need to be retrievable in a case-insensitive manner as not everybody agrees on the correct case.
+
+2014-02-22  Kirit Saelensminde  <kirit@felspar.com>
+ Folding of long lines in MIME headers needs to be conditional on the protocol because most MIME protocols use it, but HTTP does not and some web servers don't handle folded lines.
+
 2012-11-09  Kirit Saelensminde  <kirit@felspar.com>
  Allow the SMTP port to be set on the SMTP client and the tests.
 

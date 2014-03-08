@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2012, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -44,11 +44,14 @@ FSL_TEST_FUNCTION( query_string ) {
     FSL_CHECK( q2.as_string().isnull() );
     FSL_CHECK_EQ(
         q1.as_string().value( ascii_printable_string() ),
-        q2.as_string().value( ascii_printable_string() )
-    );
+        q2.as_string().value( ascii_printable_string() ));
+    FSL_CHECK(q1["not-a-key"].isnull());
+    FSL_CHECK_EQ(q2.at("not-a-key").size(), 0u);
     q1 = q2;
     q1.append( L"key", null );
     FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=" ) );
+    FSL_CHECK( q1["key"].isnull() );
+    FSL_CHECK_EQ( q1.has_key("key"), 1u );
     q1.append( L"key", null );
     FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=&key=" ) );
     q2 = q1;
@@ -56,21 +59,17 @@ FSL_TEST_FUNCTION( query_string ) {
     q1.append( L"key", L"(.)" );
     FSL_CHECK_EQ(
         q1.as_string().value(),
-        ascii_printable_string( "key=&key=&key=%28.%29" )
-    );
+        ascii_printable_string( "key=&key=&key=%28.%29" ));
     FSL_CHECK_EQ(
         q2.as_string().value(),
-        ascii_printable_string( "key=&key=" )
-    );
+        ascii_printable_string( "key=&key=" ));
     q2.append( L"key", L"\x2014" );
     FSL_CHECK_EQ(
         q1.as_string().value(),
-        ascii_printable_string( "key=&key=&key=%28.%29" )
-    );
+        ascii_printable_string( "key=&key=&key=%28.%29" ));
     FSL_CHECK_EQ(
         q2.as_string().value(),
-        ascii_printable_string( "key=&key=&key=%E2%80%94" )
-    );
+        ascii_printable_string( "key=&key=&key=%E2%80%94" ));
 }
 
 
@@ -106,6 +105,10 @@ FSL_TEST_FUNCTION( query_string_parser ) {
     QS_PARSE( L"key2&key1" ); // Ensure order is preserved
     QS_PARSE( L"key1=value1&key2=value=2&key3=value3" );
     QS_PARSE( L"key=%26%2312296%3B" );
+    FSL_CHECK( fostlib::parse( lock, L"key=(12296)", \
+            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
+    FSL_CHECK_EQ( qs.as_string().value(), \
+            coerce< ascii_printable_string >(string(L"key=%2812296%29")) );
 }
 
 
@@ -148,6 +151,7 @@ FSL_TEST_FUNCTION( url_parser_filespec ) {
 
     ascii_printable_string s;
     URL_PARSE_FILESPEC( "/", "/" );
+    URL_PARSE_FILESPEC( "/*/", "/*/" );
     URL_PARSE_FILESPEC( "/file.html", "/file.html" );
     URL_PARSE_FILESPEC( "/Site:/file.html", "/Site:/file.html" );
     URL_PARSE_FILESPEC( "/Site:/(file).html", "/Site:/(file).html" );
