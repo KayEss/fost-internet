@@ -1,3 +1,6 @@
+2014-05-10  Kirit Saelensminde  <kirit@felspar.com>
+Allow a termination lambda to also be passed into the HTTP server to control when to stop it. The lambda is only checked after a connection is opened.
+
 2014-03-04  Kirit Saelensminde  <kirit@felspar.com>
  Hold the parser lock for a much shorter period when parsing a HTTP request to the web server.
 

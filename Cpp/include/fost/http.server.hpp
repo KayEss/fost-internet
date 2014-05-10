@@ -89,7 +89,12 @@ namespace fostlib {
             /// Return the next request on the underlying socket
             std::auto_ptr< request > operator() ();
             /// Run the provided lambda to service requests forever
-            void operator () ( boost::function< bool ( request & ) > service_lambda );
+            void operator () (
+                boost::function< bool (request &) > service_lambda);
+            /// Run the provided lambda to service requests until the terminator return true
+            void operator () (
+                boost::function< bool (request &) > service_lambda,
+                boost::function< bool (void) > terminator);
 
             /// Return the status text associated with a status code
             static nliteral status_text( int code );

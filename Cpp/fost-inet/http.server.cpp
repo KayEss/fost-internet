@@ -49,11 +49,11 @@ namespace {
                 text_body error(
                     fostlib::coerce<fostlib::string>(e));
                 req( error, 500 );
-                return false;
+                return true;
             }
         } catch ( fostlib::exceptions::exception & ) {
             // A 400 response has already been sent by the request handler
-            return false;
+            return true;
         }
     }
 
@@ -78,9 +78,21 @@ namespace {
             "This is a mock server request. It cannot send a response to any client");
     }
 
+    bool return_false() {
+        return false;
+    }
+
 }
+
 void fostlib::http::server::operator () (
-    boost::function< bool ( http::server::request & ) > service_lambda
+    boost::function< bool (http::server::request &) > service_lambda
+) {
+    (*this)(service_lambda, return_false);
+}
+
+void fostlib::http::server::operator () (
+    boost::function< bool (http::server::request &) > service_lambda,
+    boost::function< bool (void) > terminate_lambda
 ) {
     // Create a worker pool to service the requests
     workerpool pool;
@@ -90,6 +102,9 @@ void fostlib::http::server::operator () (
         boost::asio::ip::tcp::socket *sock(
             new boost::asio::ip::tcp::socket( m_service ));
         m_server.accept( *sock );
+        if ( terminate_lambda() ) {
+            return;
+        }
         pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
     }
 }
