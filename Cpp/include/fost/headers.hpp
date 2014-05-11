@@ -133,7 +133,7 @@ namespace fostlib {
     /// Allow header content value to be turned to a string
     template<>
     struct coercer< string, headers_base::content > {
-        string coerce(const headers_base::content &c) {
+        string coerce(const headers_base::content &c) const {
             std::stringstream ss;
             ss << c;
             return string(ss.str());
@@ -142,8 +142,22 @@ namespace fostlib {
     /// Allow header content value to be turned to JSON
     template<>
     struct coercer< json, headers_base::content > {
-        json coerce(const headers_base::content &c) {
+        json coerce(const headers_base::content &c) const {
             return json(fostlib::coerce<string>(c));
+        }
+    };
+
+    namespace detail {
+        FOST_INET_DECLSPEC json from_headers(
+            const headers_base &);
+    }
+    /// Allow a full set of headers to be converted to JSON
+    template<typename T>
+    struct coercer<json, T,
+            typename boost::enable_if<
+                boost::is_base_of<headers_base, T> >::type > {
+        json coerce(const headers_base &h) const {
+            return detail::from_headers(h);
         }
     };
 

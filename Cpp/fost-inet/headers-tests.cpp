@@ -61,5 +61,11 @@ FSL_TEST_FUNCTION( field_setting ) {
 FSL_TEST_FUNCTION( json_content ) {
     headers_base::content line("Header value");
     FSL_CHECK_EQ(coerce<json>(line), json("Header value"));
+
+    mime::mime_headers headers;
+    FSL_CHECK_EQ(coerce<json>(headers), json::object_t());
+
+    headers.set("H1", "Content 1");
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"], json("Content 1"));
 }
 
