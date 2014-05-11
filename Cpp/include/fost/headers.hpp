@@ -133,6 +133,23 @@ namespace fostlib {
         std::ostream &o, const headers_base::content &value
     );
 
+    /// Allow header content value to be turned to a string
+    template<>
+    struct coercer< string, headers_base::content > {
+        string coerce(const headers_base::content &c) {
+            std::stringstream ss;
+            ss << c;
+            return string(ss.str());
+        }
+    };
+    /// Allow header content value to be turned to JSON
+    template<>
+    struct coercer< json, headers_base::content > {
+        json coerce(const headers_base::content &c) {
+            return json(fostlib::coerce<string>(c));
+        }
+    };
+
 
 }
 

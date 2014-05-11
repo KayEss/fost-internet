@@ -1,5 +1,5 @@
 /*
-    Copyright 2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2010-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -55,5 +55,11 @@ FSL_TEST_FUNCTION( field_setting ) {
     FSL_CHECK( headers.end() != headers.begin() );
     FSL_CHECK( ++headers.begin() != headers.end() );
     FSL_CHECK( ++ ++headers.begin() == headers.end() );
+}
+
+
+FSL_TEST_FUNCTION( json_content ) {
+    headers_base::content line("Header value");
+    FSL_CHECK_EQ(coerce<json>(line), json("Header value"));
 }
 
