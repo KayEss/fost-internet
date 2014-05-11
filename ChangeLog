@@ -1,3 +1,6 @@
+2014-05-11  Kirit Saelensminde  <kirit@felspar.com>
+ Allow the MIME headers to be cast to JSON.
+
 2014-05-10  Kirit Saelensminde  <kirit@felspar.com>
 Allow a termination lambda to also be passed into the HTTP server to control when to stop it. The lambda is only checked after a connection is opened.
 
