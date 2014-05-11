@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,6 +9,8 @@
 #include "fost-inet.hpp"
 #include <fost/mime.hpp>
 #include <fost/exception/parse_error.hpp>
+#include <fost/insert>
+#include <fost/push_back>
 
 
 using namespace fostlib;
@@ -164,6 +166,26 @@ std::ostream &fostlib::operator << (
         }
     }
     return o;
+}
+
+
+json fostlib::detail::from_headers(const headers_base &h) {
+    json values = json::object_t();
+    for ( headers_base::const_iterator i( h.begin() ); i != h.end(); ++i ) {
+        if ( values.has_key(i->first) ) {
+            if ( values[i->first].isarray() ) {
+                push_back(values, i->first, coerce<json>(i->second));
+            } else {
+                json arr = json::array_t();
+                push_back(arr, values[i->first]);
+                push_back(arr, fostlib::coerce<json>(i->second));
+                jcursor(i->first).replace(values, arr);
+            }
+        } else {
+            insert(values, i->first, coerce<json>(i->second));
+        }
+    }
+    return values;
 }
 
 

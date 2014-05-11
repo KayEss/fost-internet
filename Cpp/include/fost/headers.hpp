@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -116,8 +116,7 @@ namespace fostlib {
 
     protected:
         virtual std::pair< string, content > value(
-            const string &name, const string &value
-        ) = 0;
+            const string &name, const string &value) = 0;
 
     private:
         header_store_type m_headers;
@@ -126,12 +125,41 @@ namespace fostlib {
 
     /// Allow headers to be written to a narrow stream
     FOST_INET_DECLSPEC std::ostream &operator <<(
-        std::ostream &o, const headers_base &headers
-    );
+        std::ostream &o, const headers_base &headers);
     /// Allow header field values to be written to a narrow stream
     FOST_INET_DECLSPEC std::ostream &operator <<(
-        std::ostream &o, const headers_base::content &value
-    );
+        std::ostream &o, const headers_base::content &value);
+
+    /// Allow header content value to be turned to a string
+    template<>
+    struct coercer< string, headers_base::content > {
+        string coerce(const headers_base::content &c) const {
+            std::stringstream ss;
+            ss << c;
+            return string(ss.str());
+        }
+    };
+    /// Allow header content value to be turned to JSON
+    template<>
+    struct coercer< json, headers_base::content > {
+        json coerce(const headers_base::content &c) const {
+            return json(fostlib::coerce<string>(c));
+        }
+    };
+
+    namespace detail {
+        FOST_INET_DECLSPEC json from_headers(
+            const headers_base &);
+    }
+    /// Allow a full set of headers to be converted to JSON
+    template<typename T>
+    struct coercer<json, T,
+            typename boost::enable_if<
+                boost::is_base_of<headers_base, T> >::type > {
+        json coerce(const headers_base &h) const {
+            return detail::from_headers(h);
+        }
+    };
 
 
 }
