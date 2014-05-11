@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -116,8 +116,7 @@ namespace fostlib {
 
     protected:
         virtual std::pair< string, content > value(
-            const string &name, const string &value
-        ) = 0;
+            const string &name, const string &value) = 0;
 
     private:
         header_store_type m_headers;
@@ -126,12 +125,10 @@ namespace fostlib {
 
     /// Allow headers to be written to a narrow stream
     FOST_INET_DECLSPEC std::ostream &operator <<(
-        std::ostream &o, const headers_base &headers
-    );
+        std::ostream &o, const headers_base &headers);
     /// Allow header field values to be written to a narrow stream
     FOST_INET_DECLSPEC std::ostream &operator <<(
-        std::ostream &o, const headers_base::content &value
-    );
+        std::ostream &o, const headers_base::content &value);
 
     /// Allow header content value to be turned to a string
     template<>
