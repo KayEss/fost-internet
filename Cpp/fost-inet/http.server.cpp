@@ -101,8 +101,9 @@ void fostlib::http::server::operator () (
         // and a socket leaks, we don't care (for now)
         boost::asio::ip::tcp::socket *sock(
             new boost::asio::ip::tcp::socket( m_service ));
-        m_server.accept( *sock );
+        m_server.accept(*sock);
         if ( terminate_lambda() ) {
+            delete sock;
             return;
         }
         pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
