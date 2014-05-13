@@ -143,13 +143,12 @@ fostlib::http::user_agent::request::request(
 
 fostlib::http::user_agent::response::response(
     const string &method, const url &address,
-    const string &protocol, int status,
-    boost::shared_ptr< binary_body > body,
-    const string &message,
-    const mime::mime_headers &headers
+    int status, boost::shared_ptr< binary_body > body,
+    const mime::mime_headers &headers,
+    const string &message
 ) : m_headers(headers), method(method), address(address),
-        protocol(protocol), status(status), message(message),
-        m_body(body) {
+        protocol(coerce<string>(address.protocol())),
+        status(status), message(message), m_body(body) {
 }
 
 

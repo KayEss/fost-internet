@@ -109,10 +109,9 @@ namespace fostlib {
         public:
             /// Build a response, normally for testing purposes
             response(const string &method, const url &address,
-                const string &protocol, int status,
-                boost::shared_ptr< binary_body > body,
-                const string &message = string(),
-                const mime::mime_headers & = mime::mime_headers());
+                int status, boost::shared_ptr< binary_body > body,
+                const mime::mime_headers & = mime::mime_headers(),
+                const string &message = string());
 
             /// The request method
             accessors< const string > method;
