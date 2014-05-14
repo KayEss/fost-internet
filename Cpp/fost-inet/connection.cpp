@@ -17,6 +17,7 @@
 #include <fost/connection.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/lambda/bind.hpp>
+#include <boost/lexical_cast.hpp>
 
 
 using namespace fostlib;
@@ -66,7 +67,7 @@ namespace {
         if ( error == boost::asio::error::eof )
             throw exceptions::unexpected_eof(string(msg));
         else if ( error )
-            throw exceptions::not_implemented(func, error, msg);
+            throw exceptions::socket_error(error, msg);
     }
 
     std::size_t send(
@@ -79,11 +80,7 @@ namespace {
             else
                 return boost::asio::write(sock, b);
         } catch ( boost::system::system_error &e ) {
-            throw fostlib::exceptions::not_implemented(
-                "send(boost::asio::ip::tcp::socket &sock, ssl_data *ssl, "
-                    "boost::asio::streambuf &b)",
-                e.code()
-            );
+            throw fostlib::exceptions::socket_error(e.code());
         }
     }
 
@@ -283,11 +280,11 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
             // Receive the response
             read(*m_socket, NULL, m_input_buffer, boost::asio::transfer_at_least(8));
             if ( m_input_buffer.sbumpc() != 0x00 || m_input_buffer.sbumpc() != 0x5a )
-                throw exceptions::not_implemented("SOCKS 4 error handling where the response values are not 0x00 0x5a");
+                throw exceptions::socket_error("SOCKS 4 error handling where the response values are not 0x00 0x5a");
             char ignore[6];
             m_input_buffer.sgetn(ignore, 6);
         } else
-            throw exceptions::not_implemented("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
+            throw exceptions::socket_error("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
     } else
         connect(io_service, *m_socket, h, port);
 }
@@ -384,16 +381,42 @@ fostlib::exceptions::socket_error::socket_error() throw () {
 }
 
 fostlib::exceptions::socket_error::socket_error(
+    const fostlib::string &message
+) throw ()
+: exception(message) {
+}
+
+fostlib::exceptions::socket_error::socket_error(
+    const fostlib::string &message, const fostlib::string &extra
+) throw ()
+: exception(message) {
+    insert(data(), "context", extra);
+}
+
+fostlib::exceptions::socket_error::socket_error(
     boost::system::error_code error
 ) throw ()
 : error(error) {
-    info() << error << std::endl;
+    insert(data(), "error", string(boost::lexical_cast<std::string>(error)));
+}
+
+fostlib::exceptions::socket_error::socket_error(
+    boost::system::error_code error, const fostlib::string &message
+) throw ()
+: exception(message), error(error) {
+    insert(data(), "error", string(boost::lexical_cast<std::string>(error)));
 }
 
 fostlib::exceptions::socket_error::~socket_error() throw ()
 try {
 } catch ( ... ) {
     fostlib::absorb_exception();
+}
+
+
+fostlib::wliteral const fostlib::exceptions::socket_error::message()
+        const throw () {
+    return L"Socket error";
 }
 
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -64,18 +64,28 @@ namespace fostlib {
 
         /// The base exception type for all kinds of transmission errors
         class FOST_INET_DECLSPEC socket_error : public exception {
-            protected:
+            public:
                 /// Construct a socket error
                 socket_error() throw();
+                /// Throw an exception providing a message
+                socket_error(const string &message) throw ();
                 /// Construct a connect failure exception
                 socket_error(boost::system::error_code) throw();
+                /// Throw providing a message and extra information
+                socket_error(const string &message, const string &extra) throw ();
+                /// Allow us to throw from a Boost error code with a message
+                socket_error(boost::system::error_code error,
+                    const string &message) throw ();
 
                 /// Destruct the exception without throwing
                 ~socket_error() throw ();
 
-            public:
                 /// Allow access to the error code that caused the exception
                 accessors< const nullable< boost::system::error_code > > error;
+
+            protected:
+                /// The error message title
+                const wchar_t * const message() const throw ();
         };
 
 

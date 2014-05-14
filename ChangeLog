@@ -1,3 +1,9 @@
+2014-05-14  Kirit Saelensminde  <kirit@felspar.com>
+ No longer throw `not_implemented` exceptions from the low level networking code.
+
+2014-05-13  Kirit Saelensminde  <kirit@felspar.com>
+ Include HTTP user agent response constructor useful for tests.
+
 2014-05-11  Kirit Saelensminde  <kirit@felspar.com>
  Allow the MIME headers to be cast to JSON.
 
