@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2013,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -80,7 +80,7 @@ namespace {
             else
                 return boost::asio::write(sock, b);
         } catch ( boost::system::system_error &e ) {
-            throw fostlib::exceptions::socket_error(e.code());
+            throw exceptions::socket_error(e.code());
         }
     }
 
@@ -249,7 +249,7 @@ namespace {
             }
         }
         if ( connect_error )
-            throw fostlib::exceptions::connect_failure(connect_error, host, port);
+            throw exceptions::connect_failure(connect_error, host, port);
     }
 }
 
@@ -339,9 +339,10 @@ network_connection &fostlib::network_connection::operator >> ( std::string &s ) 
         for ( std::size_t c = 0; c < length - 2; ++c )
             s += m_input_buffer.sbumpc();
         m_input_buffer.sbumpc(); m_input_buffer.sbumpc();
-    } else
-        throw fostlib::exceptions::unexpected_eof(
+    } else {
+        throw exceptions::unexpected_eof(
             "Could not find a \\r\\n sequence before network connection ended");
+    }
     return *this;
 }
 network_connection &fostlib::network_connection::operator >> (
@@ -352,7 +353,7 @@ network_connection &fostlib::network_connection::operator >> (
                 boost::asio::transfer_at_least(
                     std::min(v.size() - m_input_buffer.size(), chunk))) );
     if ( m_input_buffer.size() < v.size() ) {
-        fostlib::exceptions::unexpected_eof exception(
+        exceptions::unexpected_eof exception(
             "Could not read all of the requested bytes from the network connection");
         insert(exception.data(), "bytes read", coerce<int64_t>(m_input_buffer.size()));
         insert(exception.data(), "bytes expected", coerce<int64_t>(v.size()));
@@ -363,8 +364,9 @@ network_connection &fostlib::network_connection::operator >> (
     return *this;
 }
 void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
-    while ( m_input_buffer.size() )
+    while ( m_input_buffer.size() ) {
         b.sputc(m_input_buffer.sbumpc());
+    }
     boost::system::error_code error;
     read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
     if ( error != boost::asio::error::eof ) {
@@ -382,13 +384,13 @@ fostlib::exceptions::socket_error::socket_error() throw () {
 }
 
 fostlib::exceptions::socket_error::socket_error(
-    const fostlib::string &message
+    const string &message
 ) throw ()
 : exception(message) {
 }
 
 fostlib::exceptions::socket_error::socket_error(
-    const fostlib::string &message, const fostlib::string &extra
+    const string &message, const string &extra
 ) throw ()
 : exception(message) {
     insert(data(), "context", extra);
@@ -402,7 +404,7 @@ fostlib::exceptions::socket_error::socket_error(
 }
 
 fostlib::exceptions::socket_error::socket_error(
-    boost::system::error_code error, const fostlib::string &message
+    boost::system::error_code error, const string &message
 ) throw ()
 : exception(message), error(error) {
     insert(data(), "error", string(boost::lexical_cast<std::string>(error)));
@@ -415,7 +417,7 @@ try {
 }
 
 
-fostlib::wliteral const fostlib::exceptions::socket_error::message()
+wliteral const fostlib::exceptions::socket_error::message()
         const throw () {
     return L"Socket error";
 }
@@ -450,8 +452,7 @@ fostlib::exceptions::read_timeout::read_timeout() throw () {
 }
 
 
-fostlib::wliteral const fostlib::exceptions::read_timeout::message()
-        const throw () {
+wliteral const fostlib::exceptions::read_timeout::message() const throw () {
     return L"Read time out";
 }
 
@@ -465,7 +466,6 @@ fostlib::exceptions::read_error::read_error() throw () {
 }
 
 
-fostlib::wliteral const fostlib::exceptions::read_error::message()
 fostlib::exceptions::read_error::read_error(
     boost::system::error_code error
 ) throw ()
@@ -473,6 +473,7 @@ fostlib::exceptions::read_error::read_error(
 }
 
 
+wliteral const fostlib::exceptions::read_error::message()
         const throw () {
     return L"Read error";
 }
