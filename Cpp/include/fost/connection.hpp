@@ -117,6 +117,8 @@ namespace fostlib {
             public:
                 /// Construct a connect failure exception
                 read_error() throw();
+                /// Construct a read error from an error code
+                read_error(boost::system::error_code) throw ();
 
             protected:
                 /// The error message title

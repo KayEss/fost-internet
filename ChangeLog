@@ -1,5 +1,6 @@
 2014-05-14  Kirit Saelensminde  <kirit@felspar.com>
  No longer throw `not_implemented` exceptions from the low level networking code.
+ Fix a bug where an exception wasn't always thrown when errors were reported reading from a socket.
 
 2014-05-13  Kirit Saelensminde  <kirit@felspar.com>
  Include HTTP user agent response constructor useful for tests.

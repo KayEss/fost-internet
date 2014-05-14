@@ -367,8 +367,9 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
         b.sputc(m_input_buffer.sbumpc());
     boost::system::error_code error;
     read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
-    if ( error != boost::asio::error::eof )
-        fostlib::exceptions::read_error(error);
+    if ( error != boost::asio::error::eof ) {
+        throw exceptions::read_error(error);
+    }
 }
 
 
@@ -465,6 +466,13 @@ fostlib::exceptions::read_error::read_error() throw () {
 
 
 fostlib::wliteral const fostlib::exceptions::read_error::message()
+fostlib::exceptions::read_error::read_error(
+    boost::system::error_code error
+) throw ()
+: socket_error(error) {
+}
+
+
         const throw () {
     return L"Read error";
 }
