@@ -141,6 +141,17 @@ fostlib::http::user_agent::request::request(
 */
 
 
+fostlib::http::user_agent::response::response(
+    const string &method, const url &address,
+    int status, boost::shared_ptr< binary_body > body,
+    const mime::mime_headers &headers,
+    const string &message
+) : m_headers(headers), method(method), address(address),
+        protocol(coerce<string>(address.protocol())),
+        status(status), message(message), m_body(body) {
+}
+
+
 namespace {
     void read_headers(
         network_connection &cnx, mime::mime_headers &headers,

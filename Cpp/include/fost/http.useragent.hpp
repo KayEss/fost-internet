@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2012, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -107,6 +107,12 @@ namespace fostlib {
                 const string &protocol, int status, const string &message
             );
         public:
+            /// Build a response, normally for testing purposes
+            response(const string &method, const url &address,
+                int status, boost::shared_ptr< binary_body > body,
+                const mime::mime_headers & = mime::mime_headers(),
+                const string &message = string());
+
             /// The request method
             accessors< const string > method;
             /// The request URL
