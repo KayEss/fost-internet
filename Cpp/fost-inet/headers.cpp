@@ -28,34 +28,36 @@ fostlib::headers_base::~headers_base() {
 }
 
 
-typedef std::pair< string, fostlib::nullable<string> > string_pair;
-static const wchar_t *c_mime_newline = L"\r\n";
+namespace {
+    typedef std::pair< string, fostlib::nullable<string> > string_pair;
+    const fostlib::string c_mime_newline(L"\r\n");
 
-static bool is_whitespace( wchar_t c ){
-    return c == L' ' || c == L'\t';
-}
-
-static string_pair precise_partition( const fostlib::nullable<string> &s, const fostlib::string &separator ) {
-    if (s.isnull())
-        return string_pair();
-    size_t cut_position = s.value().find( separator );
-
-    if (cut_position == fostlib::string::npos)
-        return string_pair( s.value(), fostlib::nullable<string>() );
-    fostlib::string second = s.value().substr( cut_position + separator.length() );
-    return string_pair( s.value().substr(0, cut_position), second.empty()? fostlib::nullable<string>() : second );
-}
-
-static string_pair mime_partition( const fostlib::nullable<string> &headers ) {
-    if (headers.isnull())
-        return string_pair();
-    string_pair part = precise_partition( headers, c_mime_newline );
-    while(!part.second.isnull() && is_whitespace( part.second.value().at(0) )){
-        string_pair new_part = precise_partition( part.second.value(), c_mime_newline );
-        part.first += new_part.first;
-        part.second = new_part.second;
+    bool is_whitespace( wchar_t c ){
+        return c == L' ' || c == L'\t';
     }
-    return part;
+
+    string_pair precise_partition( const fostlib::nullable<string> &s, const fostlib::string &separator ) {
+        if (s.isnull())
+            return string_pair();
+        size_t cut_position = s.value().find( separator );
+
+        if (cut_position == fostlib::string::npos)
+            return string_pair( s.value(), fostlib::nullable<string>() );
+        fostlib::string second = s.value().substr( cut_position + separator.length() );
+        return string_pair( s.value().substr(0, cut_position), second.empty()? fostlib::nullable<string>() : second );
+    }
+
+    string_pair mime_partition( const fostlib::nullable<string> &headers ) {
+        if (headers.isnull())
+            return string_pair();
+        string_pair part = precise_partition( headers, c_mime_newline );
+        while(!part.second.isnull() && is_whitespace( part.second.value().at(0) )){
+            string_pair new_part = precise_partition( part.second.value(), c_mime_newline );
+            part.first += new_part.first;
+            part.second = new_part.second;
+        }
+        return part;
+    }
 }
 
 void fostlib::headers_base::parse( const string &headers ) {
