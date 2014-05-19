@@ -231,8 +231,7 @@ boost::filesystem::wpath fostlib::coercer<
         } else
             narrowed += *p;
     }
-    return fostlib::coerce<boost::filesystem::wpath>(
-        fostlib::coerce<string>(narrowed));
+    return boost::filesystem::wpath(narrowed.underlying());
 }
 
 
