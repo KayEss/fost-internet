@@ -1,3 +1,6 @@
+2014-05-22  Kirit Saelensminde  <kirit@felspar.com>
+ Change expected exceptions for some tests because some platforms (i.e. Ubuntu Trusty) don't give socket connect errors, only time out errors when data is sent.
+
 2014-05-19  Kirit Saelensminde  <kirit@felspar.com>
  Change the way that `boost::filesystem::wpath` instances are converted from strings in order to fix a Boost bug on Android.
 

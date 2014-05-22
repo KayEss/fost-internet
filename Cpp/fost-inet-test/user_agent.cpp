@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2009-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -43,11 +43,11 @@ FSL_TEST_FUNCTION( connect_error ) {
     http::user_agent ua;
     {
         http::user_agent::request r("GET",url("http://localhost:64546/"));
-        FSL_CHECK_EXCEPTION(ua(r), exceptions::connect_failure&);
+        FSL_CHECK_EXCEPTION(ua(r), exceptions::socket_error&);
     }
     {
         http::user_agent::request r("GET",url("http://10.45.234.124:64546/"));
-        FSL_CHECK_EXCEPTION(ua(r), exceptions::connect_failure&);
+        FSL_CHECK_EXCEPTION(ua(r), exceptions::socket_error&);
     }
 }
 
