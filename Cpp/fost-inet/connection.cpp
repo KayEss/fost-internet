@@ -136,7 +136,7 @@ namespace {
             const setting< int64_t > &timeout = c_read_timeout
         ) : sock(sock), error(e), timer(sock.get_io_service()), received(0) {
             timer.expires_from_now(boost::posix_time::seconds(
-                timeout.value()));
+                coerce<long>(timeout.value())));
             timer.async_wait(boost::lambda::bind(&timedout,
                 boost::ref(sock), boost::ref(timeout_result),
                 boost::lambda::_1));
@@ -400,14 +400,14 @@ fostlib::exceptions::socket_error::socket_error(
     boost::system::error_code error
 ) throw ()
 : error(error) {
-    insert(data(), "error", string(boost::lexical_cast<std::string>(error)));
+    insert(data(), "error", string(boost::lexical_cast<std::string>(error).c_str()));
 }
 
 fostlib::exceptions::socket_error::socket_error(
     boost::system::error_code error, const string &message
 ) throw ()
 : exception(message), error(error) {
-    insert(data(), "error", string(boost::lexical_cast<std::string>(error)));
+    insert(data(), "error", string(boost::lexical_cast<std::string>(error).c_str()));
 }
 
 fostlib::exceptions::socket_error::~socket_error() throw ()
