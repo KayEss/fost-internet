@@ -136,7 +136,7 @@ namespace fostlib {
         string coerce(const headers_base::content &c) const {
             std::stringstream ss;
             ss << c;
-            return string(ss.str());
+            return string(ss.str().c_str());
         }
     };
     /// Allow header content value to be turned to JSON

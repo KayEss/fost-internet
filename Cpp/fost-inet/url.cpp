@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2013,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2014,Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -231,8 +231,12 @@ boost::filesystem::wpath fostlib::coercer<
         } else
             narrowed += *p;
     }
+#if BOOST_FILESYSTEM_VERSION >= 3
+    return boost::filesystem::wpath(narrowed.underlying());
+#else
     return fostlib::coerce<boost::filesystem::wpath>(
         fostlib::coerce<string>(narrowed));
+#endif
 }
 
 
