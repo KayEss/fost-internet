@@ -1,3 +1,6 @@
+2014-05-29  Kirit Saelensminde  <kirit@felspar.com>
+ Added ampersand to allowed characters in the file path of a HTTP request on the server.
+
 2014-05-14  Kirit Saelensminde  <kirit@felspar.com>
  No longer throw `not_implemented` exceptions from the low level networking code.
  Fix a bug where an exception wasn't always thrown when errors were reported reading from a socket.
