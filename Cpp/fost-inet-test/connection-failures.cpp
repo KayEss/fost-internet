@@ -1,5 +1,5 @@
 /*
-    Copyright 2010-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2010-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -22,12 +22,18 @@ FSL_TEST_FUNCTION( connect_failure ) {
     setting< int64_t > c_connect_timeout(
         "fost-internet/Cpp/fost-inet-test/connection.cpp",
         "Network settings", "Connect time out", 1);
+    setting< int64_t > c_read_timeout(
+        "fost-internet/Cpp/fost-inet-test/connection.cpp",
+        "Network settings", "Read time out", 1);
+    setting< int64_t > c_write_timeout(
+        "fost-internet/Cpp/fost-inet-test/connection.cpp",
+        "Network settings", "Write time out", 1);
     FSL_CHECK_EXCEPTION(
-        network_connection cnx(host("localhost"), 64545),
-        exceptions::connect_failure&);
+        network_connection(host("localhost"), 64545) << "Data\n",
+        exceptions::socket_error&);
     FSL_CHECK_EXCEPTION(
-        network_connection cnx(host("10.45.234.124"), 64545),
-        exceptions::connect_failure&);
+        network_connection(host("10.45.234.124"), 64545) << "Data\n",
+        exceptions::socket_error&);
 }
 
 

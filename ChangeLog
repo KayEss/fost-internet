@@ -1,3 +1,25 @@
+2014-05-29  Kirit Saelensminde  <kirit@felspar.com>
+ Added ampersand to allowed characters in the file path of a HTTP request on the server.
+
+2014-05-22  Kirit Saelensminde  <kirit@felspar.com>
+ Change expected exceptions for some tests because some platforms (i.e. Ubuntu Trusty) don't give socket connect errors, only time out errors when data is sent.
+
+2014-05-19  Kirit Saelensminde  <kirit@felspar.com>
+ Change the way that `boost::filesystem::wpath` instances are converted from strings in order to fix a Boost bug on Android.
+
+2014-05-14  Kirit Saelensminde  <kirit@felspar.com>
+ No longer throw `not_implemented` exceptions from the low level networking code.
+ Fix a bug where an exception wasn't always thrown when errors were reported reading from a socket.
+
+2014-05-13  Kirit Saelensminde  <kirit@felspar.com>
+ Include HTTP user agent response constructor useful for tests.
+
+2014-05-11  Kirit Saelensminde  <kirit@felspar.com>
+ Allow the MIME headers to be cast to JSON.
+
+2014-05-10  Kirit Saelensminde  <kirit@felspar.com>
+Allow a termination lambda to also be passed into the HTTP server to control when to stop it. The lambda is only checked after a connection is opened.
+
 2014-03-04  Kirit Saelensminde  <kirit@felspar.com>
  Hold the parser lock for a much shorter period when parsing a HTTP request to the web server.
 

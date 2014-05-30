@@ -1,5 +1,5 @@
 /*
-    Copyright 2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2010-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -55,5 +55,40 @@ FSL_TEST_FUNCTION( field_setting ) {
     FSL_CHECK( headers.end() != headers.begin() );
     FSL_CHECK( ++headers.begin() != headers.end() );
     FSL_CHECK( ++ ++headers.begin() == headers.end() );
+}
+
+
+FSL_TEST_FUNCTION( json_content ) {
+    headers_base::content line("Header value");
+    FSL_CHECK_EQ(coerce<json>(line), json("Header value"));
+
+    mime::mime_headers headers;
+    FSL_CHECK_EQ(coerce<json>(headers).size(), 0u);
+    FSL_CHECK_EQ(coerce<json>(headers), json::object_t());
+
+    headers.add("H1", "Content 1");
+    FSL_CHECK_EQ(coerce<json>(headers).size(), 1u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"], json("Content 1"));
+
+    headers.add("H2", "Content 2");
+    FSL_CHECK_EQ(coerce<json>(headers).size(), 2u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"].size(), 1u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"], json("Content 1"));
+    FSL_CHECK_EQ(coerce<json>(headers)["H2"], json("Content 2"));
+
+    headers.add("H1", "Content 1a");
+    FSL_CHECK_EQ(coerce<json>(headers).size(), 2u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"].size(), 2u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"][0], json("Content 1"));
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"][1], json("Content 1a"));
+    FSL_CHECK_EQ(coerce<json>(headers)["H2"], json("Content 2"));
+
+    headers.add("H1", "Content 1b");
+    FSL_CHECK_EQ(coerce<json>(headers).size(), 2u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"].size(), 3u);
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"][0], json("Content 1"));
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"][1], json("Content 1a"));
+    FSL_CHECK_EQ(coerce<json>(headers)["H1"][2], json("Content 1b"));
+    FSL_CHECK_EQ(coerce<json>(headers)["H2"], json("Content 2"));
 }
 

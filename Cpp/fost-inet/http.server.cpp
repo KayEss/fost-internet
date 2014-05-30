@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -49,11 +49,11 @@ namespace {
                 text_body error(
                     fostlib::coerce<fostlib::string>(e));
                 req( error, 500 );
-                return false;
+                return true;
             }
         } catch ( fostlib::exceptions::exception & ) {
             // A 400 response has already been sent by the request handler
-            return false;
+            return true;
         }
     }
 
@@ -78,9 +78,21 @@ namespace {
             "This is a mock server request. It cannot send a response to any client");
     }
 
+    bool return_false() {
+        return false;
+    }
+
 }
+
 void fostlib::http::server::operator () (
-    boost::function< bool ( http::server::request & ) > service_lambda
+    boost::function< bool (http::server::request &) > service_lambda
+) {
+    (*this)(service_lambda, return_false);
+}
+
+void fostlib::http::server::operator () (
+    boost::function< bool (http::server::request &) > service_lambda,
+    boost::function< bool (void) > terminate_lambda
 ) {
     // Create a worker pool to service the requests
     workerpool pool;
@@ -89,7 +101,11 @@ void fostlib::http::server::operator () (
         // and a socket leaks, we don't care (for now)
         boost::asio::ip::tcp::socket *sock(
             new boost::asio::ip::tcp::socket( m_service ));
-        m_server.accept( *sock );
+        m_server.accept(*sock);
+        if ( terminate_lambda() ) {
+            delete sock;
+            return;
+        }
         pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
     }
 }
@@ -122,7 +138,7 @@ fostlib::http::server::request::request(
                         phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
                 ]
                 >> boost::spirit::chlit< char >( ' ' )
-                >> (+boost::spirit::chset<>( "_@a-zA-Z0-9/.,:'()%=~!+*-" ))[
+                >> (+boost::spirit::chset<>( "_@a-zA-Z0-9/.,:'&()%=~!+*-" ))[
                     phoenix::var(m_pathspec) =
                         phoenix::construct_< url::filepath_string >(
                             phoenix::arg1, phoenix::arg2
