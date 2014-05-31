@@ -1,3 +1,6 @@
+2014-05-31  Kirit Saelensminde  <kirit@felspar.com>
+ Be absolutely sure that the URL parser lock is held when the parsers destruct.
+
 2014-05-29  Kirit Saelensminde  <kirit@felspar.com>
  Added ampersand to allowed characters in the file path of a HTTP request on the server.
 
