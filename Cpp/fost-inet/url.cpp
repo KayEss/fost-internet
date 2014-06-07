@@ -7,8 +7,9 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/url.hpp>
+#include <fost/insert>
 #include <fost/string>
+#include <fost/url.hpp>
 #include <fost/parse/url.hpp>
 
 #include <fost/exception/out_of_range.hpp>
@@ -300,10 +301,10 @@ fostlib::url::url(
 fostlib::url::url( const string &a_url )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
     parser_lock lock;
-    url_hostpart_parser url_hostpart_p;
-    url_filespec_parser url_filespec_p;
-    query_string_parser query_string_p;
     try {
+        url_hostpart_parser url_hostpart_p;
+        url_filespec_parser url_filespec_p;
+        query_string_parser query_string_p;
         url u;
         ascii_printable_string fs;
         query_string qs;
@@ -316,13 +317,14 @@ fostlib::url::url( const string &a_url )
                         boost::spirit::chlit< wchar_t >( '?' )
                         >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
                     )
-                ).full )
+                ).full ) {
             throw exceptions::parse_error( L"Could not parse URL" );
+        }
         *this = u;
-        pathspec( url::filepath_string( fs ) );
-        query( qs );
+        pathspec(url::filepath_string( fs ));
+        query(qs);
     } catch ( exceptions::exception &e ) {
-        e.info() << L"Parsing: " << a_url << std::endl;
+        insert(e.data(), "parsing", a_url);
         throw;
     }
 }
