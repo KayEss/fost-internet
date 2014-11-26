@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -66,8 +66,7 @@ namespace fostlib {
             virtual std::auto_ptr< iterator_implementation > iterator() const = 0;
 
             explicit mime(
-                const mime_headers &headers, const string &content_type
-            );
+                const mime_headers &headers, const string &content_type);
     };
 
 
@@ -168,17 +167,33 @@ namespace fostlib {
         struct binary_body_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
+            /// The type of the data storage vector
+            typedef std::vector<unsigned char> data_type;
+
             /// Construct an empty body
             binary_body(
                 const mime_headers &headers = mime_headers(),
-                const string &mime = "application/x-empty"
-            );
+                const string &mime = "application/x-empty");
             /// Construct from a data block
             binary_body(
-                const std::vector< unsigned char > &data,
+                const data_type &data,
                 const mime_headers &headers = mime_headers(),
-                const string &mime = "binary/octet-stream"
-            );
+                const string &mime = "binary/octet-stream");
+            /// Construct from a byte array
+            binary_body(
+                const char *begin, const char *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream");
+            /// Construct from a signed byte array
+            binary_body(
+                const signed char *begin, const signed char *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream");
+            /// Construct from a unsigned byte array
+            binary_body(
+                const unsigned char *begin, const unsigned char *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream");
 
             /// Display the data on a stream
             std::ostream &print_on( std::ostream &o ) const;
@@ -186,7 +201,7 @@ namespace fostlib {
             bool boundary_is_ok( const string &boundary ) const;
 
             /// Allow direct read access to the data
-            accessors< const std::vector< unsigned char > > data;
+            accessors< const data_type > data;
     };
 
     /// A MIME container which represents a file on disk
