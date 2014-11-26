@@ -48,8 +48,22 @@ FSL_TEST_FUNCTION( convert_to_text_fails ) {
 
 
 FSL_TEST_FUNCTION( construct_from_byte_array ) {
+    std::vector< char > data(256, 0x20);
+    binary_body body(&data[0], &data[0] + data.size());
+    FSL_CHECK_EQ(coerce<string>(body), string(256, ' '));
+}
+
+
+FSL_TEST_FUNCTION( construct_from_signed_byte_array ) {
+    std::vector< signed char > data(256, 0x20);
+    binary_body body(&data[0], &data[0] + data.size());
+    FSL_CHECK_EQ(coerce<string>(body), string(256, ' '));
+}
+
+
+FSL_TEST_FUNCTION( construct_from_unsigned_byte_array ) {
     std::vector< unsigned char > data(256, 0x20);
     binary_body body(&data[0], &data[0] + data.size());
-    FSL_CHECK_EQ(coerce<string>(body), string(' ', 256));
+    FSL_CHECK_EQ(coerce<string>(body), string(256, ' '));
 }
 
