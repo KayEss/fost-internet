@@ -66,8 +66,7 @@ namespace fostlib {
             virtual std::auto_ptr< iterator_implementation > iterator() const = 0;
 
             explicit mime(
-                const mime_headers &headers, const string &content_type
-            );
+                const mime_headers &headers, const string &content_type);
     };
 
 
@@ -174,14 +173,12 @@ namespace fostlib {
             /// Construct an empty body
             binary_body(
                 const mime_headers &headers = mime_headers(),
-                const string &mime = "application/x-empty"
-            );
+                const string &mime = "application/x-empty");
             /// Construct from a data block
             binary_body(
                 const data_type &data,
                 const mime_headers &headers = mime_headers(),
-                const string &mime = "binary/octet-stream"
-            );
+                const string &mime = "binary/octet-stream");
             /// Construct from a byte array
             binary_body(
                 const char *begin, const char *end,
