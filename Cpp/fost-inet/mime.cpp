@@ -328,6 +328,25 @@ fostlib::binary_body::binary_body(
     const string &mime_type
 ) : mime(headers, mime_type), data(data) {
 }
+fostlib::binary_body::binary_body(
+    const char *begin, const char *end,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(std::vector< unsigned char >(begin, end)) {
+}
+fostlib::binary_body::binary_body(
+    const signed char *begin, const signed char *end,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(std::vector< unsigned char >(begin, end)) {
+}
+fostlib::binary_body::binary_body(
+    const unsigned char *begin, const unsigned char *end,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(std::vector< unsigned char >(begin, end)) {
+}
+
 
 std::ostream &fostlib::binary_body::print_on( std::ostream &o ) const {
     for (

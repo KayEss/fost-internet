@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2011, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -179,6 +179,21 @@ namespace fostlib {
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream"
             );
+            /// Construct from a byte array
+            binary_body(
+                const char *begin, const char *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream");
+            /// Construct from a signed byte array
+            binary_body(
+                const signed char *begin, const signed char *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream");
+            /// Construct from a unsigned byte array
+            binary_body(
+                const unsigned char *begin, const unsigned char *end,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream");
 
             /// Display the data on a stream
             std::ostream &print_on( std::ostream &o ) const;
