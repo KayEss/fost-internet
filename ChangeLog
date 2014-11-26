@@ -1,3 +1,6 @@
+2014-11-26  Kirit Saelensminde  <kirit@felspar.com>
+ Allow MIME binary bodies to be made from start/end memory pointers.
+
 2014-11-05  Kirit Saelensminde  <kirit@felspar.com>
  Only set Date and Host headers if they're not already set.
 
