@@ -168,6 +168,9 @@ namespace fostlib {
         struct binary_body_iterator;
         std::auto_ptr< iterator_implementation > iterator() const;
         public:
+            /// The type of the data storage vector
+            typedef std::vector<unsigned char> data_type;
+
             /// Construct an empty body
             binary_body(
                 const mime_headers &headers = mime_headers(),
@@ -175,7 +178,7 @@ namespace fostlib {
             );
             /// Construct from a data block
             binary_body(
-                const std::vector< unsigned char > &data,
+                const data_type &data,
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream"
             );
@@ -201,7 +204,7 @@ namespace fostlib {
             bool boundary_is_ok( const string &boundary ) const;
 
             /// Allow direct read access to the data
-            accessors< const std::vector< unsigned char > > data;
+            accessors< const data_type > data;
     };
 
     /// A MIME container which represents a file on disk
