@@ -323,15 +323,34 @@ fostlib::binary_body::binary_body(
 ) : mime(headers, mime_type) {
 }
 fostlib::binary_body::binary_body(
-    const std::vector< unsigned char > &data,
+    const data_type &data,
     const mime_headers &headers,
     const string &mime_type
 ) : mime(headers, mime_type), data(data) {
 }
+fostlib::binary_body::binary_body(
+    const char *begin, const char *end,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(data_type(begin, end)) {
+}
+fostlib::binary_body::binary_body(
+    const signed char *begin, const signed char *end,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(data_type(begin, end)) {
+}
+fostlib::binary_body::binary_body(
+    const unsigned char *begin, const unsigned char *end,
+    const mime_headers &headers,
+    const string &mime_type
+) : mime(headers, mime_type), data(data_type(begin, end)) {
+}
+
 
 std::ostream &fostlib::binary_body::print_on( std::ostream &o ) const {
     for (
-        std::vector< unsigned char >::const_iterator i(data().begin());
+        data_type::const_iterator i(data().begin());
         i != data().end();
         ++i
     )
@@ -348,8 +367,8 @@ bool fostlib::binary_body::boundary_is_ok( const string &boundary ) const {
 struct fostlib::binary_body::binary_body_iterator :
     public mime::iterator_implementation
 {
-    const std::vector< unsigned char > &data; bool sent;
-    binary_body_iterator(const std::vector< unsigned char > &d)
+    const data_type &data; bool sent;
+    binary_body_iterator(const data_type &d)
     : data(d), sent(false) {
     }
     const_memory_block operator () () {

@@ -44,11 +44,16 @@ fostlib::http::user_agent::user_agent(const url &u)
 std::auto_ptr< http::user_agent::response >
         fostlib::http::user_agent::operator () (request &req) const {
     try {
-        req.headers().set("Date", coerce< string >(
-            coerce< rfc1123_timestamp >(timestamp::now())));
-        req.headers().set("Host", req.address().server().name());
-        if ( !req.headers().exists("User-Agent") )
+        if ( !req.headers().exists("Date") ) {
+            req.headers().set("Date", coerce< string >(
+                coerce< rfc1123_timestamp >(timestamp::now())));
+        }
+        if ( !req.headers().exists("Host") ) {
+            req.headers().set("Host", req.address().server().name());
+        }
+        if ( !req.headers().exists("User-Agent") ) {
             req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4");
+        }
         req.headers().set("TE", "trailers");
 
         if ( !authentication().isnull() )
