@@ -292,6 +292,7 @@ nliteral fostlib::http::server::status_text( int code ) {
         case 415: return "Unsupported Media Type";
         case 416: return "Requested Range Not Satisfiable";
         case 417: return "Expectation Failed";
+        case 423: return "Locked";
         case 449: return "Retry With";
 
         case 500: return "Internal Server Error";
