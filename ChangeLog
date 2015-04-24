@@ -1,3 +1,6 @@
+2015-04-24  Kirit Saelensminde  <kirit@felspar.com>
+ Make sure that a server io_service is properly associated with the connection. This also changes client sockets to all share a single io_service.
+
 2014-11-26  Kirit Saelensminde  <kirit@felspar.com>
  Allow MIME binary bodies to be made from start/end memory pointers.
 

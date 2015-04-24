@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -38,7 +38,9 @@ namespace fostlib {
                     /// Create an empty request
                     request();
                     /// Create a request from data on the provided socket
-                    request(std::auto_ptr< boost::asio::ip::tcp::socket > connection);
+                    request(
+                        boost::asio::io_service &,
+                        std::auto_ptr< boost::asio::ip::tcp::socket > connection);
                     /// This constructor is useful for mocking the request that doesn't get responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
