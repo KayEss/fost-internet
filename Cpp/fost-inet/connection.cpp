@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -254,18 +254,21 @@ namespace {
 }
 
 
-fostlib::network_connection::network_connection(std::auto_ptr< boost::asio::ip::tcp::socket > socket)
-: m_socket(socket), m_ssl_data(NULL) {
+fostlib::network_connection::network_connection(
+    std::auto_ptr< boost::asio::io_service > io_service,
+    std::auto_ptr< boost::asio::ip::tcp::socket > socket
+) : io_service(io_service), m_socket(socket), m_ssl_data(NULL) {
 }
 
 fostlib::network_connection::network_connection(const host &h, nullable< port_number > p)
-: m_socket(new boost::asio::ip::tcp::socket(io_service)), m_ssl_data(NULL) {
+: io_service(new boost::asio::io_service),
+        m_socket(new boost::asio::ip::tcp::socket(*io_service)), m_ssl_data(NULL) {
     const port_number port = p.value(coerce< port_number >(h.service().value("0")));
     json socks(c_socks_version.value());
 
     if ( !socks.isnull() ) {
         const host socks_host( coerce< host >( c_socks_host.value() ) );
-        connect(io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
+        connect(*io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
         if ( c_socks_version.value() == json(4) ) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection
@@ -286,7 +289,7 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
         } else
             throw exceptions::socket_error("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
     } else
-        connect(io_service, *m_socket, h, port);
+        connect(*io_service, *m_socket, h, port);
 }
 
 fostlib::network_connection::~network_connection() {
@@ -295,7 +298,7 @@ fostlib::network_connection::~network_connection() {
 
 
 void fostlib::network_connection::start_ssl() {
-    m_ssl_data = new ssl(io_service, *m_socket);
+    m_ssl_data = new ssl(*io_service, *m_socket);
 }
 
 

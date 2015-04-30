@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -28,21 +28,24 @@ fostlib::http::server::server( const host &h, uint16_t p )
 }
 
 std::auto_ptr< http::server::request > fostlib::http::server::operator () () {
+    std::auto_ptr< boost::asio::io_service > io_service(new boost::asio::io_service);
     std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-        new boost::asio::ip::tcp::socket( m_service ));
-    m_server.accept( *sock );
+        new boost::asio::ip::tcp::socket(*io_service));
+    m_server.accept(*sock);
     return std::auto_ptr< http::server::request >(
-        new http::server::request( sock ));
+        new http::server::request(io_service, sock));
 }
 
 namespace {
     bool service(
         boost::function< bool ( http::server::request & ) > service_lambda,
+        boost::asio::io_service *servicep,
         boost::asio::ip::tcp::socket *sockp
     ) {
+        std::auto_ptr< boost::asio::io_service > io_service(servicep);
         std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
         try {
-            http::server::request req(sock);
+            http::server::request req(io_service, sock);
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
@@ -99,14 +102,15 @@ void fostlib::http::server::operator () (
     while ( true ) {
         // Use a raw pointer here for minimum overhead -- if it all goes wrong
         // and a socket leaks, we don't care (for now)
+        boost::asio::io_service *service(new boost::asio::io_service);
         boost::asio::ip::tcp::socket *sock(
-            new boost::asio::ip::tcp::socket( m_service ));
+            new boost::asio::ip::tcp::socket(*service));
         m_server.accept(*sock);
         if ( terminate_lambda() ) {
             delete sock;
             return;
         }
-        pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
+        pool.f<bool>( boost::lambda::bind(::service, service_lambda, service, sock) );
     }
 }
 
@@ -119,8 +123,10 @@ void fostlib::http::server::operator () (
 fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
+    std::auto_ptr< boost::asio::io_service > io_service,
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
-) : m_cnx( new network_connection(connection) ), m_handler(raise_connection_error) {
+) : m_cnx(new network_connection(io_service, connection)),
+        m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
     query_string_parser qsp;
 
