@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -29,21 +29,20 @@ fostlib::http::server::server( const host &h, uint16_t p )
 
 std::auto_ptr< http::server::request > fostlib::http::server::operator () () {
     std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-        new boost::asio::ip::tcp::socket(m_service));
+        new boost::asio::ip::tcp::socket( m_service ));
     m_server.accept( *sock );
     return std::auto_ptr< http::server::request >(
-        new http::server::request(m_service, sock));
+        new http::server::request( sock ));
 }
 
 namespace {
     bool service(
-        boost::asio::io_service &ioservice,
-        boost::function< bool (http::server::request &) > service_lambda,
+        boost::function< bool ( http::server::request & ) > service_lambda,
         boost::asio::ip::tcp::socket *sockp
     ) {
         std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
         try {
-            http::server::request req(ioservice, sock);
+            http::server::request req(sock);
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
@@ -107,7 +106,7 @@ void fostlib::http::server::operator () (
             delete sock;
             return;
         }
-        pool.f<bool>( boost::lambda::bind(service, boost::ref(m_service), service_lambda, sock) );
+        pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
     }
 }
 
@@ -120,19 +119,13 @@ void fostlib::http::server::operator () (
 fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
-    boost::asio::io_service &service,
     std::auto_ptr< boost::asio::ip::tcp::socket > connection
-) : m_cnx( new network_connection(service, connection) ), m_handler(raise_connection_error) {
-//     static boost::atomic<int> g_request_id{};
-//     const int request(++g_request_id);
-//     std::cout << request << " " << timestamp::now() << " About to start to parse response" << std::endl;
+) : m_cnx( new network_connection(connection) ), m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
     query_string_parser qsp;
 
-//     std::cout << request << " " << timestamp::now() << " Starting read of first line" << std::endl;
     utf8_string first_line;
     (*m_cnx) >> first_line;
-//     std::cout << request << " " << timestamp::now() << " Got first line " << first_line << std::endl;
 
     try {
         {
