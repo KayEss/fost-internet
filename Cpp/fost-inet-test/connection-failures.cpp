@@ -1,5 +1,5 @@
 /*
-    Copyright 2010-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2010-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -68,17 +68,17 @@ FSL_TEST_FUNCTION( read_timeouts ) {
 
 namespace {
     void send_data() {
-        boost::asio::io_service service;
+        std::auto_ptr<boost::asio::io_service> service(new boost::asio::io_service);
         host localhost;
         uint16_t port = 64543u;
         // Set up a server on a socket
-        boost::asio::ip::tcp::acceptor server(service,
+        boost::asio::ip::tcp::acceptor server(*service,
             boost::asio::ip::tcp::endpoint(localhost.address(), port));
         // Accept the connection
         std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-            new boost::asio::ip::tcp::socket(service));
+            new boost::asio::ip::tcp::socket(*service));
         server.accept(*sock);
-        network_connection server_cnx(sock);
+        network_connection server_cnx(service, sock);
         // Send a few KB of data
         std::string data(10240, '*');
         server_cnx << data;
