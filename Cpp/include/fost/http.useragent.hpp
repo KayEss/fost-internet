@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -38,17 +38,17 @@ namespace fostlib {
             accessors< url > base;
 
             /// Perform the request and return the response
-            std::auto_ptr< response > operator () (request &) const;
+            std::unique_ptr< response > operator () (request &) const;
 
             /// Perform a GET request
-            std::auto_ptr< response > get( const url &url ) const;
+            std::unique_ptr< response > get( const url &url ) const;
             /// Perform a POST request
             template< typename D >
-            std::auto_ptr< response > post(
+            std::unique_ptr< response > post(
                 const url &url, const D &data) const;
             /// Perform a PUT request
             template< typename D >
-            std::auto_ptr< response > put(
+            std::unique_ptr< response > put(
                 const url &url, const D &data) const;
         };
 
@@ -134,14 +134,14 @@ namespace fostlib {
             boost::shared_ptr< const binary_body > body();
 
         private:
-            std::auto_ptr< network_connection > m_cnx;
+            std::unique_ptr< network_connection > m_cnx;
             boost::shared_ptr< binary_body > m_body;
         };
 
 
         /// Perform a GET request
         inline
-        std::auto_ptr< user_agent::response > user_agent::get(
+        std::unique_ptr< user_agent::response > user_agent::get(
             const url &url
         ) const {
             request r(L"GET", url);
@@ -151,7 +151,7 @@ namespace fostlib {
 
         /// Perform a POST request
         template< typename D > inline
-        std::auto_ptr< user_agent::response > user_agent::post(
+        std::unique_ptr< user_agent::response > user_agent::post(
             const url &url, const D &data
         ) const {
             request r(L"POST", url, data);
@@ -161,7 +161,7 @@ namespace fostlib {
 
         /// Perform a PUT request
         template< typename D > inline
-        std::auto_ptr< user_agent::response > user_agent::put(
+        std::unique_ptr< user_agent::response > user_agent::put(
             const url &url, const D &data
         ) const {
             request r(L"PUT", url, data);
