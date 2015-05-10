@@ -102,10 +102,9 @@ namespace fostlib {
             friend class user_agent;
             mime::mime_headers m_headers;
             response(
-                std::auto_ptr< network_connection > connection,
+                network_connection connection,
                 const string &m, const url &u,
-                const string &protocol, int status, const string &message
-            );
+                const string &protocol, int status, const string &message);
         public:
             /// Build a response, normally for testing purposes
             response(const string &method, const url &address,
@@ -134,7 +133,7 @@ namespace fostlib {
             boost::shared_ptr< const binary_body > body();
 
         private:
-            std::unique_ptr< network_connection > m_cnx;
+            network_connection m_cnx;
             boost::shared_ptr< binary_body > m_body;
         };
 
