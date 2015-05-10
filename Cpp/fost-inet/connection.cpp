@@ -255,20 +255,19 @@ namespace {
 
 
 fostlib::network_connection::network_connection(
-    std::auto_ptr< boost::asio::io_service > io_service,
-    std::auto_ptr< boost::asio::ip::tcp::socket > socket
-) : io_service(io_service), m_socket(socket), m_ssl_data(NULL) {
+    std::unique_ptr<boost::asio::io_service> io_service,
+    boost::asio::ip::tcp::socket socket
+) : io_service(std::move(io_service)), m_socket(std::move(socket)), m_ssl_data(nullptr) {
 }
 
 fostlib::network_connection::network_connection(const host &h, nullable< port_number > p)
-: io_service(new boost::asio::io_service),
-        m_socket(new boost::asio::ip::tcp::socket(*io_service)), m_ssl_data(NULL) {
+: io_service(new boost::asio::io_service), m_socket(*io_service), m_ssl_data(nullptr) {
     const port_number port = p.value(coerce< port_number >(h.service().value("0")));
     json socks(c_socks_version.value());
 
     if ( !socks.isnull() ) {
         const host socks_host( coerce< host >( c_socks_host.value() ) );
-        connect(*io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
+        connect(*io_service, m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
         if ( c_socks_version.value() == json(4) ) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection
@@ -279,17 +278,19 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
             for ( std::size_t p = 0; p < 4; ++p )
                 b.sputc(bytes[p]);
             b.sputc(0); // User ID
-            send(*m_socket, NULL, b);
+            send(m_socket, NULL, b);
             // Receive the response
-            read(*m_socket, NULL, m_input_buffer, boost::asio::transfer_at_least(8));
+            read(m_socket, NULL, m_input_buffer, boost::asio::transfer_at_least(8));
             if ( m_input_buffer.sbumpc() != 0x00 || m_input_buffer.sbumpc() != 0x5a )
                 throw exceptions::socket_error("SOCKS 4 error handling where the response values are not 0x00 0x5a");
             char ignore[6];
             m_input_buffer.sgetn(ignore, 6);
-        } else
+        } else {
             throw exceptions::socket_error("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
-    } else
-        connect(*io_service, *m_socket, h, port);
+        }
+    } else {
+        connect(*io_service, m_socket, h, port);
+    }
 }
 
 fostlib::network_connection::~network_connection() {
@@ -298,7 +299,7 @@ fostlib::network_connection::~network_connection() {
 
 
 void fostlib::network_connection::start_ssl() {
-    m_ssl_data = new ssl(*io_service, *m_socket);
+    m_ssl_data = new ssl(*io_service, m_socket);
 }
 
 
@@ -312,7 +313,7 @@ network_connection &fostlib::network_connection::operator << ( const const_memor
         boost::asio::streambuf b;
         for ( std::size_t pos = 0; pos != length; ++pos )
             b.sputc( begin[pos] );
-        std::size_t sent(send(*m_socket, m_ssl_data, b));
+        std::size_t sent(send(m_socket, m_ssl_data, b));
         b.consume(sent);
     }
     return *this;
@@ -321,7 +322,7 @@ network_connection &fostlib::network_connection::operator << ( const utf8_string
     boost::asio::streambuf b;
     std::ostream os(&b);
     os << s.underlying();
-    std::size_t length(send(*m_socket, m_ssl_data, b));
+    std::size_t length(send(m_socket, m_ssl_data, b));
     b.consume(length);
     return *this;
 }
@@ -337,7 +338,7 @@ network_connection &fostlib::network_connection::operator >> ( utf8_string &s ) 
     return *this;
 }
 network_connection &fostlib::network_connection::operator >> ( std::string &s ) {
-    std::size_t length(read_until(*m_socket, m_ssl_data, m_input_buffer, "\r\n"));
+    std::size_t length(read_until(m_socket, m_ssl_data, m_input_buffer, "\r\n"));
     if ( length >= 2 ) {
         for ( std::size_t c = 0; c < length - 2; ++c )
             s += m_input_buffer.sbumpc();
@@ -352,7 +353,7 @@ network_connection &fostlib::network_connection::operator >> (
         std::vector< utf8 > &v) {
     const std::size_t chunk = coerce<std::size_t>(c_large_read_chunk_size.value());
     while( v.size() - m_input_buffer.size()
-            && read(*m_socket, m_ssl_data, m_input_buffer,
+            && read(m_socket, m_ssl_data, m_input_buffer,
                 boost::asio::transfer_at_least(
                     std::min(v.size() - m_input_buffer.size(), chunk))) );
     if ( m_input_buffer.size() < v.size() ) {
@@ -371,7 +372,7 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
         b.sputc(m_input_buffer.sbumpc());
     }
     boost::system::error_code error;
-    read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
+    read(m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
     if ( error != boost::asio::error::eof ) {
         throw exceptions::read_error(error);
     }
