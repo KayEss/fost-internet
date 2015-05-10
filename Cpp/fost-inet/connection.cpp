@@ -255,6 +255,11 @@ namespace {
 
 
 fostlib::network_connection::network_connection(
+    network_connection &&cnx
+) : io_service(std::move(cnx.io_service)), m_socket(std::move(cnx.m_socket)) {
+}
+
+fostlib::network_connection::network_connection(
     std::unique_ptr<boost::asio::io_service> io_service,
     boost::asio::ip::tcp::socket socket
 ) : io_service(std::move(io_service)), m_socket(std::move(socket)), m_ssl_data(nullptr) {
