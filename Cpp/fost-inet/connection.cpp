@@ -309,7 +309,9 @@ fostlib::network_connection::network_connection(
 }
 
 fostlib::network_connection::~network_connection() {
-    delete m_ssl_data;
+    if ( m_socket ) {
+        delete m_ssl_data;
+    }
 }
 
 
