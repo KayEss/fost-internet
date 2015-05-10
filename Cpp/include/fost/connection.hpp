@@ -22,7 +22,7 @@ namespace fostlib {
 
 
     /// A TCP/IP network connection from either a server or client
-    class FOST_INET_DECLSPEC network_connection : boost::noncopyable {
+    class FOST_INET_DECLSPEC network_connection final : boost::noncopyable {
         struct ssl;
         std::unique_ptr<boost::asio::io_service> io_service;
         boost::asio::ip::tcp::socket m_socket;
