@@ -27,13 +27,12 @@ fostlib::http::server::server( const host &h, uint16_t p )
 ) {
 }
 
-std::auto_ptr< http::server::request > fostlib::http::server::operator () () {
-    std::auto_ptr< boost::asio::io_service > io_service(new boost::asio::io_service);
-    std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-        new boost::asio::ip::tcp::socket(*io_service));
-    m_server.accept(*sock);
-    return std::auto_ptr< http::server::request >(
-        new http::server::request(io_service, sock));
+std::unique_ptr< http::server::request > fostlib::http::server::operator () () {
+    std::unique_ptr< boost::asio::io_service > io_service(new boost::asio::io_service);
+    boost::asio::ip::tcp::socket sock(*io_service);
+    m_server.accept(sock);
+    return std::unique_ptr< http::server::request >(
+        new http::server::request(std::move(io_service), std::move(sock)));
 }
 
 namespace {
@@ -42,10 +41,10 @@ namespace {
         boost::asio::io_service *servicep,
         boost::asio::ip::tcp::socket *sockp
     ) {
-        std::auto_ptr< boost::asio::io_service > io_service(servicep);
-        std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
+        std::unique_ptr< boost::asio::io_service > io_service(servicep);
+        std::unique_ptr< boost::asio::ip::tcp::socket > usockp(sockp);
         try {
-            http::server::request req(io_service, sock);
+            http::server::request req(std::move(io_service), std::move(*usockp));
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
@@ -123,9 +122,9 @@ void fostlib::http::server::operator () (
 fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
-    std::auto_ptr< boost::asio::io_service > io_service,
-    std::auto_ptr< boost::asio::ip::tcp::socket > connection
-) : m_cnx(new network_connection(io_service, connection)),
+    std::unique_ptr< boost::asio::io_service > io_service,
+    boost::asio::ip::tcp::socket connection
+) : m_cnx(new network_connection(std::move(io_service), std::move(connection))),
         m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
     query_string_parser qsp;
@@ -211,7 +210,7 @@ fostlib::http::server::request::request(
 fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
-    std::auto_ptr< binary_body > headers_and_body,
+    std::unique_ptr< binary_body > headers_and_body,
     const url::query_string &qs
 ) : m_handler(raise_connection_error),
         m_method( method ), m_pathspec( filespec ), m_query_string(qs),
@@ -223,7 +222,7 @@ fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
     const url::query_string &qs,
-    std::auto_ptr< binary_body > headers_and_body
+    std::unique_ptr< binary_body > headers_and_body
 ) : m_handler(raise_connection_error),
         m_method( method ), m_pathspec( filespec ), m_query_string(qs),
         m_mime( headers_and_body.get()
@@ -233,7 +232,7 @@ fostlib::http::server::request::request(
 
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
-    std::auto_ptr< binary_body > headers_and_body,
+    std::unique_ptr< binary_body > headers_and_body,
     boost::function<void (const mime&, const ascii_string&)> handler
 ) : m_handler(handler),
         m_method( method ), m_pathspec( filespec ),
