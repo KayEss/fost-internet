@@ -29,8 +29,8 @@ fostlib::http::server::server( const host &h, uint16_t p )
 
 std::unique_ptr< http::server::request > fostlib::http::server::operator () () {
     std::unique_ptr< boost::asio::io_service > io_service(new boost::asio::io_service);
-    boost::asio::ip::tcp::socket sock(*io_service);
-    m_server.accept(sock);
+    auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*io_service);
+    m_server.accept(*sock);
     return std::unique_ptr< http::server::request >(
         new http::server::request(std::move(io_service), std::move(sock)));
 }
@@ -44,7 +44,7 @@ namespace {
         std::unique_ptr< boost::asio::io_service > io_service(servicep);
         std::unique_ptr< boost::asio::ip::tcp::socket > usockp(sockp);
         try {
-            http::server::request req(std::move(io_service), std::move(*usockp));
+            http::server::request req(std::move(io_service), std::move(usockp));
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
@@ -122,9 +122,9 @@ void fostlib::http::server::operator () (
 fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
-    std::unique_ptr< boost::asio::io_service > io_service,
-    boost::asio::ip::tcp::socket connection
-) : m_cnx(new network_connection(std::move(io_service), std::move(connection))),
+        std::unique_ptr<boost::asio::io_service> io_service,
+        std::unique_ptr<boost::asio::ip::tcp::socket> connection)
+: m_cnx(new network_connection(std::move(io_service), std::move(connection))),
         m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
     query_string_parser qsp;

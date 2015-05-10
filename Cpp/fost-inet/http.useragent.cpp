@@ -105,7 +105,7 @@ std::unique_ptr< http::user_agent::response >
                     "Expected a HTTP response", coerce< string >(first_line));
         }
 
-        return std::unique_ptr< http::user_agent::response >(
+        return std::unique_ptr<http::user_agent::response>(
             new http::user_agent::response(
                 std::move(cnx), req.method(), req.address(),
                 protocol, status, message));

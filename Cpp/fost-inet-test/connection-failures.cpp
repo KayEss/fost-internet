@@ -68,15 +68,15 @@ FSL_TEST_FUNCTION( read_timeouts ) {
 
 namespace {
     void send_data() {
-        std::unique_ptr<boost::asio::io_service> service(new boost::asio::io_service);
+        auto service = std::make_unique<boost::asio::io_service>();
         host localhost;
         uint16_t port = 64543u;
         // Set up a server on a socket
         boost::asio::ip::tcp::acceptor server(*service,
             boost::asio::ip::tcp::endpoint(localhost.address(), port));
+        auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
         // Accept the connection
-        boost::asio::ip::tcp::socket sock(*service);
-        server.accept(sock);
+        server.accept(*sock);
         network_connection server_cnx(std::move(service), std::move(sock));
         // Send a few KB of data
         std::string data(10240, '*');

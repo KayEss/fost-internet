@@ -18,13 +18,12 @@ FSL_TEST_SUITE( data_transmission );
 
 namespace {
     bool embed_acks() {
-        std::unique_ptr<boost::asio::io_service> service(
-            new boost::asio::io_service);
+        auto service = std::make_unique<boost::asio::io_service>();
         boost::asio::ip::tcp::acceptor server(
             *service, boost::asio::ip::tcp::endpoint(
                 host("0.0.0.0").address(), 6218));
-        boost::asio::ip::tcp::socket sock(*service);
-        server.accept(sock);
+        auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
+        server.accept(*sock);
         network_connection cnx(std::move(service), std::move(sock));
 
         std::vector<unsigned char> data(0x8000);
@@ -66,12 +65,12 @@ namespace {
 #endif
 
     bool ack_at_end() {
-        std::unique_ptr<boost::asio::io_service> service(new boost::asio::io_service);
+        auto service = std::make_unique<boost::asio::io_service>();
         boost::asio::ip::tcp::acceptor server(
             *service, boost::asio::ip::tcp::endpoint(
                 host("0.0.0.0").address(), 6217));
-        boost::asio::ip::tcp::socket sock(*service);
-        server.accept(sock);
+        auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
+        server.accept(*sock);
         network_connection cnx(std::move(service), std::move(sock));
 
         std::vector<unsigned char> data(0x8000);

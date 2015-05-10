@@ -38,7 +38,7 @@ namespace fostlib {
             accessors< url > base;
 
             /// Perform the request and return the response
-            std::unique_ptr< response > operator () (request &) const;
+            std::unique_ptr<response> operator () (request &) const;
 
             /// Perform a GET request
             std::unique_ptr< response > get( const url &url ) const;
