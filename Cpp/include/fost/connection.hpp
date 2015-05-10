@@ -26,7 +26,7 @@ namespace fostlib {
         struct ssl;
         std::unique_ptr<boost::asio::io_service> io_service;
         std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
-        boost::asio::streambuf m_input_buffer;
+        std::unique_ptr<boost::asio::streambuf> m_input_buffer;
         ssl *m_ssl_data;
     public:
         /// Used for server end points where accept returns a socket

@@ -102,7 +102,7 @@ namespace fostlib {
             friend class user_agent;
             mime::mime_headers m_headers;
             response(
-                network_connection connection,
+                network_connection &&connection,
                 const string &m, const url &u,
                 const string &protocol, int status, const string &message);
         public:

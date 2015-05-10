@@ -160,30 +160,33 @@ namespace {
         network_connection &cnx, mime::mime_headers &headers,
         nliteral error_message
     ) {
-        try {
-            while ( true ) {
-                utf8_string line;
-                cnx >> line;
-                if (line.empty())
-                    break;
-                headers.parse(coerce< string >(line));
-            }
-        } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << error_message << std::endl;
-            throw;
-        }
     }
 }
 
 
 fostlib::http::user_agent::response::response(
-    network_connection connection,
+    network_connection &&connection,
     const string &method, const url &url,
     const string &protocol, int status, const string &message
 ) : method(method), address(url), protocol(protocol),
         status(status), message(message),
         m_cnx(new network_connection(std::move(connection))) {
-    read_headers(*m_cnx, m_headers, "Whilst fetching headers");
+    try {
+        while ( true ) {
+            utf8_string line;
+            (*m_cnx) >> line;
+            if (line.empty())
+                break;
+            m_headers.parse(coerce< string >(line));
+        }
+    } catch ( fostlib::exceptions::exception &e ) {
+        e.info() << "Whilst fetching headers" << std::endl;
+        insert(e.data(), "headers", m_headers);
+        insert(e.data(), "status", status);
+        insert(e.data(), "protocol", protocol);
+        insert(e.data(), "method", method);
+        throw;
+    }
 }
 
 
@@ -191,7 +194,7 @@ boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body
     if ( !m_body ) {
         try {
             nullable< int64_t > length;
-            if ( method() == L"HEAD" ) {
+            if ( method() == "HEAD" ) {
                 length = 0;
             } else if (m_headers.exists("Content-Length")) {
                 length = coerce< int64_t >(m_headers["Content-Length"].value());
