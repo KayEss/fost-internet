@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2012, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -38,7 +38,7 @@ fostlib::mime::const_iterator fostlib::mime::begin() const {
     return const_iterator(iterator());
 }
 fostlib::mime::const_iterator fostlib::mime::end() const {
-    return const_iterator(std::auto_ptr< fostlib::mime::iterator_implementation >());
+    return const_iterator(std::unique_ptr< fostlib::mime::iterator_implementation >());
 }
 
 
@@ -47,7 +47,7 @@ fostlib::mime::const_iterator fostlib::mime::end() const {
 */
 
 
-fostlib::mime::const_iterator::const_iterator( std::auto_ptr< fostlib::mime::iterator_implementation > i )
+fostlib::mime::const_iterator::const_iterator( std::unique_ptr< fostlib::mime::iterator_implementation > i )
 : underlying( i.release() ) {
     if ( underlying.get() )
         current = (*underlying)();
@@ -145,8 +145,8 @@ struct fostlib::empty_mime::empty_mime_iterator : public mime::iterator_implemen
         return const_memory_block();
     }
 };
-std::auto_ptr< mime::iterator_implementation > fostlib::empty_mime::iterator() const {
-    return std::auto_ptr< mime::iterator_implementation >( new fostlib::empty_mime::empty_mime_iterator );
+std::unique_ptr< mime::iterator_implementation > fostlib::empty_mime::iterator() const {
+    return std::unique_ptr< mime::iterator_implementation >( new fostlib::empty_mime::empty_mime_iterator );
 }
 
 
@@ -250,9 +250,9 @@ struct fostlib::mime_envelope::mime_envelope_iterator :
         return const_memory_block(u.c_str(), u.c_str() + u.length());
     }
 };
-std::auto_ptr< mime::iterator_implementation >
+std::unique_ptr< mime::iterator_implementation >
         fostlib::mime_envelope::iterator() const {
-    return std::auto_ptr< mime::iterator_implementation >(
+    return std::unique_ptr< mime::iterator_implementation >(
         new mime_envelope_iterator(m_boundary, items().begin(), items().end()));
 }
 
@@ -307,8 +307,8 @@ struct fostlib::text_body::text_body_iterator : public mime::iterator_implementa
         }
     }
 };
-std::auto_ptr< mime::iterator_implementation > fostlib::text_body::iterator() const {
-    return std::auto_ptr< mime::iterator_implementation >(new text_body_iterator(text()));
+std::unique_ptr< mime::iterator_implementation > fostlib::text_body::iterator() const {
+    return std::unique_ptr< mime::iterator_implementation >(new text_body_iterator(text()));
 }
 
 
@@ -380,8 +380,8 @@ struct fostlib::binary_body::binary_body_iterator :
         }
     }
 };
-std::auto_ptr< mime::iterator_implementation > fostlib::binary_body::iterator() const {
-    return std::auto_ptr< mime::iterator_implementation >(
+std::unique_ptr< mime::iterator_implementation > fostlib::binary_body::iterator() const {
+    return std::unique_ptr< mime::iterator_implementation >(
         new binary_body_iterator(data())
     );
 }
@@ -425,7 +425,7 @@ struct fostlib::file_body::file_body_iteration : public mime::iterator_implement
             return const_memory_block();
     }
 };
-std::auto_ptr< mime::iterator_implementation > fostlib::file_body::iterator() const {
-    return std::auto_ptr< mime::iterator_implementation >(new file_body_iteration(filename()));;
+std::unique_ptr< mime::iterator_implementation > fostlib::file_body::iterator() const {
+    return std::unique_ptr< mime::iterator_implementation >(new file_body_iteration(filename()));;
 }
 

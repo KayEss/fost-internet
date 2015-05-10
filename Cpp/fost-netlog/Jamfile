@@ -1,6 +1,0 @@
-
-fost-lib-autotest fost-netlog
-    : Cpp/fost-netlog
-    :
-        ../fost-inet
-    ;
