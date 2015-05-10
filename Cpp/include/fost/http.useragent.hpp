@@ -133,7 +133,7 @@ namespace fostlib {
             boost::shared_ptr< const binary_body > body();
 
         private:
-            network_connection m_cnx;
+            std::unique_ptr<network_connection> m_cnx;
             boost::shared_ptr< binary_body > m_body;
         };
 
