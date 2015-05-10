@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2010, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2009-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -21,8 +21,8 @@ FSL_TEST_FUNCTION( no_authentication ) {
     std::map<string, string> keys;
     http::user_agent::request r("GET", fostlib::url());
 
-    std::auto_ptr<binary_body> body(new binary_body(r.headers()));
-    http::server::request request(r.method(), r.address().pathspec(), body);
+    http::server::request request(r.method(), r.address().pathspec(),
+        std::make_unique<binary_body>(r.headers()));
 
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
@@ -109,8 +109,8 @@ FSL_TEST_FUNCTION( fost_authentication ) {
     FSL_CHECK(r.headers().exists("X-FOST-Timestamp"));
     FSL_CHECK_EQ(r.headers()["X-FOST-Headers"].value(), L"X-FOST-Headers");
 
-    std::auto_ptr<binary_body> body(new binary_body(r.headers()));
-    http::server::request request(r.method(), r.address().pathspec(), body);
+    http::server::request request(r.method(), r.address().pathspec(), 
+        std::make_unique<binary_body>(r.headers()));
     http::fost_authn authn(http::fost_authentication(keys, request));
     FSL_CHECK(authn.authenticated());
     FSL_CHECK(authn.under_attack());
