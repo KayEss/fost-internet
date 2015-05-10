@@ -35,6 +35,8 @@ namespace fostlib {
             boost::asio::ip::tcp::socket socket);
         /// Used for clients where a host is connected to on a given port number
         network_connection(const host &h, nullable<port_number> p = null);
+        /// Move constructor
+        network_connection(network_connection&&);
 
         /// Non-virtual destructor so sub-classing is not allowed
         ~network_connection();
