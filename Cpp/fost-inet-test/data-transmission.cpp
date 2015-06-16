@@ -106,7 +106,7 @@ FSL_TEST_FUNCTION( large_send_ack_at_end ) {
             FSL_CHECK_NOTHROW(cnx << data);
         }
     } catch ( exceptions::exception &e ) {
-        insert(e.data(), "exception-in-remote-thread", coerce<json>(ok.exception()));
+        insert(e.data(), "exception-in-remote-thread", e.what());
         throw;
     }
     FSL_CHECK(ok());
