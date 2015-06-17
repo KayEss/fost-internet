@@ -1,5 +1,5 @@
 /*
-    Copyright 2011-2012, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2011-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -18,14 +18,13 @@ FSL_TEST_SUITE( data_transmission );
 
 namespace {
     bool embed_acks() {
-        boost::asio::io_service service;
+        auto service = std::make_unique<boost::asio::io_service>();
         boost::asio::ip::tcp::acceptor server(
-            service, boost::asio::ip::tcp::endpoint(
+            *service, boost::asio::ip::tcp::endpoint(
                 host("0.0.0.0").address(), 6218));
-        std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-            new boost::asio::ip::tcp::socket( service ));
+        auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
         server.accept(*sock);
-        network_connection cnx(sock);
+        network_connection cnx(std::move(service), std::move(sock));
 
         std::vector<unsigned char> data(0x8000);
         for ( std::size_t block(0); block < 8; ++block) {
@@ -66,14 +65,13 @@ namespace {
 #endif
 
     bool ack_at_end() {
-        boost::asio::io_service service;
+        auto service = std::make_unique<boost::asio::io_service>();
         boost::asio::ip::tcp::acceptor server(
-            service, boost::asio::ip::tcp::endpoint(
+            *service, boost::asio::ip::tcp::endpoint(
                 host("0.0.0.0").address(), 6217));
-        std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-            new boost::asio::ip::tcp::socket( service ));
+        auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
         server.accept(*sock);
-        network_connection cnx(sock);
+        network_connection cnx(std::move(service), std::move(sock));
 
         std::vector<unsigned char> data(0x8000);
         for ( std::size_t block(0); block < c_blocks; ++block )
@@ -108,7 +106,7 @@ FSL_TEST_FUNCTION( large_send_ack_at_end ) {
             FSL_CHECK_NOTHROW(cnx << data);
         }
     } catch ( exceptions::exception &e ) {
-        insert(e.data(), "exception-in-remote-thread", coerce<json>(ok.exception()));
+        insert(e.data(), "exception-in-remote-thread", e.what());
         throw;
     }
     FSL_CHECK(ok());

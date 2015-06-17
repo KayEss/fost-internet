@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -38,23 +38,25 @@ namespace fostlib {
                     /// Create an empty request
                     request();
                     /// Create a request from data on the provided socket
-                    request(std::auto_ptr< boost::asio::ip::tcp::socket > connection);
+                    request(
+                        std::unique_ptr< boost::asio::io_service > io_service,
+                        std::unique_ptr<boost::asio::ip::tcp::socket> connection);
                     /// This constructor is useful for mocking the request that doesn't get responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
-                        std::auto_ptr< binary_body > headers_and_body
-                            = std::auto_ptr< binary_body >(),
+                        std::unique_ptr< binary_body > headers_and_body
+                            = std::unique_ptr< binary_body >(),
                         const url::query_string &qs = url::query_string());
                     /// This constructor is useful for mocking the request that doesn't get responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
                         const url::query_string &qs,
-                        std::auto_ptr< binary_body > headers_and_body
-                            = std::auto_ptr< binary_body >());
+                        std::unique_ptr< binary_body > headers_and_body
+                            = std::unique_ptr< binary_body >());
                     /// This constructor is useful for mocking the request that gets responded to
                     request(
                         const string &method, const url::filepath_string &filespec,
-                        std::auto_ptr< binary_body > headers_and_body,
+                        std::unique_ptr< binary_body > headers_and_body,
                         boost::function<void (const mime&, const ascii_string &)>);
 
                     /// The request method
@@ -87,7 +89,7 @@ namespace fostlib {
             accessors< const uint16_t > port;
 
             /// Return the next request on the underlying socket
-            std::auto_ptr< request > operator() ();
+            std::unique_ptr<request> operator() ();
             /// Run the provided lambda to service requests forever
             void operator () (
                 boost::function< bool (request &) > service_lambda);

@@ -1,5 +1,0 @@
-
-fost-exe fsink :
-        ../fost-inet
-        fsink.cpp
-    ;

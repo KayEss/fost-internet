@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -254,18 +254,35 @@ namespace {
 }
 
 
-fostlib::network_connection::network_connection(std::auto_ptr< boost::asio::ip::tcp::socket > socket)
-: m_socket(socket), m_ssl_data(NULL) {
+fostlib::network_connection::network_connection(
+        network_connection &&cnx)
+: io_service(std::move(cnx.io_service)),
+        m_socket(std::move(cnx.m_socket)),
+        m_input_buffer(std::move(cnx.m_input_buffer)),
+        m_ssl_data(std::move(cnx.m_ssl_data)) {
 }
 
-fostlib::network_connection::network_connection(const host &h, nullable< port_number > p)
-: m_socket(new boost::asio::ip::tcp::socket(io_service)), m_ssl_data(NULL) {
+fostlib::network_connection::network_connection(
+        std::unique_ptr<boost::asio::io_service> io_service,
+        std::unique_ptr<boost::asio::ip::tcp::socket> socket)
+: io_service(std::move(io_service)),
+        m_socket(std::move(socket)),
+        m_input_buffer(new boost::asio::streambuf),
+        m_ssl_data(nullptr) {
+}
+
+fostlib::network_connection::network_connection(
+        const host &h, nullable< port_number > p)
+: io_service(new boost::asio::io_service),
+        m_socket(new boost::asio::ip::tcp::socket(*io_service)),
+        m_input_buffer(new boost::asio::streambuf),
+        m_ssl_data(nullptr) {
     const port_number port = p.value(coerce< port_number >(h.service().value("0")));
     json socks(c_socks_version.value());
 
     if ( !socks.isnull() ) {
         const host socks_host( coerce< host >( c_socks_host.value() ) );
-        connect(io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
+        connect(*io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
         if ( c_socks_version.value() == json(4) ) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection
@@ -278,24 +295,28 @@ fostlib::network_connection::network_connection(const host &h, nullable< port_nu
             b.sputc(0); // User ID
             send(*m_socket, NULL, b);
             // Receive the response
-            read(*m_socket, NULL, m_input_buffer, boost::asio::transfer_at_least(8));
-            if ( m_input_buffer.sbumpc() != 0x00 || m_input_buffer.sbumpc() != 0x5a )
+            read(*m_socket, NULL, *m_input_buffer, boost::asio::transfer_at_least(8));
+            if ( m_input_buffer->sbumpc() != 0x00 || m_input_buffer->sbumpc() != 0x5a )
                 throw exceptions::socket_error("SOCKS 4 error handling where the response values are not 0x00 0x5a");
             char ignore[6];
-            m_input_buffer.sgetn(ignore, 6);
-        } else
+            m_input_buffer->sgetn(ignore, 6);
+        } else {
             throw exceptions::socket_error("SOCKS version not implemented", coerce< string >(c_socks_version.value()));
-    } else
-        connect(io_service, *m_socket, h, port);
+        }
+    } else {
+        connect(*io_service, *m_socket, h, port);
+    }
 }
 
 fostlib::network_connection::~network_connection() {
-    delete m_ssl_data;
+    if ( m_socket ) {
+        delete m_ssl_data;
+    }
 }
 
 
 void fostlib::network_connection::start_ssl() {
-    m_ssl_data = new ssl(io_service, *m_socket);
+    m_ssl_data = new ssl(*io_service, *m_socket);
 }
 
 
@@ -334,11 +355,11 @@ network_connection &fostlib::network_connection::operator >> ( utf8_string &s ) 
     return *this;
 }
 network_connection &fostlib::network_connection::operator >> ( std::string &s ) {
-    std::size_t length(read_until(*m_socket, m_ssl_data, m_input_buffer, "\r\n"));
+    std::size_t length(read_until(*m_socket, m_ssl_data, *m_input_buffer, "\r\n"));
     if ( length >= 2 ) {
         for ( std::size_t c = 0; c < length - 2; ++c )
-            s += m_input_buffer.sbumpc();
-        m_input_buffer.sbumpc(); m_input_buffer.sbumpc();
+            s += m_input_buffer->sbumpc();
+        m_input_buffer->sbumpc(); m_input_buffer->sbumpc();
     } else {
         throw exceptions::unexpected_eof(
             "Could not find a \\r\\n sequence before network connection ended");
@@ -348,24 +369,24 @@ network_connection &fostlib::network_connection::operator >> ( std::string &s ) 
 network_connection &fostlib::network_connection::operator >> (
         std::vector< utf8 > &v) {
     const std::size_t chunk = coerce<std::size_t>(c_large_read_chunk_size.value());
-    while( v.size() - m_input_buffer.size()
-            && read(*m_socket, m_ssl_data, m_input_buffer,
+    while( v.size() - m_input_buffer->size()
+            && read(*m_socket, m_ssl_data, *m_input_buffer,
                 boost::asio::transfer_at_least(
-                    std::min(v.size() - m_input_buffer.size(), chunk))) );
-    if ( m_input_buffer.size() < v.size() ) {
+                    std::min(v.size() - m_input_buffer->size(), chunk))) );
+    if ( m_input_buffer->size() < v.size() ) {
         exceptions::unexpected_eof exception(
             "Could not read all of the requested bytes from the network connection");
-        insert(exception.data(), "bytes read", coerce<int64_t>(m_input_buffer.size()));
+        insert(exception.data(), "bytes read", coerce<int64_t>(m_input_buffer->size()));
         insert(exception.data(), "bytes expected", coerce<int64_t>(v.size()));
         throw exception;
     }
     for ( std::size_t p = 0; p <  v.size(); ++p )
-        v[p] = m_input_buffer.sbumpc();
+        v[p] = m_input_buffer->sbumpc();
     return *this;
 }
 void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
-    while ( m_input_buffer.size() ) {
-        b.sputc(m_input_buffer.sbumpc());
+    while ( m_input_buffer->size() ) {
+        b.sputc(m_input_buffer->sbumpc());
     }
     boost::system::error_code error;
     read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);

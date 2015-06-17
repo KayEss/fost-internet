@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -41,7 +41,7 @@ fostlib::http::user_agent::user_agent(const url &u)
 }
 
 
-std::auto_ptr< http::user_agent::response >
+std::unique_ptr< http::user_agent::response >
         fostlib::http::user_agent::operator () (request &req) const {
     try {
         if ( !req.headers().exists("Date") ) {
@@ -59,11 +59,9 @@ std::auto_ptr< http::user_agent::response >
         if ( !authentication().isnull() )
             authentication().value()( req );
 
-        std::auto_ptr< network_connection > cnx(
-            new network_connection(req.address().server(), req.address().port())
-        );
+        network_connection cnx(req.address().server(), req.address().port());
         if ( req.address().protocol() == ascii_printable_string("https") )
-            cnx->start_ssl();
+            cnx.start_ssl();
 
         std::stringstream buffer;
         buffer << coerce< utf8_string >( req.method() ).underlying() << " " <<
@@ -76,14 +74,14 @@ std::auto_ptr< http::user_agent::response >
         }
         req.headers().fold_limit(null); // Turn off line folding
         buffer << " HTTP/1.0\r\n" << req.headers() << "\r\n";
-        *cnx << buffer;
+        cnx << buffer;
 
         for ( mime::const_iterator i( req.data().begin() ); i != req.data().end(); ++i ) {
-            *cnx << *i;
+            cnx << *i;
         }
 
         utf8_string first_line;
-        *cnx >> first_line;
+        cnx >> first_line;
         string protocol, message; int status;
         {
             fostlib::parser_lock lock;
@@ -107,9 +105,9 @@ std::auto_ptr< http::user_agent::response >
                     "Expected a HTTP response", coerce< string >(first_line));
         }
 
-        return std::auto_ptr< http::user_agent::response >(
+        return std::unique_ptr<http::user_agent::response>(
             new http::user_agent::response(
-                cnx, req.method(), req.address(),
+                std::move(cnx), req.method(), req.address(),
                 protocol, status, message));
     } catch ( fostlib::exceptions::exception &e ) {
         insert(e.data(), "http-ua", "method", req.method());
@@ -162,29 +160,33 @@ namespace {
         network_connection &cnx, mime::mime_headers &headers,
         nliteral error_message
     ) {
-        try {
-            while ( true ) {
-                utf8_string line;
-                cnx >> line;
-                if (line.empty())
-                    break;
-                headers.parse(coerce< string >(line));
-            }
-        } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << error_message << std::endl;
-            throw;
-        }
     }
 }
 
 
 fostlib::http::user_agent::response::response(
-    std::auto_ptr< network_connection > connection,
+    network_connection &&connection,
     const string &method, const url &url,
     const string &protocol, int status, const string &message
 ) : method(method), address(url), protocol(protocol),
-        status(status), message(message), m_cnx(connection) {
-    read_headers(*m_cnx, m_headers, "Whilst fetching headers");
+        status(status), message(message),
+        m_cnx(new network_connection(std::move(connection))) {
+    try {
+        while ( true ) {
+            utf8_string line;
+            (*m_cnx) >> line;
+            if (line.empty())
+                break;
+            m_headers.parse(coerce< string >(line));
+        }
+    } catch ( fostlib::exceptions::exception &e ) {
+        e.info() << "Whilst fetching headers" << std::endl;
+        insert(e.data(), "headers", m_headers);
+        insert(e.data(), "status", status);
+        insert(e.data(), "protocol", protocol);
+        insert(e.data(), "method", method);
+        throw;
+    }
 }
 
 
@@ -192,7 +194,7 @@ boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body
     if ( !m_body ) {
         try {
             nullable< int64_t > length;
-            if ( method() == L"HEAD" ) {
+            if ( method() == "HEAD" ) {
                 length = 0;
             } else if (m_headers.exists("Content-Length")) {
                 length = coerce< int64_t >(m_headers["Content-Length"].value());

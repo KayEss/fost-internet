@@ -21,9 +21,7 @@ explicit examples ;
 
 alias fost :
         ../fost-base//fost
-        Cpp/fost-fsink
         Cpp/fost-inet
-        Cpp/fost-netlog
     ;
 
 alias tests :

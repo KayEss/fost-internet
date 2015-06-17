@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -27,22 +27,24 @@ fostlib::http::server::server( const host &h, uint16_t p )
 ) {
 }
 
-std::auto_ptr< http::server::request > fostlib::http::server::operator () () {
-    std::auto_ptr< boost::asio::ip::tcp::socket > sock(
-        new boost::asio::ip::tcp::socket( m_service ));
-    m_server.accept( *sock );
-    return std::auto_ptr< http::server::request >(
-        new http::server::request( sock ));
+std::unique_ptr< http::server::request > fostlib::http::server::operator () () {
+    std::unique_ptr< boost::asio::io_service > io_service(new boost::asio::io_service);
+    auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*io_service);
+    m_server.accept(*sock);
+    return std::unique_ptr< http::server::request >(
+        new http::server::request(std::move(io_service), std::move(sock)));
 }
 
 namespace {
     bool service(
         boost::function< bool ( http::server::request & ) > service_lambda,
+        boost::asio::io_service *servicep,
         boost::asio::ip::tcp::socket *sockp
     ) {
-        std::auto_ptr< boost::asio::ip::tcp::socket > sock(sockp);
+        std::unique_ptr< boost::asio::io_service > io_service(servicep);
+        std::unique_ptr< boost::asio::ip::tcp::socket > usockp(sockp);
         try {
-            http::server::request req(sock);
+            http::server::request req(std::move(io_service), std::move(usockp));
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
@@ -99,14 +101,15 @@ void fostlib::http::server::operator () (
     while ( true ) {
         // Use a raw pointer here for minimum overhead -- if it all goes wrong
         // and a socket leaks, we don't care (for now)
+        boost::asio::io_service *service(new boost::asio::io_service);
         boost::asio::ip::tcp::socket *sock(
-            new boost::asio::ip::tcp::socket( m_service ));
+            new boost::asio::ip::tcp::socket(*service));
         m_server.accept(*sock);
         if ( terminate_lambda() ) {
             delete sock;
             return;
         }
-        pool.f<bool>( boost::lambda::bind(service, service_lambda, sock) );
+        pool.f<bool>( boost::lambda::bind(::service, service_lambda, service, sock) );
     }
 }
 
@@ -119,8 +122,10 @@ void fostlib::http::server::operator () (
 fostlib::http::server::request::request() {
 }
 fostlib::http::server::request::request(
-    std::auto_ptr< boost::asio::ip::tcp::socket > connection
-) : m_cnx( new network_connection(connection) ), m_handler(raise_connection_error) {
+        std::unique_ptr<boost::asio::io_service> io_service,
+        std::unique_ptr<boost::asio::ip::tcp::socket> connection)
+: m_cnx(new network_connection(std::move(io_service), std::move(connection))),
+        m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
     query_string_parser qsp;
 
@@ -205,7 +210,7 @@ fostlib::http::server::request::request(
 fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
-    std::auto_ptr< binary_body > headers_and_body,
+    std::unique_ptr< binary_body > headers_and_body,
     const url::query_string &qs
 ) : m_handler(raise_connection_error),
         m_method( method ), m_pathspec( filespec ), m_query_string(qs),
@@ -217,7 +222,7 @@ fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
     const url::query_string &qs,
-    std::auto_ptr< binary_body > headers_and_body
+    std::unique_ptr< binary_body > headers_and_body
 ) : m_handler(raise_connection_error),
         m_method( method ), m_pathspec( filespec ), m_query_string(qs),
         m_mime( headers_and_body.get()
@@ -227,7 +232,7 @@ fostlib::http::server::request::request(
 
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
-    std::auto_ptr< binary_body > headers_and_body,
+    std::unique_ptr< binary_body > headers_and_body,
     boost::function<void (const mime&, const ascii_string&)> handler
 ) : m_handler(handler),
         m_method( method ), m_pathspec( filespec ),

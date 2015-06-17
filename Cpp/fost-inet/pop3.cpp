@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2013,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2009-2015,Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -171,8 +171,8 @@ namespace {
         network_connection m_cnx;
         public:
             size_t message_count;
-            pop3cnx( const host &h, const string &username, const string &password )
-            : m_cnx( h, 110 ) {
+            pop3cnx(const host &h, const string &username, const string &password)
+            : m_cnx(h, 110) {
                 try {
                     utf8_string server_status;
                     m_cnx >> server_status;
@@ -186,8 +186,7 @@ namespace {
                     m_cnx >> server_response;
 
                     std::stringstream server_response_stringstream(
-                        server_response.underlying().substr(3)
-                    );
+                        server_response.underlying().substr(3));
                     server_response_stringstream >> message_count;
                     size_t octets;
                     server_response_stringstream >> octets;
@@ -202,7 +201,7 @@ namespace {
             } catch ( ... ) {
                 absorb_exception();
             }
-            std::auto_ptr< text_body > message( size_t i ) {
+            std::unique_ptr< text_body > message( size_t i ) {
                 try {
                     send_and_check_OK(m_cnx, "retr", i);
                     mime::mime_headers h = read_headers(m_cnx);
@@ -210,9 +209,9 @@ namespace {
                     try {
                         content = read_body(m_cnx);
                     } catch ( fostlib::exceptions::unicode_encoding & ) {
-                        return std::auto_ptr< text_body >();
+                        return std::unique_ptr< text_body >();
                     }
-                    return std::auto_ptr<text_body>(
+                    return std::unique_ptr<text_body>(
                         new text_body( coerce< string >( content ), h, "text/plain" )
                     );
                 } catch ( fostlib::exceptions::exception &e ) {
@@ -239,14 +238,14 @@ void fostlib::pop3::iterate_mailbox(
 
     // Loop from the end so we always process the latest bounce messages first
     for ( std::size_t i = messages; i; --i ) {
-        std::auto_ptr< text_body > message = mailbox->message(i);
+        std::unique_ptr< text_body > message = mailbox->message(i);
         if (message.get() && destroy_message(*message))
             mailbox->remove(i);
         if ( i % 20 == 0 ) {
 			log::info("Resetting mailbox connection", i);
             mailbox.reset( new pop3cnx(host, username, password) );
             if ( mailbox->message_count < i )
-                throw fostlib::exceptions::out_of_range< size_t >(
+                throw fostlib::exceptions::out_of_range<size_t>(
                     "The number of messages on the server can't go down "
                         "below the ones we've processed!",
                     i, messages, mailbox->message_count);

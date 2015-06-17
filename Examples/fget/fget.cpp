@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -20,7 +20,7 @@ using namespace fostlib;
 FSL_MAIN(
     L"fget",
     L"Simple HTTP client\n"
-        L"Copyright (C) 2008-2010, Felspar Co. Ltd."
+        L"Copyright (C) 2008-2015, Felspar Co. Ltd."
 )( fostlib::ostream &o, fostlib::arguments &args ) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 
@@ -47,7 +47,7 @@ FSL_MAIN(
                 args.commandSwitch("secret").value(),
                 tosign);
     }
-    std::auto_ptr< http::user_agent::response > response(browser(request));
+    auto response(browser(request));
     if ( args[2].isnull() ) {
         // Display the body
         o << response->body() << std::endl;

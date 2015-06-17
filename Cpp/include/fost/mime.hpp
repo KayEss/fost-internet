@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -45,7 +45,7 @@ namespace fostlib {
                 friend class fostlib::mime;
                 boost::shared_ptr< iterator_implementation > underlying;
                 const_memory_block current;
-                const_iterator( std::auto_ptr< iterator_implementation > p );
+                const_iterator( std::unique_ptr<iterator_implementation> p );
                 public:
                     /// Allow comparison for equality
                     bool operator == ( const const_iterator & ) const;
@@ -63,7 +63,7 @@ namespace fostlib {
             const_iterator end() const;
 
         protected:
-            virtual std::auto_ptr< iterator_implementation > iterator() const = 0;
+            virtual std::unique_ptr< iterator_implementation > iterator() const = 0;
 
             explicit mime(
                 const mime_headers &headers, const string &content_type);
@@ -73,7 +73,7 @@ namespace fostlib {
     /// A MIME implementation that can never have any body data.
     class FOST_INET_DECLSPEC empty_mime : public mime {
         struct empty_mime_iterator;
-        std::auto_ptr< iterator_implementation > iterator() const;
+        std::unique_ptr< iterator_implementation > iterator() const;
         public:
             /// Construct an empty MIME body that cannot have data
             empty_mime(const mime_headers &headers = mime_headers(),
@@ -88,7 +88,7 @@ namespace fostlib {
     /// A MIME envelope can contain a nested structure of other MIME containers
     class FOST_INET_DECLSPEC mime_envelope : public mime {
         struct mime_envelope_iterator;
-        std::auto_ptr< iterator_implementation > iterator() const;
+        std::unique_ptr< iterator_implementation > iterator() const;
         string m_boundary;
         public:
             /// Construct the MIME envelope with optional headers
@@ -135,7 +135,7 @@ namespace fostlib {
     /// A MIME container which always stores text
     class FOST_INET_DECLSPEC text_body : public mime {
         struct text_body_iterator;
-        std::auto_ptr< iterator_implementation > iterator() const;
+        std::unique_ptr< iterator_implementation > iterator() const;
         public:
             text_body(
                 const utf8 *begin,
@@ -165,7 +165,7 @@ namespace fostlib {
     /// A MIME container which represents binary data in memory
     class FOST_INET_DECLSPEC binary_body : public mime {
         struct binary_body_iterator;
-        std::auto_ptr< iterator_implementation > iterator() const;
+        std::unique_ptr< iterator_implementation > iterator() const;
         public:
             /// The type of the data storage vector
             typedef std::vector<unsigned char> data_type;
@@ -207,13 +207,12 @@ namespace fostlib {
     /// A MIME container which represents a file on disk
     class FOST_INET_DECLSPEC file_body : public mime {
         struct file_body_iteration;
-        std::auto_ptr< iterator_implementation > iterator() const;
+        std::unique_ptr< iterator_implementation > iterator() const;
         public:
             file_body(
                 const boost::filesystem::wpath &file,
                 const mime_headers &headers = mime_headers(),
-                const string &mime = "binary/octet-stream"
-            );
+                const string &mime = "binary/octet-stream");
 
             /// Print the MIME out on the stream
             std::ostream &print_on( std::ostream &o ) const;
