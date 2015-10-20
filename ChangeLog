@@ -1,6 +1,12 @@
 2015-10-20  Kirit Saelensminde  <kirit@felspar.com>
  Make sure the web server logs an error message when it catches an excepion.
 
+2015-05-10  Kirit Saelensminde  <kirit@felspar.com>
+ Remove all uses of auto_ptr. Replace some with move semantics, others with unique_ptr.
+
+2015-05-06  Kirit Saelensminde  <kirit@felspar.com>
+ Fixed up the tests to use the new service API on the network connections.
+
 2015-04-30  Kirit Saelensminde  <kirit@felspar.com>
  Changed the way that Boost ASIO IO services are used so that server accept sockets can be serviced totally independantly. This is an ugly workaround for the problem, but does at least cause all requests to be properly serviced.
  Revert the change from 2015-04-24
