@@ -49,8 +49,11 @@ namespace {
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
-                text_body error(
-                    fostlib::coerce<fostlib::string>(e));
+            	auto estr = fostlib::coerce<fostlib::string>(e);
+            	log::error()
+            		("", "web server service -- exception caught")
+            		("exception", estr);
+                text_body error(estr);
                 req( error, 500 );
                 return true;
             }
