@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2015,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -428,11 +428,11 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
 
 fostlib::exceptions::relative_path_error::relative_path_error(
     const string &base, const string &rel, const string &error
-) throw () {
+) throw ()
+: exceptions::exception(error) {
     try {
-        info() << error << std::endl
-            << L"Base comes from : " << base << std::endl
-            << L"Relative pathname : " << rel << std::endl;
+        insert(data(), "base", base);
+        insert(data(), "relative", rel);
     } catch ( ... ) {
         absorb_exception();
     }
@@ -440,3 +440,4 @@ fostlib::exceptions::relative_path_error::relative_path_error(
 wliteral const fostlib::exceptions::relative_path_error::message() const throw () {
     return L"Relative path error";
 }
+

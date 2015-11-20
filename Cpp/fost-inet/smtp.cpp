@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2013,Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -13,6 +13,8 @@
 
 #include <fost/exception/null.hpp>
 #include <fost/exception/parse_error.hpp>
+
+#include <fost/insert>
 
 
 using namespace fostlib;
@@ -115,11 +117,11 @@ struct fostlib::smtp_client::implementation {
         cnx >> response;
         if ( response.underlying().substr( 0, number.underlying().length() ) != number.underlying() ) {
             exceptions::not_implemented exception(L"SMTP response was not the one expected");
-            exception.info()
-                << L"Expected " << code << " but got "
-                << response.underlying().substr(0, number.underlying().length())
-                << "\nHandling command: " << command
-                << "\nFull response: " << response << std::endl;
+            insert(exception.data(), "code", "expected", code);
+            insert(exception.data(), "code", "received",
+                response.underlying().substr(0, number.underlying().length()).c_str());
+            insert(exception.data(), "command", command);
+            insert(exception.data(), "response", response);
             throw exception;
         }
     }
