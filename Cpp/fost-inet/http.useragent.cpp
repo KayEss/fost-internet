@@ -7,14 +7,15 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/datetime>
-#include <fost/insert>
 
 #include <fost/http.useragent.hpp>
 #include <fost/parse/parse.hpp>
 
 #include <fost/exception/not_null.hpp>
 #include <fost/exception/unexpected_eof.hpp>
+
+#include <fost/datetime>
+#include <fost/insert>
 
 
 using namespace fostlib;
@@ -180,7 +181,7 @@ fostlib::http::user_agent::response::response(
             m_headers.parse(coerce< string >(line));
         }
     } catch ( fostlib::exceptions::exception &e ) {
-        e.info() << "Whilst fetching headers" << std::endl;
+        insert(e.data(), "whilst", "fetching headers");
         insert(e.data(), "headers", m_headers);
         insert(e.data(), "status", status);
         insert(e.data(), "protocol", protocol);

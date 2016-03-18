@@ -50,8 +50,8 @@ namespace {
                 headers.parse(safe);
             }
             return headers;
-        } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << "Whilst reading MIME headers" << std::endl;
+        } catch ( exceptions::exception &e ) {
+            insert(e.data(), "whilst", "reading MIME headers");
             throw;
         }
     }
@@ -87,7 +87,7 @@ namespace {
 
             return content;
         } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << "Whilst reading message body" << std::endl;
+            insert(e.data(), "whilst", "reading message body");
             throw;
         }
     }
@@ -108,7 +108,8 @@ namespace {
                 );
             }
         } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << "Whilst waiting for +OK after " << command << std::endl;
+            insert(e.data(), "whilst", "waiting for OK after command");
+            insert(e.data(), "command", command);
             throw;
         }
     }
@@ -126,7 +127,8 @@ namespace {
             }
             the_network_connection << "\r\n";
         } catch ( fostlib::exceptions::exception &e ) {
-            e.info() << "Whilst sending command: " << command << std::endl;
+            insert(e.data(), "whilst", "sending command");
+            insert(e.data(), "command", command);
             throw;
         }
     }
@@ -190,8 +192,8 @@ namespace {
                     server_response_stringstream >> message_count;
                     size_t octets;
                     server_response_stringstream >> octets;
-                } catch ( fostlib::exceptions::exception &e ) {
-                    e.info() << "Whilst establishing POP3 connection" << std::endl;
+                } catch ( exceptions::exception &e ) {
+                    insert(e.data(), "whilst", "establishing POP3 connection");
                     throw;
                 }
             }
@@ -215,7 +217,7 @@ namespace {
                         new text_body( coerce< string >( content ), h, "text/plain" )
                     );
                 } catch ( fostlib::exceptions::exception &e ) {
-                    e.info() << "Whilst retrieving a message" << std::endl;
+                    insert(e.data(), "whilst", "retrieving message");
                     throw;
                 }
             }
@@ -234,7 +236,7 @@ void fostlib::pop3::iterate_mailbox(
     boost::scoped_ptr< pop3cnx > mailbox(
         new pop3cnx(host, username, password));
     const size_t messages = mailbox->message_count;
-    log::info("Number of messages found", messages);
+    log::info(c_fost_inet, "Number of messages found", messages);
 
     // Loop from the end so we always process the latest bounce messages first
     for ( std::size_t i = messages; i; --i ) {
@@ -242,7 +244,7 @@ void fostlib::pop3::iterate_mailbox(
         if (message.get() && destroy_message(*message))
             mailbox->remove(i);
         if ( i % 20 == 0 ) {
-			log::info("Resetting mailbox connection", i);
+			log::info(c_fost_inet, "Resetting mailbox connection", i);
             mailbox.reset( new pop3cnx(host, username, password) );
             if ( mailbox->message_count < i )
                 throw fostlib::exceptions::out_of_range<size_t>(
