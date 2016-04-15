@@ -7,10 +7,11 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/log>
-#include <fost/threading>
 #include <fost/http.server.hpp>
 #include <fost/parse/url.hpp>
+
+#include <fost/log>
+#include <fost/threading>
 
 
 using namespace fostlib;
@@ -48,9 +49,12 @@ namespace {
             try {
                 return service_lambda(req);
             } catch ( fostlib::exceptions::exception &e ) {
-                text_body error(
-                    fostlib::coerce<fostlib::string>(e));
-                req( error, 500 );
+                auto estr = fostlib::coerce<fostlib::string>(e);
+                log::error(c_fost_inet)
+                    ("", "web server service -- exception caught")
+                    ("exception", estr);
+                text_body error(estr);
+                req(error, 500);
                 return true;
             }
         } catch ( fostlib::exceptions::exception & ) {
@@ -168,7 +172,7 @@ fostlib::http::server::request::request(
                     )
                 )
             ).full ) {
-                log::error()
+                log::error(c_fost_inet)
                     ("message", "First line failed to parse")
                     ("first line", coerce<string>(first_line));
                 throw exceptions::not_implemented(
@@ -201,7 +205,8 @@ fostlib::http::server::request::request(
             text_body error(coerce<string>(e));
             (*this)( error, 400 );
         } catch ( ... ) {
-            log::critical("Exception whilst sending bad request response");
+            log::warning(c_fost_inet,
+                "Exception whilst sending bad request response");
             absorb_exception();
         }
         throw;

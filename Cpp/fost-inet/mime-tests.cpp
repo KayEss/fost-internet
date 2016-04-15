@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -8,6 +8,8 @@
 
 #include "fost-inet-test.hpp"
 #include <fost/mime.hpp>
+
+#include <fost/insert>
 
 
 using namespace fostlib;
@@ -179,9 +181,9 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 Test text document\r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"--\r\n\
 " ) );
-    } catch ( fostlib::exceptions::exception &e ) {
+    } catch ( exceptions::exception &e ) {
         if ( headers[L"Content-Type"].subvalue( L"boundary" ).isnull() )
-            e.info() << L"Output from the envelope:\n" << ss.str() << std::endl;
+            insert(e.data(), "envelope", ss.str().c_str());
         throw;
     }
 }
