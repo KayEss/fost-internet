@@ -69,6 +69,10 @@ namespace fostlib {
                     }
                     /// The request body and headers
                     boost::shared_ptr< binary_body > data() const;
+                    /// Shortcut to the headers
+                    mime::mime_headers &headers() {
+                        return m_mime->headers();
+                    }
 
                     /// Used to pass the response back to the user agent.
                     void operator () (
