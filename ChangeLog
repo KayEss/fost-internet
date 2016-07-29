@@ -1,5 +1,6 @@
 2016-07-29  Kirit Saelensminde  <kirit@felspar.com>
- Drop MIME headers that have an underscore in their names.
+ * Allow access to some parts of the server request using a `jcursor`.
+ * Drop MIME headers that have an underscore in their names.
 
 2016-07-28  Kirit Saelensminde  <kirit@felspar.com>
  Add shortcut method on HTTP request for getting to the headers.

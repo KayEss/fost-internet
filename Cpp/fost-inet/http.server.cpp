@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -242,6 +242,25 @@ fostlib::http::server::request::request(
 ) : m_handler(handler),
         m_method( method ), m_pathspec( filespec ),
         m_mime( headers_and_body.release() ) {
+}
+
+
+fostlib::nullable<fostlib::json>
+    fostlib::http::server::request::operator [] (const jcursor &pos) const
+{
+    if ( pos.size() ) {
+        if ( pos[0] == "headers" && pos.size() == 2 ) {
+            auto header = boost::get<string>(pos[1]);
+            if ( headers().exists(header) ) {
+                return json(headers()[header].value());
+            } else {
+                return json();
+            }
+        }
+    }
+    throw exceptions::not_implemented(__func__,
+        "Requested path into request is not possible",
+        fostlib::coerce<fostlib::json>(pos));
 }
 
 
