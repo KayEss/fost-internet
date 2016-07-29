@@ -254,7 +254,7 @@ fostlib::nullable<fostlib::json>
             if ( headers().exists(header) ) {
                 return json(headers()[header].value());
             } else {
-                return json();
+                return null;
             }
         }
     }
