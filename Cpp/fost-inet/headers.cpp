@@ -72,7 +72,9 @@ void fostlib::headers_base::parse( const string &headers ) {
         const std::pair< string, content > parsed(
             value( line.first, line.second.value( fostlib::string() ) )
         );
-        add( parsed.first, parsed.second );
+        if ( parsed.first.find('_') == std::string::npos ) {
+            add( parsed.first, parsed.second );
+        }
     }
 }
 
