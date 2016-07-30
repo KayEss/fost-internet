@@ -1,3 +1,6 @@
+2016-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ * Allow header content to be created from a JSON object.
+
 2016-07-29  Kirit Saelensminde  <kirit@felspar.com>
  * Allow access to some parts of the server request using a `jcursor`.
  * Drop MIME headers that have an underscore in their names.
