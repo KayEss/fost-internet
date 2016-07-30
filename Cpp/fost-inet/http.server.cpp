@@ -249,10 +249,17 @@ fostlib::nullable<fostlib::json>
     fostlib::http::server::request::operator [] (const jcursor &pos) const
 {
     if ( pos.size() ) {
-        if ( pos[0] == "headers" && pos.size() == 2 ) {
+        const auto size = pos.size();
+        if ( pos[0] == "headers" && (size == 2 || size == 3) ) {
             auto header = boost::get<string>(pos[1]);
             if ( headers().exists(header) ) {
-                return json(headers()[header].value());
+                if ( size == 2 ) {
+                    return json(headers()[header].value());
+                } else {
+                    auto subvalue = headers()[header].subvalue(boost::get<string>(pos[2]));
+                    if ( subvalue.isnull() ) return null;
+                    else return json(subvalue.value());
+                }
             } else {
                 return null;
             }

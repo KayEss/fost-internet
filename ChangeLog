@@ -1,4 +1,5 @@
 2016-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ * Allow a `jcursor` to access header sub-values.
  * Allow header content to be created from a JSON object.
 
 2016-07-29  Kirit Saelensminde  <kirit@felspar.com>
