@@ -64,7 +64,7 @@ namespace fostlib {
                     /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
                     /// The query string
-                    const url::query_string query_string() const {
+                    const url::query_string &query_string() const {
                         return m_query_string;
                     }
                     /// The request body and headers
