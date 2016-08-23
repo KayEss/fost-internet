@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -64,11 +64,26 @@ namespace fostlib {
                     /// The requested resource
                     const url::filepath_string &file_spec() const { return m_pathspec; }
                     /// The query string
-                    const url::query_string query_string() const {
+                    const url::query_string &query_string() const {
                         return m_query_string;
                     }
                     /// The request body and headers
                     boost::shared_ptr< binary_body > data() const;
+
+                    /// Shortcut to the headers
+                    mime::mime_headers &headers() {
+                        return m_mime->headers();
+                    }
+                    /// Shortcut to the headers
+                    const mime::mime_headers &headers() const {
+                        return m_mime->headers();
+                    }
+
+                    /// Allow access to parts of the request using a jcursor.
+                    /// Return null if the location doesn't exist, but throw
+                    /// if the location couldn't possibly exist. The value
+                    /// may exist and return an empty JSON value
+                    nullable<json> operator [] (const jcursor &) const;
 
                     /// Used to pass the response back to the user agent.
                     void operator () (

@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -66,6 +66,10 @@ namespace fostlib {
         void set( const string &name );
         /// Allows a header to be given a specified value
         void set( const string &name, const content & );
+        /// Allows a header to be given a set of values
+        void set(const string &name, const json &j, const string &r = string()) {
+            set(name, content(j, r));
+        }
         /// Adds a header with a given name and content
         void add( const string &name, const content & );
         /// Allow a specified sub-value on the specified header to be set
@@ -85,33 +89,35 @@ namespace fostlib {
 
         /// The content of header fields
         class FOST_INET_DECLSPEC content {
-            std::map< string, string, detail::ascii_iless > m_subvalues;
-            public:
-                /// Create empty content for a header value
-                content();
-                /// Create header value content from a narrow character literal
-                content( nliteral );
-                /// Create header value content from a wide character literal
-                content( wliteral );
-                /// Create header value content from a string
-                content( const string & );
-                /// Create header value content from a string with sub-values
-                content( const string &, const std::map< string, string > & );
+        std::map< string, string, detail::ascii_iless > m_subvalues;
+        public:
+            /// Create empty content for a header value
+            content();
+            /// Create header value content from a narrow character literal
+            content( nliteral );
+            /// Create header value content from a wide character literal
+            content( wliteral );
+            /// Create header value content from a string
+            content( const string & );
+            /// Create header value content from a string with sub-values
+            content( const string &, const std::map< string, string > & );
+            /// Create header value content from JSON specifying the root key
+            explicit content(const json &values, const string &root = string());
 
-                /// The main value of the header field
-                accessors< string > value;
+            /// The main value of the header field
+            accessors< string > value;
 
-                /// Set a field's sub-value
-                content &subvalue( const string &k, const string &v );
-                /// Access a field's sub-value
-                nullable< string > subvalue( const string &k ) const;
+            /// Set a field's sub-value
+            content &subvalue( const string &k, const string &v );
+            /// Access a field's sub-value
+            nullable< string > subvalue( const string &k ) const;
 
-                /// Allows the sub-values to be iterated
-                typedef std::map< string, string, detail::ascii_iless >::const_iterator const_iterator;
-                /// The start of the sub-values
-                const_iterator begin() const;
-                /// The end of the sub-values
-                const_iterator end() const;
+            /// Allows the sub-values to be iterated
+            typedef std::map< string, string, detail::ascii_iless >::const_iterator const_iterator;
+            /// The start of the sub-values
+            const_iterator begin() const;
+            /// The end of the sub-values
+            const_iterator end() const;
         };
 
     protected:

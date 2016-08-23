@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -77,16 +77,14 @@ void fostlib::url::query_string::remove( const string &name ) {
         throw exceptions::not_null(
             "A plain text query string has already been provided");
     }
-    std::map< string, std::list< nullable< string > > >::iterator p(
-        m_query.find( name ));
+    const auto p(m_query.find( name ));
     if ( p != m_query.end() )
         m_query.erase( p );
 }
 
 
 std::size_t fostlib::url::query_string::has_key(const string &key) const {
-    std::map< string, std::list< nullable< string > > >::const_iterator p(
-        m_query.find(key));
+    const auto p(m_query.find(key));
     if ( p == m_query.end() ) {
         return 0;
     } else {
@@ -96,8 +94,7 @@ std::size_t fostlib::url::query_string::has_key(const string &key) const {
 
 
 nullable< string > fostlib::url::query_string::operator [] (const string &k) const {
-    std::map< string, std::list< nullable< string > > >::const_iterator p(
-        m_query.find(k));
+    const auto  p(m_query.find(k));
     if ( p == m_query.end() || p->second.size() == 0u ) {
         return null;
     } else {
@@ -107,12 +104,12 @@ nullable< string > fostlib::url::query_string::operator [] (const string &k) con
 
 
 namespace {
-    const std::list< nullable< string > > c_empty_list;
+    const std::vector<nullable<string>> c_empty_list;
 }
-const std::list< nullable< string > > &fostlib::url::query_string::at
-        (const string &key) const {
-    std::map< string, std::list< nullable< string > > >::const_iterator p(
-        m_query.find(key));
+const std::vector<nullable<string>> &fostlib::url::query_string::at(
+    const string &key) const
+{
+    const auto p(m_query.find(key));
     if ( p == m_query.end() ) {
         return c_empty_list;
     } else {
@@ -144,12 +141,8 @@ namespace {
 nullable< ascii_printable_string > fostlib::url::query_string::as_string() const {
     if ( m_string.isnull() ) {
         nullable< ascii_printable_string > r;
-        for (std::map< string, std::list< nullable< string > > >::const_iterator it(
-                    m_query.begin());
-                it != m_query.end(); ++it ) {
-            for (
-                std::list< nullable< string > >::const_iterator v( it->second.begin() );
-                    v != it->second.end(); ++v) {
+        for (auto it(m_query.begin()); it != m_query.end(); ++it ) {
+            for ( auto v( it->second.begin() ); v != it->second.end(); ++v) {
                 r = concat(
                     r, ascii_printable_string( "&" ), concat(
                         query_string_encode( it->first ) + ascii_printable_string( "=" ),

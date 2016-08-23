@@ -35,6 +35,15 @@ FSL_TEST_FUNCTION( headers ) {
     FSL_CHECK_EQ( headers[ L"X-First" ].value(), L"Another value" );
 }
 
+FSL_TEST_FUNCTION( drops_underscores ) {
+    mime::mime_headers headers;
+    headers.parse(L"X_First: value1\r\nX-Second: value2");
+
+    FSL_CHECK(not headers.exists( L"X_First" ));
+    FSL_CHECK(headers.exists( L"X-Second" ));
+    FSL_CHECK(not headers.exists( L"X-Third" ));
+}
+
 FSL_TEST_FUNCTION( headers_case_insensitive ) {
     mime::mime_headers headers;
     headers.set("ETag", "somevalue");

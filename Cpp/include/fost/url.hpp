@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -59,11 +59,11 @@ namespace fostlib {
             nullable< string > operator [] (const string &key) const;
 
             /// Fetch all items at this key position, or an empty list if none exists
-            const std::list< nullable< string > > &at(const string &key) const;
+            const std::vector<nullable<string>> &at(const string &key) const;
 
         private:
             nullable< ascii_printable_string > m_string;
-            std::map< string, std::list< nullable< string > > > m_query;
+            std::map<string, std::vector<nullable<string>>> m_query;
         };
         enum t_form { e_pathname, e_encoded };
 

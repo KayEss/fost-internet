@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -72,7 +72,9 @@ void fostlib::headers_base::parse( const string &headers ) {
         const std::pair< string, content > parsed(
             value( line.first, line.second.value( fostlib::string() ) )
         );
-        add( parsed.first, parsed.second );
+        if ( parsed.first.find('_') == std::string::npos ) {
+            add( parsed.first, parsed.second );
+        }
     }
 }
 
@@ -208,9 +210,29 @@ fostlib::headers_base::content::content( const string &val )
 : value( val ) {
 }
 fostlib::headers_base::content::content(
-    const string &val, const std::map< string, string > &args
-) : m_subvalues( args.begin(), args.end() ), value( val ) {
+    const string &val, const std::map< string, string > &args)
+: m_subvalues( args.begin(), args.end() ), value( val ) {
 }
+fostlib::headers_base::content::content(
+    const json &values, const string &root
+) {
+    try {
+        for ( json::const_iterator item(values.begin()); item != values.end(); ++item ) {
+            const auto key = coerce<string>(item.key());
+            const auto itemstr = coerce<string>(*item);
+            if ( key == root ) {
+                value(itemstr);
+            } else {
+                m_subvalues[key] = itemstr;
+            }
+        }
+    } catch ( exceptions::exception &e ) {
+        insert(e.data(), "headers_base", "content", "values", values);
+        insert(e.data(), "headers_base", "content", "root", root);
+        throw;
+    }
+}
+
 
 headers_base::content &fostlib::headers_base::content::subvalue(
     const string &k, const string &v

@@ -1,3 +1,20 @@
+2016-08-08  Kirit Saelensminde  <kirit@felspar.com>
+ Swap a `std::list` for a `std::vector` in the query string interface.
+
+2016-08-07  Kirit Saelensminde  <kirit@felspar.com>
+ Fix a bug in the server request so it properly returns a reference to the query string.
+
+2016-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ * Allow a `jcursor` to access header sub-values.
+ * Allow header content to be created from a JSON object.
+
+2016-07-29  Kirit Saelensminde  <kirit@felspar.com>
+ * Allow access to some parts of the server request using a `jcursor`.
+ * Drop MIME headers that have an underscore in their names.
+
+2016-07-28  Kirit Saelensminde  <kirit@felspar.com>
+ Add shortcut method on HTTP request for getting to the headers.
+
 2015-11-20  Kirit Saelensminde  <kirit@felspar.com>
  Removed use of deprecated Fost APIs.
 
