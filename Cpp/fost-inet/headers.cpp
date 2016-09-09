@@ -217,14 +217,21 @@ fostlib::headers_base::content::content(
     const json &values, const string &root
 ) {
     try {
-        for ( json::const_iterator item(values.begin()); item != values.end(); ++item ) {
-            const auto key = coerce<string>(item.key());
-            const auto itemstr = coerce<string>(*item);
-            if ( key == root ) {
-                value(itemstr);
-            } else {
-                m_subvalues[key] = itemstr;
+        if ( values.isobject() ) {
+            for ( json::const_iterator item(values.begin()); item != values.end(); ++item ) {
+                const auto key = coerce<string>(item.key());
+                const auto itemstr = coerce<string>(*item);
+                if ( key == root ) {
+                    value(itemstr);
+                } else {
+                    m_subvalues[key] = itemstr;
+                }
             }
+        } else if ( values.isatom() ) {
+            value(coerce<string>(values));
+        } else {
+            throw exceptions::not_implemented(__func__,
+                "Can't set header values from this JSON", values);
         }
     } catch ( exceptions::exception &e ) {
         insert(e.data(), "headers_base", "content", "values", values);
