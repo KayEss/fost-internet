@@ -1,3 +1,6 @@
+2016-09-14  Kirit Saelensminde  <kirit@felspar.com>
+ The HTTP server now adds a header describing the remote address.
+
 2016-09-09  Kirit Saelensminde  <kirit@felspar.com>
  Handle setting MIME headers via JSON.
 

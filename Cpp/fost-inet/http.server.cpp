@@ -189,6 +189,8 @@ fostlib::http::server::request::request(
             headers.parse(coerce< string >(line));
         }
 
+        headers.add("__remote_addr", m_cnx->remote_end().name());
+
         std::size_t content_length = 0;
         if ( headers.exists("Content-Length") )
             content_length = coerce< int64_t >(headers["Content-Length"].value());
