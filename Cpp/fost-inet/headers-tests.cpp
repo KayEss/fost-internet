@@ -29,6 +29,21 @@ FSL_TEST_FUNCTION( ostream ) {
 }
 
 
+FSL_TEST_FUNCTION(parse) {
+    fostlib::mime::mime_headers h1, h2, h3;
+    h1.parse("Header-Value: One Two");
+    FSL_CHECK(h1.exists("header-value"));
+    FSL_CHECK_EQ(h1["Header-Value"].value(), "One Two");
+
+    h2.parse("Header-Value: One Two; two=2");
+    FSL_CHECK(h1.exists("header-value"));
+    FSL_CHECK_EQ(h1["header-value"].value(), "One Two");
+
+    h3.parse("Header_Value: One Two");
+    FSL_CHECK(not h3.exists("Header_Value"));
+}
+
+
 FSL_TEST_FUNCTION( field_setting ) {
     fostlib::mime::mime_headers headers;
     FSL_CHECK( headers.end() == headers.begin() );
