@@ -79,6 +79,15 @@ namespace fostlib {
                         return m_mime->headers();
                     }
 
+                    /// Return the remote host address. The setting
+                    /// webserver:remote_header is used to retrieve this.
+                    /// The remote end will always be set in the
+                    /// __remote_addr header when the request is parsed
+                    /// from the socket, but the setting should be changed
+                    /// when the real IP address is passed in through some
+                    /// other header like `X-Forwarded-For`
+                    host remote_address() const;
+
                     /// Allow access to parts of the request using a jcursor.
                     /// Return null if the location doesn't exist, but throw
                     /// if the location couldn't possibly exist. The value

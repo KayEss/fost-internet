@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -43,6 +43,9 @@ namespace fostlib {
 
         /// Start SSL on this connection. After a successful handshake all traffic will be over SSL.
         void start_ssl();
+
+        /// Return the remote end
+        host remote_end();
 
         /// Immediately push data over the network
         network_connection &operator << ( const const_memory_block & );

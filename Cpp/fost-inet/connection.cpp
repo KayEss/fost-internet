@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -317,6 +317,11 @@ fostlib::network_connection::~network_connection() {
 
 void fostlib::network_connection::start_ssl() {
     m_ssl_data = new ssl(*io_service, *m_socket);
+}
+
+
+fostlib::host fostlib::network_connection::remote_end() {
+    return host(m_socket->remote_endpoint().address().to_string());
 }
 
 

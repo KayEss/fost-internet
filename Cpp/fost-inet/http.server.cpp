@@ -189,6 +189,8 @@ fostlib::http::server::request::request(
             headers.parse(coerce< string >(line));
         }
 
+        headers.add("__remote_addr", m_cnx->remote_end().name());
+
         std::size_t content_length = 0;
         if ( headers.exists("Content-Length") )
             content_length = coerce< int64_t >(headers["Content-Length"].value());
@@ -222,6 +224,7 @@ fostlib::http::server::request::request(
         m_mime( headers_and_body.get()
             ? headers_and_body.release()
             : new binary_body() ) {
+    m_mime->headers().add("__remote_addr", "127.0.0.1");
 }
 fostlib::http::server::request::request(
     const string &method,
@@ -233,6 +236,7 @@ fostlib::http::server::request::request(
         m_mime( headers_and_body.get()
             ? headers_and_body.release()
             : new binary_body() ) {
+    m_mime->headers().add("__remote_addr", "127.0.0.1");
 }
 
 fostlib::http::server::request::request(
@@ -242,6 +246,14 @@ fostlib::http::server::request::request(
 ) : m_handler(handler),
         m_method( method ), m_pathspec( filespec ),
         m_mime( headers_and_body.release() ) {
+    m_mime->headers().add("__remote_addr", "127.0.0.1");
+}
+
+
+fostlib::host fostlib::http::server::request::remote_address() const {
+    static const setting<string> header("fost-internet/Cpp/fost-inet/http.server.cpp",
+        "webserver", "Remote address header", "__remote_addr", true);
+    return host(m_mime->headers()[header.value()].value());
 }
 
 
