@@ -1,3 +1,6 @@
+2016-09-18  Kirit Saelensminde  <kirit@felspar.com>
+ Make the remote address properly available on the server HTTP request.
+
 2016-09-14  Kirit Saelensminde  <kirit@felspar.com>
  The HTTP server now adds a header describing the remote address.
 
