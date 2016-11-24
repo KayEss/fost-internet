@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -57,8 +57,7 @@ namespace {
                 signature << *i;
         else
             signature << fostlib::utf8_string(
-                request.address().query().as_string().value("").underlying()
-            );
+                request.address().query().as_string().value_or("").underlying());
 
         request.headers().set( L"X-FOST-Headers", signd );
         request.headers().set( L"Authorization", L"FOST " + api_key + L":" +
@@ -114,9 +113,9 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
     std::pair< string, nullable<string> > authorization =
         partition(request.data()->headers()["Authorization"].value());
 
-    if ( authorization.first != "FOST" || authorization.second.isnull() )
+    if ( authorization.first != "FOST" || not authorization.second ) {
         return fost_authn("Non FOST authentication not implemented");
-    else {
+    } else {
         if ( !request.data()->headers().exists("X-FOST-Headers") )
             return fost_authn("No signed headers found");
 
@@ -145,15 +144,15 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
 
         std::pair< string, nullable<string> > signature_partition =
             partition(authorization.second.value(), ":");
-        if ( signature_partition.second.isnull() )
+        if ( not signature_partition.second ) {
             return fost_authn("No FOST key:signature pair found");
-        else {
+        } else {
             const string &key = signature_partition.first;
             const string &signature = signature_partition.second.value();
             nullable<string> found_secret = key_mapping(key);
-            if ( found_secret.isnull() )
+            if ( not found_secret ) {
                 return fost_authn("Key not found", true);
-            else {
+            } else {
                 const string &secret = found_secret.value();
                 boost::shared_ptr<mime::mime_headers> headers(
                     new mime::mime_headers);

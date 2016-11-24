@@ -37,8 +37,7 @@ namespace {
     }
 
     string_pair precise_partition( const fostlib::nullable<string> &s, const fostlib::string &separator ) {
-        if (s.isnull())
-            return string_pair();
+        if ( not s ) return string_pair();
         size_t cut_position = s.value().find( separator );
 
         if (cut_position == fostlib::string::npos)
@@ -48,10 +47,9 @@ namespace {
     }
 
     string_pair mime_partition( const fostlib::nullable<string> &headers ) {
-        if (headers.isnull())
-            return string_pair();
+        if ( not headers ) return string_pair();
         string_pair part = precise_partition( headers, c_mime_newline );
-        while(!part.second.isnull() && is_whitespace( part.second.value().at(0) )){
+        while( part.second && is_whitespace(part.second.value().at(0)) ){
             string_pair new_part = precise_partition( part.second.value(), c_mime_newline );
             part.first += new_part.first;
             part.second = new_part.second;
@@ -70,8 +68,7 @@ void fostlib::headers_base::parse( const string &headers ) {
     ) {
         const string_pair line( partition( lines.first, L":" ));
         const std::pair< string, content > parsed(
-            value( line.first, line.second.value( fostlib::string() ) )
-        );
+            value(line.first, line.second.value_or(fostlib::string())));
         if ( parsed.first.find('_') == std::string::npos ) {
             add( parsed.first, parsed.second );
         }
@@ -163,7 +160,7 @@ std::ostream &fostlib::operator << (
         std::stringstream ss;
         ss << coerce<ascii_string>(i->first).underlying()
             << ": " << i->second << "\r\n";
-        if ( headers.fold_limit().isnull() ) {
+        if ( not headers.fold_limit() ) {
             o << ss.str();
         } else {
             o << fold(ss.str(), headers.fold_limit().value());

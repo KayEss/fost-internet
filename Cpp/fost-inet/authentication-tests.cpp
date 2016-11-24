@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2009-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -114,6 +114,6 @@ FSL_TEST_FUNCTION( fost_authentication ) {
     http::fost_authn authn(http::fost_authentication(keys, request));
     FSL_CHECK(authn.authenticated());
     FSL_CHECK(authn.under_attack());
-    FSL_CHECK(authn.error().isnull());
+    FSL_CHECK(not authn.error());
 }
 

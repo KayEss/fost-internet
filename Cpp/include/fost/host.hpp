@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -20,15 +20,7 @@
 
 #include <fost/string>
 
-#ifdef _MSC_VER
-    #pragma warning ( push )
-    // conversion from 'size_t' to 'DWORD', possible loss of data
-    #pragma warning ( disable : 4267 )
-    #include <boost/asio.hpp>
-    #pragma warning ( pop )
-#else
-    #include <boost/asio.hpp>
-#endif
+#include <boost/asio.hpp>
 
 
 namespace fostlib {

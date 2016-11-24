@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -94,18 +94,18 @@ std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( c
         // Parse the value from the format
         // form-data; name="aname"; extra="value"
         std::pair< string, nullable< string > > disp( partition( value, L";" ) );
-        if ( !disp.second.isnull() ) {
+        if ( disp.second ) {
             for ( std::pair< string, nullable< string > > para( partition( disp.second, L";" ) ); !para.first.empty(); para = partition( para.second, L";" ) ) {
                 // Normally the extra argument values should be surrounded by double quotes, but sometimes not
                 std::pair< string, nullable< string > > argument = partition( para.first, L"=" );
-                if ( !argument.second.isnull()
+                if ( argument.second
                     && argument.second.value().at(0) == '"'
                     && argument.second.value().at(argument.second.value().length()-1) == '"'
                 ) {
                     argument.second = argument.second.value().substr(1, argument.second.value().length()-2);
                 }
-                if ( argument.second.isnull() )
-                    throw exceptions::parse_error( L"Message header " + name + L" does not have a value for an argument", para.first );
+                if ( not argument.second ) throw exceptions::parse_error(
+                    L"Message header " + name + L" does not have a value for an argument", para.first);
                 args[ argument.first ] = argument.second.value();
             }
         }

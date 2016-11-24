@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2012, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -26,7 +26,7 @@ namespace {
         boost::asio::ip::tcp::resolver resolver( io_service );
         boost::asio::ip::tcp::resolver::query query(
             coerce< ascii_string >( host.name() ).underlying(),
-            coerce< ascii_string >( host.service().value("0") ).underlying()
+            coerce< ascii_string >( host.service().value_or("0") ).underlying()
         );
         boost::system::error_code error;
         boost::asio::ip::tcp::resolver::iterator it( resolver.resolve( query, error ) );
@@ -71,8 +71,7 @@ fostlib::host::host( uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4, const nulla
 
 
 boost::asio::ip::address fostlib::host::address() const {
-    if ( m_address.isnull() )
-        m_address = getaddr( *this );
+    if ( not m_address ) m_address = getaddr( *this );
     return m_address.value();
 }
 
@@ -97,14 +96,11 @@ host fostlib::coercer< host, string >::coerce( const string &h ) {
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( fostlib::coerce< ascii_string >( address.to_string() ) );
 }
-ascii_string fostlib::coercer< ascii_string, host >::coerce( const host &h ) {
-    if ( h.service().isnull() )
-        return fostlib::coerce< ascii_string >( h.name() );
-    else
-        return fostlib::coerce< ascii_string >( h.name() )
+ascii_string fostlib::coercer<ascii_string, host>::coerce( const host &h ) {
+    if ( not h.service() ) return fostlib::coerce< ascii_string >(h.name());
+    else return fostlib::coerce< ascii_string >(h.name())
             + ascii_string(":")
-            + fostlib::coerce< ascii_string >( h.service().value() )
-        ;
+            + fostlib::coerce< ascii_string >(h.service().value());
 }
 
 
@@ -114,3 +110,4 @@ fostlib::exceptions::host_not_found::host_not_found( const string &hostname ) th
 const wchar_t * const fostlib::exceptions::host_not_found::message() const throw () {
     return L"Could not find an IP address for the host name";
 }
+
