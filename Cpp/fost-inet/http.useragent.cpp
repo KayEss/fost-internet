@@ -57,7 +57,7 @@ std::unique_ptr< http::user_agent::response >
         }
         req.headers().set("TE", "trailers");
 
-        if ( authentication() ) authentication().value()( req );
+        if ( authentication() ) authentication()(req);
 
         network_connection cnx(req.address().server(), req.address().port());
         if ( req.address().protocol() == ascii_printable_string("https") )
