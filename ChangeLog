@@ -1,3 +1,6 @@
+2016-12-16  Kirit Saelensminde  <kirit@felspar.com>
+ Add a cookie header parser.
+
 2016-11-26  Kirit Saelensminde  <kirit@felspar.com>
  Replace older Boost code with `std::function` and lambdas.
 
