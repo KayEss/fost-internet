@@ -64,18 +64,16 @@ fostlib::url::query_string::query_string( const ascii_printable_string &q )
 void fostlib::url::query_string::append(
     const string &name, const nullable< string > &value
 ) {
-    if ( !m_string.isnull() ) {
-        throw exceptions::not_null(
-            "A plain text query string has already been provided");
+    if ( m_string ) {
+        throw exceptions::not_null("A plain text query string has already been provided");
     }
     m_query[ name ].push_back( value );
 }
 
 
 void fostlib::url::query_string::remove( const string &name ) {
-    if ( !m_string.isnull() ) {
-        throw exceptions::not_null(
-            "A plain text query string has already been provided");
+    if ( m_string ) {
+        throw exceptions::not_null("A plain text query string has already been provided");
     }
     const auto p(m_query.find( name ));
     if ( p != m_query.end() )
@@ -131,7 +129,7 @@ namespace {
     nullable< ascii_printable_string > query_string_encode(
         const nullable< string > &s
     ) {
-        if ( s.isnull() ) {
+        if ( not s ) {
             return null;
         } else {
             return query_string_encode( s.value() );
@@ -139,7 +137,7 @@ namespace {
     }
 }
 nullable< ascii_printable_string > fostlib::url::query_string::as_string() const {
-    if ( m_string.isnull() ) {
+    if ( not m_string ) {
         nullable< ascii_printable_string > r;
         for (auto it(m_query.begin()); it != m_query.end(); ++it ) {
             for ( auto v( it->second.begin() ); v != it->second.end(); ++v) {

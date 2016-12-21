@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -83,8 +83,11 @@ namespace {
      * All good stuff, and exactly what we want.
      */
     std::string normalise_path( std::string t_path ) {
-        while( t_path.find( "//" ) != std::string::npos )
-            t_path.replace( t_path.find( "//" ), 2, "/" );
+        auto slashslash = [&]() {
+                while( t_path.find( "//" ) != std::string::npos )
+                    t_path.replace( t_path.find( "//" ), 2, "/" );
+            };
+        slashslash();
 
         if( t_path[0] == '/' )
             // Trim off any leading / - otherwise we get a blank entry at the beginning
@@ -119,7 +122,8 @@ namespace {
         for( pathlist_type::const_iterator P=pathlist.begin(); P!=pathlist.end(); ++P ) {
             t_path += '/' + (*P);
         }
-        return replace_all(t_path, "//", "/").underlying();
+        slashslash();
+        return t_path;
     }
     url::filepath_string normalise_path( const url::filepath_string &path ) {
         return url::filepath_string(
@@ -287,11 +291,11 @@ fostlib::url::url( const t_form form, const string &str )
         m_pathspec = coerce< url::filepath_string >( query_parts.first );
         break;
     }
-    if ( !query_parts.second.isnull() )
+    if ( query_parts.second )
         query( query_string( coerce< ascii_printable_string >(
             query_parts.second.value()
         ) ) );
-    if ( !anchor_parts.second.isnull() )
+    if ( anchor_parts.second )
         anchor( coerce< ascii_printable_string >( anchor_parts.second.value() ) );
 }
 fostlib::url::url(
@@ -337,14 +341,14 @@ fostlib::url::url( const ascii_printable_string &protocol, const host &h,
 
 ascii_printable_string fostlib::url::as_string() const {
     ascii_printable_string url( protocol() + ascii_printable_string( "://" ) );
-    if ( !user().isnull() )
+    if ( user() )
         url += coerce< ascii_printable_string >(
-            user().value() + L":" + password().value( string() ) + L"@"
+            user().value() + L":" + password().value_or( string() ) + L"@"
         );
-    else if ( !password().isnull() )
+    else if ( password() )
         url += coerce< ascii_printable_string >( L":" + password().value() + L"@" );
     url += coerce< ascii_printable_string >(server().name());
-    if ( !server().service().isnull() && (
+    if ( server().service() && (
             ( protocol() == ascii_printable_string("http")
                 && server().service() != "80" )
             || ( protocol() == ascii_printable_string("https")
@@ -377,7 +381,7 @@ ascii_printable_string fostlib::url::as_string( const url &relative_from ) const
 }
 
 fostlib::port_number fostlib::url::port() const {
-    if ( server().service().isnull() )
+    if ( not server().service() )
         return protocol() == ascii_printable_string("http") ? 80 : 443;
     else
         return coerce< port_number >( server().service().value() );

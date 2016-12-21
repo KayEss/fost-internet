@@ -129,6 +129,11 @@ namespace fostlib {
     };
 
 
+    /// Parse the headers and put their values into the supplied
+    /// content header.
+    void parse_cookies(fostlib::headers_base::content &);
+
+
     /// Allow headers to be written to a narrow stream
     FOST_INET_DECLSPEC std::ostream &operator <<(
         std::ostream &o, const headers_base &headers);

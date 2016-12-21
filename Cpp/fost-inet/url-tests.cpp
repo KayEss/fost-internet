@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -40,17 +40,17 @@ FSL_TEST_FUNCTION( filepath_string ) {
 
 FSL_TEST_FUNCTION( query_string ) {
     url::query_string q1, q2;
-    FSL_CHECK( q1.as_string().isnull() );
-    FSL_CHECK( q2.as_string().isnull() );
+    FSL_CHECK(not q1.as_string());
+    FSL_CHECK(not q2.as_string());
     FSL_CHECK_EQ(
-        q1.as_string().value( ascii_printable_string() ),
-        q2.as_string().value( ascii_printable_string() ));
-    FSL_CHECK(q1["not-a-key"].isnull());
+        q1.as_string().value_or(ascii_printable_string()),
+        q2.as_string().value_or(ascii_printable_string()));
+    FSL_CHECK(not q1["not-a-key"]);
     FSL_CHECK_EQ(q2.at("not-a-key").size(), 0u);
     q1 = q2;
     q1.append( L"key", null );
     FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=" ) );
-    FSL_CHECK( q1["key"].isnull() );
+    FSL_CHECK(not q1["key"]);
     FSL_CHECK_EQ( q1.has_key("key"), 1u );
     q1.append( L"key", null );
     FSL_CHECK_EQ( q1.as_string().value(), ascii_printable_string( "key=&key=" ) );
@@ -182,7 +182,7 @@ FSL_TEST_FUNCTION( parse ) {
     FSL_CHECK_NOTHROW(
         url a( L"http://localhost/" );
         FSL_CHECK_EQ( a.server().name(), L"localhost" );
-        FSL_CHECK( a.user().isnull() );
+        FSL_CHECK(not a.user());
     )
     FSL_CHECK_EQ( url( "http://localhost" ).server().name(), L"localhost" );
     FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );

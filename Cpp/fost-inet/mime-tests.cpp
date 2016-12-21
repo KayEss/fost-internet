@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -59,7 +59,7 @@ FSL_TEST_FUNCTION( subvalues_case_insensitive ) {
     mime::mime_headers headers;
     headers.set("Content-Type", "text/plain");
     headers.set_subvalue("content-type", "encoding", "utf-8");
-    FSL_CHECK(!headers["Content-type"].subvalue("Encoding").isnull());
+    FSL_CHECK(headers["Content-type"].subvalue("Encoding"));
     FSL_CHECK_EQ(headers["Content-type"].subvalue("Encoding").value(), "utf-8");
     std::stringstream ss;
     ss << headers;
@@ -191,8 +191,9 @@ Test text document\r\n\
 --" + headers[L"Content-Type"].subvalue( L"boundary" ).value() + L"--\r\n\
 " ) );
     } catch ( exceptions::exception &e ) {
-        if ( headers[L"Content-Type"].subvalue( L"boundary" ).isnull() )
+        if ( not headers[L"Content-Type"].subvalue( L"boundary" ) ) {
             insert(e.data(), "envelope", ss.str().c_str());
+        }
         throw;
     }
 }

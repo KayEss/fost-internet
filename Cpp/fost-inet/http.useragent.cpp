@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -57,8 +57,7 @@ std::unique_ptr< http::user_agent::response >
         }
         req.headers().set("TE", "trailers");
 
-        if ( !authentication().isnull() )
-            authentication().value()( req );
+        if ( authentication() ) authentication()(req);
 
         network_connection cnx(req.address().server(), req.address().port());
         if ( req.address().protocol() == ascii_printable_string("https") )
@@ -69,7 +68,7 @@ std::unique_ptr< http::user_agent::response >
             req.address().pathspec().underlying().underlying();
         {
             nullable< ascii_printable_string > q = req.address().query().as_string();
-            if ( !q.isnull() ) {
+            if ( q ) {
                 buffer << "?" << q.value().underlying();
             }
         }
@@ -201,10 +200,10 @@ boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body
                 length = coerce< int64_t >(m_headers["Content-Length"].value());
             }
 
-            if ( status() == 304 || (!length.isnull() && length.value() == 0) ) {
+            if ( status() == 304 || (length && length.value() == 0) ) {
                 m_body = boost::shared_ptr< binary_body >(
                     new binary_body(m_headers));
-            } else if ( length.isnull() ) {
+            } else if ( not length ) {
                 if ( m_headers["Transfer-Encoding"].value() == "chunked" ) {
                     std::vector< unsigned char > data;
                     while ( true ) {

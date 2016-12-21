@@ -121,7 +121,7 @@ namespace {
             boost::system::error_code e
         ) {
             timer.cancel();
-            n = std::make_pair(e, 0);
+            n = std::make_pair(e, std::size_t{});
         }
         static void read_done(
             boost::asio::deadline_timer &timer, read_error &n,
@@ -277,12 +277,13 @@ fostlib::network_connection::network_connection(
         m_socket(new boost::asio::ip::tcp::socket(*io_service)),
         m_input_buffer(new boost::asio::streambuf),
         m_ssl_data(nullptr) {
-    const port_number port = p.value(coerce< port_number >(h.service().value("0")));
+    const port_number port = p.value_or(coerce<port_number>(h.service().value_or("0")));
     json socks(c_socks_version.value());
 
     if ( !socks.isnull() ) {
         const host socks_host( coerce< host >( c_socks_host.value() ) );
-        connect(*io_service, *m_socket, socks_host, coerce< port_number >(socks_host.service().value("0")));
+        connect(*io_service, *m_socket, socks_host,
+                coerce<port_number>(socks_host.service().value_or("0")));
         if ( c_socks_version.value() == json(4) ) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection

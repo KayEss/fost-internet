@@ -1,5 +1,5 @@
 /*
-    Copyright 2007-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2007-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -36,7 +36,7 @@ namespace fostlib {
             };
             template< typename H, typename N >
             void operator () ( H &h, N n ) {
-                if ( h.service().isnull() )
+                if ( not h.service() )
                     h.service(fostlib::string(1, n));
                 else
                     h.service(h.service().value() + fostlib::string(1, n));

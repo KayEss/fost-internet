@@ -1,5 +1,5 @@
 /*
-    Copyright 2010-2014, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2010-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -64,7 +64,7 @@ FSL_TEST_FUNCTION( field_setting ) {
     headers.set("H1", "c"); // Replaces the content
     FSL_CHECK( headers.end() != headers.begin() );
     FSL_CHECK( ++headers.begin() == headers.end() );
-    FSL_CHECK(headers["H1"].subvalue("sub").isnull());
+    FSL_CHECK(not headers["H1"].subvalue("sub"));
 
     headers.add("H1", "d"); // Adds a second H1 header
     FSL_CHECK( headers.end() != headers.begin() );

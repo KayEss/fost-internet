@@ -269,7 +269,7 @@ fostlib::nullable<fostlib::json>
                     return json(headers()[header].value());
                 } else {
                     auto subvalue = headers()[header].subvalue(boost::get<string>(pos[2]));
-                    if ( subvalue.isnull() ) return null;
+                    if ( not subvalue ) return null;
                     else return json(subvalue.value());
                 }
             } else {
