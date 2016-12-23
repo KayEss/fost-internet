@@ -1,0 +1,8 @@
+
+fost-lib-autotest fost-rask-proto
+    :
+        Cpp/fost-rask-proto
+    :
+        ../../../fost-base/Cpp/fost-crypto/
+        ../fost-inet
+    ;

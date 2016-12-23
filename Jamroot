@@ -22,6 +22,7 @@ explicit examples ;
 alias fost :
         ../fost-base//fost
         Cpp/fost-inet
+        Cpp/fost-rask-proto
     ;
 
 alias tests :
