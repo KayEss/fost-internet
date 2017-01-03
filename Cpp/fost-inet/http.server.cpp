@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -8,8 +8,9 @@
 
 #include "fost-inet.hpp"
 #include <fost/http.server.hpp>
-#include <fost/parse/url.hpp>
+#include <fost/parse/http.server.hpp>
 
+#include <fost/exception/parse_error.hpp>
 #include <fost/log>
 #include <fost/threading>
 
@@ -131,7 +132,6 @@ fostlib::http::server::request::request(
 : m_cnx(new network_connection(std::move(io_service), std::move(connection))),
         m_handler(raise_connection_error) {
     m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
-    query_string_parser qsp;
 
     utf8_string first_line;
     (*m_cnx) >> first_line;
@@ -139,45 +139,19 @@ fostlib::http::server::request::request(
     try {
         {
             fostlib::parser_lock lock;
-            if ( !fostlib::parse(lock, first_line.underlying().c_str(),
-                (
-                    +boost::spirit::chset<>( "A-Z" )
-                )[
-                    phoenix::var(m_method) =
-                        phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-                ]
-                >> boost::spirit::chlit< char >( ' ' )
-                >> (+boost::spirit::chset<>( "_@a-zA-Z0-9/.,:'&()%=~!+*-" ))[
-                    phoenix::var(m_pathspec) =
-                        phoenix::construct_< url::filepath_string >(
-                            phoenix::arg1, phoenix::arg2
-                        )
-                ]
-                >> !(
-                    boost::spirit::chlit< char >('?')
-                    >> !(
-                            qsp[phoenix::var(m_query_string) = phoenix::arg1]
-                        |
-                            (+boost::spirit::chset<>( "&\\/:_@a-zA-Z0-9.,'()%+*=-" ))
-                                [phoenix::var(m_query_string) =
-                                    phoenix::construct_< ascii_printable_string >
-                                        (phoenix::arg1, phoenix::arg2)]
-                    )
-                )
-                >> !(
-                    boost::spirit::chlit< char >( ' ' )
-                    >> (
-                        boost::spirit::strlit< nliteral >("HTTP/1.0") |
-                        boost::spirit::strlit< nliteral >("HTTP/1.1")
-                    )
-                )
-            ).full ) {
+            request_status parsed_line;
+            auto pos = first_line.begin(), end = first_line.end();
+            server_first_line<utf8_string::const_iterator> rule;
+            if ( not boost::spirit::qi::parse(pos, end, rule, parsed_line) || pos != end ) {
                 log::error(c_fost_inet)
                     ("message", "First line failed to parse")
-                    ("first line", coerce<string>(first_line));
-                throw exceptions::not_implemented(
-                    "Expected a HTTP request", coerce<string>(first_line));
+                    ("first line", coerce<string>(first_line))
+                    ("unparsed", string(pos, end));
+                throw exceptions::parse_error("Expected a HTTP request", coerce<string>(first_line));
             }
+            m_method = parsed_line.method;
+            m_pathspec = parsed_line.path;
+            m_query_string = parsed_line.query;
         }
 
         mime::mime_headers headers;
@@ -205,7 +179,7 @@ fostlib::http::server::request::request(
     } catch ( fostlib::exceptions::exception &e ) {
         try {
             text_body error(coerce<string>(e));
-            (*this)( error, 400 );
+            (*this)(error, 400);
         } catch ( ... ) {
             log::warning(c_fost_inet,
                 "Exception whilst sending bad request response");

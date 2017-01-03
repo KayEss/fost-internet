@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -302,31 +302,14 @@ fostlib::url::url(
     const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw
 ) : protocol( "http" ), server( h ), user( u ), password( pw ), m_pathspec( "/" ) {
 }
-fostlib::url::url( const string &a_url )
-: protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
-    parser_lock lock;
+fostlib::url::url(const string &a_url)
+: protocol("http"), server(host(s_default_host.value())), m_pathspec("/") {
     try {
-        url_hostpart_parser url_hostpart_p;
-        url_filespec_parser url_filespec_p;
-        query_string_parser query_string_p;
-        url u;
-        ascii_printable_string fs;
-        query_string qs;
-        if ( !fostlib::parse( lock, a_url.c_str(),
-                    url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ]
-                    >> !(
-                        boost::spirit::chlit< wchar_t >( '/' )
-                        >> !url_filespec_p[ phoenix::var( fs ) = phoenix::arg1 ]
-                    ) >> !(
-                        boost::spirit::chlit< wchar_t >( '?' )
-                        >> !query_string_p[ phoenix::var( qs ) = phoenix::arg1 ]
-                    )
-                ).full ) {
-            throw exceptions::parse_error( L"Could not parse URL" );
+        parser_lock lock;
+        auto pos = a_url.begin();
+        if ( not url_p(lock, pos, a_url.end(), *this) || pos != a_url.end() ) {
+            throw exceptions::parse_error("Could not parse URL string", string(pos, a_url.end()));
         }
-        *this = u;
-        pathspec(url::filepath_string( fs ));
-        query(qs);
     } catch ( exceptions::exception &e ) {
         insert(e.data(), "parsing", a_url);
         throw;

@@ -1,5 +1,5 @@
 /*
-    Copyright 2007-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2007-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -13,90 +13,60 @@
 #include <fost/host.hpp>
 #include <fost/parse/parse.hpp>
 
+#include <boost/spirit/include/phoenix.hpp>
+
 
 namespace fostlib {
 
 
-    namespace detail {
+    template<typename Iterator>
+    struct hostname_parser : public boost::spirit::qi::grammar<Iterator, std::string()> {
+        boost::spirit::qi::rule<Iterator, std::string()> top, fqname, hname;
 
-
-        struct host_closure : boost::spirit::closure< host_closure,
-            host,
-            string,
-            uint32_t
-        > {
-            member1 host;
-            member2 hostname;
-            member3 ipv4;
-        };
-        struct host_port_setter {
-            template< typename H, typename N >
-            struct result {
-                typedef void type;
-            };
-            template< typename H, typename N >
-            void operator () ( H &h, N n ) {
-                if ( not h.service() )
-                    h.service(fostlib::string(1, n));
-                else
-                    h.service(h.service().value() + fostlib::string(1, n));
-            }
-        };
-        const phoenix::function<host_port_setter> host_port = host_port_setter();
-
-
-    }
-
-
-    struct FOST_INET_DECLSPEC host_parser : public boost::spirit::grammar <
-        host_parser, detail::host_closure::context_t
-    > {
-        template< typename scanner_t >
-        struct definition {
-            definition( host_parser const &self ) {
-                top = (
-                    ipv4address[ self.host = phoenix::construct_< fostlib::host >( self.ipv4 ) ]
-                    | fqname[ self.host = phoenix::construct_< fostlib::host >( self.hostname ) ]
-                    | rawipv4[ self.host = phoenix::construct_< fostlib::host >( self.ipv4 ) ]
-                    | hname[ self.host = phoenix::construct_< fostlib::host >( self.hostname ) ]
-                    ) >> ! ( boost::spirit::chlit< wchar_t >( ':' )
-                        >> +boost::spirit::chset<>(L"0-9")[
-                            detail::host_port(self.host, phoenix::arg1)
-                        ]
-                    );
-
-                rawipv4 = boost::spirit::uint_parser< uint32_t, 10, 1, 10 >()[
-                    self.ipv4 = phoenix::arg1
-                ];
-
-                ipv4address =
-                    boost::spirit::uint_parser< uint8_t, 10, 1, 3 >()[ self.ipv4 = phoenix::arg1 ]
-                    >> boost::spirit::chlit< wchar_t >( '.' )[ self.ipv4 *= 0x100 ]
-                    >> boost::spirit::uint_parser< uint8_t, 10, 1, 3 >()[ self.ipv4 += phoenix::arg1 ]
-                    >> boost::spirit::chlit< wchar_t >( '.' )[ self.ipv4 *= 0x100 ]
-                    >> boost::spirit::uint_parser< uint8_t, 10, 1, 3 >()[ self.ipv4 += phoenix::arg1 ]
-                    >> boost::spirit::chlit< wchar_t >( '.' )[ self.ipv4 *= 0x100 ]
-                    >> boost::spirit::uint_parser< uint8_t, 10, 1, 3 >()[ self.ipv4 += phoenix::arg1 ];
-
-                hname = boost::spirit::chset<>( L"a-zA-Z0-9" )[
-                    self.hostname = phoenix::construct_< fostlib::string >( 1, phoenix::arg1 )
-                ] >> *boost::spirit::chset<>( L"a-zA-Z0-9-" )[
-                    self.hostname += phoenix::arg1
-                ];
-                dname = +boost::spirit::chset<>( L"a-zA-Z0-9-" )[
-                    self.hostname += phoenix::arg1
-                ];
-                fqname = hname >> +(
-                    boost::spirit::chlit< wchar_t >( '.' )[
-                        self.hostname += phoenix::arg1
-                    ] >> dname
-                );
-            }
-            boost::spirit::rule< scanner_t > top, fqname, dname, hname, rawipv4, ipv4address;
-
-            boost::spirit::rule< scanner_t > const &start() const { return top; }
-        };
+        hostname_parser()
+        : hostname_parser::base_type(top) {
+            top = fqname | hname;
+            hname = boost::spirit::qi::char_("a-zA-Z0-9") >> *boost::spirit::qi::char_("a-zA-Z0-9-");
+            fqname = hname >> +(boost::spirit::qi::char_('.') >> hname);
+        }
     };
+
+
+    template<typename Iterator>
+    struct host_parser : public boost::spirit::qi::grammar<Iterator, host()> {
+        boost::spirit::qi::rule<Iterator, host()> top;
+        hostname_parser<Iterator> hostname;
+        boost::spirit::qi::rule<Iterator, uint32_t> rawipv4;
+        boost::spirit::qi::rule<Iterator, uint16_t> port;
+
+        host_parser()
+        : host_parser::base_type(top) {
+            using boost::spirit::qi::_1;
+            using boost::spirit::qi::_2;
+            using boost::spirit::qi::_val;
+
+            top = ((hostname.fqname | rawipv4 | hostname.hname) >> -port)
+                [boost::phoenix::bind([&](auto &val, auto s, auto p) {
+                    if ( uint32_t *ip4 = boost::get<uint32_t>(&s) ) {
+                        val = p ? host(*ip4, coerce<string>(p.value())) : host(*ip4);
+                    } else {
+                        auto &h = boost::get<std::string>(s);
+                        val = p ? host(h, p.value()) : host(h);
+                    }
+                }, _val, _1, _2)];
+
+            rawipv4 = boost::spirit::qi::int_;
+
+            port = boost::spirit::qi::lit(':') >> boost::spirit::qi::int_;
+        }
+    };
+
+
+    template<typename I> inline
+    auto host_p(parser_lock &, I begin, I end, host &into) {
+        host_parser<I> rule;
+        return boost::spirit::qi::parse(begin, end, rule, into) && begin == end;
+    }
 
 
 }
