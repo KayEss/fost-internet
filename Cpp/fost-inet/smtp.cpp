@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,7 +9,7 @@
 #include "fost-inet.hpp"
 #include <fost/connection.hpp>
 #include <fost/smtp.hpp>
-#include <fost/parse/parse.hpp>
+#include <fost/parse/email.hpp>
 
 #include <fost/exception/null.hpp>
 #include <fost/exception/parse_error.hpp>
@@ -63,27 +63,20 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
     else
         return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
 }
-email_address fostlib::coercer< email_address, string >::coerce( const string &s ) {
+email_address fostlib::coercer< email_address, string >::coerce(const string &s) {
     fostlib::parser_lock lock;
-    string name, address1, address2;
-    if ( !fostlib::parse(lock, s.c_str(),
-        ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_\\.\\+ -"))[
-            phoenix::var( name ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-        ] >> boost::spirit::chlit< wchar_t >( '<' )
-            >> ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_@\\.\\+-" ))[
-                phoenix::var( address1 ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-            ])
-            >> boost::spirit::chlit< wchar_t >( '>' ))
-        | ((+boost::spirit::chset< wchar_t >(L"a-zA-Z0-9_@\\.\\+-" ))[
-            phoenix::var( address2 ) = phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 )
-        ])
-    ).full )
-        throw exceptions::not_implemented("fostlib::coercer< email_address, string >::coerce( const string &s ) -- could not parse", s);
-    if ( address1.empty() )
-        return rfc822_address( fostlib::coerce< ascii_printable_string >( address2 ) );
-    else
-        return email_address( rfc822_address( fostlib::coerce< ascii_printable_string >( address1 ) ),
-            trim(name) );
+    std::pair<boost::optional<std::string>, std::string> result;
+    smtp_address_parser<string::const_iterator> rule;
+    auto pos = s.begin();
+    if ( boost::spirit::qi::parse(pos, s.end(), rule, result) && pos == s.end() ) {
+        if ( not result.first )
+            return rfc822_address(fostlib::coerce<ascii_printable_string>(result.second));
+        else
+            return email_address(rfc822_address(fostlib::coerce<ascii_printable_string>(result.second)),
+                trim(string(result.first.value())));
+    } else {
+        throw exceptions::parse_error("Could not parse email address", string(pos, s.end()));
+    }
 }
 
 

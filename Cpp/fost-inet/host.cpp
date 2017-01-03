@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -81,17 +81,15 @@ string fostlib::host::name() const {
 }
 
 
-host fostlib::coercer< host, string >::coerce( const string &h ) {
+host fostlib::coercer< host, string >::coerce(const string &hostname) {
     fostlib::parser_lock lock;
     host r;
-    host_parser host_p;
-    if ( fostlib::parse(lock, h.c_str(), host_p[ phoenix::var(r) = phoenix::arg1 ]).full )
+    auto begin = hostname.begin();
+    if ( fostlib::host_p(lock, begin, hostname.end(), r) ) {
         return r;
-    else
-        throw exceptions::not_implemented(
-            "fostlib::coercer< host, string >::coerce( const string &h )"
-            " -- where the host name didn't parse"
-        );
+    } else {
+        throw exceptions::not_implemented(__func__, "Where the host name didn't parse", hostname);
+    }
 }
 string fostlib::coercer< string, boost::asio::ip::address >::coerce( const boost::asio::ip::address &address ) {
     return fostlib::coerce< string >( fostlib::coerce< ascii_string >( address.to_string() ) );

@@ -1,5 +1,5 @@
 /*
-    Copyright 2007-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2007-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -13,148 +13,150 @@
 #include <fost/url.hpp>
 #include <fost/parse/host.hpp>
 
+#include <boost/fusion/include/std_pair.hpp>
+
 
 namespace fostlib {
 
 
-    namespace detail {
+    template<typename Iterator>
+    struct url_hostpart_parser : public boost::spirit::qi::grammar <Iterator, url()> {
+        boost::spirit::qi::rule<Iterator, url()> top;
+        boost::spirit::qi::rule<Iterator, std::string()> moniker;
+        host_parser<Iterator> host_p;
 
+        url_hostpart_parser()
+        : url_hostpart_parser::base_type(top) {
+            using boost::spirit::qi::_1;
+            using boost::spirit::qi::_2;
+            using boost::spirit::qi::_3;
+            using boost::spirit::qi::_val;
 
-        struct query_string_closure : boost::spirit::closure< query_string_closure,
-            url::query_string,
-            utf8_string,
-            utf8_string
-        > {
-            member1 qs;
-            member2 key;
-            member3 value;
-        };
-        struct query_string_inserter {
-            template <typename Container, typename Key, typename Value>
-            struct result {
-                typedef void type;
-            };
-            template <typename Container, typename Key, typename Value>
-            void operator()(Container& c, Key const& key, Value const& value) const {
-                c.append( coerce< string >( key ), value.empty() ? nullable< string >() : coerce< string >( value ) );
-            }
-        };
-        const phoenix::function<query_string_inserter> query_string_insert = query_string_inserter();
+            top = (moniker >> boost::spirit::qi::string("://") >> host_p)
+                [boost::phoenix::bind([&](auto &u, auto &m, auto &, auto &h) {
+                        u = url(ascii_printable_string(m), h);
+                    }, _val, _1, _2, _3)];
 
-        struct url_closure : boost::spirit::closure< url_closure,
-            url,
-            ascii_printable_string,
-            host
-        > {
-            member1 url;
-            member2 moniker;
-            member3 host;
-        };
+            moniker = +boost::spirit::qi::char_("a-zA-Z0-9+");
+        }
+    };
 
-        struct url_filespec_closure : boost::spirit::closure< url_filespec_closure,
-            ascii_printable_string
-        > {
-            member1 filespec;
-        };
-
-
+    template<typename I> inline
+    auto url_hostpart_p(parser_lock &, I &begin, I end, url &into) {
+        url_hostpart_parser<I> rule;
+        return boost::spirit::qi::parse(begin, end, rule, into);
     }
 
 
-    struct FOST_INET_DECLSPEC query_string_parser : public boost::spirit::grammar<
-        query_string_parser, detail::query_string_closure::context_t
-    > {
-        template< typename scanner_t >
-        struct definition {
-            definition( query_string_parser const& self ) {
-                top = (
-                    boost::spirit::list_p( (
-                        key[ self.key = phoenix::arg1 ] >>
-                        boost::spirit::chlit<>( '=' )[ self.value = utf8_string() ] >>
-                        !value[ self.value = phoenix::arg1 ]
-                    )[
-                        detail::query_string_insert( self.qs, self.key, self.value )
-                    ], boost::spirit::chlit<>( '&' ) )
-                ) | (
-                    (+boost::spirit::chset<>( "&/:_@a-zA-Z0-9.,%+*%=!-" ))
-                        [self.qs = phoenix::construct_<ascii_printable_string>(
-                            phoenix::arg1, phoenix::arg2)]
-                ) | (
-                    boost::spirit::nothing_p
-                        [self.qs = phoenix::construct_<url::query_string>()]
-                );
-                key = ( +boost::spirit::chset<>( "_@a-zA-Z0-9.+*!-" )[
-                    parsers::push_back( key.buffer, phoenix::arg1 )
-                ] )[
-                    key.text = parsers::coerce< utf8_string >()( key.buffer )
-                ];
-                value = (+(
-                        (
-                            boost::spirit::chset<>( "/:_@a-zA-Z0-9().,+*!=-" )
-                                [parsers::push_back( value.buffer, phoenix::arg1 )]
-                        ) | (
-                            boost::spirit::chlit<>( '%' )
-                            >> boost::spirit::uint_parser<char, 16, 2, 2>()
-                                [parsers::push_back( value.buffer, phoenix::arg1 )]
-                        )
-                    ))[value.text = parsers::coerce< utf8_string >()( value.buffer )];
-            }
-            boost::spirit::rule< scanner_t > top;
-            boost::spirit::rule< scanner_t, utf8_string_builder_closure::context_t > key, value;
+    template<typename Iterator>
+    struct url_filespec_parser : public boost::spirit::qi::grammar <Iterator, ascii_printable_string()> {
+        boost::spirit::qi::rule<Iterator, ascii_printable_string()> top;
+        boost::spirit::qi::rule<Iterator, std::string()> line;
 
-            boost::spirit::rule< scanner_t > const &start() const { return top; }
-        };
+        url_filespec_parser()
+        : url_filespec_parser::base_type(top) {
+            using boost::spirit::qi::_1;
+            using boost::spirit::qi::_val;
+
+            top = line[boost::phoenix::bind(
+                [](auto &v, auto s) {
+                    v = ascii_printable_string(s);
+                }, _val, _1)];
+
+            line = +boost::spirit::qi::char_("_@~!a-zA-Z0-9/.,:()+%*-");
+        }
     };
 
+    template<typename I> inline
+    auto url_filespec_p(parser_lock &, I &begin, I end, ascii_printable_string &into) {
+        url_filespec_parser<I> rule;
+        return boost::spirit::qi::parse(begin, end, rule, into);
+    }
 
-    struct FOST_INET_DECLSPEC url_hostpart_parser : public boost::spirit::grammar <
-        url_hostpart_parser, detail::url_closure::context_t
-    > {
-        template< typename scanner_t >
-        struct definition {
-            definition( url_hostpart_parser const &self ) {
-                top = (
-                        moniker[ self.moniker = phoenix::arg1 ]
-                        >> boost::spirit::chlit< wchar_t >( ':' )
-                        >> boost::spirit::strlit< wliteral >( L"//" )
-                        >> host_p[ self.host = phoenix::arg1 ]
-                    )[ self.url = phoenix::construct_< fostlib::url >( self.moniker, self.host ) ];
 
-                moniker = ( +boost::spirit::chset<>( L"a-zA-Z+" )[
-                    parsers::push_back( moniker.buffer, phoenix::arg1 )
-                ] )[
-                    moniker.text = parsers::coerce< ascii_printable_string >()( moniker.buffer )
-                ];
-            }
-            host_parser host_p;
+    template<typename Iterator>
+    struct query_string_parser : public boost::spirit::qi::grammar<Iterator, url::query_string()> {
+        using pair_type = std::pair<std::string, std::string>;
+        using vector_type = std::vector<pair_type>;
+        boost::spirit::qi::rule<Iterator, url::query_string()> top;
+        boost::spirit::qi::rule<Iterator, std::string()> key, value;
+        boost::spirit::qi::rule<Iterator, pair_type()> pair;
+        boost::spirit::qi::rule<Iterator, vector_type()> query;
+        boost::spirit::qi::rule<Iterator, std::string()> alternative;
+        hex_char<Iterator> hex;
+        boost::spirit::qi::rule<Iterator, uint8_t> plus;
 
-            boost::spirit::rule< scanner_t > top;
-            boost::spirit::rule< scanner_t, ascii_printable_string_builder_closure::context_t > moniker;
+        query_string_parser()
+        : query_string_parser::base_type(top) {
+            using boost::spirit::qi::_1;
+            using boost::spirit::qi::_val;
 
-            boost::spirit::rule< scanner_t > const &start() const { return top; }
-        };
+            top = (query | alternative)[boost::phoenix::bind(
+                [](auto &v, auto r) {
+                    if ( auto *pv = boost::get<vector_type>(&r) ) {
+                        for ( auto &&p : *pv ) {
+                            if ( p.second.empty() ) {
+                                v.append(p.first, null);
+                            } else {
+                                v.append(p.first, p.second);
+                            }
+                        }
+                    } else {
+                        auto s = boost::get<std::string>(r);
+                        if ( not s.empty() ) {
+                            v = url::query_string(ascii_printable_string(s));
+                        }
+                    }
+                }, _val, _1)];
+
+            plus = boost::spirit::qi::char_('+')[_val = ' '];
+            key = (hex | plus | boost::spirit::qi::char_("_@a-zA-Z0-9..*!-"))
+                >> *(hex | plus | boost::spirit::qi::char_("_@a-zA-Z0-9..*!-"));
+            value = *(hex | plus | boost::spirit::qi::char_("/:_@a-zA-Z0-9().,*!=-"));
+            pair = key >> boost::spirit::qi::lit('=') >> value;
+            query = pair >> *(boost::spirit::qi::lit('&') >> pair);
+
+            alternative = *boost::spirit::qi::char_("&/:_@a-zA-Z0-9.,+*%=!-");
+        }
     };
 
+    template<typename I> inline
+    auto query_string_p(parser_lock &, I &begin, I end, url::query_string &into) {
+        query_string_parser<I> rule;
+        return boost::spirit::qi::parse(begin, end, rule, into);
+    }
 
-    struct FOST_INET_DECLSPEC url_filespec_parser : public boost::spirit::grammar <
-        url_filespec_parser, detail::url_filespec_closure::context_t
-    > {
-        template< typename scanner_t >
-        struct definition {
-            definition( url_filespec_parser const &self ) {
-                top = (
-                    +boost::spirit::chset<>( "_@~!a-zA-Z0-9/.,:()+%*-" )
-                )[ self.filespec = phoenix::construct_<ascii_printable_string>(phoenix::arg1, phoenix::arg2) ];
-            }
 
-            url_hostpart_parser url_hostpart_p;
-            query_string_parser query_string_p;
+    template<typename Iterator>
+    struct url_parser : public boost::spirit::qi::grammar<Iterator, url()> {
+        boost::spirit::qi::rule<Iterator, url()> top;
+        url_hostpart_parser<Iterator> hostpart;
+        url_filespec_parser<Iterator> filespec;
+        query_string_parser<Iterator> query;
 
-            boost::spirit::rule< scanner_t > top;
+        url_parser()
+        : url_parser::base_type(top) {
+            using boost::spirit::qi::_1;
+            using boost::spirit::qi::_2;
+            using boost::spirit::qi::_3;
+            using boost::spirit::qi::_val;
 
-            boost::spirit::rule< scanner_t > const &start() const { return top; }
-        };
+            top = (hostpart
+                    >> -(boost::spirit::qi::lit('/') >> -filespec)
+                    >> -(boost::spirit::qi::lit('?') >> -query))
+                [boost::phoenix::bind(
+                    [](auto &v, auto h, auto fs, auto qs) {
+                        v = url(h, fs.value_or(ascii_printable_string()));
+                        if ( qs ) v.query(qs.value());
+                    }, _val, _1, _2, _3)];
+        }
     };
+
+    template<typename I> inline
+    auto url_p(parser_lock &, I &begin, I end, url &into) {
+        url_parser<I> rule;
+        return boost::spirit::qi::parse(begin, end, rule, into);
+    }
 
 
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -14,7 +14,7 @@
 using namespace fostlib;
 
 
-FSL_TEST_SUITE( internet_url );
+FSL_TEST_SUITE(internet_url);
 
 
 FSL_TEST_FUNCTION( filepath_string ) {
@@ -81,34 +81,45 @@ FSL_TEST_FUNCTION( url ) {
 }
 
 
-#define QS_PARSE( str ) \
-    FSL_CHECK( fostlib::parse( lock, (str), \
-            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full ); \
-    FSL_CHECK_EQ( qs.as_string().value(), \
-            coerce< ascii_printable_string >(string(str)) );
 FSL_TEST_FUNCTION( query_string_parser ) {
-    fostlib::parser_lock lock;
-    query_string_parser query_string_p;
+    auto check = [](string s) {
+            fostlib::parser_lock lock;
+            url::query_string into;
+            auto pos = s.begin();
+            FSL_CHECK(query_string_p(lock, pos, s.end(), into));
+            FSL_CHECK_EQ(string(pos, s.end()), string());
+            if ( s.empty() ) {
+                FSL_CHECK(not into.as_string().has_value());
+            } else {
+                FSL_CHECK(into.as_string().has_value());
+                FSL_CHECK_EQ(coerce<string>(into.as_string().value()), s);
+            }
+            return into;
+        };
+    auto check_p = [&check](fostlib::string s, fostlib::string k, fostlib::nullable<fostlib::string> v) {
+            auto qs = check(s);
+            FSL_CHECK(qs.has_key(k));
+            if ( v ) {
+                FSL_CHECK(qs[k]);
+                FSL_CHECK_EQ(qs[k].value(), v.value());
+            } else {
+                FSL_CHECK(not qs[k]);
+            }
+            return qs;
+        };
 
-    url::query_string qs;
-/*    FSL_CHECK( fostlib::parse( L"",
-            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
-    FSL_CHECK( qs.as_string().isnull() );*/
-    QS_PARSE( L"key=value&key=value" );
-    QS_PARSE( L"key=value" );
-    QS_PARSE( L"key=" );
-    QS_PARSE( L"__=" );
-    QS_PARSE( L"key=&key=" );
-    QS_PARSE( L"key=value&key=" );
-    QS_PARSE( L"next=/path/" );
-    QS_PARSE( L"key1&key2" );
-    QS_PARSE( L"key2&key1" ); // Ensure order is preserved
-    QS_PARSE( L"key1=value1&key2=value=2&key3=value3" );
-    QS_PARSE( L"key=%26%2312296%3B" );
-    FSL_CHECK( fostlib::parse( lock, L"key=(12296)", \
-            query_string_p[ phoenix::var( qs ) = phoenix::arg1 ] ).full );
-    FSL_CHECK_EQ( qs.as_string().value(), \
-            coerce< ascii_printable_string >(string(L"key=%2812296%29")) );
+    check("");
+    check_p("key=value", "key", "value");
+    FSL_CHECK_EQ(check_p("key=value&key=value", "key", "value").at("key").size(), 2u);
+    check_p("key=", "key", fostlib::null);
+    check_p("__=", "__", fostlib::null);
+    check_p("key=&key=", "key", fostlib::null);
+    check_p("key=value&key=", "key", "value");
+    check_p("next=/path/", "next", "/path/");
+    check("key1&key2");
+    check("key2&key1"); // Ensure order is preserved
+    check_p("key1=value1&key2=value=2&key3=value3", "key2", "value=2");
+    check_p("key=%26%2312296%3B", "key", "&#12296;");
 }
 
 
@@ -120,44 +131,53 @@ FSL_TEST_FUNCTION( url_parser_protocol ) {
 }
 
 
-#define URL_PARSE_HOSTPART( str, u_ ) \
-    FSL_CHECK( fostlib::parse( lock, str, \
-        url_hostpart_p[ phoenix::var( u ) = phoenix::arg1 ] ).full ); \
-    FSL_CHECK_EQ( u.as_string(), u_.as_string() );
-FSL_TEST_FUNCTION( url_parser_hostpart ) {
-    fostlib::parser_lock lock;
-    url_hostpart_parser url_hostpart_p;
+FSL_TEST_FUNCTION(url_parser_hostpart) {
+    auto check = [](auto s, const url &u, std::string fails = std::string(), bool works = true) {
+            fostlib::parser_lock lock;
+            string str(s);
+            auto pos = str.begin();
+            url into;
+            FSL_CHECK(fostlib::url_hostpart_p(lock, pos, str.end(), into) == works);
+            FSL_CHECK_EQ(string(pos, str.end()), fails);
+            FSL_CHECK_EQ(u.as_string(), into.as_string());
+        };
 
-    url u;
-    URL_PARSE_HOSTPART( L"http://localhost", url() );
-    URL_PARSE_HOSTPART( L"http://127.0.0.1", url( host( 127, 0, 0, 1 ) ) );
-    URL_PARSE_HOSTPART( L"http://10.0.2.2", url( host( 10, 0, 2, 2 ) ) );
-    URL_PARSE_HOSTPART( L"http://www.felspar.com", url( host( L"www.felspar.com" ) ) );
-    URL_PARSE_HOSTPART( L"http://urquell-fn.appspot.com", url( host( L"urquell-fn.appspot.com" ) ) );
-    FSL_CHECK( !fostlib::parse( lock, L"http://www..felspar.com/", url_hostpart_p ).full );
-    FSL_CHECK( !fostlib::parse( lock, L"http://www./", url_hostpart_p ).full );
-    FSL_CHECK( !fostlib::parse( lock, L"http://.www/", url_hostpart_p ).full );
-    URL_PARSE_HOSTPART( L"http://123.45", url( host( L"123.45" ) ) );
-    URL_PARSE_HOSTPART( L"http://12345", url( host( 12345 ) ) );
-    URL_PARSE_HOSTPART( L"http://localhost:80", url( host( L"localhost", L"80" ) ) );
-    URL_PARSE_HOSTPART( L"http://localhost:8080", url( host( L"localhost", L"8080" ) ) );
+    check("http://localhost", url());
+    check("http://127.0.0.1", url(host( 127, 0, 0, 1 )));
+    check("http://10.0.2.2", url(host(10, 0, 2, 2)));
+    check("http://www.felspar.com", url(host("www.felspar.com")));
+    check("http://urquell-fn.appspot.com", url(host("urquell-fn.appspot.com")));
+    check("http://123.45", url(host("123.45")));
+    check("http://12345", url(host(12345 )));
+    check("http://localhost:80", url(host("localhost", "80")));
+    check("http://localhost:8080", url(host("localhost", "8080")));
+    check("https://localhost:80", url("https", host("localhost", "80")));
+
+    check("http://www..felspar.com/", url(host("www")), "..felspar.com/");
+    check("http://www./", url(host("www")), "./");
+    check("http://.www/", url(), "http://.www/", false);
 }
-#define URL_PARSE_FILESPEC( str, s_ ) \
-    FSL_CHECK( fostlib::parse( lock, str, url_filespec_p[ phoenix::var( s ) = phoenix::arg1 ] ).full ); \
-    FSL_CHECK_EQ( s, ascii_printable_string( s_ ) )
+
+
 FSL_TEST_FUNCTION( url_parser_filespec ) {
-    fostlib::parser_lock lock;
-    url_filespec_parser url_filespec_p;
+    auto check = [](string s, auto p) {
+            fostlib::parser_lock lock;
+            ascii_printable_string into;
+            auto pos = s.begin();
+            FSL_CHECK(url_filespec_p(lock, pos, s.end(), into));
+            FSL_CHECK_EQ(string(pos, s.end()), string());
+            FSL_CHECK_EQ(coerce<ascii_printable_string>(s), into);
+        };
 
-    ascii_printable_string s;
-    URL_PARSE_FILESPEC( "/", "/" );
-    URL_PARSE_FILESPEC( "/*/", "/*/" );
-    URL_PARSE_FILESPEC( "/file.html", "/file.html" );
-    URL_PARSE_FILESPEC( "/Site:/file.html", "/Site:/file.html" );
-    URL_PARSE_FILESPEC( "/Site:/(file).html", "/Site:/(file).html" );
-    URL_PARSE_FILESPEC( "/Type/List:/Article%20(FSLib::::Content::::Article)",
-        "/Type/List:/Article%20(FSLib::::Content::::Article)" );
+    check("/", "/");
+    check("/*/", "/*/");
+    check("/file.html", "/file.html");
+    check("/Site:/file.html", "/Site:/file.html");
+    check("/Site:/(file).html", "/Site:/(file).html");
+    check("/Type/List:/Article%20(FSLib::::Content::::Article)",
+        "/Type/List:/Article%20(FSLib::::Content::::Article)");
 }
+
 
 FSL_TEST_FUNCTION( path_spec ) {
     url u( L"http://localhost/" );
@@ -170,6 +190,7 @@ FSL_TEST_FUNCTION( path_spec ) {
     FSL_CHECK_EQ(coerce<string>(u.pathspec()), "/file-name");
 }
 
+
 #define TEST_PATH_SPEC_ENCODING( from, to ) \
     FSL_CHECK_EQ( url::filepath_string(ascii_printable_string(from), url::filepath_string::unencoded).underlying(), to )
 FSL_TEST_FUNCTION( path_spec_encoding ) {
@@ -178,24 +199,23 @@ FSL_TEST_FUNCTION( path_spec_encoding ) {
 }
 
 
-FSL_TEST_FUNCTION( parse ) {
+FSL_TEST_FUNCTION(parse) {
     FSL_CHECK_NOTHROW(
-        url a( L"http://localhost/" );
-        FSL_CHECK_EQ( a.server().name(), L"localhost" );
+        url a("http://localhost/");
+        FSL_CHECK_EQ(a.server().name(), L"localhost");
         FSL_CHECK(not a.user());
     )
     FSL_CHECK_EQ( url( "http://localhost" ).server().name(), L"localhost" );
     FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );
-    FSL_CHECK_EQ( url( "http://localhost:6789/file-path.html" ).server().service().value(), L"6789" );
-    FSL_CHECK_EQ( url( "http://localhost:6789/file-path.html" ).port(), 6789 );
+    FSL_CHECK_EQ( url("http://localhost:6789/file-path.html").server().service().value(), "6789");
+    FSL_CHECK_EQ( url("http://localhost:6789/file-path.html").port(), 6789);
 
     FSL_CHECK_EXCEPTION( url( "http://localhost/file path.html" ), fostlib::exceptions::parse_error& );
     FSL_CHECK_EXCEPTION( url( "http://localhost/file\\path.html" ), fostlib::exceptions::parse_error& );
 
     FSL_CHECK_EQ(
         url("http://bmf.miro.felspar.net:8000/rest/email/new_subscription/123821/").pathspec(),
-        url::filepath_string("/rest/email/new_subscription/123821/")
-    );
+        url::filepath_string("/rest/email/new_subscription/123821/"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/echo/*Afsk1YSP"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/json/object/basic_data?__="));
@@ -227,8 +247,8 @@ FSL_TEST_FUNCTION( parse ) {
 }
 
 #define TEST_COERCION(u) \
-    FSL_CHECK_EQ( coerce< string >( url( u ) ), u );
-FSL_TEST_FUNCTION( z_coercion ) {
+    FSL_CHECK_EQ(coerce<string>(url(u)), u);
+FSL_TEST_FUNCTION(z_coercion) {
     TEST_COERCION( "http://localhost/file-path.html" );
     TEST_COERCION( "http://localhost/somebody@example.com" );
     TEST_COERCION( "http://localhost/somebody+else@example.com" );
