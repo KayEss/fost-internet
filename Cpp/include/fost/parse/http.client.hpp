@@ -30,6 +30,7 @@ namespace fostlib {
             boost::spirit::qi::rule<Iterator, response_status()> top;
             boost::spirit::qi::rule<Iterator, std::string()> version, message;
             boost::spirit::qi::rule<Iterator, int> status;
+            boost::spirit::qi::rule<Iterator, void()> space;
 
             client_first_line()
             : client_first_line::base_type(top) {
@@ -38,7 +39,7 @@ namespace fostlib {
                 using boost::spirit::qi::_3;
                 using boost::spirit::qi::_val;
 
-                auto space = +boost::spirit::qi::lit(' ');
+                space = +boost::spirit::qi::lit(' ');
 
                 top = (version >> space >> status >> space >> message)
                     [boost::phoenix::bind([](auto &l, auto &v, auto &s, auto &m) {

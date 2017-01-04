@@ -33,6 +33,7 @@ namespace fostlib {
             url_filespec_parser<Iterator> filespec;
             query_string_parser<Iterator> query;
             boost::spirit::qi::symbols<char, request_status::version_n> version;
+            boost::spirit::qi::rule<Iterator, void()> spaces;
 
             server_first_line()
             : server_first_line::base_type(top) {
@@ -42,7 +43,7 @@ namespace fostlib {
                 using boost::spirit::qi::_4;
                 using boost::spirit::qi::_val;
 
-                auto spaces = *boost::spirit::qi::lit(' ');
+                spaces = *boost::spirit::qi::lit(' ');
 
                 top = (method >> spaces
                         >> filespec >> -(boost::spirit::qi::lit('?') >> query)
