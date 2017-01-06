@@ -1,5 +1,5 @@
 /*
-    Copyright 2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2016-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,20 +9,24 @@
 #pragma once
 
 
-#include <fost/core>
+#include <fost/internet>
+#include <fost/rask/counters.hpp>
+#include <fost/rask/connection.hpp>
 
 
 namespace fostlib {
 
 
-    class rask_tcp {
-    public:
-        /// Default construct the connection
-        rask_tcp();
+    /// Module for TCP
+    extern const module c_rask_proto_tcp;
 
-        /// The connection ID used in log messages
-        const int64_t id;
-    };
+
+    using rask_tcp_server = rask_server<boost::asio::ip::tcp::socket>;
+    using rask_tcp = rask_connection<boost::asio::ip::tcp::socket>;
+
+
+    /// Counters used for TCP
+    extern rask_counters rask_tcp_counters;
 
 
 }
