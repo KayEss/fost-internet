@@ -12,6 +12,9 @@
 #include <fost/internet>
 #include <fost/rask/counters.hpp>
 #include <fost/rask/connection.hpp>
+#include <fost/rask/packet.hpp>
+
+#include <boost/asio/spawn.hpp>
 
 
 namespace fostlib {
@@ -29,5 +32,19 @@ namespace fostlib {
     extern rask_counters rask_tcp_counters;
 
 
+}
+
+
+/// Implementation of TCP data send for outbound packets
+template<> inline
+void rask::out_packet::operator () (
+    boost::asio::ip::tcp::socket &cnx, boost::asio::yield_context &yield
+) const {
+    boost::asio::streambuf header;
+    size_sequence(size(), header);
+    header.sputc(control);
+    std::array<boost::asio::streambuf::const_buffers_type, 2>
+        data{{header.data(), buffer->data()}};
+    async_write(cnx, data, yield);
 }
 

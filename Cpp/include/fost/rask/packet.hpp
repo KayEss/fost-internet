@@ -12,6 +12,7 @@
 #include <fost/rask/rask-proto.hpp>
 
 #include <fost/pointers>
+#include <fost/unicode>
 
 #include <boost/asio/streambuf.hpp>
 #include <boost/endian/conversion.hpp>
@@ -34,20 +35,20 @@ namespace rask {
 
 
     /// A packet that is to be sent over a connection
-    class out_packet : boost::noncopyable {
-    protected:
+    class out_packet final : boost::noncopyable {
+    private:
         /// Output buffers
         std::unique_ptr<boost::asio::streambuf> buffer;
         /// The control block value
         control_byte control;
 
-        /// Build a new outbound packet with the specified control byte.
-        out_packet(control_byte);
-
         /// Write a size control sequence to the specified buffer
         static void size_sequence(std::size_t, boost::asio::streambuf &);
 
     public:
+        /// Build a new outbound packet with the specified control byte.
+        out_packet(control_byte);
+
         /// Make movable
         out_packet(out_packet &&);
 
@@ -82,6 +83,12 @@ namespace rask {
                 reinterpret_cast<const char *>(b.second) -
                 reinterpret_cast<const char *>(b.first));
         }
+
+        /// Send the data over the wire. A concrete implementation of
+        /// this is needed depending on the transport. See [tcp.hpp] for
+        /// an example.
+        template<typename Socket, typename Yield>
+        void operator () (Socket &s, Yield &y) const;
     };
 
 
@@ -89,15 +96,24 @@ namespace rask {
 
 
 /// Insert an integer in network byte order
-template<typename I, typename O,
-    typename = std::enable_if_t<std::is_integral<I>::value>>
-O &operator << (O &o, I i) {
-    if ( sizeof(i) > 1 ) { // Should be constexpr if
+template<typename I,
+    typename = std::enable_if_t<std::is_integral<I>::value>> inline
+rask::out_packet &operator << (rask::out_packet &o, I i) {
+    if ( sizeof(i) > 1 ) { // TODO: Should be constexpr if
         auto v = boost::endian::native_to_big(i);
         o.bytes(fostlib::array_view<char>(reinterpret_cast<char*>(&v), sizeof(v)));
     } else {
         o.byte(i);
     }
+    return o;
+}
+
+
+/// Insert a UTF8 string
+inline
+rask::out_packet &operator << (rask::out_packet &o, fostlib::utf::u8_view str) {
+    o.size_sequence(str.bytes());
+    o.bytes(fostlib::array_view<char>(str.data(), str.bytes()));
     return o;
 }
 
