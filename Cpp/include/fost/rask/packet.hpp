@@ -9,7 +9,7 @@
 #pragma once
 
 
-#include <fost/rask/rask-proto.hpp>
+#include <fost/rask/decoder.hpp>
 
 #include <fost/pointers>
 #include <fost/unicode>
@@ -29,7 +29,7 @@ namespace rask {
     };
 
 
-    template<typename Iterator, typename Store>
+    template<typename Store>
     class in_packet : public in_packet_base {
     };
 

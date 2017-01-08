@@ -13,6 +13,8 @@
 
 #include <fost/rask/rask-proto.hpp>
 
+#include <boost/asio/streambuf.hpp>
+
 
 namespace fostlib {
 
@@ -28,6 +30,9 @@ namespace fostlib {
     public:
         /// The connection ID used in log messages
         const int64_t id;
+
+        /// An input buffer
+        boost::asio::streambuf input_buffer;
     };
 
 
