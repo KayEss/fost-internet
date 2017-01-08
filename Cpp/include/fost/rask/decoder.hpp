@@ -15,10 +15,18 @@
 namespace rask {
 
 
+    class decoder_base {
+    public:
+        virtual std::size_t read_size() = 0;
+        virtual char read_byte() = 0;
+        virtual void read_data(char *into, std::size_t bytes) = 0;
+    };
+
+
     /// A mechanism for decoding the two basic parts of the Rask
     /// protocol -- data and a size control sequence
     template<typename ReadByte, typename ReadBytes>
-    class decoder : boost::noncopyable {
+    class decoder final : public decoder_base, boost::noncopyable {
         ReadByte byte;
         ReadBytes bytes;
 
@@ -32,7 +40,7 @@ namespace rask {
         }
 
         /// Read a size sequence
-        std::size_t read_size() {
+        std::size_t read_size() override {
             std::size_t size = byte();
             if ( size > 0xf8 ) {
                 const int bytes = size - 0xf8;
@@ -47,8 +55,13 @@ namespace rask {
         }
 
         /// Return a single byte of data
-        auto read_byte() {
+        char read_byte() override {
             return byte();
+        }
+
+        /// Read data into array
+        void read_data(char *into, std::size_t size) override {
+            bytes(into, size);
         }
 
         /// Read data
