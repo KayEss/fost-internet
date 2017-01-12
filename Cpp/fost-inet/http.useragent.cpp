@@ -91,22 +91,6 @@ std::unique_ptr< http::user_agent::response >
                 throw exceptions::parse_error(
                     "Expected a HTTP response", coerce<string>(first_line));
             }
-//             if ( !fostlib::parse(lock, first_line.underlying().c_str(),
-//                 (
-//                     boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
-//                     boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
-//                     boost::spirit::strlit< wliteral >(L"HTTP/1.1")
-//                 )[ phoenix::var(protocol) =
-//                     phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-//                 >> boost::spirit::chlit< wchar_t >( ' ' )
-//                 >> boost::spirit::uint_parser< int, 10, 3, 3 >()
-//                     [ phoenix::var(status) = phoenix::arg1 ]
-//                 >> boost::spirit::chlit< wchar_t >( ' ' )
-//                 >> (
-//                     +boost::spirit::chset<>( L"a-zA-Z -" )
-//                 )[ phoenix::var(message) =
-//                     phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-//             ).full )
         }
 
         return std::unique_ptr<http::user_agent::response>(
