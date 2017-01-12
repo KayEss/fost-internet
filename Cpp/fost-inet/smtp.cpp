@@ -64,7 +64,6 @@ string fostlib::coercer< string, email_address >::coerce( const email_address &e
         return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
 }
 email_address fostlib::coercer< email_address, string >::coerce(const string &s) {
-    fostlib::parser_lock lock;
     std::pair<boost::optional<std::string>, std::string> result;
     smtp_address_parser<string::const_iterator> rule;
     auto pos = s.begin();

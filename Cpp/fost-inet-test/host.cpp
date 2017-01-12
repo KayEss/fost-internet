@@ -27,9 +27,8 @@ FSL_TEST_FUNCTION( constructors ) {
 
 FSL_TEST_FUNCTION( parse ) {
     auto check = [](std::string name) {
-            parser_lock lock;
             host h;
-            FSL_CHECK(host_p(lock, name.begin(), name.end(), h));
+            FSL_CHECK(host_p(name.begin(), name.end(), h));
             FSL_CHECK_EQ(fostlib::coerce<ascii_string>(h), fostlib::ascii_string(name));
         };
     check("localhost");

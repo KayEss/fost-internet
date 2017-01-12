@@ -85,7 +85,6 @@ std::unique_ptr< http::user_agent::response >
         cnx >> first_line;
         response_status status;
         {
-            fostlib::parser_lock lock;
             auto pos = first_line.begin(), end = first_line.end();
             client_first_line<utf8_string::const_iterator> rule;
             if ( not boost::spirit::qi::parse(pos, end, rule, status) || pos != end ) {
