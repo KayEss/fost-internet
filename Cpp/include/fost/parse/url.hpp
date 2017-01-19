@@ -42,7 +42,7 @@ namespace fostlib {
     };
 
     template<typename I> inline
-    auto url_hostpart_p(parser_lock &, I &begin, I end, url &into) {
+    auto url_hostpart_p(I &begin, I end, url &into) {
         url_hostpart_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }
@@ -68,7 +68,7 @@ namespace fostlib {
     };
 
     template<typename I> inline
-    auto url_filespec_p(parser_lock &, I &begin, I end, ascii_printable_string &into) {
+    auto url_filespec_p(I &begin, I end, ascii_printable_string &into) {
         url_filespec_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }
@@ -121,7 +121,7 @@ namespace fostlib {
     };
 
     template<typename I> inline
-    auto query_string_p(parser_lock &, I &begin, I end, url::query_string &into) {
+    auto query_string_p(I &begin, I end, url::query_string &into) {
         query_string_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }
@@ -153,7 +153,7 @@ namespace fostlib {
     };
 
     template<typename I> inline
-    auto url_p(parser_lock &, I &begin, I end, url &into) {
+    auto url_p(I &begin, I end, url &into) {
         url_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }

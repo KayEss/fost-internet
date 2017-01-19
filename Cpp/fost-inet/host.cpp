@@ -82,10 +82,9 @@ string fostlib::host::name() const {
 
 
 host fostlib::coercer< host, string >::coerce(const string &hostname) {
-    fostlib::parser_lock lock;
     host r;
     auto begin = hostname.begin();
-    if ( fostlib::host_p(lock, begin, hostname.end(), r) ) {
+    if ( fostlib::host_p(begin, hostname.end(), r) ) {
         return r;
     } else {
         throw exceptions::not_implemented(__func__, "Where the host name didn't parse", hostname);

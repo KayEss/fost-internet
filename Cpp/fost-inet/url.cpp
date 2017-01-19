@@ -305,9 +305,8 @@ fostlib::url::url(
 fostlib::url::url(const string &a_url)
 : protocol("http"), server(host(s_default_host.value())), m_pathspec("/") {
     try {
-        parser_lock lock;
         auto pos = a_url.begin();
-        if ( not url_p(lock, pos, a_url.end(), *this) || pos != a_url.end() ) {
+        if ( not url_p(pos, a_url.end(), *this) || pos != a_url.end() ) {
             throw exceptions::parse_error("Could not parse URL string", string(pos, a_url.end()));
         }
     } catch ( exceptions::exception &e ) {

@@ -63,7 +63,7 @@ namespace fostlib {
 
 
     template<typename I> inline
-    auto host_p(parser_lock &, I begin, I end, host &into) {
+    auto host_p(I begin, I end, host &into) {
         host_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into) && begin == end;
     }

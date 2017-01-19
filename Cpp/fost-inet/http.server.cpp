@@ -138,7 +138,6 @@ fostlib::http::server::request::request(
 
     try {
         {
-            fostlib::parser_lock lock;
             request_status parsed_line;
             auto pos = first_line.begin(), end = first_line.end();
             server_first_line<utf8_string::const_iterator> rule;

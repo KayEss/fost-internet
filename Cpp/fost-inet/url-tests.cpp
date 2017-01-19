@@ -83,10 +83,9 @@ FSL_TEST_FUNCTION( url ) {
 
 FSL_TEST_FUNCTION( query_string_parser ) {
     auto check = [](string s) {
-            fostlib::parser_lock lock;
             url::query_string into;
             auto pos = s.begin();
-            FSL_CHECK(query_string_p(lock, pos, s.end(), into));
+            FSL_CHECK(query_string_p(pos, s.end(), into));
             FSL_CHECK_EQ(string(pos, s.end()), string());
             if ( s.empty() ) {
                 FSL_CHECK(not into.as_string().has_value());
@@ -133,11 +132,10 @@ FSL_TEST_FUNCTION( url_parser_protocol ) {
 
 FSL_TEST_FUNCTION(url_parser_hostpart) {
     auto check = [](auto s, const url &u, std::string fails = std::string(), bool works = true) {
-            fostlib::parser_lock lock;
             string str(s);
             auto pos = str.begin();
             url into;
-            FSL_CHECK(fostlib::url_hostpart_p(lock, pos, str.end(), into) == works);
+            FSL_CHECK(fostlib::url_hostpart_p(pos, str.end(), into) == works);
             FSL_CHECK_EQ(string(pos, str.end()), fails);
             FSL_CHECK_EQ(u.as_string(), into.as_string());
         };
@@ -161,10 +159,9 @@ FSL_TEST_FUNCTION(url_parser_hostpart) {
 
 FSL_TEST_FUNCTION( url_parser_filespec ) {
     auto check = [](string s, auto p) {
-            fostlib::parser_lock lock;
             ascii_printable_string into;
             auto pos = s.begin();
-            FSL_CHECK(url_filespec_p(lock, pos, s.end(), into));
+            FSL_CHECK(url_filespec_p(pos, s.end(), into));
             FSL_CHECK_EQ(string(pos, s.end()), string());
             FSL_CHECK_EQ(coerce<ascii_printable_string>(s), into);
         };
