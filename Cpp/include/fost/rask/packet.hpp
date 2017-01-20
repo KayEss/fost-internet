@@ -25,12 +25,17 @@ namespace rask {
     typedef uint8_t control_byte;
 
 
-    class in_packet_base : boost::noncopyable {
+    template<typename Decoder>
+    class in_packet;
+
+
+    template<>
+    class in_packet<decoder_base> : boost::noncopyable {
     };
 
 
-    template<typename Store>
-    class in_packet : public in_packet_base {
+    template<typename Decoder>
+    class in_packet : public in_packet<decoder_base> {
     };
 
 

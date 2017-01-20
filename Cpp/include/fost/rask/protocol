@@ -10,5 +10,6 @@
 
 
 #include <fost/rask/packet.hpp>
+#include <fost/rask/protocol.hpp>
 #include <fost/rask/tcp.hpp>
 
