@@ -13,6 +13,7 @@
 
 #include <fost/rask/rask-proto.hpp>
 
+#include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
 
 
@@ -23,7 +24,9 @@ namespace fostlib {
 
 
     /// Base class for the connection
-    class rask_connection_base {
+    class rask_connection_base :
+        public std::enable_shared_from_this<rask_connection_base>
+    {
     protected:
         rask_connection_base();
 
@@ -31,8 +34,6 @@ namespace fostlib {
         /// The connection ID used in log messages
         const int64_t id;
 
-        /// An input buffer
-        boost::asio::streambuf input_buffer;
     };
 
 
@@ -43,18 +44,40 @@ namespace fostlib {
     /// [see `class rask_server`](#class-rask_server).
     template<typename Transport>
     class rask_connection : public rask_connection_base {
+    protected:
+        /// Which side is this peer
+        using peering = enum { server_side, client_side };
+        const peering peer;
+
+        /// Construct a connection
+        rask_connection(peering p)
+        : peer(p) {
+        }
+
+        /// Return the IO service that needs to be used to service
+        /// the underlying connection
+        virtual boost::asio::io_service &get_io_service() = 0;
+
     public:
-        /// Default construct the connection
-        rask_connection() {}
+        /// Start up the data sending and receiving processes
+        virtual void process() {
+            auto self = shared_from_this();
+            boost::asio::spawn(get_io_service(), [self, this](auto yield) {
+                this->process_inbound(yield);
+            });
+            boost::asio::spawn(get_io_service(), [self, this](auto yield) {
+                this->process_outbound(yield);
+            });
+        }
 
-        /// TODO: Connect to a remote host
-    };
+    protected:
+        /// The inbound message stream
+        virtual void process_inbound(boost::asio::yield_context &) = 0;
+        /// Dispatch the packet
+        virtual void dispatch(uint8_t control, std::size_t bytes, boost::asio::streambuf &) = 0;
 
-
-    //// class-rask-server
-    template<typename Transport>
-    class rask_server {
-        /// TODO: Listen for incoming connections
+        /// The outbound message stream
+        virtual void process_outbound(boost::asio::yield_context &) = 0;
     };
 
 
