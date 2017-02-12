@@ -65,14 +65,14 @@ namespace rask {
         /// Add the specified bytes to the buffer
         template<typename B>
         void bytes(fostlib::array_view<B> av) {
-            static_assert(sizeof(B), "Must add an array of bytes");
+            static_assert(sizeof(B) == 1, "Must add an array of bytes");
             buffer->sputn(av.data(), av.size());
         }
 
         /// Add a single byte to the buffer
         template<typename B>
         void byte(B b) {
-            static_assert(sizeof(B), "Must add an array of bytes");
+            static_assert(sizeof(B) == 1, "Must add an array of bytes");
             buffer->sputc(b);
         }
 

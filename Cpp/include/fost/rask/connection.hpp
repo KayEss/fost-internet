@@ -73,8 +73,6 @@ namespace fostlib {
     protected:
         /// The inbound message stream
         virtual void process_inbound(boost::asio::yield_context &) = 0;
-        /// Dispatch the packet
-        virtual void dispatch(uint8_t control, std::size_t bytes, boost::asio::streambuf &) = 0;
 
         /// The outbound message stream
         virtual void process_outbound(boost::asio::yield_context &) = 0;

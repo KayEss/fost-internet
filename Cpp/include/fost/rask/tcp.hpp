@@ -35,9 +35,6 @@ namespace fostlib {
             return socket.get_io_service();
         }
 
-        /// Loop for processing inbound packets
-        void process_inbound(boost::asio::yield_context &) override;
-
     public:
         /// The socket for this connection
         boost::asio::ip::tcp::socket socket;
@@ -52,6 +49,50 @@ namespace fostlib {
     /// the ongoing connection.
     void tcp_listen(boost::asio::io_service &ios, fostlib::host netloc,
         std::function<std::shared_ptr<rask_tcp>(boost::asio::ip::tcp::socket)> factory);
+
+
+    /// A loop implementation for receiving the inbound packets. The
+    /// signature for the Dispatch handler (lambda) is:
+    ///     (auto decoder, uint8_t control, std::size_t bytes, boost::asio::streambuf &&buffer)
+    template<typename Dispatch> inline
+    void receive_loop(
+        rask_tcp &cnx, boost::asio::yield_context &yield, Dispatch dispatch
+    ) {
+        while ( cnx.socket.is_open() ) {
+            boost::asio::streambuf input_buffer;
+            auto decode{rask::make_decoder(
+                [&]() {
+                    boost::asio::async_read(cnx.socket, input_buffer,
+                        boost::asio::transfer_exactly(1), yield);
+                    return input_buffer.sbumpc();
+                },
+                [&](char *into, std::size_t bytes) {
+                    boost::asio::async_read(cnx.socket, input_buffer,
+                        boost::asio::transfer_exactly(bytes), yield);
+                    return input_buffer.sgetn(into, bytes);
+                })};
+            try {
+                std::size_t packet_size = decode.read_size();
+                uint8_t control = decode.read_byte();
+                boost::asio::async_read(cnx.socket, input_buffer,
+                    boost::asio::transfer_exactly(packet_size), yield);
+                fostlib::log::debug(fostlib::c_rask_proto)
+                    ("", "Got packet")
+                    ("connection", cnx.id)
+                    ("control", control)
+                    ("size", packet_size);
+                dispatch(std::move(decode), control, packet_size, std::move(input_buffer));
+            } catch ( ... ) {
+                cnx.socket.close();
+                fostlib::log::error(c_rask_proto)
+                    ("", "Socket error")
+                    ("connection", cnx.id);
+            }
+        }
+        fostlib::log::error(fostlib::c_rask_proto)
+            ("", "Connection closed")
+            ("connection", cnx.id);
+    }
 
 
 }
