@@ -20,23 +20,10 @@
 
 namespace rask {
 
+
     /// The type for the control byte. Typically this should be an
     /// enumeration.
     typedef uint8_t control_byte;
-
-
-    template<typename Decoder>
-    class in_packet;
-
-
-    template<>
-    class in_packet<decoder_base> : boost::noncopyable {
-    };
-
-
-    template<typename Decoder>
-    class in_packet : public in_packet<decoder_base> {
-    };
 
 
     /// A packet that is to be sent over a connection

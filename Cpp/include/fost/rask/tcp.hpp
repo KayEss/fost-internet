@@ -59,37 +59,25 @@ namespace fostlib {
         rask_tcp &cnx, boost::asio::yield_context &yield, Dispatch dispatch
     ) {
         while ( cnx.socket.is_open() ) {
-            boost::asio::streambuf input_buffer;
-            auto decode{rask::make_decoder(
-                [&]() {
-                    boost::asio::async_read(cnx.socket, input_buffer,
-                        boost::asio::transfer_exactly(1), yield);
-                    return input_buffer.sbumpc();
-                },
-                [&](char *into, std::size_t bytes) {
-                    boost::asio::async_read(cnx.socket, input_buffer,
-                        boost::asio::transfer_exactly(bytes), yield);
-                    return input_buffer.sgetn(into, bytes);
-                })};
             try {
+                rask::decoder<boost::asio::ip::tcp::socket> decode(cnx.socket, yield);
                 std::size_t packet_size = decode.read_size();
-                uint8_t control = decode.read_byte();
-                boost::asio::async_read(cnx.socket, input_buffer,
-                    boost::asio::transfer_exactly(packet_size), yield);
+                rask::control_byte control = decode.read_byte();
+                decode.transfer(packet_size);
                 fostlib::log::debug(fostlib::c_rask_proto)
                     ("", "Got packet")
                     ("connection", cnx.id)
                     ("control", control)
                     ("size", packet_size);
-                dispatch(std::move(decode), control, packet_size, std::move(input_buffer));
+                dispatch(std::move(decode), control, packet_size);
             } catch ( ... ) {
                 cnx.socket.close();
                 fostlib::log::error(c_rask_proto)
-                    ("", "Socket error")
+                    ("", "Socket error - exception caught")
                     ("connection", cnx.id);
             }
         }
-        fostlib::log::error(fostlib::c_rask_proto)
+        fostlib::log::info(fostlib::c_rask_proto)
             ("", "Connection closed")
             ("connection", cnx.id);
     }
@@ -110,3 +98,14 @@ void rask::out_packet::operator () (
         data{{header.data(), buffer->data()}};
     async_write(cnx, data, yield);
 }
+
+
+/// Implementation for transfer for TCP
+template<> inline
+void rask::decoder<boost::asio::ip::tcp::socket>::transfer(std::size_t bytes) {
+    if ( socket ) {
+        boost::asio::async_read(*socket, *input_buffer,
+            boost::asio::transfer_exactly(bytes), *yield);
+    }
+}
+
