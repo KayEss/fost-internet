@@ -17,18 +17,15 @@
 #include <boost/asio/streambuf.hpp>
 
 
-namespace fostlib {
-
-
-    class rask_protocol;
+namespace rask {
 
 
     /// Base class for the connection
-    class rask_connection_base :
-        public std::enable_shared_from_this<rask_connection_base>
+    class connection_base :
+        public std::enable_shared_from_this<connection_base>
     {
     protected:
-        rask_connection_base();
+        connection_base();
 
     public:
         /// The connection ID used in log messages
@@ -43,14 +40,14 @@ namespace fostlib {
     /// end point that is listening for new connections,
     /// [see `class rask_server`](#class-rask_server).
     template<typename Transport>
-    class rask_connection : public rask_connection_base {
+    class connection : public connection_base {
     protected:
         /// Which side is this peer
         using peering = enum { server_side, client_side };
         const peering peer;
 
         /// Construct a connection
-        rask_connection(peering p)
+        connection(peering p)
         : peer(p) {
         }
 
@@ -76,12 +73,6 @@ namespace fostlib {
 
         /// The outbound message stream
         virtual void process_outbound(boost::asio::yield_context &) = 0;
-    };
-
-
-    /// Start a client connection and keep it open
-    template<typename Transport>
-    class rask_connect {
     };
 
 

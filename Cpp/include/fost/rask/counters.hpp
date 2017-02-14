@@ -13,12 +13,12 @@
 #include <fost/rask/rask-proto.hpp>
 
 
-namespace fostlib {
+namespace rask {
 
 
     /// A set of counters that are used for protocols and versions etc.
-    struct rask_counters {
-        rask_counters(const fostlib::module &base);
+    struct counters {
+        counters(const fostlib::module &base);
 
         fostlib::performance cnx_created;
     };

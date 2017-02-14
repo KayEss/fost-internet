@@ -12,13 +12,13 @@
 #include <fost/core>
 
 
-namespace fostlib {
+namespace rask {
 
 
     /// The module
-    extern const module c_rask;
+    extern const fostlib::module c_rask;
     /// The protocol module
-    extern const module c_rask_proto;
+    extern const fostlib::module c_rask_proto;
 
 
 }

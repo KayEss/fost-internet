@@ -13,11 +13,11 @@
 
 
 namespace {
-    fostlib::performance p_cnx_created(fostlib::c_rask_proto, "connections", "created");
+    fostlib::performance p_cnx_created(rask::c_rask_proto, "connections", "created");
 }
 
 
-fostlib::rask_connection_base::rask_connection_base()
+rask::connection_base::connection_base()
 : id(++p_cnx_created) {
 }
 

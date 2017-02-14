@@ -9,7 +9,7 @@
 #include <fost/rask/counters.hpp>
 
 
-fostlib::rask_counters::rask_counters(const fostlib::module &base)
+rask::counters::counters(const fostlib::module &base)
 : cnx_created(base, "created") {
 }
 

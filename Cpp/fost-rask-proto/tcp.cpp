@@ -9,14 +9,11 @@
 #include <fost/rask/tcp.hpp>
 
 
-const fostlib::module fostlib::c_rask_proto_tcp(c_rask_proto, "tcp");
+const fostlib::module rask::c_rask_proto_tcp(c_rask_proto, "tcp");
 
 
-fostlib::rask_counters fostlib::rask_tcp_counters(c_rask_proto_tcp);
-
-
-void fostlib::tcp_listen(
+void rask::tcp_listen(
     boost::asio::io_service &ios, fostlib::host netloc,
-    std::function<std::shared_ptr<fostlib::rask_tcp>(boost::asio::ip::tcp::socket)> factory
+    std::function<std::shared_ptr<tcp_connection>(boost::asio::ip::tcp::socket)> factory
 ) {
 }

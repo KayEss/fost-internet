@@ -17,18 +17,18 @@
 #include <boost/asio/spawn.hpp>
 
 
-namespace fostlib {
+namespace rask {
 
 
     /// Module for TCP
-    extern const module c_rask_proto_tcp;
+    extern const fostlib::module c_rask_proto_tcp;
 
 
     /// TCP connection
-    class rask_tcp : public rask_connection<boost::asio::ip::tcp::socket> {
+    class tcp_connection : public connection<boost::asio::ip::tcp::socket> {
     protected:
-        rask_tcp(boost::asio::io_service &ios)
-        : rask_connection<boost::asio::ip::tcp::socket>(server_side), socket(ios) {
+        tcp_connection(boost::asio::io_service &ios)
+        : connection<boost::asio::ip::tcp::socket>(server_side), socket(ios) {
         }
 
         boost::asio::io_service &get_io_service() override {
@@ -41,14 +41,11 @@ namespace fostlib {
     };
 
 
-    /// Counters used for TCP
-    extern rask_counters rask_tcp_counters;
-
     /// Listen for a connection. When a connection is established the factory
     /// is used to create a connection object which is then expected to handle
     /// the ongoing connection.
     void tcp_listen(boost::asio::io_service &ios, fostlib::host netloc,
-        std::function<std::shared_ptr<rask_tcp>(boost::asio::ip::tcp::socket)> factory);
+        std::function<std::shared_ptr<tcp_connection>(boost::asio::ip::tcp::socket)> factory);
 
 
     /// A loop implementation for receiving the inbound packets. The
@@ -56,7 +53,7 @@ namespace fostlib {
     ///     (auto decoder, uint8_t control, std::size_t bytes, boost::asio::streambuf &&buffer)
     template<typename Dispatch> inline
     void receive_loop(
-        rask_tcp &cnx, boost::asio::yield_context &yield, Dispatch dispatch
+        tcp_connection &cnx, boost::asio::yield_context &yield, Dispatch dispatch
     ) {
         while ( cnx.socket.is_open() ) {
             try {
@@ -64,7 +61,7 @@ namespace fostlib {
                 std::size_t packet_size = decode.read_size();
                 rask::control_byte control = decode.read_byte();
                 decode.transfer(packet_size);
-                fostlib::log::debug(fostlib::c_rask_proto)
+                fostlib::log::debug(c_rask_proto)
                     ("", "Got packet")
                     ("connection", cnx.id)
                     ("control", control)
@@ -77,7 +74,7 @@ namespace fostlib {
                     ("connection", cnx.id);
             }
         }
-        fostlib::log::info(fostlib::c_rask_proto)
+        fostlib::log::info(c_rask_proto)
             ("", "Connection closed")
             ("connection", cnx.id);
     }
