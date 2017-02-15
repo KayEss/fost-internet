@@ -21,16 +21,22 @@ namespace rask {
 
 
     /// Base class for the connection
-    class connection_base :
-        public std::enable_shared_from_this<connection_base>
-    {
+    class connection_base {
     protected:
         connection_base();
+
+        /// The version that these two peers can support for sending
+        /// of data
+        std::atomic<uint8_t> peer_version;
 
     public:
         /// The connection ID used in log messages
         const int64_t id;
 
+        /// Return the current version number for the connection
+        uint8_t version() {
+            return peer_version.load();
+        }
     };
 
 
@@ -57,12 +63,12 @@ namespace rask {
 
     public:
         /// Start up the data sending and receiving processes
-        virtual void process() {
-            auto self = shared_from_this();
-            boost::asio::spawn(get_io_service(), [self, this](auto yield) {
+        template<typename A>
+        void process(A capture) {
+            boost::asio::spawn(get_io_service(), [capture, this](auto yield) {
                 this->process_inbound(yield);
             });
-            boost::asio::spawn(get_io_service(), [self, this](auto yield) {
+            boost::asio::spawn(get_io_service(), [capture, this](auto yield) {
                 this->process_outbound(yield);
             });
         }

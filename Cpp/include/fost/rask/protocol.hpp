@@ -33,8 +33,8 @@ namespace rask {
             // Build the base array
             control_bytes base;
             for ( int cc{}; cc != 256; ++cc ) {
-                base[cc] = [vAny_default, cc](auto &v) {
-                        vAny_default(cc, v);
+                base[cc] = [vAny_default, cc](auto &&...v) {
+                        vAny_default(cc, v...);
                     };
             }
             // Build the other versions

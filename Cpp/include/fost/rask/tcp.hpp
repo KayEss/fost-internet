@@ -24,6 +24,10 @@ namespace rask {
     extern const fostlib::module c_rask_proto_tcp;
 
 
+    /// TCP specialisation of the decoder
+    using tcp_decoder = decoder<boost::asio::ip::tcp::socket>;
+
+
     /// TCP connection
     class tcp_connection : public connection<boost::asio::ip::tcp::socket> {
     protected:
@@ -50,7 +54,8 @@ namespace rask {
 
     /// A loop implementation for receiving the inbound packets. The
     /// signature for the Dispatch handler (lambda) is:
-    ///     (auto decoder, uint8_t control, std::size_t bytes, boost::asio::streambuf &&buffer)
+    ///     (tcp_decoder decoder, uint8_t control, std::size_t bytes)
+    /// Note that the `tcp_decoder` is moved into the function.
     template<typename Dispatch> inline
     void receive_loop(
         tcp_connection &cnx, boost::asio::yield_context &yield, Dispatch dispatch
