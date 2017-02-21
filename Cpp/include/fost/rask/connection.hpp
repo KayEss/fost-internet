@@ -12,6 +12,7 @@
 #include <f5/threading/boost-asio.hpp>
 
 #include <fost/rask/rask-proto.hpp>
+#include <fost/rask/protocol.hpp>
 
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -36,6 +37,14 @@ namespace rask {
         /// Return the current version number for the connection
         uint8_t version() {
             return peer_version.load();
+        }
+        /// Set the negotiated version number and return the old
+        /// version number
+        template<typename D>
+        uint8_t version(protocol<D> &proto, uint8_t peer) {
+            auto cur = peer_version.load();
+            peer_version.store(std::min(proto.max_version(), peer));
+            return cur;
         }
     };
 
