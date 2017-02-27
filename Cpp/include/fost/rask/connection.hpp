@@ -17,6 +17,8 @@
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
 
+#include <deque>
+
 
 namespace rask {
 
@@ -56,6 +58,7 @@ namespace rask {
     /// [see `class rask_server`](#class-rask_server).
     template<typename Transport>
     class connection : public connection_base {
+        std::deque<rask::out_packet> outbound;
     protected:
         /// Which side is this peer
         using peering = enum { server_side, client_side };
@@ -80,14 +83,17 @@ namespace rask {
             boost::asio::spawn(get_io_service(), [capture, this](auto yield) {
                 this->process_outbound(yield);
             });
+            established();
         }
 
     protected:
         /// The inbound message stream
         virtual void process_inbound(boost::asio::yield_context &) = 0;
-
         /// The outbound message stream
         virtual void process_outbound(boost::asio::yield_context &) = 0;
+        /// The connection is establshed and ready to send and receive
+        /// data
+        virtual void established() = 0;
     };
 
 
