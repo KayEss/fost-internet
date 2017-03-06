@@ -51,6 +51,19 @@ namespace rask {
     void tcp_listen(boost::asio::io_service &ios, fostlib::host netloc,
         std::function<std::shared_ptr<tcp_connection>(boost::asio::ip::tcp::socket)> factory);
 
+    /// Connect to a remote end point over TCP
+    template<typename Cnx>
+    std::shared_ptr<Cnx> tcp_connect(boost::asio::io_service &ios, const fostlib::host &to) {
+        auto cnx = std::make_shared<Cnx>(ios);
+        /// Try to connect to the remote server
+        boost::asio::ip::tcp::resolver resolver{ios};
+        boost::asio::ip::tcp::resolver::query q(to.name().c_str(), to.service().value().c_str());
+        auto endp = resolver.resolve(q);
+        cnx->socket.open(endp->endpoint().protocol());
+        cnx->process(cnx);
+        return cnx;
+    }
+
 
     /// A loop implementation for receiving the inbound packets. The
     /// signature for the Dispatch handler (lambda) is:
