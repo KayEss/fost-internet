@@ -58,10 +58,21 @@ namespace rask {
         /// Try to connect to the remote server
         boost::asio::ip::tcp::resolver resolver{ios};
         boost::asio::ip::tcp::resolver::query q(to.name().c_str(), to.service().value().c_str());
-        auto endp = resolver.resolve(q);
-        cnx->socket.open(endp->endpoint().protocol());
-        cnx->process(cnx);
-        return cnx;
+        boost::asio::ip::tcp::resolver::iterator endp = resolver.resolve(q), end;
+        boost::system::error_code error;
+        while ( endp != end ) {
+            cnx->socket.connect(*endp, error);
+            if ( error ) {
+                fostlib::log::error(c_rask_proto)
+                    ("", "Connect error to endpoint")
+                    ("error", error);
+            } else {
+                cnx->process(cnx);
+                return cnx;
+            }
+        }
+        throw fostlib::exceptions::connect_failure(error, to,
+            fostlib::coerce<uint16_t>(to.service().value()));
     }
 
 
