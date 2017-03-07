@@ -85,6 +85,12 @@ namespace rask {
                     ("control", control)
                     ("size", packet_size);
                 dispatch(std::move(decode), control, packet_size);
+            } catch ( std::exception &e ) {
+                cnx.socket.close();
+                fostlib::log::error(c_rask_proto)
+                    ("", "Socket error - exception caught")
+                    ("connection", cnx.id)
+                    ("exception", "what", e.what());
             } catch ( ... ) {
                 cnx.socket.close();
                 fostlib::log::error(c_rask_proto)
