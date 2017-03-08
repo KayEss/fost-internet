@@ -97,6 +97,8 @@ namespace rask {
                     ("control", control)
                     ("size", packet_size);
                 dispatch(std::move(decode), control, packet_size);
+            } catch ( boost::coroutines::detail::forced_unwind & ) {
+                throw;
             } catch ( std::exception &e ) {
                 cnx.socket.close();
                 fostlib::log::error(c_rask_proto)
