@@ -66,6 +66,7 @@ namespace rask {
                 fostlib::log::error(c_rask_proto)
                     ("", "Connect error to endpoint")
                     ("error", error);
+                ++endp;
             } else {
                 cnx->process(cnx);
                 return cnx;
