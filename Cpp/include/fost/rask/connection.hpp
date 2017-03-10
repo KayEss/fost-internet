@@ -43,7 +43,7 @@ namespace rask {
         /// Set the negotiated version number and return the old
         /// version number
         template<typename D>
-        uint8_t version(protocol<D> &proto, uint8_t peer) {
+        uint8_t version(const protocol<D> &proto, uint8_t peer) {
             auto cur = peer_version.load();
             peer_version.store(std::min(proto.max_version(), peer));
             return cur;
