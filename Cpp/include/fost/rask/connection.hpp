@@ -58,7 +58,6 @@ namespace rask {
     /// [see `class rask_server`](#class-rask_server).
     template<typename Transport>
     class connection : public connection_base {
-        std::deque<rask::out_packet> outbound;
     protected:
         /// Which side is this peer
         using peering = enum { server_side, client_side };
