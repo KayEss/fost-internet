@@ -18,6 +18,6 @@ namespace {
 
 
 rask::connection_base::connection_base()
-: id(++p_cnx_created), peer_version{} {
+: peer_version{}, id(++p_cnx_created) {
 }
 
