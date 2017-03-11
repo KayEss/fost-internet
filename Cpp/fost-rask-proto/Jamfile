@@ -5,4 +5,8 @@ fost-lib-autotest fost-rask-proto
     :
         ../../../fost-base/Cpp/fost-crypto/
         ../fost-inet
+    :
+        <define>BOOST_COROUTINES_NO_DEPRECATION_WARNING
+        <define>BOOST_COROUTINE_NO_DEPRECATION_WARNING
+        <cxxflags>-Wno-unused-variable
     ;
