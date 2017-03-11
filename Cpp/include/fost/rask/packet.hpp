@@ -89,26 +89,3 @@ namespace rask {
 
 }
 
-
-/// Insert an integer in network byte order
-template<typename I,
-    typename = std::enable_if_t<std::is_integral<I>::value>> inline
-rask::out_packet &operator << (rask::out_packet &o, I i) {
-    if ( sizeof(i) > 1 ) { // TODO: Should be constexpr if
-        auto v = boost::endian::native_to_big(i);
-        o.bytes(fostlib::array_view<char>(reinterpret_cast<char*>(&v), sizeof(v)));
-    } else {
-        o.byte(i);
-    }
-    return o;
-}
-
-
-/// Insert a UTF8 string
-inline
-rask::out_packet &operator << (rask::out_packet &o, fostlib::utf::u8_view str) {
-    o.size_sequence(str.bytes());
-    o.bytes(fostlib::array_view<char>(str.data(), str.bytes()));
-    return o;
-}
-

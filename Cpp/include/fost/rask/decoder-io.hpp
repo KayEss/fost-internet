@@ -25,18 +25,67 @@ namespace rask {
     }
 
 
-    /// Read an integer type
-    template<typename I, typename P> inline
-    typename std::enable_if<std::is_integral<I>::value, I>::type read(decoder<P> &d) {
-        detail::check_bytes(d, sizeof(I));
-        if ( sizeof(I) ) {
-            return d.read_byte();
-        } else {
-            I i;
-            d.read_data(reinterpret_cast<char *>(&i), sizeof(I));
-            boost::endian::big_to_native_inplace(i);
-        }
+    /// struct to be partially specialised for all the types we need to
+    /// be able to send and receive.
+    template<typename V, typename P, typename = void>
+    struct read_pattern {};
+
+
+    /// Read an instance of the specified type from the packet
+    template<typename V, typename P>
+    V read(decoder<P> &d) {
+        return read_pattern<V, P>{}(d);
     }
+
+
+    /// Insert an integer in network byte order
+    template<typename I,
+        typename = std::enable_if_t<std::is_integral<I>::value>> inline
+    out_packet &operator << (out_packet &o, I i) {
+        if ( sizeof(i) > 1 ) { // TODO: Should be constexpr if
+            auto v = boost::endian::native_to_big(i);
+            o.bytes(fostlib::array_view<char>(reinterpret_cast<char*>(&v), sizeof(v)));
+        } else {
+            o.byte(i);
+        }
+        return o;
+    }
+    /// Read an integer type
+    template<typename I, typename P>
+    struct read_pattern<I, P, std::enable_if_t<std::is_integral<I>::value>>
+    {
+        I operator () (rask::decoder<P> &d) {
+            detail::check_bytes(d, sizeof(I));
+            if ( sizeof(I) > 1 ) { // TODO: Should be constexpr if
+                I i;
+                d.read_data(reinterpret_cast<char *>(&i), sizeof(I));
+                boost::endian::big_to_native_inplace(i);
+            } else {
+                return d.read_byte();
+            }
+        }
+    };
+
+
+    /// Insert a UTF8 string
+    inline out_packet &operator << (out_packet &o, fostlib::utf::u8_view str) {
+        o.size_sequence(str.bytes());
+        o.bytes(fostlib::array_view<char>(str.data(), str.bytes()));
+        return o;
+    }
+    /// Read a string
+    template<typename P>
+    struct read_pattern<fostlib::utf8_string, P> {
+        fostlib::utf8_string operator () (decoder<P> &d) {
+            auto length = d.read_size();
+            fostlib::utf8_string str;
+            str.reserve(length);
+            while ( length-- ) {
+                str += d.read_byte();
+            }
+            return str;
+        }
+    };
 
 
 }
