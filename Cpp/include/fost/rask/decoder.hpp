@@ -54,6 +54,11 @@ namespace rask {
         /// `socket` is empty then do nothing.
         void transfer(std::size_t bytes);
 
+        /// The number of bytes in the buffer
+        std::size_t size() const {
+            return input_buffer->size();
+        }
+
         /// Read a size sequence
         std::size_t read_size() {
             std::size_t size = read_byte();
