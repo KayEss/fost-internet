@@ -11,6 +11,7 @@
 
 #include <fost/rask/decoder.hpp>
 
+#include <fost/counter>
 #include <fost/pointers>
 #include <fost/unicode>
 
@@ -28,6 +29,8 @@ namespace rask {
 
     /// A packet that is to be sent over a connection
     class out_packet final : boost::noncopyable {
+        static fostlib::performance p_created;
+        static fostlib::performance p_sent;
     private:
         /// Output buffers
         std::unique_ptr<boost::asio::streambuf> buffer;

@@ -9,8 +9,13 @@
 #include <fost/rask/packet.hpp>
 
 
+fostlib::performance rask::out_packet::p_created(c_rask_proto, "packet", "out", "created");
+fostlib::performance rask::out_packet::p_sent(c_rask_proto, "packet", "out", "sent");
+
+
 rask::out_packet::out_packet(control_byte c)
 : buffer(new boost::asio::streambuf), control(c) {
+    ++p_created;
 }
 
 
