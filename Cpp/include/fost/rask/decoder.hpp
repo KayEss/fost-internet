@@ -72,7 +72,7 @@ namespace rask {
         }
 
         /// Return a single byte of data
-        char read_byte() {
+        unsigned char read_byte() {
             transfer(1u);
             return input_buffer->sbumpc();
         }
