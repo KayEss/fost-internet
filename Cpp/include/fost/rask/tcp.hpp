@@ -95,10 +95,17 @@ namespace rask {
                     ("", "Got packet")
                     ("connection", cnx.id)
                     ("control", control)
-                    ("size", packet_size);
+                    ("size", "specified", packet_size)
+                    ("size", "buffered", decode.size());
                 dispatch(std::move(decode), control, packet_size);
             } catch ( boost::coroutines::detail::forced_unwind & ) {
                 throw;
+            } catch ( fostlib::exceptions::exception &e ) {
+                cnx.socket.close();
+                fostlib::log::error(c_rask_proto)
+                    ("", "Socket error - exception caught")
+                    ("connection", cnx.id)
+                    ("exception", fostlib::coerce<fostlib::json>(e));
             } catch ( std::exception &e ) {
                 cnx.socket.close();
                 fostlib::log::error(c_rask_proto)
@@ -131,7 +138,13 @@ void rask::out_packet::operator () (
     header.sputc(control);
     std::array<boost::asio::streambuf::const_buffers_type, 2>
         data{{header.data(), buffer->data()}};
-    async_write(cnx, data, yield);
+    boost::system::error_code error;
+    async_write(cnx, data, yield[error]);
+    if ( not error ) {
+        ++p_sent;
+    } else {
+        throw fostlib::exceptions::not_implemented(__func__, error);
+    }
 }
 
 
