@@ -52,9 +52,9 @@ namespace rask {
         std::function<std::shared_ptr<tcp_connection>(boost::asio::ip::tcp::socket)> factory);
 
     /// Connect to a remote end point over TCP
-    template<typename Cnx>
-    std::shared_ptr<Cnx> tcp_connect(boost::asio::io_service &ios, const fostlib::host &to) {
-        auto cnx = std::make_shared<Cnx>(ios);
+    template<typename Cnx, typename... A>
+    std::shared_ptr<Cnx> tcp_connect(const fostlib::host &to,boost::asio::io_service &ios,  A&&... a) {
+        auto cnx = std::make_shared<Cnx>(ios, std::forward<A>(a)...);
         /// Try to connect to the remote server
         boost::asio::ip::tcp::resolver resolver{ios};
         boost::asio::ip::tcp::resolver::query q(to.name().c_str(), to.service().value().c_str());
