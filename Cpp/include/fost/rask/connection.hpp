@@ -58,11 +58,12 @@ namespace rask {
     /// [see `class rask_server`](#class-rask_server).
     template<typename Transport>
     class connection : public connection_base {
-    protected:
+    public:
         /// Which side is this peer
         using peering = enum { server_side, client_side };
         const peering peer;
 
+    protected:
         /// Construct a connection
         connection(peering p)
         : peer(p) {

@@ -31,8 +31,8 @@ namespace rask {
     /// TCP connection
     class tcp_connection : public connection<boost::asio::ip::tcp::socket> {
     protected:
-        tcp_connection(boost::asio::io_service &ios)
-        : connection<boost::asio::ip::tcp::socket>(server_side), socket(ios) {
+        tcp_connection(boost::asio::io_service &ios, peering p)
+        : connection<boost::asio::ip::tcp::socket>(p), socket(ios) {
         }
 
         boost::asio::io_service &get_io_service() override {
