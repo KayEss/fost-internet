@@ -39,15 +39,19 @@ namespace rask {
 
 
     /// Insert an integer in network byte order
-    template<typename I,
-        typename = std::enable_if_t<std::is_integral<I>::value>> inline
-    out_packet &operator << (out_packet &o, I i) {
-        if ( sizeof(i) > 1 ) { // TODO: Should be constexpr if
-            auto v = boost::endian::native_to_big(i);
-            o.bytes(fostlib::array_view<char>(reinterpret_cast<char*>(&v), sizeof(v)));
-        } else {
-            o.byte(i);
-        }
+    template<typename I > inline
+    std::enable_if_t<std::is_integral<I>::value && (sizeof(I) > 1), out_packet &>
+        operator << (out_packet &o, I i)
+    {
+        auto v = boost::endian::native_to_big(i);
+        o.bytes(fostlib::array_view<char>(reinterpret_cast<char*>(&v), sizeof(v)));
+        return o;
+    }
+    template<typename I> inline
+    std::enable_if_t<std::is_integral<I>::value && sizeof(I) == 1, out_packet &>
+        operator << (out_packet &o, I i)
+    {
+        o.byte(i);
         return o;
     }
     /// Read an integer type
@@ -59,7 +63,7 @@ namespace rask {
             if ( sizeof(I) > 1 ) { // TODO: Should be constexpr if
                 I i;
                 d.read_data(reinterpret_cast<char *>(&i), sizeof(I));
-                boost::endian::big_to_native_inplace(i);
+                return boost::endian::big_to_native(i);
             } else {
                 return d.read_byte();
             }
