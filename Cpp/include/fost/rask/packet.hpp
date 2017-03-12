@@ -62,7 +62,7 @@ namespace rask {
         /// Add a single byte to the buffer
         template<typename B>
         void byte(B b) {
-            static_assert(sizeof(B) == 1, "Must add an array of bytes");
+            static_assert(sizeof(B) == 1, "Must add a single byte");
             buffer->sputc(b);
         }
 
