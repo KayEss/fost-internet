@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,8 +9,9 @@
 #include "fost-inet.hpp"
 
 #include <fost/http.useragent.hpp>
-#include <fost/parse/parse.hpp>
+#include <fost/parse/http.client.hpp>
 
+#include <fost/exception/parse_error.hpp>
 #include <fost/exception/not_null.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
@@ -82,33 +83,20 @@ std::unique_ptr< http::user_agent::response >
 
         utf8_string first_line;
         cnx >> first_line;
-        string protocol, message; int status;
+        response_status status;
         {
-            fostlib::parser_lock lock;
-            if ( !fostlib::parse(lock, first_line.underlying().c_str(),
-                (
-                    boost::spirit::strlit< wliteral >(L"HTTP/0.9") |
-                    boost::spirit::strlit< wliteral >(L"HTTP/1.0") |
-                    boost::spirit::strlit< wliteral >(L"HTTP/1.1")
-                )[ phoenix::var(protocol) =
-                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-                >> boost::spirit::chlit< wchar_t >( ' ' )
-                >> boost::spirit::uint_parser< int, 10, 3, 3 >()
-                    [ phoenix::var(status) = phoenix::arg1 ]
-                >> boost::spirit::chlit< wchar_t >( ' ' )
-                >> (
-                    +boost::spirit::chset<>( L"a-zA-Z -" )
-                )[ phoenix::var(message) =
-                    phoenix::construct_< string >( phoenix::arg1, phoenix::arg2 ) ]
-            ).full )
-                throw exceptions::not_implemented(
-                    "Expected a HTTP response", coerce< string >(first_line));
+            auto pos = first_line.begin(), end = first_line.end();
+            client_first_line<utf8_string::const_iterator> rule;
+            if ( not boost::spirit::qi::parse(pos, end, rule, status) || pos != end ) {
+                throw exceptions::parse_error(
+                    "Expected a HTTP response", coerce<string>(first_line));
+            }
         }
 
         return std::unique_ptr<http::user_agent::response>(
             new http::user_agent::response(
                 std::move(cnx), req.method(), req.address(),
-                protocol, status, message));
+                std::move(status.version), status.status, std::move(status.message)));
     } catch ( fostlib::exceptions::exception &e ) {
         insert(e.data(), "http-ua", "method", req.method());
         throw;
