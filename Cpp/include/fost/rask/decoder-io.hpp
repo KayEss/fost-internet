@@ -21,6 +21,13 @@ namespace rask {
         /// Throw an exception if there aren't enough bytes in the sequence
         template<typename P> inline
         void check_bytes(decoder<P> &d, std::size_t bytes) {
+            if ( d.size() < bytes ) {
+                fostlib::exceptions::unexpected_eof e(
+                    "Tried to read more than the number of available bytes");
+                fostlib::insert(e.data(), "remaining", d.size());
+                fostlib::insert(e.data(), "wanted", bytes);
+                throw e;
+            }
         }
     }
 
