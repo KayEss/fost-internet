@@ -131,7 +131,7 @@ namespace rask {
 /// Implementation of TCP data send for outbound packets
 template<> inline
 void rask::out_packet::operator () (
-    boost::asio::ip::tcp::socket &cnx, boost::asio::yield_context &yield
+    boost::asio::ip::tcp::socket &sock, boost::asio::yield_context &yield
 ) const {
     boost::asio::streambuf header;
     size_sequence(size(), header);
@@ -139,10 +139,11 @@ void rask::out_packet::operator () (
     std::array<boost::asio::streambuf::const_buffers_type, 2>
         data{{header.data(), buffer->data()}};
     boost::system::error_code error;
-    async_write(cnx, data, yield[error]);
+    async_write(sock, data, yield[error]);
     if ( not error ) {
         ++p_sent;
     } else {
+        sock.close();
         throw fostlib::exceptions::not_implemented(__func__, error);
     }
 }
@@ -151,9 +152,16 @@ void rask::out_packet::operator () (
 /// Implementation for transfer for TCP
 template<> inline
 void rask::decoder<boost::asio::ip::tcp::socket>::transfer(std::size_t bytes) {
+    /// If we have a socket then we transfer bytes for it. If however there
+    /// is no socket this simply means that we assume that the input buffer
+    /// already contains the data so we do nothing.
     if ( socket ) {
+        boost::system::error_code error;
         boost::asio::async_read(*socket, *input_buffer,
-            boost::asio::transfer_exactly(bytes), *yield);
+            boost::asio::transfer_exactly(bytes), (*yield)[error]);
+        if ( error ) {
+            throw fostlib::exceptions::unexpected_eof("Reading bytes from socket", error);
+        }
     }
 }
 
