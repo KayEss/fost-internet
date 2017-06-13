@@ -1,3 +1,6 @@
+2017-06-13  Kirit Saelensminde  <kirit@felspar.com>
+ Ampersands are allowed characters in the URL file specification.
+
 2017-01-12  Kirit Saelensminde  <kirit@felspar.com>
  Removed the old `parser_lock` which is no longer needed.
 
