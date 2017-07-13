@@ -159,12 +159,12 @@ FSL_TEST_FUNCTION(url_parser_hostpart) {
 
 FSL_TEST_FUNCTION( url_parser_filespec ) {
     auto check = [](string s, auto p) {
-            ascii_printable_string into;
-            auto pos = s.begin();
-            FSL_CHECK(url_filespec_p(pos, s.end(), into));
-            FSL_CHECK_EQ(string(pos, s.end()), string());
-            FSL_CHECK_EQ(coerce<ascii_printable_string>(s), into);
-        };
+        ascii_printable_string into;
+        auto pos = s.begin();
+        FSL_CHECK(url_filespec_p(pos, s.end(), into));
+        FSL_CHECK_EQ(string(pos, s.end()), string());
+        FSL_CHECK_EQ(coerce<ascii_printable_string>(s), into);
+    };
 
     check("/", "/");
     check("/*/", "/*/");
@@ -186,6 +186,17 @@ FSL_TEST_FUNCTION( path_spec ) {
         coerce< url::filepath_string >( boost::filesystem::wpath(L"test") ),
         url::filepath_string("test") );
     FSL_CHECK_EQ(coerce<string>(u.pathspec()), "/file-name");
+    u.pathspec(url::filepath_string("/Coups%20d%27%C3%A9tat"));
+    FSL_CHECK_EQ(coerce<string>(u.pathspec()), L"/Coups d'\u00e9tat");
+
+    url::filepath_string str("/Coups%20d%27%C3%A9tat");
+    FSL_CHECK_EQ(coerce<string>(str), L"/Coups d'\u00e9tat");
+
+#if BOOST_VERSION_MAJOR < 64
+    FSL_CHECK_EXCEPTION(coerce<boost::filesystem::wpath>(str), std::exception&);
+#else
+    FSL_CHECK_EQ(coerce<boost::filesystem::wpath>(str), L"/Coups d'\u00e9tat");
+#endif
 }
 
 

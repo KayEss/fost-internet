@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -174,23 +174,23 @@ namespace fostlib {
         /// Performs the coercion
         url::filepath_string coerce( const boost::filesystem::wpath &s );
     };
-    /// Allow a file specification to be turned into a path.
-    template<>
-    struct FOST_INET_DECLSPEC coercer<
-        boost::filesystem::wpath, url::filepath_string
-    > {
-        /// Performs the coercion
-        boost::filesystem::wpath coerce( const url::filepath_string &s );
-    };
     /// Allow a file specification to be turned into a string.
     template<>
     struct FOST_INET_DECLSPEC coercer<
         string, url::filepath_string
     > {
         /// Performs the coercion
-        string coerce( const url::filepath_string &s ) {
-            return fostlib::coerce<string>(
-                fostlib::coerce<boost::filesystem::wpath>(s));
+        string coerce( const url::filepath_string &s );
+    };
+    /// Allow a file specification to be turned into a path.
+    template<>
+    struct FOST_INET_DECLSPEC coercer<
+        boost::filesystem::wpath, url::filepath_string
+    > {
+        /// Performs the coercion
+        boost::filesystem::wpath coerce(const url::filepath_string &s) {
+            return fostlib::coerce<boost::filesystem::wpath>(
+                fostlib::coerce<string>(s));
         }
     };
 
