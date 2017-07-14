@@ -1,3 +1,6 @@
+2017-07-14  Kirit Saelensminde  <kirit@felspar.com>
+ Add single quote and dollar symbol to allowed URL path characters.
+
 2017-07-13  Kirit Saelensminde  <kirit@felspar.com>
  The conversion of HTTP request file paths to strings now works for a wider range of inputs. The conversion to `boost::filesystem:;wpath` is problematic with Boost versions prior to 1.64 due to the way they use codecvt.
 

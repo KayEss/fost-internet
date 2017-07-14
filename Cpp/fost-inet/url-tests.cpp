@@ -174,6 +174,7 @@ FSL_TEST_FUNCTION( url_parser_filespec ) {
     check("/Type/List:/Article%20(FSLib::::Content::::Article)",
         "/Type/List:/Article%20(FSLib::::Content::::Article)");
     check("/M&M", "/M&M");
+    check("/$1", "/$1");
 }
 
 

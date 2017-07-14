@@ -63,7 +63,7 @@ namespace fostlib {
                     v = ascii_printable_string(s);
                 }, _val, _1)];
 
-            line = +boost::spirit::qi::char_("_@&~!a-zA-Z0-9/.,:()+%*-");
+            line = +boost::spirit::qi::char_("_@$&~!a-zA-Z0-9/.,:'()+%*-");
         }
     };
 
