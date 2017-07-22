@@ -221,9 +221,7 @@ url::filepath_string fostlib::coercer<
 }
 
 
-boost::filesystem::wpath fostlib::coercer<
-    boost::filesystem::wpath, url::filepath_string
->::coerce( const url::filepath_string &s ) {
+string fostlib::coercer<string, url::filepath_string>::coerce(const url::filepath_string &s) {
     utf8_string narrowed;
     for ( ascii_printable_string::const_iterator p(s.underlying().begin()); p != s.underlying().end(); ++p ) {
         if ( *p == '%' ) {
@@ -233,12 +231,7 @@ boost::filesystem::wpath fostlib::coercer<
         } else
             narrowed += *p;
     }
-#if BOOST_FILESYSTEM_VERSION >= 3
-    return boost::filesystem::wpath(narrowed.underlying());
-#else
-    return fostlib::coerce<boost::filesystem::wpath>(
-        fostlib::coerce<string>(narrowed));
-#endif
+    return fostlib::coerce<string>(narrowed);
 }
 
 
