@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -28,7 +28,7 @@ namespace fostlib {
             class FOST_INET_DECLSPEC request : boost::noncopyable {
                 friend class fostlib::http::server;
                 boost::scoped_ptr< network_connection > m_cnx;
-                boost::function<void (mime&, const ascii_string&)> m_handler;
+                std::function<void(mime&, const ascii_string&)> m_handler;
                 string m_method;
                 url::filepath_string m_pathspec;
                 url::query_string m_query_string;
@@ -57,7 +57,7 @@ namespace fostlib {
                     request(
                         const string &method, const url::filepath_string &filespec,
                         std::unique_ptr< binary_body > headers_and_body,
-                        boost::function<void (const mime&, const ascii_string &)>);
+                        std::function<void(const mime&, const ascii_string &)>);
 
                     /// The request method
                     const string &method() const { return m_method; }
@@ -116,11 +116,11 @@ namespace fostlib {
             std::unique_ptr<request> operator() ();
             /// Run the provided lambda to service requests forever
             void operator () (
-                boost::function< bool (request &) > service_lambda);
+                std::function<bool(request &)> service_lambda);
             /// Run the provided lambda to service requests until the terminator return true
             void operator () (
-                boost::function< bool (request &) > service_lambda,
-                boost::function< bool (void) > terminator);
+                std::function<bool(request &)> service_lambda,
+                std::function<bool(void)> terminator);
 
             /// Return the status text associated with a status code
             static nliteral status_text( int code );

@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -88,12 +88,8 @@ namespace {
         typedef nullable< boost::system::error_code > timeout_error;
         typedef nullable< std::pair< boost::system::error_code, std::size_t > >
             read_error;
-        typedef boost::function<
-            void (boost::system::error_code)
-        > connect_async_function_type;
-        typedef boost::function<
-            void (boost::system::error_code, std::size_t)
-        > read_async_function_type;
+        using connect_async_function_type = std::function<void (boost::system::error_code)>;
+        using read_async_function_type = std::function<void (boost::system::error_code, std::size_t)>;
 
         boost::asio::ip::tcp::socket &sock;
         boost::system::error_code &error;

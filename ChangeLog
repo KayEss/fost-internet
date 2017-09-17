@@ -1,3 +1,6 @@
+2017-09-17  Kirit Saelensminde  <kirit@felspar.com>
+ Removed all uses of `boost::function`
+
 2017-07-14  Kirit Saelensminde  <kirit@felspar.com>
  Add single quote and dollar symbol to allowed URL path characters.
 
