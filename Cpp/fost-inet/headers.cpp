@@ -217,7 +217,9 @@ fostlib::headers_base::content::content(
         if ( values.isobject() ) {
             for ( json::const_iterator item(values.begin()); item != values.end(); ++item ) {
                 const auto key = coerce<string>(item.key());
-                const auto itemstr = coerce<string>(*item);
+                const auto itemstr = (*item).isarray() ?
+                    fostlib::json::unparse(*item, false) :
+                    coerce<string>(*item);
                 if ( key == root ) {
                     value(itemstr);
                 } else {
