@@ -23,7 +23,7 @@ namespace {
 
 
     const setting< bool > g_allow_relative(
-        L"fost-base/Cpp/fost-inet/url.cpp", L"url", L"Allow relative urls", true, true
+        "fost-base/Cpp/fost-inet/url.cpp", "url", "Allow relative urls", true, true
     );
 
 
@@ -32,7 +32,7 @@ namespace {
         if ( dig < 0x0a ) return dig + '0';
         if ( dig < 0x10 ) return dig + 'A' - 0x0a;
         throw fostlib::exceptions::out_of_range< int >(
-            L"Number to convert to hex digit is too big", 0, 0x10, dig);
+            "Number to convert to hex digit is too big", 0, 0x10, dig);
     }
     template< typename S >
     S hex( utf8 ch ) {
@@ -143,8 +143,8 @@ namespace {
 void fostlib::url::filepath_string_tag::do_encode(
     fostlib::nliteral from, ascii_printable_string &into
 ) {
-    throw fostlib::exceptions::not_implemented( L"fostlib::url::filepath_string_tag::do_encode("
-    L"fostlib::nliteral from, ascii_printable_string &into )" );
+    throw fostlib::exceptions::not_implemented( "fostlib::url::filepath_string_tag::do_encode("
+    "fostlib::nliteral from, ascii_printable_string &into )" );
 }
 
 
@@ -175,7 +175,7 @@ void fostlib::url::filepath_string_tag::check_encoded(
                 for ( std::size_t p = 0; p != 2; ++p ) {
                     if ( ++c == s.end() )
                         throw fostlib::exceptions::parse_error(
-                            L"File specification escape sequence is truncated"
+                            "File specification escape sequence is truncated"
                         );
                     if (
                         ( *c >= '0' && *c <= '9' )
@@ -184,13 +184,13 @@ void fostlib::url::filepath_string_tag::check_encoded(
                     ) ; // This is fine
                     else
                         throw fostlib::exceptions::parse_error(
-                            L"File specification contains an illegal character in"
-                            L"an escape sequence", string( 1, *c )
+                            "File specification contains an illegal character in"
+                            "an escape sequence", string( 1, *c )
                         );
                 }
             else
                 throw fostlib::exceptions::parse_error(
-                    L"File specification contains an illegal character", string( 1, *c )
+                    "File specification contains an illegal character", string( 1, *c )
                 );
         }
 }
@@ -241,8 +241,8 @@ string fostlib::coercer<string, url::filepath_string>::coerce(const url::filepat
 
 
 setting< string > fostlib::url::s_default_host(
-    L"fost-base/Cpp/fost-inet/url.cpp",
-    L"Site", L"Host", L"localhost", true
+    "fost-base/Cpp/fost-inet/url.cpp",
+    "Site", "Host", "localhost", true
 );
 
 
@@ -263,9 +263,9 @@ fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
 }
 fostlib::url::url( const t_form form, const string &str )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
-    std::pair< string, nullable< string > > anchor_parts( partition( str, L"#" ) );
+    std::pair< string, nullable< string > > anchor_parts( partition( str, "#" ) );
     std::pair< string, nullable< string > > query_parts(
-        partition( anchor_parts.first, L"?" )
+        partition( anchor_parts.first, "?" )
     );
     switch ( form ) {
     case e_pathname:
@@ -279,7 +279,7 @@ fostlib::url::url( const t_form form, const string &str )
         for ( string::const_iterator it( str.begin() ); it != str.end(); ++it )
             if ( *it < 0x20 || *it > 0x7f )
                 throw fostlib::exceptions::parse_error(
-                    L"The encoded url contains an invalid character (" + str + L")"
+                    "The encoded url contains an invalid character (" + str + ")"
                 );
         m_pathspec = coerce< url::filepath_string >( query_parts.first );
         break;
@@ -318,17 +318,17 @@ ascii_printable_string fostlib::url::as_string() const {
     ascii_printable_string url( protocol() + ascii_printable_string( "://" ) );
     if ( user() )
         url += coerce< ascii_printable_string >(
-            user().value() + L":" + password().value_or( string() ) + L"@"
+            user().value() + ":" + password().value_or( string() ) + "@"
         );
     else if ( password() )
-        url += coerce< ascii_printable_string >( L":" + password().value() + L"@" );
+        url += coerce< ascii_printable_string >( ":" + password().value() + "@" );
     url += coerce< ascii_printable_string >(server().name());
     if ( server().service() && (
             ( protocol() == ascii_printable_string("http")
                 && server().service() != "80" )
             || ( protocol() == ascii_printable_string("https")
-                && server().service() != L"443" )
-    ) ) url += coerce< ascii_printable_string >(L":" + server().service().value());
+                && server().service() != "443" )
+    ) ) url += coerce< ascii_printable_string >(":" + server().service().value());
     url += pathspec().underlying();
     url = concat( url, ascii_printable_string( "?" ), query().as_string() ).value();
     return concat( url, ascii_printable_string( "#" ), anchor() ).value();
