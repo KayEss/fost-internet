@@ -1,3 +1,6 @@
+2017-12-28  Kirit Saelensminde  <kirit@felspar.com>
+ Make the `query_string` API a bit less pathalogical by caching the stringified version.
+
 2017-12-13  Kirit Saelensminde  <kirit@felspar.com>
  JSON arrays used as header sub-values are now set as the JSON string.
 
