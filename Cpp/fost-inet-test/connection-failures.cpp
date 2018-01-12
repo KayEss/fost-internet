@@ -1,5 +1,5 @@
 /*
-    Copyright 2010-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2010-2018, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -10,6 +10,7 @@
 #include <fost/internet>
 
 #include <boost/timer.hpp>
+#include <thread>
 
 
 using namespace fostlib;
@@ -92,7 +93,7 @@ FSL_TEST_FUNCTION( early_closure ) {
     worker server;
     server(send_data);
     // Wait for long enough for the server to start
-    boost::this_thread::sleep(boost::posix_time::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds{250});
     // Open a connection to the server
     network_connection client(localhost, port);
     // Try to read more data than the server is going to send before it closes the connection
