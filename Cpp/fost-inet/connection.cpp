@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2018, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -44,8 +44,8 @@ namespace {
 
 struct ssl_data {
     ssl_data(
-        boost::asio::io_service &io_service, boost::asio::ip::tcp::socket &sock
-    ) : ctx(io_service, boost::asio::ssl::context::sslv23_client),
+        boost::asio::io_service &, boost::asio::ip::tcp::socket &sock
+    ) : ctx(boost::asio::ssl::context::sslv23_client),
     ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
