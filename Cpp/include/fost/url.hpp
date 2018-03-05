@@ -50,7 +50,7 @@ namespace fostlib {
             void remove( const string &name );
 
             /// A string representing the query, if any is specified
-            nullable< ascii_printable_string > as_string() const;
+            const nullable<ascii_printable_string> &as_string() const;
 
             /// Return the number of items for the requested key
             std::size_t has_key(const string &key) const;
@@ -62,7 +62,7 @@ namespace fostlib {
             const std::vector<nullable<string>> &at(const string &key) const;
 
         private:
-            nullable< ascii_printable_string > m_string;
+            mutable nullable<ascii_printable_string> m_string;
             std::map<string, std::vector<nullable<string>>> m_query;
         };
         enum t_form { e_pathname, e_encoded };

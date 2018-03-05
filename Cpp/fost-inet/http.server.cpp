@@ -114,7 +114,9 @@ void fostlib::http::server::operator () (
             delete sock;
             return;
         }
-        pool.f<bool>( boost::lambda::bind(::service, service_lambda, service, sock) );
+        pool.f<bool>([service_lambda, service, sock]() {
+            return ::service(service_lambda, service, sock);
+        });
     }
 }
 

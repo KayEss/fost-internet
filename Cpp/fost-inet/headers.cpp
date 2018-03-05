@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -30,7 +30,7 @@ fostlib::headers_base::~headers_base() {
 
 namespace {
     typedef std::pair< string, fostlib::nullable<string> > string_pair;
-    const fostlib::string c_mime_newline(L"\r\n");
+    const fostlib::string c_mime_newline("\r\n");
 
     bool is_whitespace( wchar_t c ){
         return c == L' ' || c == L'\t';
@@ -66,7 +66,7 @@ void fostlib::headers_base::parse( const string &headers ) {
         !lines.first.empty();
         lines = mime_partition( lines.second )
     ) {
-        const string_pair line( partition( lines.first, L":" ));
+        const string_pair line( partition( lines.first, ":" ));
         const std::pair< string, content > parsed(
             value(line.first, line.second.value_or(fostlib::string())));
         if ( parsed.first.find('_') == std::string::npos ) {
@@ -217,7 +217,9 @@ fostlib::headers_base::content::content(
         if ( values.isobject() ) {
             for ( json::const_iterator item(values.begin()); item != values.end(); ++item ) {
                 const auto key = coerce<string>(item.key());
-                const auto itemstr = coerce<string>(*item);
+                const auto itemstr = (*item).isarray() ?
+                    fostlib::json::unparse(*item, false) :
+                    coerce<string>(*item);
                 if ( key == root ) {
                     value(itemstr);
                 } else {

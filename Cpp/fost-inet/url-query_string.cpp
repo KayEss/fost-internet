@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -64,20 +64,17 @@ fostlib::url::query_string::query_string( const ascii_printable_string &q )
 void fostlib::url::query_string::append(
     const string &name, const nullable< string > &value
 ) {
-    if ( m_string ) {
-        throw exceptions::not_null("A plain text query string has already been provided");
-    }
-    m_query[ name ].push_back( value );
+    m_string = null;
+    m_query[name].push_back( value );
 }
 
 
 void fostlib::url::query_string::remove( const string &name ) {
-    if ( m_string ) {
-        throw exceptions::not_null("A plain text query string has already been provided");
-    }
     const auto p(m_query.find( name ));
-    if ( p != m_query.end() )
-        m_query.erase( p );
+    if ( p != m_query.end() ) {
+        m_string = null;
+        m_query.erase(p);
+    }
 }
 
 
@@ -136,20 +133,19 @@ namespace {
         }
     }
 }
-nullable< ascii_printable_string > fostlib::url::query_string::as_string() const {
+const nullable<ascii_printable_string> &fostlib::url::query_string::as_string() const {
     if ( not m_string ) {
         nullable< ascii_printable_string > r;
-        for (auto it(m_query.begin()); it != m_query.end(); ++it ) {
-            for ( auto v( it->second.begin() ); v != it->second.end(); ++v) {
+        for ( auto it(m_query.begin()); it != m_query.end(); ++it ) {
+            for ( auto v( it->second.begin() ); v != it->second.end(); ++v ) {
                 r = concat(
                     r, ascii_printable_string( "&" ), concat(
                         query_string_encode( it->first ) + ascii_printable_string( "=" ),
                         query_string_encode( *v )));
             }
         }
-        return r;
-    } else {
-        return m_string.value();
+        m_string = r;
     }
+    return m_string;
 }
 
