@@ -19,7 +19,7 @@ add_library(fost-inet
         url-query_string.cpp
         url.cpp
     )
-target_link_libraries(fost-inet fost-core crypto ssl)
+target_link_libraries(fost-inet fost-crypto crypto ssl)
 target_include_directories(fost-inet PUBLIC ../include)
 install(TARGETS fost-inet LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
