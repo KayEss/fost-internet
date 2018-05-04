@@ -1,5 +1,5 @@
 /*
-    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2018, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -8,7 +8,7 @@
 #include "fost-inet.hpp"
 #include <fost/pop3.hpp>
 
-#include <boost/regex.hpp>
+#include <regex>
 
 
 using namespace fostlib;
@@ -41,7 +41,7 @@ bool fostlib::email_is_an_ndr( const text_body &email ) {
 
 
 namespace {
-    const boost::regex c_delay_regex("^Warning: message delayed \\d+ .+?$");
+    const std::regex c_delay_regex("^Warning: message delayed \\d+ .+?$");
 }
 bool fostlib::email_is_a_delay_report( const text_body &email ) {
     string subject = email.headers()["Subject"].value();
@@ -50,7 +50,7 @@ bool fostlib::email_is_a_delay_report( const text_body &email ) {
             // email.headers()["Content-Type"].subvalue("report-type") == "delivery-status" &&
             subject == "Delivery Status Notification (Delay)" ||
             subject == "Delivery Status Notification (Warning)"
-        ) || boost::regex_match( coerce< utf8_string >(subject).underlying(), c_delay_regex )
+        ) || std::regex_match( coerce< utf8_string >(subject).underlying(), c_delay_regex )
     ;
 }
 
