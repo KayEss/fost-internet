@@ -1,5 +1,5 @@
 /*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -89,15 +89,15 @@ fostlib::mime::iterator_implementation::~iterator_implementation() {
 */
 
 std::pair< string, headers_base::content > fostlib::mime::mime_headers::value( const string &name, const string &value ) {
-    if ( name == L"Content-Disposition" || name == L"content-disposition" || name == L"Content-Type" ) {
+    if ( name == "Content-Disposition" || name == "content-disposition" || name == "Content-Type" ) {
         std::map< string, string > args;
         // Parse the value from the format
         // form-data; name="aname"; extra="value"
-        std::pair< string, nullable< string > > disp( partition( value, L";" ) );
+        std::pair< string, nullable< string > > disp( partition( value, ";" ) );
         if ( disp.second ) {
-            for ( std::pair< string, nullable< string > > para( partition( disp.second, L";" ) ); !para.first.empty(); para = partition( para.second, L";" ) ) {
+            for ( std::pair< string, nullable< string > > para( partition( disp.second, ";" ) ); !para.first.empty(); para = partition( para.second, ";" ) ) {
                 // Normally the extra argument values should be surrounded by double quotes, but sometimes not
-                std::pair< string, nullable< string > > argument = partition( para.first, L"=" );
+                std::pair< string, nullable< string > > argument = partition( para.first, "=" );
                 if ( argument.second
                     && argument.second.value().at(0) == '"'
                     && argument.second.value().at(argument.second.value().length()-1) == '"'

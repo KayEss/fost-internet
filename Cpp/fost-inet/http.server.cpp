@@ -39,7 +39,7 @@ std::unique_ptr< http::server::request > fostlib::http::server::operator () () {
 
 namespace {
     bool service(
-        boost::function< bool ( http::server::request & ) > service_lambda,
+        std::function< bool ( http::server::request & ) > service_lambda,
         boost::asio::io_service *servicep,
         boost::asio::ip::tcp::socket *sockp
     ) {
@@ -92,14 +92,14 @@ namespace {
 }
 
 void fostlib::http::server::operator () (
-    boost::function< bool (http::server::request &) > service_lambda
+    std::function< bool (http::server::request &) > service_lambda
 ) {
     (*this)(service_lambda, return_false);
 }
 
 void fostlib::http::server::operator () (
-    boost::function< bool (http::server::request &) > service_lambda,
-    boost::function< bool (void) > terminate_lambda
+    std::function< bool (http::server::request &) > service_lambda,
+    std::function< bool (void) > terminate_lambda
 ) {
     // Create a worker pool to service the requests
     workerpool pool;
@@ -114,7 +114,9 @@ void fostlib::http::server::operator () (
             delete sock;
             return;
         }
-        pool.f<bool>( boost::lambda::bind(::service, service_lambda, service, sock) );
+        pool.f<bool>([service_lambda, service, sock]() {
+            return ::service(service_lambda, service, sock);
+        });
     }
 }
 
@@ -124,8 +126,11 @@ void fostlib::http::server::operator () (
 */
 
 
-fostlib::http::server::request::request() {
+fostlib::http::server::request::request()
+: m_method("GET"), m_pathspec("/"), m_mime(new binary_body()) {
 }
+
+
 fostlib::http::server::request::request(
         std::unique_ptr<boost::asio::io_service> io_service,
         std::unique_ptr<boost::asio::ip::tcp::socket> connection)
@@ -187,6 +192,8 @@ fostlib::http::server::request::request(
         throw;
     }
 }
+
+
 fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
@@ -199,6 +206,8 @@ fostlib::http::server::request::request(
             : new binary_body() ) {
     m_mime->headers().add("__remote_addr", "127.0.0.1");
 }
+
+
 fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
@@ -212,10 +221,11 @@ fostlib::http::server::request::request(
     m_mime->headers().add("__remote_addr", "127.0.0.1");
 }
 
+
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
     std::unique_ptr< binary_body > headers_and_body,
-    boost::function<void (const mime&, const ascii_string&)> handler
+    std::function<void (const mime&, const ascii_string&)> handler
 ) : m_handler(handler),
         m_method( method ), m_pathspec( filespec ),
         m_mime( headers_and_body.release() ) {
