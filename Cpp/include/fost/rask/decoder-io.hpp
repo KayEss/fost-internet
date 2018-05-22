@@ -1,5 +1,5 @@
 /*
-    Copyright 2017, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2017-2018, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -79,9 +79,9 @@ namespace rask {
 
 
     /// Insert a UTF8 string
-    inline out_packet &operator << (out_packet &o, fostlib::utf::u8_view str) {
+    inline out_packet &operator << (out_packet &o, f5::u8view str) {
         o.size_sequence(str.bytes());
-        o.bytes(fostlib::array_view<char>(str.data(), str.bytes()));
+        o.bytes(str.memory());
         return o;
     }
     /// Read a string
