@@ -83,7 +83,7 @@ namespace rask {
         /// this is needed depending on the transport. See [tcp.hpp] for
         /// an example.
         template<typename Socket, typename Yield>
-        void operator () (Socket &s, Yield &y) const;
+        void operator () (Socket &s, Yield y) const;
     };
 
 

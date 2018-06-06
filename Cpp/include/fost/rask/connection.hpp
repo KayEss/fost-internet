@@ -88,9 +88,9 @@ namespace rask {
 
     protected:
         /// The inbound message stream
-        virtual void process_inbound(boost::asio::yield_context &) = 0;
+        virtual void process_inbound(boost::asio::yield_context) = 0;
         /// The outbound message stream
-        virtual void process_outbound(boost::asio::yield_context &) = 0;
+        virtual void process_outbound(boost::asio::yield_context) = 0;
         /// The connection is establshed and ready to send and receive
         /// data
         virtual void established() = 0;

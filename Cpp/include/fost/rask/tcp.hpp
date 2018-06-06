@@ -1,5 +1,5 @@
 /*
-    Copyright 2016-2017, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2016-2018, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -83,7 +83,7 @@ namespace rask {
     /// Note that the `tcp_decoder` is moved into the function.
     template<typename Dispatch> inline
     void receive_loop(
-        tcp_connection &cnx, boost::asio::yield_context &yield, Dispatch dispatch
+        tcp_connection &cnx, boost::asio::yield_context yield, Dispatch dispatch
     ) {
         while ( cnx.socket.is_open() ) {
             try {
@@ -131,7 +131,7 @@ namespace rask {
 /// Implementation of TCP data send for outbound packets
 template<> inline
 void rask::out_packet::operator () (
-    boost::asio::ip::tcp::socket &sock, boost::asio::yield_context &yield
+    boost::asio::ip::tcp::socket &sock, boost::asio::yield_context yield
 ) const {
     boost::asio::streambuf header;
     size_sequence(size(), header);
