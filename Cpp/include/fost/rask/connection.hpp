@@ -1,8 +1,8 @@
-/*
-    Copyright 2017-2018, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2017-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -54,8 +54,7 @@ namespace rask {
     /// A connection over a specific transport  of the Rask meta-protocol. The
     /// connection can be started from here to a transport end point that
     /// is waiting for connections, or it can be started from the transport
-    /// end point that is listening for new connections,
-    /// [see `class rask_server`](#class-rask_server).
+    /// end point that is listening for new connections.
     template<typename Transport>
     class connection : public connection_base {
     public:
