@@ -20,10 +20,6 @@
 namespace fostlib { namespace hod {
 
 
-    /// Module for TCP
-    extern const fostlib::module c_fost_hod_tcp;
-
-
     /// TCP specialisation of the decoder
     using tcp_decoder = decoder<boost::asio::ip::tcp::socket>;
 
@@ -56,7 +52,7 @@ namespace fostlib { namespace hod {
         while ( endp != end ) {
             cnx->socket.connect(*endp, error);
             if ( error ) {
-                fostlib::log::error(c_fost_hod_tcp)
+                fostlib::log::error(c_hod_tcp)
                     ("", "Connect error to endpoint")
                     ("error", error);
                 ++endp;
@@ -84,7 +80,7 @@ namespace fostlib { namespace hod {
                 std::size_t packet_size = decode.read_size();
                 control_byte control = decode.read_byte();
                 decode.transfer(packet_size);
-                fostlib::log::debug(c_fost_hod_tcp)
+                fostlib::log::debug(c_hod_tcp)
                     ("", "Got packet")
                     ("connection", cnx.id)
                     ("control", control)
@@ -95,24 +91,24 @@ namespace fostlib { namespace hod {
                 throw;
             } catch ( fostlib::exceptions::exception &e ) {
                 cnx.socket.close();
-                fostlib::log::error(c_fost_hod_tcp)
+                fostlib::log::error(c_hod_tcp)
                     ("", "Socket error - exception caught")
                     ("connection", cnx.id)
                     ("exception", fostlib::coerce<fostlib::json>(e));
             } catch ( std::exception &e ) {
                 cnx.socket.close();
-                fostlib::log::error(c_fost_hod_tcp)
+                fostlib::log::error(c_hod_tcp)
                     ("", "Socket error - exception caught")
                     ("connection", cnx.id)
                     ("exception", "what", e.what());
             } catch ( ... ) {
                 cnx.socket.close();
-                fostlib::log::error(c_fost_hod_tcp)
+                fostlib::log::error(c_hod_tcp)
                     ("", "Socket error - exception caught")
                     ("connection", cnx.id);
             }
         }
-        fostlib::log::info(c_fost_hod_tcp)
+        fostlib::log::info(c_hod_tcp)
             ("", "Connection closed")
             ("connection", cnx.id);
     }
