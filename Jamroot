@@ -27,7 +27,6 @@ alias tests :
 explicit tests ;
 
 alias all :
-        docs
         examples
         fost
         tests
