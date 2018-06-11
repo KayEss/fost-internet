@@ -1,8 +1,8 @@
-/*
-    Copyright 2016-2018, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2016-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -17,7 +17,7 @@
 #include <boost/asio/spawn.hpp>
 
 
-namespace rask {
+namespace fostlib { namespace hod {
 
 
     /// Module for TCP
@@ -87,9 +87,9 @@ namespace rask {
     ) {
         while ( cnx.socket.is_open() ) {
             try {
-                rask::decoder<boost::asio::ip::tcp::socket> decode(cnx.socket, yield);
+                decoder<boost::asio::ip::tcp::socket> decode(cnx.socket, yield);
                 std::size_t packet_size = decode.read_size();
-                rask::control_byte control = decode.read_byte();
+                control_byte control = decode.read_byte();
                 decode.transfer(packet_size);
                 fostlib::log::debug(c_rask_proto)
                     ("", "Got packet")
@@ -125,12 +125,12 @@ namespace rask {
     }
 
 
-}
+}}
 
 
 /// Implementation of TCP data send for outbound packets
 template<> inline
-void rask::out_packet::operator () (
+void fostlib::hod::out_packet::operator () (
     boost::asio::ip::tcp::socket &sock, boost::asio::yield_context yield
 ) const {
     boost::asio::streambuf header;
@@ -151,7 +151,7 @@ void rask::out_packet::operator () (
 
 /// Implementation for transfer for TCP
 template<> inline
-void rask::decoder<boost::asio::ip::tcp::socket>::transfer(std::size_t bytes) {
+void fostlib::hod::decoder<boost::asio::ip::tcp::socket>::transfer(std::size_t bytes) {
     /// If we have a socket then we transfer bytes for it. If however there
     /// is no socket this simply means that we assume that the input buffer
     /// already contains the data so we do nothing.

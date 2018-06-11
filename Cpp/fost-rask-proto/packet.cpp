@@ -1,30 +1,30 @@
-/*
-    Copyright 2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2017-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
 #include <fost/rask/packet.hpp>
 
 
-fostlib::performance rask::out_packet::p_created(c_rask_proto, "packet", "out", "created");
-fostlib::performance rask::out_packet::p_sent(c_rask_proto, "packet", "out", "sent");
+fostlib::performance fostlib::hod::out_packet::p_created(c_rask_proto, "packet", "out", "created");
+fostlib::performance fostlib::hod::out_packet::p_sent(c_rask_proto, "packet", "out", "sent");
 
 
-rask::out_packet::out_packet(control_byte c)
+fostlib::hod::out_packet::out_packet(control_byte c)
 : buffer(new boost::asio::streambuf), control(c) {
     ++p_created;
 }
 
 
-rask::out_packet::out_packet(out_packet &&o)
+fostlib::hod::out_packet::out_packet(out_packet &&o)
 : buffer(std::move(o.buffer)), control(o.control) {
 }
 
 
-void rask::out_packet::size_sequence(std::size_t s, boost::asio::streambuf &b) {
+void fostlib::hod::out_packet::size_sequence(std::size_t s, boost::asio::streambuf &b) {
     if ( s < 0x80 ) {
         b.sputc(s);
     } else if ( s < 0x100 ) {

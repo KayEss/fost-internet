@@ -20,7 +20,7 @@
 #include <deque>
 
 
-namespace rask {
+namespace fostlib { namespace hod {
 
 
     /// Base class for the connection
@@ -96,5 +96,5 @@ namespace rask {
     };
 
 
-}
+}}
 
