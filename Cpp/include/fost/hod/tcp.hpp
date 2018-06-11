@@ -44,13 +44,6 @@ namespace fostlib { namespace hod {
         boost::asio::ip::tcp::socket socket;
     };
 
-
-    /// Listen for a connection. When a connection is established the factory
-    /// is used to create a connection object which is then expected to handle
-    /// the ongoing connection.
-    void tcp_listen(boost::asio::io_service &ios, fostlib::host netloc,
-        std::function<std::shared_ptr<tcp_connection>(boost::asio::ip::tcp::socket)> factory);
-
     /// Connect to a remote end point over TCP
     template<typename Cnx, typename... A>
     std::shared_ptr<Cnx> tcp_connect(const fostlib::host &to,boost::asio::io_service &ios,  A&&... a) {

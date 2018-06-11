@@ -10,10 +10,3 @@
 
 
 const fostlib::module fostlib::hod::c_fost_hod_tcp(c_hod, "tcp");
-
-
-void fostlib::hod::tcp_listen(
-    boost::asio::io_service &ios, fostlib::host netloc,
-    std::function<std::shared_ptr<tcp_connection>(boost::asio::ip::tcp::socket)> factory
-) {
-}
