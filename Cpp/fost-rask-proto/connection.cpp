@@ -8,7 +8,6 @@
 
 #include <fost/counter>
 
-#include <fost/rask/rask-proto.hpp>
 #include <fost/rask/tcp.hpp>
 
 

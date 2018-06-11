@@ -11,7 +11,7 @@
 
 #include <f5/threading/reactor.hpp>
 
-#include <fost/rask/rask-proto.hpp>
+#include <fost/rask/hod.hpp>
 #include <fost/rask/protocol.hpp>
 
 #include <boost/asio/spawn.hpp>
