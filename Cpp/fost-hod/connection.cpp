@@ -8,7 +8,7 @@
 
 #include <fost/counter>
 
-#include <fost/hod/tcp.hpp>
+#include <fost/hod/connection.hpp>
 
 
 namespace {
