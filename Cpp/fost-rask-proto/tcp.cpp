@@ -9,7 +9,7 @@
 #include <fost/rask/tcp.hpp>
 
 
-const fostlib::module fostlib::hod::c_rask_proto_tcp(c_rask_proto, "tcp");
+const fostlib::module fostlib::hod::c_fost_hod_tcp(c_hod, "tcp");
 
 
 void fostlib::hod::tcp_listen(

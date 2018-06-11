@@ -9,6 +9,5 @@
 #include <fost/rask/rask-proto.hpp>
 
 
-const fostlib::module fostlib::hod::c_rask(fostlib::c_fost, "rask");
-const fostlib::module fostlib::hod::c_rask_proto(c_rask, "protocol");
+const fostlib::module fostlib::hod::c_hod(fostlib::c_fost, "hod");
 

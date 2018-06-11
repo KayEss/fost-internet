@@ -16,9 +16,7 @@ namespace fostlib { namespace hod {
 
 
     /// The module
-    extern const fostlib::module c_rask;
-    /// The protocol module
-    extern const fostlib::module c_rask_proto;
+    extern const fostlib::module c_hod;
 
 
 }}

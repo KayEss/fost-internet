@@ -9,8 +9,8 @@
 #include <fost/rask/packet.hpp>
 
 
-fostlib::performance fostlib::hod::out_packet::p_created(c_rask_proto, "packet", "out", "created");
-fostlib::performance fostlib::hod::out_packet::p_sent(c_rask_proto, "packet", "out", "sent");
+fostlib::performance fostlib::hod::out_packet::p_created(c_hod, "packet", "out", "created");
+fostlib::performance fostlib::hod::out_packet::p_sent(c_hod, "packet", "out", "sent");
 
 
 fostlib::hod::out_packet::out_packet(control_byte c)

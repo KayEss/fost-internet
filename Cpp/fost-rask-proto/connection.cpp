@@ -13,7 +13,7 @@
 
 
 namespace {
-    fostlib::performance p_cnx_created(fostlib::hod::c_rask_proto, "connections", "created");
+    fostlib::performance p_cnx_created(fostlib::hod::c_hod, "connections", "created");
 }
 
 
