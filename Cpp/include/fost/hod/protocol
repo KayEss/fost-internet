@@ -6,8 +6,10 @@
 */
 
 
-#include <fost/rask/hod.hpp>
+#pragma once
 
 
-const fostlib::module fostlib::hod::c_hod(fostlib::c_fost, "hod");
+#include <fost/hod/packet.hpp>
+#include <fost/hod/protocol.hpp>
+#include <fost/hod/tcp.hpp>
 
