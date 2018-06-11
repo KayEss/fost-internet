@@ -5,11 +5,6 @@ include ../fost-base/fost.jam ;
 use-project fost-base : ../fost-base/ ;
 fost-project fost-internet ;
 
-alias docs :
-        Docs
-    ;
-explicit docs ;
-
 alias examples :
         ../fost-base//examples
         Examples/host
@@ -21,6 +16,7 @@ explicit examples ;
 
 alias fost :
         ../fost-base//fost
+        Cpp/fost-hod
         Cpp/fost-inet
     ;
 
