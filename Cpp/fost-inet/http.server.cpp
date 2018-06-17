@@ -126,8 +126,11 @@ void fostlib::http::server::operator () (
 */
 
 
-fostlib::http::server::request::request() {
+fostlib::http::server::request::request()
+: m_method("GET"), m_pathspec("/"), m_mime(new binary_body()) {
 }
+
+
 fostlib::http::server::request::request(
         std::unique_ptr<boost::asio::io_service> io_service,
         std::unique_ptr<boost::asio::ip::tcp::socket> connection)
@@ -189,6 +192,8 @@ fostlib::http::server::request::request(
         throw;
     }
 }
+
+
 fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
@@ -201,6 +206,8 @@ fostlib::http::server::request::request(
             : new binary_body() ) {
     m_mime->headers().add("__remote_addr", "127.0.0.1");
 }
+
+
 fostlib::http::server::request::request(
     const string &method,
     const url::filepath_string &filespec,
@@ -213,6 +220,7 @@ fostlib::http::server::request::request(
             : new binary_body() ) {
     m_mime->headers().add("__remote_addr", "127.0.0.1");
 }
+
 
 fostlib::http::server::request::request(
     const string &method, const url::filepath_string &filespec,
