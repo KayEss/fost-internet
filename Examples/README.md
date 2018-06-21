@@ -1,4 +1,7 @@
-1 - host
+# Examples
+
+
+## 1 - host
 
 Looks up the IP numbers associated with host names. Shows:
 * Iterating through the command line arguments
