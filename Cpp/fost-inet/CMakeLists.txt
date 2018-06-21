@@ -28,6 +28,7 @@ add_library(fost-inet-smoke STATIC EXCLUDE_FROM_ALL
         cookie.tests.cpp
         headers-tests.cpp
         host-tests.cpp
+        http-tests.cpp
         mime-binary_body-tests.cpp
         mime-mime_envelope-tests.cpp
         mime-tests.cpp
