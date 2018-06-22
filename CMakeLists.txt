@@ -1,2 +1,2 @@
-add_subdirectory(Cpp/fost-inet)
+add_subdirectory(Cpp)
 add_subdirectory(Examples)
