@@ -1,7 +1,3 @@
-find_package(OpenSSL)
-if(NOT ${OPENSSL_FOUND})
-endif()
-
 add_library(fost-inet
         connection.cpp
         cookie.cpp
