@@ -131,7 +131,7 @@ fostlib::http::server::request::request()
 }
 
 
-fostlib::http::server::request::request(returnreturn
+fostlib::http::server::request::request(
         std::unique_ptr<boost::asio::io_service> io_service,
         std::unique_ptr<boost::asio::ip::tcp::socket> connection)
 : m_cnx(new network_connection(std::move(io_service), std::move(connection))),
