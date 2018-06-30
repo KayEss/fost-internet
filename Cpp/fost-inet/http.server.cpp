@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -18,8 +18,8 @@
 using namespace fostlib;
 
 
-/*
-    fostlib::http::server
+/**
+    ## fostlib::http::server
 */
 
 
@@ -121,8 +121,8 @@ void fostlib::http::server::operator () (
 }
 
 
-/*
-    fostlib::http::server::request
+/**
+    ## fostlib::http::server::request
 */
 
 
@@ -136,7 +136,9 @@ fostlib::http::server::request::request(
         std::unique_ptr<boost::asio::ip::tcp::socket> connection)
 : m_cnx(new network_connection(std::move(io_service), std::move(connection))),
         m_handler(raise_connection_error) {
-    m_handler = boost::bind(respond_on_socket, m_cnx.get(), _1, _2);
+    m_handler = [this](mime &m, const ascii_string &h) {
+        respond_on_socket(m_cnx.get(), m, h);
+    };
 
     utf8_string first_line;
     (*m_cnx) >> first_line;
@@ -345,3 +347,4 @@ void fostlib::http::server::request::operator() (
     ss << status << " " << status_text(status);
     (*this)(response, ss.str());
 }
+

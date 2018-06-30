@@ -1,7 +1,0 @@
-
-fost-lib-autotest fost-inet
-    :
-        Cpp/fost-inet
-    :
-        ../../../fost-base/Cpp/fost-crypto/
-    ;

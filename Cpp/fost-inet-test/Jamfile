@@ -1,6 +1,0 @@
-
-fost-integration-test fost-inet-test
-    : Cpp/fost-inet-test
-    :
-        ../fost-inet/
-    ;
