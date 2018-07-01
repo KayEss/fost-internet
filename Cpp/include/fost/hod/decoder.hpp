@@ -29,20 +29,21 @@ namespace fostlib { namespace hod {
     class decoder final : boost::noncopyable {
         std::unique_ptr<boost::asio::streambuf> input_buffer;
         Transport *socket;
-        boost::asio::yield_context *yield;
+        std::unique_ptr<boost::asio::yield_context> yield;
 
     public:
         /// Construct a decoder that starts by talking to the underlying
         /// transport for data.
-        explicit decoder(Transport &s, boost::asio::yield_context &y)
+        explicit decoder(Transport &s, boost::asio::yield_context y)
         : input_buffer(std::make_unique<boost::asio::streambuf>()),
-            socket(&s), yield(&y)
+            socket(&s),
+            yield(std::make_unique<boost::asio::yield_context>(y))
         {
         }
         /// Construct from an input_buffer that is handed over. This is
         /// useful for testing.
         explicit decoder(std::unique_ptr<boost::asio::streambuf> b)
-        : input_buffer(std::move(b)), socket(nullptr), yield(nullptr) {
+        : input_buffer(std::move(b)), socket(nullptr) {
         }
 
         /// When the decoder is moved only the buffer comes along
