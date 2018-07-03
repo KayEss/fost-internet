@@ -68,7 +68,7 @@ namespace fostlib { namespace hod {
 
     /// A loop implementation for receiving the inbound packets. The
     /// signature for the Dispatch handler (lambda) is:
-    ///     (tcp_decoder decoder, uint8_t control, std::size_t bytes)
+    ///     (tcp_decoder decoder, uint8_t control, std::size_t bytes) -> void
     /// Note that the `tcp_decoder` is moved into the function.
     template<typename Dispatch> inline
     void receive_loop(
