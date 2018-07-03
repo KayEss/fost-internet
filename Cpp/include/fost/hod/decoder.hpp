@@ -26,11 +26,14 @@ namespace fostlib { namespace hod {
     /// The dispatch process takes the decoder after all of the remaining
     /// bytes have been transferred.
     template<typename Transport>
-    class decoder final : boost::noncopyable {
+    class decoder final {
         std::unique_ptr<boost::asio::streambuf> input_buffer;
         Transport *socket;
         std::unique_ptr<boost::asio::yield_context> yield;
 
+        /// This is only movable
+        decoder(const decoder &) = delete;
+        decoder &operator =(const decoder &) = delete;
     public:
         /// Construct a decoder that starts by talking to the underlying
         /// transport for data.
