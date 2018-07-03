@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -22,8 +22,8 @@
 using namespace fostlib;
 
 
-/*
-    fostlib::http::user_agent
+/**
+    ## fostlib::http::user_agent
 */
 
 
@@ -104,8 +104,8 @@ std::unique_ptr< http::user_agent::response >
 }
 
 
-/*
-    fostlib::http::user_agent::request
+/**
+    ## fostlib::http::user_agent::request
 */
 
 
@@ -127,8 +127,8 @@ fostlib::http::user_agent::request::request(
 }
 
 
-/*
-    fostlib::http::user_agent::response
+/**
+    ## fostlib::http::user_agent::response
 */
 
 
@@ -178,7 +178,7 @@ fostlib::http::user_agent::response::response(
 }
 
 
-boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body() {
+boost::shared_ptr<binary_body> fostlib::http::user_agent::response::body() {
     if ( !m_body ) {
         try {
             nullable< int64_t > length;
