@@ -17,6 +17,7 @@ add_library(fost-inet
     )
 target_link_libraries(fost-inet fost-crypto crypto ssl)
 target_include_directories(fost-inet PUBLIC ../include)
+set_target_properties(fost-inet PROPERTIES DEBUG_POSTFIX "-d")
 install(TARGETS fost-inet LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 add_library(fost-inet-smoke STATIC EXCLUDE_FROM_ALL
