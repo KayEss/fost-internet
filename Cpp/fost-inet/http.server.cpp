@@ -248,12 +248,14 @@ fostlib::nullable<fostlib::json>
     if ( pos.size() ) {
         const auto size = pos.size();
         if ( pos[0] == "headers" && (size == 2 || size == 3) ) {
-            auto header = boost::get<string>(pos[1]);
+            /// **TODO** There's no reason to suppose the cursor always
+            /// contains strings.
+            auto header = std::get<string>(pos[1]);
             if ( headers().exists(header) ) {
                 if ( size == 2 ) {
                     return json(headers()[header].value());
                 } else {
-                    auto subvalue = headers()[header].subvalue(boost::get<string>(pos[2]));
+                    auto subvalue = headers()[header].subvalue(std::get<string>(pos[2]));
                     if ( not subvalue ) return null;
                     else return json(subvalue.value());
                 }
