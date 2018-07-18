@@ -1,3 +1,6 @@
+2018-07-18  Kirit Saelensminde  <kirit@felspar.com>
+ Improve handling of weird ways TCP connections can be dropped and add more logging.
+
 2018-07-02  Kirit Saelensminde  <kirit@felspar.com>
  The HTTP response body doesn't really need to be `const`.
 
