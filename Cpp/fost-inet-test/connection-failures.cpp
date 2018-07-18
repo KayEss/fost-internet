@@ -62,7 +62,7 @@ FSL_TEST_FUNCTION( read_timeouts ) {
         network_connection cnx(localhost, port);
         std::vector< unsigned char > data(256);
         FSL_CHECK_EXCEPTION(cnx >> data,
-            fostlib::exceptions::read_timeout&);
+            fostlib::exceptions::socket_error&);
     }
 }
 
