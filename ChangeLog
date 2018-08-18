@@ -1,3 +1,6 @@
+2018-08-19  Kirit Saelensminde  <kirit@felspar.com>
+ Rename `url::anchor` to `url::fragment` as that is the proper term.
+
 2018-07-18  Kirit Saelensminde  <kirit@felspar.com>
  Improve handling of weird ways TCP connections can be dropped and add more logging.
 

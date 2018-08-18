@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2018, Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -22,9 +22,8 @@ using namespace fostlib;
 namespace {
 
 
-    const setting< bool > g_allow_relative(
-        "fost-base/Cpp/fost-inet/url.cpp", "url", "Allow relative urls", true, true
-    );
+    const setting<bool> g_allow_relative("fost-base/Cpp/fost-inet/url.cpp",
+        "url", "Allow relative urls", true, true);
 
 
     template< typename C >
@@ -263,8 +262,8 @@ fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
 }
 fostlib::url::url( const t_form form, const string &str )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
-    std::pair< string, nullable< string > > anchor_parts( partition( str, "#" ) );
-    std::pair< string, nullable< string > > query_parts(
+    std::pair<string, nullable<string>> anchor_parts(partition(str, "#"));
+    std::pair<string, nullable<string>> query_parts(
         partition( anchor_parts.first, "?" )
     );
     switch ( form ) {
@@ -285,11 +284,10 @@ fostlib::url::url( const t_form form, const string &str )
         break;
     }
     if ( query_parts.second )
-        query( query_string( coerce< ascii_printable_string >(
-            query_parts.second.value()
-        ) ) );
-    if ( anchor_parts.second )
-        anchor( coerce< ascii_printable_string >( anchor_parts.second.value() ) );
+        query(query_string(coerce<ascii_printable_string>(query_parts.second.value())));
+    if ( anchor_parts.second ) {
+        fragment(coerce<ascii_printable_string>(anchor_parts.second.value()));
+    }
 }
 fostlib::url::url(
     const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw
@@ -331,10 +329,10 @@ ascii_printable_string fostlib::url::as_string() const {
     ) ) url += coerce< ascii_printable_string >(":" + server().service().value());
     url += pathspec().underlying();
     url = concat( url, ascii_printable_string( "?" ), query().as_string() ).value();
-    return concat( url, ascii_printable_string( "#" ), anchor() ).value();
+    return concat(url, ascii_printable_string( "#" ), fragment()).value();
 }
 
-ascii_printable_string fostlib::url::as_string( const url &relative_from ) const {
+ascii_printable_string fostlib::url::as_string(const url &relative_from) const {
     if ( g_allow_relative.value() &&
         (
             protocol() == ascii_printable_string( "http" )
@@ -349,7 +347,7 @@ ascii_printable_string fostlib::url::as_string( const url &relative_from ) const
                 query().as_string()
             ),
             ascii_printable_string( "#" ),
-            anchor()
+            fragment()
         ).value();
     else
         return as_string();
