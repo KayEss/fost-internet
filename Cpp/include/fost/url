@@ -8,7 +8,13 @@
 #pragma once
 
 
-#include <fost/url>
-#include <fost/connection.hpp>
-#include <fost/http.useragent.hpp>
-#include <fost/smtp.hpp>
+#ifdef FOST_OS_WINDOWS
+    #define FOST_INET_DECLSPEC __declspec( dllimport )
+#else
+    #define FOST_INET_DECLSPEC
+#endif
+
+
+#include <fost/url.hpp>
+
+
