@@ -37,10 +37,15 @@ namespace {
     S hex( utf8 ch ) {
         typename S::value_type num[ 4 ];
         num[ 0 ] = '%';
-        num[ 1 ] = digit< typename S::value_type >( ( ch & 0xf0 ) >> 4 );
-        num[ 2 ] = digit< typename S::value_type >( ch & 0x0f );
+        num[ 1 ] = digit< typename S::value_type >((ch & 0xf0) >> 4);
+        num[ 2 ] = digit< typename S::value_type >(ch & 0x0f);
         num[ 3 ] = 0;
         return S( num );
+    }
+    void hex(utf8 ch, std::string &into) {
+        into += '%';
+        into += digit<std::string::value_type>((ch & 0xf0) >> 4);
+        into += digit<std::string::value_type>(ch & 0x0f);
     }
 
     unsigned char undigit(char d) {
@@ -75,7 +80,7 @@ namespace {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 
-    /*
+    /**
      * Note that given a pathSpec ending in '/', this will leave it like that.
      * What actually happens is that a blank entry gets shoved into the list,
      * and this recreates it later.
@@ -134,8 +139,8 @@ namespace {
 }
 
 
-/*
-    fostlib::url::filepath_string_tag
+/**
+    ## fostlib::url::filepath_string_tag
 */
 
 
@@ -234,8 +239,8 @@ string fostlib::coercer<string, url::filepath_string>::coerce(const url::filepat
 }
 
 
-/*
-    fostlib::url
+/**
+    ## fostlib::url
 */
 
 
@@ -248,9 +253,23 @@ setting< string > fostlib::url::s_default_host(
 fostlib::url::url()
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
 }
-fostlib::url::url( const url& url, const char *path )
-: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
-    pathspec( ascii_printable_string(path) );
+fostlib::url::url(const url& url, f5::u8view u)
+: protocol(url.protocol()), server(url.server()), m_pathspec("/") {
+    /// **TODO** We need to de-IRI this, i.e  escape unicode code points
+    /// that aren't as per the ASCII sub-set used by URLs
+    if ( u.substr(0, 1) == "/" ) {
+        std::string outp;
+        for ( auto *bp = u.data(); bp < u.data() + u.bytes(); ++bp ) {
+            if ( *bp < 0x21 || *bp > 0x7f ) {
+                outp += '%';
+            } else {
+                hex(*bp, outp);
+            }
+        }
+        pathspec(ascii_printable_string(std::move(outp)));
+    } else {
+        throw fostlib::exceptions::not_implemented(__func__, u);
+    }
 }
 fostlib::url::url( const url& url, const filepath_string &path )
 : protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
@@ -398,8 +417,8 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
 }
 
 
-/*
-    fostlib::exceptions::relative_path_error
+/**
+    ## fostlib::exceptions::relative_path_error
 */
 
 

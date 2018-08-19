@@ -148,7 +148,7 @@ namespace fostlib {
                     >> -(boost::spirit::qi::lit('#') >> -filespec))
                 [boost::phoenix::bind(
                     [](auto &v, auto h, auto fs, auto qs, auto frag) {
-                        v = url(h, fs.value_or(ascii_printable_string()));
+                        v = url(h, boost::filesystem::path(fs.value_or(ascii_printable_string()).underlying().c_str()));
                         if ( qs ) v.query(qs.value());
                         if ( frag ) v.fragment(frag.value());
                     }, _val, _1, _2, _3, _4)];

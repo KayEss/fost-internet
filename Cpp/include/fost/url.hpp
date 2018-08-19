@@ -15,6 +15,8 @@
 #include <fost/host.hpp>
 #include <fost/tagged-string.hpp>
 
+#include <string_view>
+
 
 namespace fostlib {
 
@@ -71,21 +73,24 @@ namespace fostlib {
         url();
         /// Construct a URL by parsing a string
         explicit url( const string & );
-        /// Construct a URL from a base and a character literal path
-        url( const url &base, const char *new_path );
+        /// Construct a URL from a base joining the new string (a potentially
+        /// relative IRI)
+        url(const url &base, f5::u8view);
+        template<std::size_t N>
+        url(const url &base, const char (&a)[N])
+        : url(base, f5::u8view(a)) {
+        }
         /// Construct a URL from a base and a new path
-        url( const url &base, const filepath_string &new_path );
+        url(const url &base, const filepath_string &new_path);
         /// Construct a URL from a base and a new path
-        url( const url &base, const boost::filesystem::wpath &new_path );
-        url( const t_form, const string & );
-        explicit url( const host &,
+        url(const url &base, const boost::filesystem::wpath &new_path);
+        url(const t_form, const string &);
+        explicit url(const host &,
             const nullable< string > &username = null,
-            const nullable< string > &password = null
-        );
-        url( const ascii_printable_string &protocol, const host &,
+            const nullable< string > &password = null);
+        url(const ascii_printable_string &protocol, const host &,
             const nullable< string > &username = null,
-            const nullable< string > &password = null
-        );
+            const nullable< string > &password = null);
 
         accessors< ascii_printable_string > protocol;
         accessors< host > server;

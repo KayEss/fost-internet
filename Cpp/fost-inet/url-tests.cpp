@@ -261,6 +261,15 @@ FSL_TEST_FUNCTION(parse) {
     FSL_CHECK_EQ(fostlib::url("http://localhost/#some%20thing").fragment(), "some%20thing");
 }
 
+
+FSL_TEST_FUNCTION(url_join) {
+    using namespace f5::literals;
+    url base("http://localhost:45/some/path?query=yes#fragment");
+    FSL_CHECK_EQ(url(base, "/new/path"_l).as_string(), "http://localhost:45/new/path");
+    FSL_CHECK_EQ(url(base, "where"_l).as_string(), "http://localhost:45/some/where");
+}
+
+
 #define TEST_COERCION(u) \
     FSL_CHECK_EQ(coerce<string>(url(u)), u);
 FSL_TEST_FUNCTION(z_coercion) {
