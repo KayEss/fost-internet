@@ -1,8 +1,8 @@
-/*
-    Copyright 2007-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2007-2018 Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -139,16 +139,19 @@ namespace fostlib {
             using boost::spirit::qi::_1;
             using boost::spirit::qi::_2;
             using boost::spirit::qi::_3;
+            using boost::spirit::qi::_4;
             using boost::spirit::qi::_val;
 
             top = (hostpart
                     >> -(boost::spirit::qi::lit('/') >> -filespec)
-                    >> -(boost::spirit::qi::lit('?') >> -query))
+                    >> -(boost::spirit::qi::lit('?') >> -query)
+                    >> -(boost::spirit::qi::lit('#') >> -filespec))
                 [boost::phoenix::bind(
-                    [](auto &v, auto h, auto fs, auto qs) {
+                    [](auto &v, auto h, auto fs, auto qs, auto frag) {
                         v = url(h, fs.value_or(ascii_printable_string()));
                         if ( qs ) v.query(qs.value());
-                    }, _val, _1, _2, _3)];
+                        if ( frag ) v.fragment(frag.value());
+                    }, _val, _1, _2, _3, _4)];
         }
     };
 

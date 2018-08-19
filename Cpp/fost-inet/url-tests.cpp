@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2018 Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -256,6 +256,9 @@ FSL_TEST_FUNCTION(parse) {
         "metro/footer/footer_0.1.68.css&metro/footer/subfooter_0.0.11.css"));
     FSL_CHECK_NOTHROW(url("http://www.google.com/coop/cse/brand?"
         "form=cse-search-box%26%2312296%3B=th"));
+    FSL_CHECK(not fostlib::url("http://localhost/").fragment().has_value());
+    FSL_CHECK_EQ(fostlib::url("http://localhost/#").fragment(), "");
+    FSL_CHECK_EQ(fostlib::url("http://localhost/#some%20thing").fragment(), "some%20thing");
 }
 
 #define TEST_COERCION(u) \
