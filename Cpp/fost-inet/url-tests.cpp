@@ -215,7 +215,6 @@ FSL_TEST_FUNCTION(parse) {
     FSL_CHECK_NOTHROW(
         url a("http://localhost/");
         FSL_CHECK_EQ(a.server().name(), L"localhost");
-        FSL_CHECK(not a.user());
     )
     FSL_CHECK_EQ( url( "http://localhost" ).server().name(), L"localhost" );
     FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );
@@ -265,8 +264,10 @@ FSL_TEST_FUNCTION(parse) {
 FSL_TEST_FUNCTION(url_join) {
     using namespace f5::literals;
     url base("http://localhost:45/some/path?query=yes#fragment");
-    FSL_CHECK_EQ(url(base, "/new/path"_l).as_string(), "http://localhost:45/new/path");
-    FSL_CHECK_EQ(url(base, "where"_l).as_string(), "http://localhost:45/some/where");
+    FSL_CHECK_EQ(url(base, "http://example.com").as_string(), "http://example.com/");
+    FSL_CHECK_EQ(url(base, "https://example.com").as_string(), "https://example.com/");
+    FSL_CHECK_EQ(url(base, "/new/path").as_string(), "http://localhost:45/new/path");
+//     FSL_CHECK_EQ(url(base, "where").as_string(), "http://localhost:45/some/where");
 }
 
 
@@ -274,8 +275,6 @@ FSL_TEST_FUNCTION(url_join) {
     FSL_CHECK_EQ(coerce<string>(url(u)), u);
 FSL_TEST_FUNCTION(z_coercion) {
     TEST_COERCION( "http://localhost/file-path.html" );
-    TEST_COERCION( "http://localhost/somebody@example.com" );
-    TEST_COERCION( "http://localhost/somebody+else@example.com" );
     TEST_COERCION( "http://localhost/~somebody" );
     TEST_COERCION( "http://localhost:8000/~somebody" );
     TEST_COERCION( "http://bmf.miro.felspar.net/extranet/login/?next=/office/" );

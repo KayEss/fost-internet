@@ -85,18 +85,12 @@ namespace fostlib {
         /// Construct a URL from a base and a new path
         url(const url &base, const boost::filesystem::wpath &new_path);
         url(const t_form, const string &);
-        explicit url(const host &,
-            const nullable< string > &username = null,
-            const nullable< string > &password = null);
-        url(const ascii_printable_string &protocol, const host &,
-            const nullable< string > &username = null,
-            const nullable< string > &password = null);
+        explicit url(const host &);
+        url(const ascii_printable_string &protocol, const host &);
 
         accessors< ascii_printable_string > protocol;
         accessors< host > server;
         port_number port() const;
-        accessors< nullable< string > > user;
-        accessors< nullable< string > > password;
         const filepath_string &pathspec() const;
         void pathspec( const filepath_string &pathName );
         accessors< query_string, fostlib::lvalue > query;

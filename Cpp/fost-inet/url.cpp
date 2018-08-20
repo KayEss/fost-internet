@@ -257,16 +257,30 @@ fostlib::url::url(const url& url, f5::u8view u)
 : protocol(url.protocol()), server(url.server()), m_pathspec("/") {
     /// **TODO** We need to de-IRI this, i.e  escape unicode code points
     /// that aren't as per the ASCII sub-set used by URLs
-    if ( u.substr(0, 1) == "/" ) {
+    if ( u.substr(0, 7) == "http://" || u.substr(0, 8) == "https://" ) {
+        fostlib::url up{u};
+        protocol(up.protocol());
+        server(up.server());
+        m_pathspec = up.m_pathspec;
+        query(up.query());
+        fragment(up.fragment());
+    } else if ( u.substr(0, 3) == "://" ) {
+        throw fostlib::exceptions::not_implemented(__func__, u);
+    } else if ( u.substr(0, 1) == "/" ) {
         std::string outp;
         for ( auto *bp = u.data(); bp < u.data() + u.bytes(); ++bp ) {
-            if ( *bp < 0x21 || *bp > 0x7f ) {
+            if ( g_url_allowed.underlying().find(*bp) == std::string::npos ) {
                 outp += '%';
-            } else {
                 hex(*bp, outp);
+            } else {
+                outp += *bp;
             }
         }
-        pathspec(ascii_printable_string(std::move(outp)));
+        m_pathspec = ascii_printable_string(std::move(outp));
+        query(query_string{});
+        fragment(null);
+    } else if ( u.substr(0, 1) == "#" ) {
+        throw fostlib::exceptions::not_implemented(__func__, u);
     } else {
         throw fostlib::exceptions::not_implemented(__func__, u);
     }
@@ -308,9 +322,8 @@ fostlib::url::url( const t_form form, const string &str )
         fragment(coerce<ascii_printable_string>(anchor_parts.second.value()));
     }
 }
-fostlib::url::url(
-    const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw
-) : protocol( "http" ), server( h ), user( u ), password( pw ), m_pathspec( "/" ) {
+fostlib::url::url(const fostlib::host &h)
+: protocol("http"), server(h), m_pathspec("/") {
 }
 fostlib::url::url(const string &a_url)
 : protocol("http"), server(host(s_default_host.value())), m_pathspec("/") {
@@ -324,21 +337,13 @@ fostlib::url::url(const string &a_url)
         throw;
     }
 }
-fostlib::url::url( const ascii_printable_string &protocol, const host &h,
-    const nullable< string > &username,
-    const nullable< string > &password
-) : protocol( protocol ), server( h ),
-        user( username ), password( password ), m_pathspec( "/" ) {
+fostlib::url::url( const ascii_printable_string &protocol, const host &h)
+: protocol(protocol), server(h), m_pathspec("/") {
 }
 
+
 ascii_printable_string fostlib::url::as_string() const {
-    ascii_printable_string url( protocol() + ascii_printable_string( "://" ) );
-    if ( user() )
-        url += coerce< ascii_printable_string >(
-            user().value() + ":" + password().value_or( string() ) + "@"
-        );
-    else if ( password() )
-        url += coerce< ascii_printable_string >( ":" + password().value() + "@" );
+    ascii_printable_string url(protocol() + ascii_printable_string( "://" ));
     url += coerce< ascii_printable_string >(server().name());
     if ( server().service() && (
             ( protocol() == ascii_printable_string("http")
