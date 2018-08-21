@@ -263,10 +263,14 @@ FSL_TEST_FUNCTION(parse) {
 
 FSL_TEST_FUNCTION(url_join) {
     using namespace f5::literals;
-    url base("http://localhost:45/some/path?query=yes#fragment");
+    url base("https://loc:45/some/path?query=yes#fragment");
     FSL_CHECK_EQ(url(base, "http://example.com").as_string(), "http://example.com/");
     FSL_CHECK_EQ(url(base, "https://example.com").as_string(), "https://example.com/");
-    FSL_CHECK_EQ(url(base, "/new/path").as_string(), "http://localhost:45/new/path");
+    FSL_CHECK_EQ(url(base, "https://example.com:4567").as_string(),
+                 "https://example.com:4567/");
+    FSL_CHECK_EQ(url(base, "://example.com/foo").as_string(), "https://example.com/foo");
+    FSL_CHECK_EQ(url(base, "/new/path").as_string(), "https://loc:45/new/path");
+//     FSL_CHECK_EQ(url(base, "file.html").as_string(), "https://loc:45/some/file.html");
 //     FSL_CHECK_EQ(url(base, "where").as_string(), "http://localhost:45/some/where");
 }
 

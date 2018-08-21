@@ -14,6 +14,8 @@
 #include <fost/parse/host.hpp>
 
 #include <boost/fusion/include/std_pair.hpp>
+#include <boost/fusion/include/std_tuple.hpp>
+#include <boost/spirit/include/qi_optional.hpp>
 
 
 namespace fostlib {
@@ -160,6 +162,39 @@ namespace fostlib {
         url_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }
+
+    /**
+        ## Parsing IRIs
+
+        This parser is only intended to break a string up into parts that roughly
+        correspond to the important sections of a few well known IRI formats.
+        The expectation is that the result will be used to construct some other
+        IRI or URL structure from the output.
+
+        This version of the parser only targets URLs.
+     */
+    using iri_part = boost::optional<std::string>;
+    using iri_host_part = boost::optional<std::pair<iri_part, host>>;
+    using iri_tuple = std::tuple<iri_host_part, iri_part, iri_part, iri_part>;
+    template<typename Iterator>
+    struct iri_parts_parser : public boost::spirit::qi::grammar<Iterator, iri_tuple()> {
+        boost::spirit::qi::rule<Iterator, iri_tuple()> top;
+        host_parser<Iterator> host;
+        boost::spirit::qi::rule<Iterator, iri_part()> scheme, path, query, fragment;
+
+        iri_parts_parser()
+        : iri_parts_parser::base_type(top) {
+            namespace qi = boost::spirit::qi;
+
+            top = -(-scheme >> qi::omit[qi::string("://")] >> host)
+                >> -path >> -query >> -fragment;
+
+            scheme = +qi::char_("a-z0-9+");
+            path = *(qi::standard_wide::char_ - '?' - '#');
+            query = qi::char_('?') >> *(qi::standard_wide::char_ - '#');
+            fragment = qi::char_('#') >> *qi::standard_wide::char_;
+        }
+    };
 
 
 }

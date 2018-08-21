@@ -251,39 +251,61 @@ setting< string > fostlib::url::s_default_host(
 
 
 fostlib::url::url()
-: protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
+: protocol( "http" ), server(host(s_default_host.value())), m_pathspec("/") {
 }
 fostlib::url::url(const url& url, f5::u8view u)
-: protocol(url.protocol()), server(url.server()), m_pathspec("/") {
+: fostlib::url(url) {
     /// **TODO** We need to de-IRI this, i.e  escape unicode code points
     /// that aren't as per the ASCII sub-set used by URLs
-    if ( u.substr(0, 7) == "http://" || u.substr(0, 8) == "https://" ) {
-        fostlib::url up{u};
-        protocol(up.protocol());
-        server(up.server());
-        m_pathspec = up.m_pathspec;
-        query(up.query());
-        fragment(up.fragment());
-    } else if ( u.substr(0, 3) == "://" ) {
-        throw fostlib::exceptions::not_implemented(__func__, u);
-    } else if ( u.substr(0, 1) == "/" ) {
-        std::string outp;
-        for ( auto *bp = u.data(); bp < u.data() + u.bytes(); ++bp ) {
-            if ( g_url_allowed.underlying().find(*bp) == std::string::npos ) {
-                outp += '%';
-                hex(*bp, outp);
-            } else {
-                outp += *bp;
+    const auto *pos = u.data(), *end = u.data() + u.bytes();
+    const iri_parts_parser<decltype(pos)> iri_parser;
+    iri_tuple parts;
+    if ( boost::spirit::qi::parse(pos, end, iri_parser, parts) && pos == end ) {
+        if ( auto hs = std::get<0>(parts); hs ) {
+            if ( auto proto = std::get<0>(*hs); proto ) {
+                protocol(ascii_printable_string(*proto));
             }
+            server(std::get<1>(*hs));
+            m_pathspec = ascii_printable_string("/");
+            query(query_string{});
+            fragment(null);
         }
-        m_pathspec = ascii_printable_string(std::move(outp));
-        query(query_string{});
-        fragment(null);
-    } else if ( u.substr(0, 1) == "#" ) {
-        throw fostlib::exceptions::not_implemented(__func__, u);
+        if ( const auto fs = std::get<1>(parts); fs ) {
+            m_pathspec = ascii_printable_string(*fs);
+            query(query_string{});
+            fragment(null);
+        }
     } else {
-        throw fostlib::exceptions::not_implemented(__func__, u);
+        throw fostlib::exceptions::not_implemented(__func__,
+            "Didn't parse", f5::u8view(pos, (end - pos)));
     }
+//     if ( u.substr(0, 7) == "http://" || u.substr(0, 8) == "https://" ) {
+//         fostlib::url up{u};
+//         protocol(up.protocol());
+//         server(up.server());
+//         m_pathspec = up.m_pathspec;
+//         query(up.query());
+//         fragment(up.fragment());
+//     } else if ( u.substr(0, 3) == "://" ) {
+//         throw fostlib::exceptions::not_implemented(__func__, u);
+//     } else if ( u.substr(0, 1) == "/" ) {
+//         std::string outp;
+//         for ( auto *bp = u.data(); bp < u.data() + u.bytes(); ++bp ) {
+//             if ( g_url_allowed.underlying().find(*bp) == std::string::npos ) {
+//                 outp += '%';
+//                 hex(*bp, outp);
+//             } else {
+//                 outp += *bp;
+//             }
+//         }
+//         m_pathspec = ascii_printable_string(std::move(outp));
+//         query(query_string{});
+//         fragment(null);
+//     } else if ( u.substr(0, 1) == "#" ) {
+//         throw fostlib::exceptions::not_implemented(__func__, u);
+//     } else {
+//         throw fostlib::exceptions::not_implemented(__func__, u);
+//     }
 }
 fostlib::url::url( const url& url, const filepath_string &path )
 : protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
@@ -295,29 +317,27 @@ fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
 }
 fostlib::url::url( const t_form form, const string &str )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
-    std::pair<string, nullable<string>> anchor_parts(partition(str, "#"));
-    std::pair<string, nullable<string>> query_parts(
-        partition( anchor_parts.first, "?" )
-    );
+    const auto anchor_parts(partition(str, "#"));
+    const auto query_parts(partition(anchor_parts.first, "?"));
     switch ( form ) {
     case e_pathname:
-        m_pathspec = url::filepath_string( ascii_printable_string(
+        m_pathspec = url::filepath_string(ascii_printable_string(
             normalise_path(
-                coerce< url::filepath_string >( str ).underlying().underlying()
-            )
-        ) );
+                coerce< url::filepath_string >( str ).underlying().underlying())));
         break;
     case e_encoded:
-        for ( string::const_iterator it( str.begin() ); it != str.end(); ++it )
-            if ( *it < 0x20 || *it > 0x7f )
+        for ( string::const_iterator it( str.begin() ); it != str.end(); ++it ) {
+            if ( *it < 0x20 || *it > 0x7f ) {
                 throw fostlib::exceptions::parse_error(
-                    "The encoded url contains an invalid character (" + str + ")"
-                );
-        m_pathspec = coerce< url::filepath_string >( query_parts.first );
+                    "The encoded url contains an invalid character (" + str + ")");
+            }
+        }
+        m_pathspec = coerce<url::filepath_string>(query_parts.first);
         break;
     }
-    if ( query_parts.second )
+    if ( query_parts.second ) {
         query(query_string(coerce<ascii_printable_string>(query_parts.second.value())));
+    }
     if ( anchor_parts.second ) {
         fragment(coerce<ascii_printable_string>(anchor_parts.second.value()));
     }
