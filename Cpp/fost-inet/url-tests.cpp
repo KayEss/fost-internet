@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2018 Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -215,7 +215,6 @@ FSL_TEST_FUNCTION(parse) {
     FSL_CHECK_NOTHROW(
         url a("http://localhost/");
         FSL_CHECK_EQ(a.server().name(), L"localhost");
-        FSL_CHECK(not a.user());
     )
     FSL_CHECK_EQ( url( "http://localhost" ).server().name(), L"localhost" );
     FSL_CHECK_EQ( url( "http://localhost/file-path.html" ).pathspec(), url::filepath_string( "/file-path.html" ) );
@@ -256,14 +255,36 @@ FSL_TEST_FUNCTION(parse) {
         "metro/footer/footer_0.1.68.css&metro/footer/subfooter_0.0.11.css"));
     FSL_CHECK_NOTHROW(url("http://www.google.com/coop/cse/brand?"
         "form=cse-search-box%26%2312296%3B=th"));
+    FSL_CHECK(not fostlib::url("http://localhost/").fragment().has_value());
+    FSL_CHECK_EQ(fostlib::url("http://localhost/#").fragment(), "");
+    FSL_CHECK_EQ(fostlib::url("http://localhost/#some%20thing").fragment(), "some%20thing");
 }
+
+
+FSL_TEST_FUNCTION(url_join) {
+    using namespace f5::literals;
+    url base("https://loc:45/some/path?query=yes#fragment");
+    FSL_CHECK_EQ(url(base, "http://example.com").as_string(), "http://example.com/");
+    FSL_CHECK_EQ(url(base, "https://example.com").as_string(), "https://example.com/");
+    FSL_CHECK_EQ(url(base, "https://example.com:4567").as_string(),
+                 "https://example.com:4567/");
+    FSL_CHECK_EQ(url(base, "://example.com/foo").as_string(), "https://example.com/foo");
+    FSL_CHECK_EQ(url(base, "/new/path").as_string(), "https://loc:45/new/path");
+    FSL_CHECK_EQ(url(base, "file.html").as_string(), "https://loc:45/some/file.html");
+    FSL_CHECK_EQ(url(base, "./where").as_string(), "https://loc:45/some/where");
+    FSL_CHECK_EQ(url(base, "../where").as_string(), "https://loc:45/where");
+    FSL_CHECK_EQ(url(base, "../../where").as_string(), "https://loc:45/../where");
+    FSL_CHECK_EQ(url(base, ".").as_string(), "https://loc:45/some/");
+    FSL_CHECK_EQ(url(base, "?q").as_string(), "https://loc:45/some/path?q");
+    FSL_CHECK_EQ(url(base, "?q#bd").as_string(), "https://loc:45/some/path?q#bd");
+    FSL_CHECK_EQ(url(base, "#fr").as_string(), "https://loc:45/some/path?query=yes#fr");
+}
+
 
 #define TEST_COERCION(u) \
     FSL_CHECK_EQ(coerce<string>(url(u)), u);
 FSL_TEST_FUNCTION(z_coercion) {
     TEST_COERCION( "http://localhost/file-path.html" );
-    TEST_COERCION( "http://localhost/somebody@example.com" );
-    TEST_COERCION( "http://localhost/somebody+else@example.com" );
     TEST_COERCION( "http://localhost/~somebody" );
     TEST_COERCION( "http://localhost:8000/~somebody" );
     TEST_COERCION( "http://bmf.miro.felspar.net/extranet/login/?next=/office/" );
