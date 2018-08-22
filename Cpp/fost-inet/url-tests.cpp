@@ -275,6 +275,9 @@ FSL_TEST_FUNCTION(url_join) {
     FSL_CHECK_EQ(url(base, "../where").as_string(), "https://loc:45/where");
     FSL_CHECK_EQ(url(base, "../../where").as_string(), "https://loc:45/../where");
     FSL_CHECK_EQ(url(base, ".").as_string(), "https://loc:45/some/");
+    FSL_CHECK_EQ(url(base, "?q").as_string(), "https://loc:45/some/path?q");
+    FSL_CHECK_EQ(url(base, "?q#bd").as_string(), "https://loc:45/some/path?q#bd");
+    FSL_CHECK_EQ(url(base, "#fr").as_string(), "https://loc:45/some/path?query=yes#fr");
 }
 
 

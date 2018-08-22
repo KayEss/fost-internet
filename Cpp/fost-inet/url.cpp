@@ -279,37 +279,17 @@ fostlib::url::url(const url& url, f5::u8view u)
             query(query_string{});
             fragment(null);
         }
+        if ( const auto qs = std::get<2>(parts); qs ) {
+            query(ascii_printable_string(*qs));
+            fragment(null);
+        }
+        if ( const auto frag = std::get<3>(parts); frag ) {
+            fragment(ascii_printable_string(*frag));
+        }
     } else {
         throw fostlib::exceptions::not_implemented(__func__,
             "Didn't parse", f5::u8view(pos, (end - pos)));
     }
-//     if ( u.substr(0, 7) == "http://" || u.substr(0, 8) == "https://" ) {
-//         fostlib::url up{u};
-//         protocol(up.protocol());
-//         server(up.server());
-//         m_pathspec = up.m_pathspec;
-//         query(up.query());
-//         fragment(up.fragment());
-//     } else if ( u.substr(0, 3) == "://" ) {
-//         throw fostlib::exceptions::not_implemented(__func__, u);
-//     } else if ( u.substr(0, 1) == "/" ) {
-//         std::string outp;
-//         for ( auto *bp = u.data(); bp < u.data() + u.bytes(); ++bp ) {
-//             if ( g_url_allowed.underlying().find(*bp) == std::string::npos ) {
-//                 outp += '%';
-//                 hex(*bp, outp);
-//             } else {
-//                 outp += *bp;
-//             }
-//         }
-//         m_pathspec = ascii_printable_string(std::move(outp));
-//         query(query_string{});
-//         fragment(null);
-//     } else if ( u.substr(0, 1) == "#" ) {
-//         throw fostlib::exceptions::not_implemented(__func__, u);
-//     } else {
-//         throw fostlib::exceptions::not_implemented(__func__, u);
-//     }
 }
 fostlib::url::url( const url& url, const filepath_string &path )
 : protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {

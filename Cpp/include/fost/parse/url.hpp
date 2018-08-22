@@ -191,8 +191,8 @@ namespace fostlib {
 
             scheme = +qi::char_("a-z0-9+");
             path = *(qi::standard_wide::char_ - '?' - '#');
-            query = qi::char_('?') >> *(qi::standard_wide::char_ - '#');
-            fragment = qi::char_('#') >> *qi::standard_wide::char_;
+            query = qi::omit[qi::char_('?')] >> *(qi::standard_wide::char_ - '#');
+            fragment = qi::omit[qi::char_('#')] >> *qi::standard_wide::char_;
         }
     };
 
