@@ -1,8 +1,8 @@
-/*
-    Copyright 2009-2014, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2009-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -22,7 +22,7 @@ FSL_TEST_FUNCTION( request ) {
 
 
 FSL_TEST_FUNCTION( user_agent ) {
-    http::user_agent ua(url("http://www.kirit.com/"));
+    http::user_agent ua(url("https://kirit.com/"));
     http::user_agent::request r("HEAD", ua.base());
     ua(r);
 }
@@ -30,7 +30,7 @@ FSL_TEST_FUNCTION( user_agent ) {
 
 FSL_TEST_FUNCTION( mime_request ) {
     boost::shared_ptr< mime > request_body( new empty_mime );
-    http::user_agent ua(url("http://www.kirit.com/"));
+    http::user_agent ua(url("https://kirit.com/"));
     http::user_agent::request r("GET", ua.base(), request_body);
     FSL_CHECK_NOTHROW(ua(r));
 }

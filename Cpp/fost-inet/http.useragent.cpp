@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -17,13 +17,14 @@
 
 #include <fost/datetime>
 #include <fost/insert>
+#include <fost/log>
 
 
 using namespace fostlib;
 
 
-/*
-    fostlib::http::user_agent
+/**
+    ## fostlib::http::user_agent
 */
 
 
@@ -104,8 +105,8 @@ std::unique_ptr< http::user_agent::response >
 }
 
 
-/*
-    fostlib::http::user_agent::request
+/**
+    ## fostlib::http::user_agent::request
 */
 
 
@@ -127,8 +128,8 @@ fostlib::http::user_agent::request::request(
 }
 
 
-/*
-    fostlib::http::user_agent::response
+/**
+    ## fostlib::http::user_agent::response
 */
 
 
@@ -178,21 +179,26 @@ fostlib::http::user_agent::response::response(
 }
 
 
-boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body() {
+boost::shared_ptr<binary_body> fostlib::http::user_agent::response::body() {
     if ( !m_body ) {
         try {
+            auto logger = fostlib::log::debug(c_fost_inet);
+            logger("response", "status", status())
+                ("response", "headers", headers());
             nullable< int64_t > length;
             if ( method() == "HEAD" ) {
                 length = 0;
             } else if (m_headers.exists("Content-Length")) {
                 length = coerce< int64_t >(m_headers["Content-Length"].value());
             }
+            logger("length", length);
 
             if ( status() == 304 || (length && length.value() == 0) ) {
                 m_body = boost::shared_ptr< binary_body >(
                     new binary_body(m_headers));
             } else if ( not length ) {
                 if ( m_headers["Transfer-Encoding"].value() == "chunked" ) {
+                    logger("fetching", "transfer", "chunked");
                     std::vector< unsigned char > data;
                     while ( true ) {
                         std::string length, ignore_crlf;
@@ -214,8 +220,10 @@ boost::shared_ptr< const binary_body > fostlib::http::user_agent::response::body
                     m_body = boost::shared_ptr< binary_body >(
                         new binary_body(data, m_headers));
                 } else {
+                    logger("fetching", "transfer", "unknown size");
                     boost::asio::streambuf body_buffer;
                     *m_cnx >> body_buffer;
+                    logger("fetching", "data", "size", body_buffer.size());
                     std::vector< unsigned char > body_data;
                     body_data.reserve(body_buffer.size());
                     while ( body_buffer.size() ) {

@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2018, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -13,8 +13,11 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/insert>
 #include <fost/connection.hpp>
+
+#include <fost/insert>
+#include <fost/log>
+
 #include <boost/asio/ssl.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lexical_cast.hpp>
@@ -154,7 +157,11 @@ namespace {
             sock.get_io_service().run();
             if ( read_result.value().first &&
                     read_result.value().first != boost::asio::error::eof )
-                throw exceptions::read_timeout();
+            {
+                fostlib::log::debug(c_fost_inet)
+                    ("", "Got an error that will be treated as a normal TCP connection closure")
+                    ("error", read_result.value().first);
+            }
             error = read_result.value().first;
             received = read_result.value().second;
             return received;
@@ -390,16 +397,20 @@ void fostlib::network_connection::operator >> ( boost::asio::streambuf &b ) {
     while ( m_input_buffer->size() ) {
         b.sputc(m_input_buffer->sbumpc());
     }
+    /**
+     * There's lots of ways that the read below can finish, in all of them
+     * we're going to ignore the error and just return whatever data we
+     * do have to the application. It asked for all data available so it will
+     * get all data that's available. If it's not happy with it, well it will have
+     * to sort the mess out.
+     */
     boost::system::error_code error;
     read(*m_socket, m_ssl_data, b, boost::asio::transfer_all(), error);
-    if ( error != boost::asio::error::eof ) {
-        throw exceptions::read_error(error);
-    }
 }
 
 
-/*
-    fostlib::exceptions::socket_error
+/**
+    ## fostlib::exceptions::socket_error
 */
 
 
@@ -446,8 +457,8 @@ wliteral const fostlib::exceptions::socket_error::message()
 }
 
 
-/*
-    fostlib::exceptions::connect_failure
+/**
+    ## fostlib::exceptions::connect_failure
 */
 
 
@@ -466,8 +477,8 @@ fostlib::wliteral const fostlib::exceptions::connect_failure::message()
 }
 
 
-/*
-    fostlib::exceptions::read_timeout
+/**
+    ## fostlib::exceptions::read_timeout
 */
 
 
@@ -480,8 +491,8 @@ wliteral const fostlib::exceptions::read_timeout::message() const throw () {
 }
 
 
-/*
-    fostlib::exceptions::read_error
+/**
+    ## fostlib::exceptions::read_error
 */
 
 

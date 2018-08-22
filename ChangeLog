@@ -1,5 +1,14 @@
+2018-07-18  Kirit Saelensminde  <kirit@felspar.com>
+ Improve handling of weird ways TCP connections can be dropped and add more logging.
+
+2018-07-02  Kirit Saelensminde  <kirit@felspar.com>
+ The HTTP response body doesn't really need to be `const`.
+
 2018-06-11  Kirit Saelensminde  <kirit@felspar.com>
  Add `fost-hod` for handling packet oriented data over TCP.
+
+2018-04-05  Kirit Saelensminde  <kirit@felspar.com>
+ No longer make use of Boost regex library.
 
 2017-12-28  Kirit Saelensminde  <kirit@felspar.com>
  Make the `query_string` API a bit less pathalogical by caching the stringified version.
