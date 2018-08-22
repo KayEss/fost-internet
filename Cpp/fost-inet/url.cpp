@@ -271,7 +271,11 @@ fostlib::url::url(const url& url, f5::u8view u)
             fragment(null);
         }
         if ( const auto fs = std::get<1>(parts); fs ) {
-            m_pathspec = ascii_printable_string(*fs);
+            if ( fs->substr(0, 1) == "/" ) {
+                m_pathspec = ascii_printable_string(normalise_path(*fs));
+            } else {
+                pathspec(ascii_printable_string(*fs));
+            }
             query(query_string{});
             fragment(null);
         }

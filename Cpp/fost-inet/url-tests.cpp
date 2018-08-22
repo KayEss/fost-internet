@@ -270,8 +270,11 @@ FSL_TEST_FUNCTION(url_join) {
                  "https://example.com:4567/");
     FSL_CHECK_EQ(url(base, "://example.com/foo").as_string(), "https://example.com/foo");
     FSL_CHECK_EQ(url(base, "/new/path").as_string(), "https://loc:45/new/path");
-//     FSL_CHECK_EQ(url(base, "file.html").as_string(), "https://loc:45/some/file.html");
-//     FSL_CHECK_EQ(url(base, "where").as_string(), "http://localhost:45/some/where");
+    FSL_CHECK_EQ(url(base, "file.html").as_string(), "https://loc:45/some/file.html");
+    FSL_CHECK_EQ(url(base, "./where").as_string(), "https://loc:45/some/where");
+    FSL_CHECK_EQ(url(base, "../where").as_string(), "https://loc:45/where");
+    FSL_CHECK_EQ(url(base, "../../where").as_string(), "https://loc:45/../where");
+    FSL_CHECK_EQ(url(base, ".").as_string(), "https://loc:45/some/");
 }
 
 
