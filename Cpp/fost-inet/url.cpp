@@ -292,13 +292,18 @@ fostlib::url::url(const url& url, f5::u8view u)
     }
 }
 fostlib::url::url( const url& url, const filepath_string &path )
-: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
-    pathspec( path );
+: protocol(url.protocol()), server(url.server()), m_pathspec("/") {
+    pathspec(path);
 }
-fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
-: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
-    pathspec( coerce< filepath_string >( path ) );
+fostlib::url::url(const url& url, const boost::filesystem::wpath &path)
+: protocol(url.protocol()), server(url.server()), m_pathspec("/") {
+    pathspec(coerce<filepath_string>(path));
 }
+fostlib::url::url(const url& u, const jcursor &pointer)
+: url(u) {
+    fragment(pointer.as_json_pointer());
+}
+
 fostlib::url::url( const t_form form, const string &str )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
     const auto anchor_parts(partition(str, "#"));

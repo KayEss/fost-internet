@@ -1,3 +1,6 @@
+2018-08-31  Kirit Saelensminde  <kirit@felspar.com>
+ Allow setting a URL fragment from a jcursor.
+
 2018-08-22  Kirit Saelensminde  <kirit@felspar.com>
  Implement a better URL join that covers many more of the required cases.
 

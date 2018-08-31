@@ -84,6 +84,9 @@ namespace fostlib {
         url(const url &base, const filepath_string &new_path);
         /// Construct a URL from a base and a new path
         url(const url &base, const boost::filesystem::wpath &new_path);
+        /// Construct from a base with a JSON pointer value
+        url(const url &base, const jcursor &);
+        /// Other URL constructors
         url(const t_form, const string &);
         explicit url(const host &);
         url(const ascii_printable_string &protocol, const host &);
