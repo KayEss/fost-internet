@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2018, Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -14,6 +14,8 @@
 #include <fost/unicode>
 #include <fost/host.hpp>
 #include <fost/tagged-string.hpp>
+
+#include <string_view>
 
 
 namespace fostlib {
@@ -71,31 +73,31 @@ namespace fostlib {
         url();
         /// Construct a URL by parsing a string
         explicit url( const string & );
-        /// Construct a URL from a base and a character literal path
-        url( const url &base, const char *new_path );
+        /// Construct a URL from a base joining the new string (a potentially
+        /// relative IRI)
+        url(const url &base, f5::u8view);
+        template<std::size_t N>
+        url(const url &base, const char (&a)[N])
+        : url(base, f5::u8view(a)) {
+        }
         /// Construct a URL from a base and a new path
-        url( const url &base, const filepath_string &new_path );
+        url(const url &base, const filepath_string &new_path);
         /// Construct a URL from a base and a new path
-        url( const url &base, const boost::filesystem::wpath &new_path );
-        url( const t_form, const string & );
-        explicit url( const host &,
-            const nullable< string > &username = null,
-            const nullable< string > &password = null
-        );
-        url( const ascii_printable_string &protocol, const host &,
-            const nullable< string > &username = null,
-            const nullable< string > &password = null
-        );
+        url(const url &base, const boost::filesystem::wpath &new_path);
+        /// Construct from a base with a JSON pointer value
+        url(const url &base, const jcursor &);
+        /// Other URL constructors
+        url(const t_form, const string &);
+        explicit url(const host &);
+        url(const ascii_printable_string &protocol, const host &);
 
         accessors< ascii_printable_string > protocol;
         accessors< host > server;
         port_number port() const;
-        accessors< nullable< string > > user;
-        accessors< nullable< string > > password;
         const filepath_string &pathspec() const;
         void pathspec( const filepath_string &pathName );
-        accessors< nullable< ascii_printable_string > > anchor;
         accessors< query_string, fostlib::lvalue > query;
+        accessors<nullable<ascii_printable_string>> fragment;
 
         static setting< string > s_default_host;
 

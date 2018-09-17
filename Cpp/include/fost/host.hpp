@@ -1,16 +1,9 @@
-/*
-    Copyright 1999-2016, Felspar Co Ltd. http://fost.3.felspar.com/
+/**
+    Copyright 1999-2018, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
-
-
-#ifdef FOST_OS_LINUX
-    // Boost.ASIO causes unused return value warnings and we can't do other
-    // than completely remove them. TODO remove the asio.hpp from our headers
-    #pragma GCC diagnostic ignored "-Wunused-result"
-#endif
 
 
 #ifndef FOST_HOST_HPP
@@ -38,8 +31,7 @@ namespace fostlib {
         host( const string &host, port_number service );
         explicit host( uint32_t ipv4, const nullable< string > &service = null );
         host( uint8_t, uint8_t, uint8_t, uint8_t,
-            const nullable< string > &service = null
-        );
+            const nullable< string > &service = null);
 
         boost::asio::ip::address address() const;
         string name() const;
@@ -47,7 +39,6 @@ namespace fostlib {
 
     private:
         fostlib::string m_name;
-        mutable nullable< boost::asio::ip::address > m_address;
     };
 
 

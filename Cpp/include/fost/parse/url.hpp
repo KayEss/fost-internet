@@ -1,8 +1,8 @@
-/*
-    Copyright 2007-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2007-2018 Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -14,6 +14,8 @@
 #include <fost/parse/host.hpp>
 
 #include <boost/fusion/include/std_pair.hpp>
+#include <boost/fusion/include/std_tuple.hpp>
+#include <boost/spirit/include/qi_optional.hpp>
 
 
 namespace fostlib {
@@ -139,16 +141,19 @@ namespace fostlib {
             using boost::spirit::qi::_1;
             using boost::spirit::qi::_2;
             using boost::spirit::qi::_3;
+            using boost::spirit::qi::_4;
             using boost::spirit::qi::_val;
 
             top = (hostpart
                     >> -(boost::spirit::qi::lit('/') >> -filespec)
-                    >> -(boost::spirit::qi::lit('?') >> -query))
+                    >> -(boost::spirit::qi::lit('?') >> -query)
+                    >> -(boost::spirit::qi::lit('#') >> -filespec))
                 [boost::phoenix::bind(
-                    [](auto &v, auto h, auto fs, auto qs) {
-                        v = url(h, fs.value_or(ascii_printable_string()));
+                    [](auto &v, auto h, auto fs, auto qs, auto frag) {
+                        v = url(h, boost::filesystem::path(fs.value_or(ascii_printable_string()).underlying().c_str()));
                         if ( qs ) v.query(qs.value());
-                    }, _val, _1, _2, _3)];
+                        if ( frag ) v.fragment(frag.value());
+                    }, _val, _1, _2, _3, _4)];
         }
     };
 
@@ -157,6 +162,39 @@ namespace fostlib {
         url_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }
+
+    /**
+        ## Parsing IRIs
+
+        This parser is only intended to break a string up into parts that roughly
+        correspond to the important sections of a few well known IRI formats.
+        The expectation is that the result will be used to construct some other
+        IRI or URL structure from the output.
+
+        This version of the parser only targets URLs.
+     */
+    using iri_part = boost::optional<std::string>;
+    using iri_host_part = boost::optional<std::pair<iri_part, host>>;
+    using iri_tuple = std::tuple<iri_host_part, iri_part, iri_part, iri_part>;
+    template<typename Iterator>
+    struct iri_parts_parser : public boost::spirit::qi::grammar<Iterator, iri_tuple()> {
+        boost::spirit::qi::rule<Iterator, iri_tuple()> top;
+        host_parser<Iterator> host;
+        boost::spirit::qi::rule<Iterator, iri_part()> scheme, path, query, fragment;
+
+        iri_parts_parser()
+        : iri_parts_parser::base_type(top) {
+            namespace qi = boost::spirit::qi;
+
+            top = -(-scheme >> qi::omit[qi::string("://")] >> host)
+                >> -path >> -query >> -fragment;
+
+            scheme = +qi::char_("a-z0-9+");
+            path = *(qi::standard_wide::char_ - '?' - '#');
+            query = qi::omit[qi::char_('?')] >> *(qi::standard_wide::char_ - '#');
+            fragment = qi::omit[qi::char_('#')] >> *qi::standard_wide::char_;
+        }
+    };
 
 
 }

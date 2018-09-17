@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2018, Felspar Co Ltd. <https://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -22,9 +22,8 @@ using namespace fostlib;
 namespace {
 
 
-    const setting< bool > g_allow_relative(
-        "fost-base/Cpp/fost-inet/url.cpp", "url", "Allow relative urls", true, true
-    );
+    const setting<bool> g_allow_relative("fost-base/Cpp/fost-inet/url.cpp",
+        "url", "Allow relative urls", true, true);
 
 
     template< typename C >
@@ -38,10 +37,15 @@ namespace {
     S hex( utf8 ch ) {
         typename S::value_type num[ 4 ];
         num[ 0 ] = '%';
-        num[ 1 ] = digit< typename S::value_type >( ( ch & 0xf0 ) >> 4 );
-        num[ 2 ] = digit< typename S::value_type >( ch & 0x0f );
+        num[ 1 ] = digit< typename S::value_type >((ch & 0xf0) >> 4);
+        num[ 2 ] = digit< typename S::value_type >(ch & 0x0f);
         num[ 3 ] = 0;
         return S( num );
+    }
+    void hex(utf8 ch, std::string &into) {
+        into += '%';
+        into += digit<std::string::value_type>((ch & 0xf0) >> 4);
+        into += digit<std::string::value_type>(ch & 0x0f);
     }
 
     unsigned char undigit(char d) {
@@ -76,7 +80,7 @@ namespace {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 
-    /*
+    /**
      * Note that given a pathSpec ending in '/', this will leave it like that.
      * What actually happens is that a blank entry gets shoved into the list,
      * and this recreates it later.
@@ -135,8 +139,8 @@ namespace {
 }
 
 
-/*
-    fostlib::url::filepath_string_tag
+/**
+    ## fostlib::url::filepath_string_tag
 */
 
 
@@ -235,8 +239,8 @@ string fostlib::coercer<string, url::filepath_string>::coerce(const url::filepat
 }
 
 
-/*
-    fostlib::url
+/**
+    ## fostlib::url
 */
 
 
@@ -247,53 +251,88 @@ setting< string > fostlib::url::s_default_host(
 
 
 fostlib::url::url()
-: protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
+: protocol( "http" ), server(host(s_default_host.value())), m_pathspec("/") {
 }
-fostlib::url::url( const url& url, const char *path )
-: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
-    pathspec( ascii_printable_string(path) );
+fostlib::url::url(const url& url, f5::u8view u)
+: fostlib::url(url) {
+    /// **TODO** We need to de-IRI this, i.e  escape unicode code points
+    /// that aren't as per the ASCII sub-set used by URLs
+    const auto *pos = u.data(), *end = u.data() + u.bytes();
+    const iri_parts_parser<decltype(pos)> iri_parser;
+    iri_tuple parts;
+    if ( boost::spirit::qi::parse(pos, end, iri_parser, parts) && pos == end ) {
+        if ( auto hs = std::get<0>(parts); hs ) {
+            if ( auto proto = std::get<0>(*hs); proto ) {
+                protocol(ascii_printable_string(*proto));
+            }
+            server(std::get<1>(*hs));
+            m_pathspec = ascii_printable_string("/");
+            query(query_string{});
+            fragment(null);
+        }
+        if ( const auto fs = std::get<1>(parts); fs ) {
+            if ( fs->substr(0, 1) == "/" ) {
+                m_pathspec = ascii_printable_string(normalise_path(*fs));
+            } else {
+                pathspec(ascii_printable_string(*fs));
+            }
+            query(query_string{});
+            fragment(null);
+        }
+        if ( const auto qs = std::get<2>(parts); qs ) {
+            query(ascii_printable_string(*qs));
+            fragment(null);
+        }
+        if ( const auto frag = std::get<3>(parts); frag ) {
+            fragment(ascii_printable_string(*frag));
+        }
+    } else {
+        throw fostlib::exceptions::not_implemented(__func__,
+            "Didn't parse", f5::u8view(pos, (end - pos)));
+    }
 }
 fostlib::url::url( const url& url, const filepath_string &path )
-: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
-    pathspec( path );
+: protocol(url.protocol()), server(url.server()), m_pathspec("/") {
+    pathspec(path);
 }
-fostlib::url::url( const url& url, const boost::filesystem::wpath &path )
-: protocol( url.protocol() ), server( url.server() ), m_pathspec( "/" ) {
-    pathspec( coerce< filepath_string >( path ) );
+fostlib::url::url(const url& url, const boost::filesystem::wpath &path)
+: protocol(url.protocol()), server(url.server()), m_pathspec("/") {
+    pathspec(coerce<filepath_string>(path));
 }
+fostlib::url::url(const url& u, const jcursor &pointer)
+: url(u) {
+    fragment(pointer.as_json_pointer());
+}
+
 fostlib::url::url( const t_form form, const string &str )
 : protocol( "http" ), server( host(s_default_host.value()) ), m_pathspec( "/" ) {
-    std::pair< string, nullable< string > > anchor_parts( partition( str, "#" ) );
-    std::pair< string, nullable< string > > query_parts(
-        partition( anchor_parts.first, "?" )
-    );
+    const auto anchor_parts(partition(str, "#"));
+    const auto query_parts(partition(anchor_parts.first, "?"));
     switch ( form ) {
     case e_pathname:
-        m_pathspec = url::filepath_string( ascii_printable_string(
+        m_pathspec = url::filepath_string(ascii_printable_string(
             normalise_path(
-                coerce< url::filepath_string >( str ).underlying().underlying()
-            )
-        ) );
+                coerce< url::filepath_string >( str ).underlying().underlying())));
         break;
     case e_encoded:
-        for ( string::const_iterator it( str.begin() ); it != str.end(); ++it )
-            if ( *it < 0x20 || *it > 0x7f )
+        for ( string::const_iterator it( str.begin() ); it != str.end(); ++it ) {
+            if ( *it < 0x20 || *it > 0x7f ) {
                 throw fostlib::exceptions::parse_error(
-                    "The encoded url contains an invalid character (" + str + ")"
-                );
-        m_pathspec = coerce< url::filepath_string >( query_parts.first );
+                    "The encoded url contains an invalid character (" + str + ")");
+            }
+        }
+        m_pathspec = coerce<url::filepath_string>(query_parts.first);
         break;
     }
-    if ( query_parts.second )
-        query( query_string( coerce< ascii_printable_string >(
-            query_parts.second.value()
-        ) ) );
-    if ( anchor_parts.second )
-        anchor( coerce< ascii_printable_string >( anchor_parts.second.value() ) );
+    if ( query_parts.second ) {
+        query(query_string(coerce<ascii_printable_string>(query_parts.second.value())));
+    }
+    if ( anchor_parts.second ) {
+        fragment(coerce<ascii_printable_string>(anchor_parts.second.value()));
+    }
 }
-fostlib::url::url(
-    const fostlib::host &h, const nullable< string > &u, const nullable< string > &pw
-) : protocol( "http" ), server( h ), user( u ), password( pw ), m_pathspec( "/" ) {
+fostlib::url::url(const fostlib::host &h)
+: protocol("http"), server(h), m_pathspec("/") {
 }
 fostlib::url::url(const string &a_url)
 : protocol("http"), server(host(s_default_host.value())), m_pathspec("/") {
@@ -307,21 +346,13 @@ fostlib::url::url(const string &a_url)
         throw;
     }
 }
-fostlib::url::url( const ascii_printable_string &protocol, const host &h,
-    const nullable< string > &username,
-    const nullable< string > &password
-) : protocol( protocol ), server( h ),
-        user( username ), password( password ), m_pathspec( "/" ) {
+fostlib::url::url( const ascii_printable_string &protocol, const host &h)
+: protocol(protocol), server(h), m_pathspec("/") {
 }
 
+
 ascii_printable_string fostlib::url::as_string() const {
-    ascii_printable_string url( protocol() + ascii_printable_string( "://" ) );
-    if ( user() )
-        url += coerce< ascii_printable_string >(
-            user().value() + ":" + password().value_or( string() ) + "@"
-        );
-    else if ( password() )
-        url += coerce< ascii_printable_string >( ":" + password().value() + "@" );
+    ascii_printable_string url(protocol() + ascii_printable_string( "://" ));
     url += coerce< ascii_printable_string >(server().name());
     if ( server().service() && (
             ( protocol() == ascii_printable_string("http")
@@ -331,10 +362,10 @@ ascii_printable_string fostlib::url::as_string() const {
     ) ) url += coerce< ascii_printable_string >(":" + server().service().value());
     url += pathspec().underlying();
     url = concat( url, ascii_printable_string( "?" ), query().as_string() ).value();
-    return concat( url, ascii_printable_string( "#" ), anchor() ).value();
+    return concat(url, ascii_printable_string( "#" ), fragment()).value();
 }
 
-ascii_printable_string fostlib::url::as_string( const url &relative_from ) const {
+ascii_printable_string fostlib::url::as_string(const url &relative_from) const {
     if ( g_allow_relative.value() &&
         (
             protocol() == ascii_printable_string( "http" )
@@ -349,7 +380,7 @@ ascii_printable_string fostlib::url::as_string( const url &relative_from ) const
                 query().as_string()
             ),
             ascii_printable_string( "#" ),
-            anchor()
+            fragment()
         ).value();
     else
         return as_string();
@@ -400,8 +431,8 @@ void fostlib::url::pathspec( const url::filepath_string &a_pathName ) {
 }
 
 
-/*
-    fostlib::exceptions::relative_path_error
+/**
+    ## fostlib::exceptions::relative_path_error
 */
 
 
