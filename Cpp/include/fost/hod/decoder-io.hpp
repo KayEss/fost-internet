@@ -47,7 +47,7 @@ namespace fostlib { namespace hod {
 
     /// Insert an integer in network byte order
     template<typename I > inline
-    std::enable_if_t<std::is_integral<I>::value && (sizeof(I) > 1), out_packet &>
+    std::enable_if_t<std::is_integral_v<I> && (sizeof(I) > 1), out_packet &>
         operator << (out_packet &o, I i)
     {
         auto v = boost::endian::native_to_big(i);
