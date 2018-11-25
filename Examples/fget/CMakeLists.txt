@@ -1,6 +1,4 @@
-add_executable(fget EXCLUDE_FROM_ALL
-        fget.cpp
-    )
+add_executable(fget fget.cpp)
 target_link_libraries(fget fost-cli fost-inet)
-add_dependencies(examples fget)
+install(TARGETS fget EXPORT fget RUNTIME DESTINATION bin)
 

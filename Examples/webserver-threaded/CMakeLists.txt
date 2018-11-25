@@ -1,6 +1,4 @@
-add_executable(http-threaded EXCLUDE_FROM_ALL
-        threaded.cpp
-    )
+add_executable(http-threaded threaded.cpp)
 target_link_libraries(http-threaded fost-cli fost-inet)
-add_dependencies(examples http-threaded)
+install(TARGETS http-threaded EXPORT http-threaded RUNTIME DESTINATION bin)
 

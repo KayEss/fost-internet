@@ -1,6 +1,4 @@
-add_executable(http-simple EXCLUDE_FROM_ALL
-        simple.cpp
-    )
+add_executable(http-simple simple.cpp)
 target_link_libraries(http-simple fost-cli fost-inet)
-add_dependencies(examples http-simple)
+install(TARGETS http-simple EXPORT http-simple RUNTIME DESTINATION bin)
 
