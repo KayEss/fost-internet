@@ -10,8 +10,7 @@
 #include <fost/test>
 
 
-extern const fostlib::setting< fostlib::string > c_smtp_host;
-extern const fostlib::setting< fostlib::port_number > c_smtp_port;
-extern const fostlib::setting< fostlib::string > c_pop3_server;
-extern const fostlib::setting< fostlib::string > c_pop3_test_account;
-
+extern const fostlib::setting<fostlib::string> c_smtp_host;
+extern const fostlib::setting<fostlib::port_number> c_smtp_port;
+extern const fostlib::setting<fostlib::string> c_pop3_server;
+extern const fostlib::setting<fostlib::string> c_pop3_test_account;

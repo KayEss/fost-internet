@@ -13,16 +13,17 @@
 #include <fost/hod/hod.hpp>
 
 
-namespace fostlib { namespace hod {
+namespace fostlib {
+    namespace hod {
 
 
-    /// A set of counters that are used for protocols and versions etc.
-    struct counters {
-        counters(const fostlib::module &base);
+        /// A set of counters that are used for protocols and versions etc.
+        struct counters {
+            counters(const fostlib::module &base);
 
-        fostlib::performance cnx_created;
-    };
+            fostlib::performance cnx_created;
+        };
 
 
-}}
-
+    }
+}

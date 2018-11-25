@@ -25,17 +25,23 @@ using namespace fostlib;
 */
 
 
-void fostlib::rfc822_address_tag::do_encode( fostlib::nliteral from, ascii_printable_string &into ) {
-    throw exceptions::not_implemented("fostlib::rfc822_address_tag::do_encode( fostlib::nliteral from, ascii_string &into )");
+void fostlib::rfc822_address_tag::do_encode(
+        fostlib::nliteral from, ascii_printable_string &into) {
+    throw exceptions::not_implemented(
+            "fostlib::rfc822_address_tag::do_encode( fostlib::nliteral from, "
+            "ascii_string &into )");
 }
-void fostlib::rfc822_address_tag::do_encode( const ascii_printable_string &from, ascii_printable_string &into ) {
-    throw exceptions::not_implemented("fostlib::rfc822_address_tag::do_encode( const ascii_string &from, ascii_string &into )");
+void fostlib::rfc822_address_tag::do_encode(
+        const ascii_printable_string &from, ascii_printable_string &into) {
+    throw exceptions::not_implemented(
+            "fostlib::rfc822_address_tag::do_encode( const ascii_string &from, "
+            "ascii_string &into )");
 }
-void fostlib::rfc822_address_tag::check_encoded( const ascii_printable_string &s ) {
-    if ( s.empty() )
-        throw exceptions::null( L"Email address is empty" );
-    if ( s.underlying().find( '@' ) == string::npos )
-        throw exceptions::parse_error( L"Email address doesn't contain @ symbol", coerce< string >(s) );
+void fostlib::rfc822_address_tag::check_encoded(const ascii_printable_string &s) {
+    if (s.empty()) throw exceptions::null(L"Email address is empty");
+    if (s.underlying().find('@') == string::npos)
+        throw exceptions::parse_error(
+                L"Email address doesn't contain @ symbol", coerce<string>(s));
 }
 
 
@@ -44,37 +50,41 @@ void fostlib::rfc822_address_tag::check_encoded( const ascii_printable_string &s
 */
 
 
-fostlib::email_address::email_address() {
-}
+fostlib::email_address::email_address() {}
 
-fostlib::email_address::email_address( const rfc822_address &address, const nullable<string> &name )
-: email( address ), name( name ) {
-}
+fostlib::email_address::email_address(
+        const rfc822_address &address, const nullable<string> &name)
+: email(address), name(name) {}
 
-fostlib::email_address::email_address(const ascii_printable_string &address, const nullable< string > &name)
-: email(rfc822_address(address)),
-    name(name) {
-}
+fostlib::email_address::email_address(
+        const ascii_printable_string &address, const nullable<string> &name)
+: email(rfc822_address(address)), name(name) {}
 
 
-string fostlib::coercer< string, email_address >::coerce( const email_address &e ) {
-    if ( not e.name() )
-        return L"<" + fostlib::coerce< string >( e.email().underlying() ) + ">";
+string fostlib::coercer<string, email_address>::coerce(const email_address &e) {
+    if (not e.name())
+        return L"<" + fostlib::coerce<string>(e.email().underlying()) + ">";
     else
-        return e.name().value() + L" <" + fostlib::coerce< string >( e.email().underlying() ) + L">";
+        return e.name().value() + L" <"
+                + fostlib::coerce<string>(e.email().underlying()) + L">";
 }
-email_address fostlib::coercer< email_address, string >::coerce(const string &s) {
+email_address fostlib::coercer<email_address, string>::coerce(const string &s) {
     std::pair<boost::optional<std::string>, std::string> result;
     smtp_address_parser<string::const_iterator> rule;
     auto pos = s.begin();
-    if ( boost::spirit::qi::parse(pos, s.end(), rule, result) && pos == s.end() ) {
-        if ( not result.first )
-            return rfc822_address(fostlib::coerce<ascii_printable_string>(result.second));
+    if (boost::spirit::qi::parse(pos, s.end(), rule, result)
+        && pos == s.end()) {
+        if (not result.first)
+            return rfc822_address(
+                    fostlib::coerce<ascii_printable_string>(result.second));
         else
-            return email_address(rfc822_address(fostlib::coerce<ascii_printable_string>(result.second)),
-                trim(string(result.first.value())));
+            return email_address(
+                    rfc822_address(fostlib::coerce<ascii_printable_string>(
+                            result.second)),
+                    trim(string(result.first.value())));
     } else {
-        throw exceptions::parse_error("Could not parse email address", string(pos, s.end()));
+        throw exceptions::parse_error(
+                "Could not parse email address", string(pos, s.end()));
     }
 }
 
@@ -96,22 +106,25 @@ struct fostlib::smtp_client::implementation {
         can_send = true;
     }
     ~implementation() {
-        if ( can_send ) {
+        if (can_send) {
             cnx << "QUIT\r\n";
             check(221, L"QUIT");
         }
     }
 
-    void check( int code, const string &command ) {
-        utf8_string number = coerce< utf8_string >(
-            coerce< string >( code ));
+    void check(int code, const string &command) {
+        utf8_string number = coerce<utf8_string>(coerce<string>(code));
         utf8_string response;
         cnx >> response;
-        if ( response.underlying().substr( 0, number.underlying().length() ) != number.underlying() ) {
-            exceptions::not_implemented exception(L"SMTP response was not the one expected");
+        if (response.underlying().substr(0, number.underlying().length())
+            != number.underlying()) {
+            exceptions::not_implemented exception(
+                    L"SMTP response was not the one expected");
             insert(exception.data(), "code", "expected", code);
             insert(exception.data(), "code", "received",
-                response.underlying().substr(0, number.underlying().length()).c_str());
+                   response.underlying()
+                           .substr(0, number.underlying().length())
+                           .c_str());
             insert(exception.data(), "command", command);
             insert(exception.data(), "response", response);
             throw exception;
@@ -121,20 +134,17 @@ struct fostlib::smtp_client::implementation {
 
 
 fostlib::smtp_client::smtp_client(const host &server, const port_number p)
-: m_impl(new implementation(server, p)) {
-}
+: m_impl(new implementation(server, p)) {}
 
-fostlib::smtp_client::~smtp_client()
-try {
-    delete m_impl;
-} catch ( ... ) {
+fostlib::smtp_client::~smtp_client() try { delete m_impl; } catch (...) {
     absorb_exception();
 }
 
 
-void fostlib::smtp_client::send(const mime &email,
-    const rfc822_address &to, const rfc822_address &from
-) {
+void fostlib::smtp_client::send(
+        const mime &email,
+        const rfc822_address &to,
+        const rfc822_address &from) {
     m_impl->can_send = false;
 
     m_impl->cnx << "MAIL FROM:<" + from.underlying().underlying() + ">\r\n";
@@ -149,11 +159,10 @@ void fostlib::smtp_client::send(const mime &email,
     ss << "\r\n";
     m_impl->cnx << ss;
 
-    for ( mime::const_iterator d( email.begin() ); d != email.end(); ++d )
+    for (mime::const_iterator d(email.begin()); d != email.end(); ++d)
         m_impl->cnx << *d;
     m_impl->cnx << "\r\n.\r\n";
     m_impl->check(250, L"Data spooling");
 
     m_impl->can_send = true;
 }
-
