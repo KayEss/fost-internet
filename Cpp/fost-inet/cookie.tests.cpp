@@ -25,14 +25,15 @@ FSL_TEST_FUNCTION(empty) {
 
 FSL_TEST_FUNCTION(realistic) {
     const fostlib::string cv(
-        "_cv=XX.12314.23123; "
-        "logged_in=yes; "
-        "dotcom_user=UsrEx; "
-        "_ga=GA1.2.234234.43232; "
-        "tz=Asia%2FBangkok; "
-        "user_session=49lQUhQ1RHR8kB4G-%2FkiDIiNOCoKZtbV3; "
-        "__Host-user_session_same_site=oinw9IjFkBOXhXaU-wX6XgHoBSo%2BU5V3E; "
-        "_sess=P%2BpO%2BR%3D%3D-");
+            "_cv=XX.12314.23123; "
+            "logged_in=yes; "
+            "dotcom_user=UsrEx; "
+            "_ga=GA1.2.234234.43232; "
+            "tz=Asia%2FBangkok; "
+            "user_session=49lQUhQ1RHR8kB4G-%2FkiDIiNOCoKZtbV3; "
+            "__Host-user_session_same_site=oinw9IjFkBOXhXaU-wX6XgHoBSo%2BU5V3E;"
+            " "
+            "_sess=P%2BpO%2BR%3D%3D-");
     fostlib::mime::mime_headers h;
     h.parse("Cookie: " + cv);
     fostlib::headers_base::content cookie(h["Cookie"]);
@@ -49,8 +50,11 @@ FSL_TEST_FUNCTION(realistic) {
     FSL_CHECK_EQ(cookie.subvalue("dotcom_user").value(), "UsrEx");
     FSL_CHECK_EQ(cookie.subvalue("_ga").value(), "GA1.2.234234.43232");
     FSL_CHECK_EQ(cookie.subvalue("tz").value(), "Asia/Bangkok");
-    FSL_CHECK_EQ(cookie.subvalue("user_session").value(), "49lQUhQ1RHR8kB4G-/kiDIiNOCoKZtbV3");
-    FSL_CHECK_EQ(cookie.subvalue("__Host-user_session_same_site").value(), "oinw9IjFkBOXhXaU-wX6XgHoBSo+U5V3E");
+    FSL_CHECK_EQ(
+            cookie.subvalue("user_session").value(),
+            "49lQUhQ1RHR8kB4G-/kiDIiNOCoKZtbV3");
+    FSL_CHECK_EQ(
+            cookie.subvalue("__Host-user_session_same_site").value(),
+            "oinw9IjFkBOXhXaU-wX6XgHoBSo+U5V3E");
     FSL_CHECK_EQ(cookie.subvalue("_sess").value(), "P+pO+R==-");
 }
-

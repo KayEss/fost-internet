@@ -10,6 +10,4 @@
 
 
 fostlib::hod::counters::counters(const fostlib::module &base)
-: cnx_created(base, "created") {
-}
-
+: cnx_created(base, "created") {}

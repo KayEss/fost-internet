@@ -28,40 +28,44 @@ namespace fostlib {
         std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
         std::unique_ptr<boost::asio::streambuf> m_input_buffer;
         ssl *m_ssl_data;
-    public:
+
+      public:
         /// Used for server end points where accept returns a socket
         network_connection(
-            std::unique_ptr<boost::asio::io_service> io_service,
-            std::unique_ptr<boost::asio::ip::tcp::socket> socket);
+                std::unique_ptr<boost::asio::io_service> io_service,
+                std::unique_ptr<boost::asio::ip::tcp::socket> socket);
         /// Used for clients where a host is connected to on a given port number
         network_connection(const host &h, nullable<port_number> p = null);
         /// Move constructor
-        network_connection(network_connection&&);
+        network_connection(network_connection &&);
 
         /// Non-virtual destructor so sub-classing is not allowed
         ~network_connection();
 
-        /// Start SSL on this connection. After a successful handshake all traffic will be over SSL.
+        /// Start SSL on this connection. After a successful handshake all
+        /// traffic will be over SSL.
         void start_ssl();
 
         /// Return the remote end
         host remote_end();
 
         /// Immediately push data over the network
-        network_connection &operator << ( const const_memory_block & );
+        network_connection &operator<<(const const_memory_block &);
         /// Immediately push data over the network
-        network_connection &operator << ( const utf8_string &s );
+        network_connection &operator<<(const utf8_string &s);
         /// Immediately push data over the network
-        network_connection &operator << ( const std::stringstream &ss );
+        network_connection &operator<<(const std::stringstream &ss);
 
         /// Read up until the next \r\n which is discarded
-        network_connection &operator >> ( std::string &s );
-        /// Read up until the next \r\n which is discarded and decode the line as UTF-8
-        network_connection &operator >> ( utf8_string &s );
-        /// Read into the vector. The vector size must match the number of bytes expected.
-        network_connection &operator >> ( std::vector< utf8 > &v );
+        network_connection &operator>>(std::string &s);
+        /// Read up until the next \r\n which is discarded and decode the line
+        /// as UTF-8
+        network_connection &operator>>(utf8_string &s);
+        /// Read into the vector. The vector size must match the number of bytes
+        /// expected.
+        network_connection &operator>>(std::vector<utf8> &v);
         /// Read everything until the connection is dropped by the server
-        void operator >> ( boost::asio::streambuf &b );
+        void operator>>(boost::asio::streambuf &b);
     };
 
 
@@ -70,65 +74,69 @@ namespace fostlib {
 
         /// The base exception type for all kinds of transmission errors
         class FOST_INET_DECLSPEC socket_error : public exception {
-            public:
-                /// Construct a socket error
-                socket_error() throw();
-                /// Throw an exception providing a message
-                socket_error(const string &message) throw ();
-                /// Construct a connect failure exception
-                socket_error(boost::system::error_code) throw();
-                /// Throw providing a message and extra information
-                socket_error(const string &message, const string &extra) throw ();
-                /// Allow us to throw from a Boost error code with a message
-                socket_error(boost::system::error_code error,
-                    const string &message) throw ();
+          public:
+            /// Construct a socket error
+            socket_error() throw();
+            /// Throw an exception providing a message
+            socket_error(const string &message) throw();
+            /// Construct a connect failure exception
+            socket_error(boost::system::error_code) throw();
+            /// Throw providing a message and extra information
+            socket_error(const string &message, const string &extra) throw();
+            /// Allow us to throw from a Boost error code with a message
+            socket_error(
+                    boost::system::error_code error,
+                    const string &message) throw();
 
-                /// Destruct the exception without throwing
-                ~socket_error() throw ();
+            /// Destruct the exception without throwing
+            ~socket_error() throw();
 
-                /// Allow access to the error code that caused the exception
-                accessors< const nullable< boost::system::error_code > > error;
+            /// Allow access to the error code that caused the exception
+            accessors<const nullable<boost::system::error_code>> error;
 
-            protected:
-                /// The error message title
-                const wchar_t * const message() const throw ();
+          protected:
+            /// The error message title
+            const wchar_t *const message() const throw();
         };
 
 
         /// Thrown for errors during connection to a socket
         class FOST_INET_DECLSPEC connect_failure : public socket_error {
-            public:
-                /// Construct a connect failure exception
-                connect_failure(boost::system::error_code,
-                    const host &, port_number) throw();
+          public:
+            /// Construct a connect failure exception
+            connect_failure(
+                    boost::system::error_code,
+                    const host &,
+                    port_number) throw();
 
-            protected:
-                /// The error message title
-                const wchar_t * const message() const throw ();
+          protected:
+            /// The error message title
+            const wchar_t *const message() const throw();
         };
 
-        /// Thrown for errors during connection to a socket or reading from a socket
+        /// Thrown for errors during connection to a socket or reading from a
+        /// socket
         class FOST_INET_DECLSPEC read_timeout : public socket_error {
-            public:
-                /// Construct a connect failure exception
-                read_timeout() throw();
+          public:
+            /// Construct a connect failure exception
+            read_timeout() throw();
 
-            protected:
-                /// The error message title
-                const wchar_t * const message() const throw ();
+          protected:
+            /// The error message title
+            const wchar_t *const message() const throw();
         };
 
         /// Thrown for general errors when reading from a socket
         class FOST_INET_DECLSPEC read_error : public socket_error {
-            public:
-                /// Construct a connect failure exception
-                read_error() throw();
-                /// Construct a read error from an error code
-                read_error(boost::system::error_code) throw ();
+          public:
+            /// Construct a connect failure exception
+            read_error() throw();
+            /// Construct a read error from an error code
+            read_error(boost::system::error_code) throw();
 
-            protected:
-                /// The error message title
-                const wchar_t * const message() const throw ();
+          protected:
+            /// The error message title
+            const wchar_t *const message() const throw();
         };
 
 

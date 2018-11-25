@@ -10,4 +10,3 @@
 
 
 const fostlib::module fostlib::c_fost_inet(c_fost, "inet");
-

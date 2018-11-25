@@ -26,14 +26,14 @@ namespace fostlib {
 
 
         template<typename Iterator>
-        struct client_first_line : boost::spirit::qi::grammar<Iterator, response_status()> {
+        struct client_first_line :
+        boost::spirit::qi::grammar<Iterator, response_status()> {
             boost::spirit::qi::rule<Iterator, response_status()> top;
             boost::spirit::qi::rule<Iterator, std::string()> version, message;
             boost::spirit::qi::rule<Iterator, int> status;
             boost::spirit::qi::rule<Iterator, void()> space;
 
-            client_first_line()
-            : client_first_line::base_type(top) {
+            client_first_line() : client_first_line::base_type(top) {
                 using boost::spirit::qi::_1;
                 using boost::spirit::qi::_2;
                 using boost::spirit::qi::_3;
@@ -41,14 +41,16 @@ namespace fostlib {
 
                 space = +boost::spirit::qi::lit(' ');
 
-                top = (version >> space >> status >> space >> message)
-                    [boost::phoenix::bind([](auto &l, auto &v, auto &s, auto &m) {
+                top = (version >> space >> status >> space
+                       >> message)[boost::phoenix::bind(
+                        [](auto &l, auto &v, auto &s, auto &m) {
                             l = {v, s, m};
-                        }, _val, _1, _2, _3)];
+                        },
+                        _val, _1, _2, _3)];
 
                 version = boost::spirit::qi::string("HTTP/0.9")
-                    | boost::spirit::qi::string("HTTP/1.0")
-                    | boost::spirit::qi::string("HTTP/1.1");
+                        | boost::spirit::qi::string("HTTP/1.0")
+                        | boost::spirit::qi::string("HTTP/1.1");
                 status = boost::spirit::qi::uint_parser<int, 10, 3, 3>();
                 message = +boost::spirit::qi::char_;
             }
@@ -59,4 +61,3 @@ namespace fostlib {
 
 
 }
-

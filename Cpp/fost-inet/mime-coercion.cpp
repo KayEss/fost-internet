@@ -10,14 +10,16 @@
 #include <fost/mime.hpp>
 
 
-fostlib::utf8_string fostlib::coercer<
-    fostlib::utf8_string, fostlib::mime
->::coerce( const fostlib::mime &input ) {
+fostlib::utf8_string
+        fostlib::coercer<fostlib::utf8_string, fostlib::mime>::coerce(
+                const fostlib::mime &input) {
     fostlib::utf8_string string;
-    for ( fostlib::mime::const_iterator i(input.begin()); i != input.end(); ++i ) {
+    for (fostlib::mime::const_iterator i(input.begin()); i != input.end();
+         ++i) {
         fostlib::utf8_string data(fostlib::coerce<fostlib::utf8_string>(*i));
-        if ( data.underlying().length() < bytes(*i) )
-            throw fostlib::exceptions::not_implemented("Not all data converted");
+        if (data.underlying().length() < bytes(*i))
+            throw fostlib::exceptions::not_implemented(
+                    "Not all data converted");
         string += data;
     }
     return string;

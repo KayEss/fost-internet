@@ -16,7 +16,6 @@
 #include <fost/mime.hpp>
 
 
-
 namespace fostlib {
 
 
@@ -25,11 +24,10 @@ namespace fostlib {
 
         /// Iterates through all of the emails in a POP3 mailbox
         FOST_INET_DECLSPEC void iterate_mailbox(
-            const host &host,
-            std::function<bool(const text_body &)> destroy_message,
-            const string &username,
-            const string &password
-        );
+                const host &host,
+                std::function<bool(const text_body &)> destroy_message,
+                const string &username,
+                const string &password);
 
 
     }

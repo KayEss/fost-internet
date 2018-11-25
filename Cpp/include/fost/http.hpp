@@ -19,10 +19,7 @@
 namespace fostlib {
 
 
-    namespace http {
-
-
-    }
+    namespace http {}
 
 
 }

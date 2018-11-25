@@ -13,17 +13,17 @@
 using namespace fostlib;
 
 
-FSL_TEST_SUITE( smtp );
+FSL_TEST_SUITE(smtp);
 
 
-FSL_TEST_FUNCTION( email_address_without_name ) {
+FSL_TEST_FUNCTION(email_address_without_name) {
     fostlib::json e1("test@example.com");
     fostlib::email_address a1 = fostlib::coerce<fostlib::email_address>(e1);
     FSL_CHECK(not a1.name());
     FSL_CHECK_EQ(a1.email(), "test@example.com");
 }
 
-FSL_TEST_FUNCTION( email_address_with_name ) {
+FSL_TEST_FUNCTION(email_address_with_name) {
     fostlib::json e1("Test account<test@example.com>");
     fostlib::email_address a1 = fostlib::coerce<fostlib::email_address>(e1);
     FSL_CHECK(a1.name());

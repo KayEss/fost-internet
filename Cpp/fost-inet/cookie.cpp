@@ -13,19 +13,19 @@
 
 namespace {
     const auto unescape = [](const auto &s) {
-            const fostlib::url::filepath_string fs(s.c_str());
-            return fostlib::coerce<fostlib::string>(fs);
-        };
+        const fostlib::url::filepath_string fs(s.c_str());
+        return fostlib::coerce<fostlib::string>(fs);
+    };
 }
 
 
 void fostlib::parse_cookies(fostlib::headers_base::content &cookie) {
     auto cookies = fostlib::split(cookie.value(), "; ");
-    for ( const auto &cv : cookies ) {
+    for (const auto &cv : cookies) {
         const auto parts = partition(cv, "=");
-        cookie.subvalue(unescape(parts.first),
-            unescape(parts.second.value_or(fostlib::string())));
+        cookie.subvalue(
+                unescape(parts.first),
+                unescape(parts.second.value_or(fostlib::string())));
     }
     cookie.value(fostlib::string());
 }
-

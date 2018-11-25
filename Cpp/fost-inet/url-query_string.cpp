@@ -19,31 +19,29 @@ using namespace fostlib;
 namespace {
 
 
-    template< typename C >
-    C digit( utf8 dig ) {
-        if ( dig < 0x0a ) return dig + '0';
-        if ( dig < 0x10 ) return dig + 'A' - 0x0a;
-        throw fostlib::exceptions::out_of_range< int >(
-            L"Number to convert to hex digit is too big", 0, 0x10, dig
-        );
+    template<typename C>
+    C digit(utf8 dig) {
+        if (dig < 0x0a) return dig + '0';
+        if (dig < 0x10) return dig + 'A' - 0x0a;
+        throw fostlib::exceptions::out_of_range<int>(
+                L"Number to convert to hex digit is too big", 0, 0x10, dig);
     }
-    template< typename S >
-    S hex( utf8 ch ) {
-        typename S::value_type num[ 4 ];
-        num[ 0 ] = '%';
-        num[ 1 ] = digit< typename S::value_type >( ( ch & 0xf0 ) >> 4 );
-        num[ 2 ] = digit< typename S::value_type >( ch & 0x0f );
-        num[ 3 ] = 0;
-        return S( num );
+    template<typename S>
+    S hex(utf8 ch) {
+        typename S::value_type num[4];
+        num[0] = '%';
+        num[1] = digit<typename S::value_type>((ch & 0xf0) >> 4);
+        num[2] = digit<typename S::value_type>(ch & 0x0f);
+        num[3] = 0;
+        return S(num);
     }
 
 
     const fostlib::utf8_string g_query_string_allowed(
-        ".,:/\\_-*~="
-        "0123456789"
-        "abcdefghijklmnopqrstuvwxyz"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    );
+            ".,:/\\_-*~="
+            "0123456789"
+            "abcdefghijklmnopqrstuvwxyz"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
 
 }
@@ -54,24 +52,21 @@ namespace {
 */
 
 
-fostlib::url::query_string::query_string() {
-}
-fostlib::url::query_string::query_string( const ascii_printable_string &q )
-: m_string( q ) {
-}
+fostlib::url::query_string::query_string() {}
+fostlib::url::query_string::query_string(const ascii_printable_string &q)
+: m_string(q) {}
 
 
 void fostlib::url::query_string::append(
-    const string &name, const nullable< string > &value
-) {
+        const string &name, const nullable<string> &value) {
     m_string = null;
-    m_query[name].push_back( value );
+    m_query[name].push_back(value);
 }
 
 
-void fostlib::url::query_string::remove( const string &name ) {
-    const auto p(m_query.find( name ));
-    if ( p != m_query.end() ) {
+void fostlib::url::query_string::remove(const string &name) {
+    const auto p(m_query.find(name));
+    if (p != m_query.end()) {
         m_string = null;
         m_query.erase(p);
     }
@@ -80,7 +75,7 @@ void fostlib::url::query_string::remove( const string &name ) {
 
 std::size_t fostlib::url::query_string::has_key(const string &key) const {
     const auto p(m_query.find(key));
-    if ( p == m_query.end() ) {
+    if (p == m_query.end()) {
         return 0;
     } else {
         return p->second.size();
@@ -88,9 +83,9 @@ std::size_t fostlib::url::query_string::has_key(const string &key) const {
 }
 
 
-nullable< string > fostlib::url::query_string::operator [] (const string &k) const {
-    const auto  p(m_query.find(k));
-    if ( p == m_query.end() || p->second.size() == 0u ) {
+nullable<string> fostlib::url::query_string::operator[](const string &k) const {
+    const auto p(m_query.find(k));
+    if (p == m_query.end() || p->second.size() == 0u) {
         return null;
     } else {
         return *p->second.begin();
@@ -101,11 +96,10 @@ nullable< string > fostlib::url::query_string::operator [] (const string &k) con
 namespace {
     const std::vector<nullable<string>> c_empty_list;
 }
-const std::vector<nullable<string>> &fostlib::url::query_string::at(
-    const string &key) const
-{
+const std::vector<nullable<string>> &
+        fostlib::url::query_string::at(const string &key) const {
     const auto p(m_query.find(key));
-    if ( p == m_query.end() ) {
+    if (p == m_query.end()) {
         return c_empty_list;
     } else {
         return p->second;
@@ -114,38 +108,40 @@ const std::vector<nullable<string>> &fostlib::url::query_string::at(
 
 
 namespace {
-    ascii_printable_string query_string_encode( const string &s ) {
-        ascii_printable_string r; utf8_string i( coerce< utf8_string >( s ) );
-        for ( utf8_string::const_iterator c( i.begin() ); c != i.end(); ++c )
-            if ( g_query_string_allowed.underlying().find( *c ) == std::string::npos )
-                r += hex< ascii_printable_string >( *c );
+    ascii_printable_string query_string_encode(const string &s) {
+        ascii_printable_string r;
+        utf8_string i(coerce<utf8_string>(s));
+        for (utf8_string::const_iterator c(i.begin()); c != i.end(); ++c)
+            if (g_query_string_allowed.underlying().find(*c)
+                == std::string::npos)
+                r += hex<ascii_printable_string>(*c);
             else
                 r += *c;
         return r;
     }
-    nullable< ascii_printable_string > query_string_encode(
-        const nullable< string > &s
-    ) {
-        if ( not s ) {
+    nullable<ascii_printable_string>
+            query_string_encode(const nullable<string> &s) {
+        if (not s) {
             return null;
         } else {
-            return query_string_encode( s.value() );
+            return query_string_encode(s.value());
         }
     }
 }
-const nullable<ascii_printable_string> &fostlib::url::query_string::as_string() const {
-    if ( not m_string ) {
-        nullable< ascii_printable_string > r;
-        for ( auto it(m_query.begin()); it != m_query.end(); ++it ) {
-            for ( auto v( it->second.begin() ); v != it->second.end(); ++v ) {
-                r = concat(
-                    r, ascii_printable_string( "&" ), concat(
-                        query_string_encode( it->first ) + ascii_printable_string( "=" ),
-                        query_string_encode( *v )));
+const nullable<ascii_printable_string> &
+        fostlib::url::query_string::as_string() const {
+    if (not m_string) {
+        nullable<ascii_printable_string> r;
+        for (auto it(m_query.begin()); it != m_query.end(); ++it) {
+            for (auto v(it->second.begin()); v != it->second.end(); ++v) {
+                r =
+                        concat(r, ascii_printable_string("&"),
+                               concat(query_string_encode(it->first)
+                                              + ascii_printable_string("="),
+                                      query_string_encode(*v)));
             }
         }
         m_string = r;
     }
     return m_string;
 }
-
