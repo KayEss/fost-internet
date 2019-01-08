@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2018, Felspar Co Ltd. <https://support.felspar.com/>
+    Copyright 1999-2019, Felspar Co Ltd. <https://support.felspar.com/>
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -63,7 +63,7 @@ namespace {
                 "Hex digit is not valid", '0', 'F', d);
     }
     unsigned char unhex(char c1, char c2) {
-        return (undigit(c1) << 4) + undigit(c2);
+        return (undigit(c1) << 4u) + undigit(c2);
     }
 
     const fostlib::utf8_string g_url_allowed(
@@ -227,17 +227,17 @@ url::filepath_string
 
 string fostlib::coercer<string, url::filepath_string>::coerce(
         const url::filepath_string &s) {
-    utf8_string narrowed;
-    for (ascii_printable_string::const_iterator p(s.underlying().begin());
-         p != s.underlying().end(); ++p) {
+    std::string narrowed;
+    for (auto p(s.begin()); p != s.end(); ++p) {
         if (*p == '%') {
             char d1 = *++p;
             char d2 = *++p;
             narrowed += unhex(d1, d2);
-        } else
+        } else {
             narrowed += *p;
+        }
     }
-    return fostlib::coerce<string>(narrowed);
+    return string{std::move(narrowed)};
 }
 
 
