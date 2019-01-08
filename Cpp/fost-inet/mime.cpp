@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -19,8 +19,8 @@
 using namespace fostlib;
 
 
-/*
-    fostlib::mime
+/**
+    ## fostlib::mime
 */
 
 
@@ -197,8 +197,9 @@ bool fostlib::mime_envelope::boundary_is_ok(const string &boundary) const {
 std::ostream &fostlib::mime_envelope::print_on(std::ostream &o) const {
     o << headers() << "\r\n";
     for (const_iterator c(begin()); c != end(); ++c) {
-        const char *first = reinterpret_cast<const char *>((*c).first);
-        const char *second = reinterpret_cast<const char *>((*c).second);
+        auto const &starc = *c;
+        const char *first = reinterpret_cast<const char *>(starc.first);
+        const char *second = reinterpret_cast<const char *>(starc.second);
         o.write(first, second - first);
     }
     return o;
@@ -262,8 +263,8 @@ public mime::iterator_implementation {
             throw exceptions::not_implemented(
                     "Impossible MIME envelope write state");
         }
-        const std::string &u(internal_buffer.underlying());
-        return const_memory_block(u.c_str(), u.c_str() + u.length());
+        auto const u{internal_buffer.memory()};
+        return const_memory_block{u.data(), u.data() + u.size()};
     }
 };
 std::unique_ptr<mime::iterator_implementation>
