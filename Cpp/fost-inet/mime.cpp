@@ -399,11 +399,11 @@ public mime::iterator_implementation {
     bool sent;
     binary_body_iterator(const data_type &d) : data(d), sent(false) {}
     const_memory_block operator()() {
-        if (data.size() == 0 || sent)
-            return const_memory_block();
-        else {
+        if (data.size() == 0 || sent) {
+            return const_memory_block{};
+        } else {
             sent = true;
-            return const_memory_block(&data[0], &data[0] + data.size());
+            return const_memory_block{data.data(), data.data() + data.size()};
         }
     }
 };
