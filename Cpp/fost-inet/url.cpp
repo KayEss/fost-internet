@@ -136,8 +136,7 @@ namespace {
         return t_path;
     }
     url::filepath_string normalise_path(const url::filepath_string &path) {
-        return url::filepath_string(ascii_printable_string(
-                normalise_path(path.underlying().underlying())));
+        return url::filepath_string(ascii_printable_string(normalise_path(static_cast<std::string>(path))));
     }
 
 
