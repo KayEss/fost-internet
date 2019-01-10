@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -28,10 +28,8 @@ namespace {
 
         fostlib::hmac signature(fostlib::sha1, secret);
 
-        signature
-                << request.method() << " "
-                << request.address().pathspec().underlying().underlying().c_str()
-                << "\n";
+        signature << request.method() << " " << request.address().pathspec()
+                  << "\n";
 
         fostlib::string now =
                 fostlib::coerce<fostlib::string>(fostlib::timestamp::now());
@@ -153,12 +151,10 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
                 boost::shared_ptr<mime::mime_headers> headers(
                         new mime::mime_headers);
                 hmac document(&sha1, secret);
-                document
-                        << request.method() << " "
-                        << request.file_spec().underlying().underlying().c_str()
-                        << "\n"
-                        << request.data()->headers()["X-FOST-Timestamp"].value()
-                        << "\n";
+                document << request.method() << " " << request.file_spec()
+                         << "\n"
+                         << request.data()->headers()["X-FOST-Timestamp"].value()
+                         << "\n";
                 headers->add(
                         "X-FOST-Timestamp",
                         request.data()->headers()["X-FOST-Timestamp"]);
@@ -166,7 +162,7 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
                      h != signed_headers.end(); ++h) {
                     std::stringstream ss;
                     ss << request.data()->headers()[*h];
-                    document << ss.str().c_str() << "\n";
+                    document << string{ss.str()} << "\n";
                     headers->add(*h, request.data()->headers()[*h]);
                 }
                 if (coerce<string>(coerce<base64_string>(document.digest()))
