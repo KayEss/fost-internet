@@ -83,7 +83,7 @@ bool fostlib::mime::const_iterator::operator!=(const const_iterator &o) const {
 */
 
 
-fostlib::mime::iterator_implementation::~iterator_implementation() {}
+fostlib::mime::iterator_implementation::~iterator_implementation() = default;
 
 
 /*
@@ -335,9 +335,9 @@ public mime::iterator_implementation {
             return const_memory_block();
         else {
             sent = true;
-            return const_memory_block(
-                    body.underlying().c_str(),
-                    body.underlying().c_str() + body.underlying().length());
+            return const_memory_block{body.memory().data(),
+                                      body.memory().data()
+                                              + body.memory().size()};
         }
     }
 };
