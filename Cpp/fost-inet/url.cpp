@@ -136,7 +136,8 @@ namespace {
         return t_path;
     }
     url::filepath_string normalise_path(const url::filepath_string &path) {
-        return url::filepath_string(ascii_printable_string(normalise_path(static_cast<std::string>(path))));
+        return url::filepath_string(ascii_printable_string(
+                normalise_path(static_cast<std::string>(path))));
     }
 
 
@@ -306,8 +307,8 @@ fostlib::url::url(const t_form form, const string &str)
     const auto query_parts(partition(anchor_parts.first, "?"));
     switch (form) {
     case e_pathname:
-        m_pathspec = url::filepath_string(ascii_printable_string(normalise_path(
-                coerce<url::filepath_string>(str))));
+        m_pathspec = url::filepath_string(ascii_printable_string(
+                normalise_path(coerce<url::filepath_string>(str))));
         break;
     case e_encoded:
         for (string::const_iterator it(str.begin()); it != str.end(); ++it) {

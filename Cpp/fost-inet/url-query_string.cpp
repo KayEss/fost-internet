@@ -118,7 +118,8 @@ namespace {
         std::string r;
         auto const i(coerce<utf8_string>(s));
         for (auto const c : i.memory()) {
-            if (g_query_string_allowed.underlying().find(c) == std::string::npos) {
+            if (g_query_string_allowed.underlying().find(c)
+                == std::string::npos) {
                 r += hex<std::string>(c);
             } else {
                 r += c;
@@ -141,7 +142,8 @@ const nullable<ascii_printable_string> &
         nullable<ascii_printable_string> r;
         for (auto it(m_query.begin()); it != m_query.end(); ++it) {
             for (auto v(it->second.begin()); v != it->second.end(); ++v) {
-                r = concat(r, ascii_printable_string("&"),
+                r =
+                        concat(r, ascii_printable_string("&"),
                                concat(query_string_encode(it->first)
                                               + ascii_printable_string("="),
                                       query_string_encode(*v)));

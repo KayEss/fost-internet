@@ -169,7 +169,8 @@ namespace {
                 m_cnx >> server_response;
 
                 std::stringstream server_response_stringstream{
-                        static_cast<std::string>(server_response.underlying().substr(3))};
+                        static_cast<std::string>(
+                                server_response.underlying().substr(3))};
                 server_response_stringstream >> message_count;
                 size_t octets;
                 server_response_stringstream >> octets;

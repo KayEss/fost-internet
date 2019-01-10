@@ -19,9 +19,10 @@ fostlib::utf8_string
          ++i) {
         fostlib::utf8_string data(fostlib::coerce<fostlib::utf8_string>(*i));
         if (data.underlying().bytes() < bytes(*i)) {
-            fostlib::exceptions::not_implemented err{
-                __PRETTY_FUNCTION__, "Not all data converted"};
-            fostlib::insert(err.data(), "data", "bytes", data.underlying().bytes());
+            fostlib::exceptions::not_implemented err{__PRETTY_FUNCTION__,
+                                                     "Not all data converted"};
+            fostlib::insert(
+                    err.data(), "data", "bytes", data.underlying().bytes());
             fostlib::insert(err.data(), "bytes", bytes(*i));
             throw err;
         }

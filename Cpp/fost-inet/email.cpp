@@ -48,8 +48,7 @@ bool fostlib::email_is_a_delay_report(const text_body &email) {
                    subject == "Delivery Status Notification (Delay)"
                    || subject == "Delivery Status Notification (Warning)")
             || std::regex_match(
-                       static_cast<std::string>(subject),
-                       c_delay_regex);
+                       static_cast<std::string>(subject), c_delay_regex);
 }
 
 

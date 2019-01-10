@@ -61,7 +61,8 @@ boost::asio::ip::address fostlib::host::address() const {
     boost::asio::ip::tcp::resolver resolver(io_service);
     boost::asio::ip::tcp::resolver::query query{
             static_cast<std::string>(coerce<ascii_string>(name()).underlying()),
-            static_cast<std::string>(coerce<ascii_string>(service().value_or("0")).underlying())};
+            static_cast<std::string>(
+                    coerce<ascii_string>(service().value_or("0")).underlying())};
     boost::system::error_code error;
     boost::asio::ip::tcp::resolver::iterator it{resolver.resolve(query, error)};
     if (error == boost::asio::error::host_not_found)
