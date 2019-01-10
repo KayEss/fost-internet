@@ -253,8 +253,8 @@ namespace {
         using namespace boost::asio::ip;
         tcp::resolver resolver(io_service);
         tcp::resolver::query q(
-                coerce<ascii_string>(host.name()).underlying(),
-                coerce<ascii_string>(coerce<string>(port)).underlying());
+                static_cast<std::string>(coerce<ascii_string>(host.name()).underlying()),
+                static_cast<std::string>(coerce<ascii_string>(coerce<string>(port)).underlying()));
         boost::system::error_code host_error;
         tcp::resolver::iterator endpoint = resolver.resolve(q, host_error), end;
         if (host_error == boost::asio::error::host_not_found)
