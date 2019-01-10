@@ -308,7 +308,7 @@ fostlib::url::url(const t_form form, const string &str)
     switch (form) {
     case e_pathname:
         m_pathspec = url::filepath_string(ascii_printable_string(normalise_path(
-                coerce<url::filepath_string>(str).underlying().underlying())));
+                coerce<url::filepath_string>(str))));
         break;
     case e_encoded:
         for (string::const_iterator it(str.begin()); it != str.end(); ++it) {
