@@ -18,11 +18,10 @@ fostlib::utf8_string
     for (fostlib::mime::const_iterator i(input.begin()); i != input.end();
          ++i) {
         fostlib::utf8_string data(fostlib::coerce<fostlib::utf8_string>(*i));
-        if (data.underlying().bytes() < bytes(*i)) {
+        if (data.bytes() < bytes(*i)) {
             fostlib::exceptions::not_implemented err{__PRETTY_FUNCTION__,
                                                      "Not all data converted"};
-            fostlib::insert(
-                    err.data(), "data", "bytes", data.underlying().bytes());
+            fostlib::insert(err.data(), "data", "bytes", data.bytes());
             fostlib::insert(err.data(), "bytes", bytes(*i));
             throw err;
         }
