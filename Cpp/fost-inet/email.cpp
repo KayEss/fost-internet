@@ -1,8 +1,8 @@
-/*
-    Copyright 2009-2018, Felspar Co Ltd. http://fost.3.felspar.com/
+/**
+    Copyright 2009-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 #include "fost-inet.hpp"
@@ -48,8 +48,7 @@ bool fostlib::email_is_a_delay_report(const text_body &email) {
                    subject == "Delivery Status Notification (Delay)"
                    || subject == "Delivery Status Notification (Warning)")
             || std::regex_match(
-                       coerce<utf8_string>(subject).underlying(),
-                       c_delay_regex);
+                       static_cast<std::string>(subject), c_delay_regex);
 }
 
 

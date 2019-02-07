@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -20,23 +20,29 @@ namespace {
 
 
     template<typename C>
-    C digit(utf8 dig) {
+    C digit(unsigned char dig) {
         if (dig < 0x0a) return dig + '0';
         if (dig < 0x10) return dig + 'A' - 0x0a;
         throw fostlib::exceptions::out_of_range<int>(
                 L"Number to convert to hex digit is too big", 0, 0x10, dig);
     }
     template<typename S>
-    S hex(utf8 ch) {
-        typename S::value_type num[4];
-        num[0] = '%';
-        num[1] = digit<typename S::value_type>((ch & 0xf0) >> 4);
-        num[2] = digit<typename S::value_type>(ch & 0x0f);
-        num[3] = 0;
-        return S(num);
+    S hex(unsigned char ch) {
+        std::string num;
+        num += '%';
+        num += digit<typename std::string::value_type>((ch & 0xf0) >> 4);
+        num += digit<typename std::string::value_type>(ch & 0x0f);
+        return S{std::move(num)};
     }
 
 
+    /**
+     * Including the `=` sign here is a bit dodgy. It's OK to have it un-
+     * encoded in the value part, but clearly if it's not encoded in key
+     * then clearly things will go wrong. But if you put a `=` sign in
+     * the query string key names you're pretty much asking for a
+     * ton of trouble anyway, so....
+     */
     const fostlib::utf8_string g_query_string_allowed(
             ".,:/\\_-*~="
             "0123456789"
@@ -109,15 +115,17 @@ const std::vector<nullable<string>> &
 
 namespace {
     ascii_printable_string query_string_encode(const string &s) {
-        ascii_printable_string r;
-        utf8_string i(coerce<utf8_string>(s));
-        for (utf8_string::const_iterator c(i.begin()); c != i.end(); ++c)
-            if (g_query_string_allowed.underlying().find(*c)
-                == std::string::npos)
-                r += hex<ascii_printable_string>(*c);
-            else
-                r += *c;
-        return r;
+        std::string r;
+        auto const i(coerce<utf8_string>(s));
+        for (auto const c : i.memory()) {
+            if (g_query_string_allowed.underlying().find(c)
+                == std::string::npos) {
+                r += hex<std::string>(c);
+            } else {
+                r += c;
+            }
+        }
+        return ascii_printable_string{std::move(r)};
     }
     nullable<ascii_printable_string>
             query_string_encode(const nullable<string> &s) {

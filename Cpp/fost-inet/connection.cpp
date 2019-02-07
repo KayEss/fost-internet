@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2018, Felspar Co Ltd. <http://support.felspar.com/>
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -253,8 +253,10 @@ namespace {
         using namespace boost::asio::ip;
         tcp::resolver resolver(io_service);
         tcp::resolver::query q(
-                coerce<ascii_string>(host.name()).underlying(),
-                coerce<ascii_string>(coerce<string>(port)).underlying());
+                static_cast<std::string>(
+                        coerce<ascii_string>(host.name()).underlying()),
+                static_cast<std::string>(
+                        coerce<ascii_string>(coerce<string>(port)).underlying()));
         boost::system::error_code host_error;
         tcp::resolver::iterator endpoint = resolver.resolve(q, host_error), end;
         if (host_error == boost::asio::error::host_not_found)
@@ -378,7 +380,7 @@ network_connection &fostlib::network_connection::
 }
 network_connection &fostlib::network_connection::
         operator<<(const std::stringstream &ss) {
-    return this->operator<<(ss.str());
+    return this->operator<<(utf8_string{ss.str()});
 }
 
 

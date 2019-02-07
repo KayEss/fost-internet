@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -59,9 +59,10 @@ fostlib::host::host(
 boost::asio::ip::address fostlib::host::address() const {
     boost::asio::io_service io_service;
     boost::asio::ip::tcp::resolver resolver(io_service);
-    boost::asio::ip::tcp::resolver::query query(
-            coerce<ascii_string>(name()).underlying(),
-            coerce<ascii_string>(service().value_or("0")).underlying());
+    boost::asio::ip::tcp::resolver::query query{
+            static_cast<std::string>(coerce<ascii_string>(name()).underlying()),
+            static_cast<std::string>(
+                    coerce<ascii_string>(service().value_or("0")).underlying())};
     boost::system::error_code error;
     boost::asio::ip::tcp::resolver::iterator it{resolver.resolve(query, error)};
     if (error == boost::asio::error::host_not_found)
