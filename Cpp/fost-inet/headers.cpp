@@ -245,14 +245,11 @@ headers_base::content::const_iterator
     return m_subvalues.end();
 }
 
-std::ostream &fostlib::
-        operator<<(std::ostream &o, const headers_base::content &value) {
-    o << coerce<utf8_string>(value.value()).underlying();
-    for (headers_base::content::const_iterator i(value.begin());
-         i != value.end(); ++i)
-        o << "; " << coerce<utf8_string>(i->first).underlying()
-          << "="
-             "\""
-          << coerce<utf8_string>(i->second).underlying() << "\"";
+std::ostream &fostlib::operator<<(std::ostream &o, const headers_base::content &v) {
+    /// Without the `static_cast` here the Android NDK compiler goes super weird
+    o << static_cast<std::string_view>(v.value());
+    for (auto const &i : v) {
+        o << "; " << i.first << "=\"" << i.second << "\"";
+    }
     return o;
 }
