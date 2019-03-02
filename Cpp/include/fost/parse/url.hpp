@@ -56,17 +56,18 @@ namespace fostlib {
     struct url_filespec_parser :
     public boost::spirit::qi::grammar<Iterator, ascii_printable_string()> {
         boost::spirit::qi::rule<Iterator, ascii_printable_string()> top;
-        boost::spirit::qi::rule<Iterator, std::string()> line;
+        boost::spirit::qi::rule<Iterator, std::string()> id, line;
 
         url_filespec_parser() : url_filespec_parser::base_type(top) {
             using boost::spirit::qi::_1;
             using boost::spirit::qi::_val;
 
-            top = line[boost::phoenix::bind(
+            top = id[boost::phoenix::bind(
                     [](auto &v, auto s) { v = ascii_printable_string(s); },
                     _val, _1)];
 
-            line = +boost::spirit::qi::char_("_@$&~!a-zA-Z0-9/.,:'()+%*-");
+            line = *boost::spirit::qi::char_("_@$&~!a-zA-Z0-9/.,:'()+%*-");
+            id = +boost::spirit::qi::char_("_@$&~!a-zA-Z0-9/.,:'()+%*-");
         }
     };
 
@@ -149,17 +150,14 @@ namespace fostlib {
             using boost::spirit::qi::_4;
             using boost::spirit::qi::_val;
 
-            top = (hostpart >> -(boost::spirit::qi::lit('/') >> -filespec)
+            top = (hostpart >> -(boost::spirit::qi::lit('/') >> -filespec.id)
                    >> -(boost::spirit::qi::lit('?') >> -query)
-                   >> -(boost::spirit::qi::lit('#') >> -filespec))
+                   >> -(boost::spirit::qi::lit('#') >> filespec.line))
                     [boost::phoenix::bind(
                             [](auto &v, auto h, auto fs, auto qs, auto frag) {
                                 v = url(h,
                                         boost::filesystem::path(
-                                                fs.value_or(
-                                                          ascii_printable_string())
-                                                        .underlying()
-                                                        .c_str()));
+                                                fs.value_or(std::string{})));
                                 if (qs) v.query(qs.value());
                                 if (frag) v.fragment(frag.value());
                             },
@@ -172,6 +170,7 @@ namespace fostlib {
         url_parser<I> rule;
         return boost::spirit::qi::parse(begin, end, rule, into);
     }
+
 
     /**
         ## Parsing IRIs
