@@ -245,7 +245,8 @@ headers_base::content::const_iterator
     return m_subvalues.end();
 }
 
-std::ostream &fostlib::operator<<(std::ostream &o, const headers_base::content &v) {
+std::ostream &fostlib::
+        operator<<(std::ostream &o, const headers_base::content &v) {
     /// Without the `static_cast` here the Android NDK compiler goes super weird
     o << static_cast<std::string_view>(v.value());
     for (auto const &i : v) {
