@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -173,7 +173,7 @@ namespace fostlib {
     struct coercer<
             json,
             T,
-            typename boost::enable_if<boost::is_base_of<headers_base, T>>::type> {
+            std::enable_if_t<std::is_base_of_v<headers_base, T>>> {
         json coerce(const headers_base &h) const {
             return detail::from_headers(h);
         }

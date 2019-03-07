@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2015, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -18,7 +18,7 @@ namespace fostlib {
 
 
     /// An abstract base class for MIME containers
-    class FOST_INET_DECLSPEC mime : boost::noncopyable {
+    class FOST_INET_DECLSPEC mime {
       protected:
         struct FOST_INET_DECLSPEC iterator_implementation {
             virtual ~iterator_implementation();
@@ -33,6 +33,10 @@ namespace fostlib {
                     value(const string &name, const string &value);
         };
         virtual ~mime();
+
+        /// Not copyable
+        mime(mime const &) = delete;
+        mime &operator=(mime const &) = delete;
 
         accessors<string> content_type;
         accessors<mime_headers, fostlib::lvalue> headers;
@@ -251,7 +255,7 @@ namespace fostlib {
     struct coercer<
             T,
             F,
-            typename boost::enable_if<boost::is_base_of<mime, F>>::type> {
+            std::enable_if_t<std::is_base_of_v<mime, F>>> {
         T coerce(const F &f) { return fostlib::coerce<T, mime>(f); }
     };
 
