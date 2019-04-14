@@ -169,8 +169,14 @@ namespace {
         }
 
         std::size_t complete() {
-            sock.get_io_service().reset();
-            sock.get_io_service().run();
+            sock.get_executor()
+                    .template target<boost::asio::io_context::executor_type>()
+                    ->context()
+                    .reset();
+            sock.get_executor()
+                    .template target<boost::asio::io_context::executor_type>()
+                    ->context()
+                    .run();
             if (read_result.value().first
                 && read_result.value().first != boost::asio::error::eof) {
                 fostlib::log::debug(c_fost_inet)(
