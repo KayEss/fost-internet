@@ -55,8 +55,9 @@ namespace fostlib {
             auto cnx = std::make_shared<Cnx>(ios, std::forward<A>(a)...);
             /// Try to connect to the remote server
             boost::asio::ip::tcp::resolver resolver{ios};
-            boost::asio::ip::tcp::resolver::query q(
-                    to.name().c_str(), to.service().value().c_str());
+            boost::asio::ip::tcp::resolver::query q{
+                    static_cast<std::string>(to.name()),
+                    static_cast<std::string>(to.service().value())};
             boost::asio::ip::tcp::resolver::iterator endp = resolver.resolve(q),
                                                      end;
             boost::system::error_code error;
