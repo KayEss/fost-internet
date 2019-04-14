@@ -6,12 +6,6 @@
 */
 
 
-#ifdef FOST_OS_LINUX
-// Boost.ASIO checks a pointer for NULL which can never be NULL
-#pragma GCC diagnostic ignored "-Waddress"
-#endif
-
-
 #include "fost-inet.hpp"
 #include <fost/connection.hpp>
 
