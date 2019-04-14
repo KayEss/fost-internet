@@ -34,8 +34,8 @@ namespace fostlib {
             io_context_type &get_io_service() override {
 #if BOOST_VERSION >= 107000 // 1.70.0
                 return socket.get_executor()
-                    .template target<io_context_type::executor_type>()
-                    ->context();
+                        .template target<io_context_type::executor_type>()
+                        ->context();
 #elif BOOST_VERSION >= 106600 // 1.66.0
                 return socket.get_io_context();
 #else
@@ -51,9 +51,7 @@ namespace fostlib {
         /// Connect to a remote end point over TCP
         template<typename Cnx, typename... A>
         std::shared_ptr<Cnx> tcp_connect(
-                const fostlib::host &to,
-                io_context_type &ios,
-                A &&... a) {
+                const fostlib::host &to, io_context_type &ios, A &&... a) {
             auto cnx = std::make_shared<Cnx>(ios, std::forward<A>(a)...);
             /// Try to connect to the remote server
             boost::asio::ip::tcp::resolver resolver{ios};
@@ -89,8 +87,7 @@ namespace fostlib {
                 Dispatch dispatch) {
             while (cnx.socket.is_open()) {
                 try {
-                    decoder<socket_type> decode(
-                            cnx.socket, yield);
+                    decoder<socket_type> decode(cnx.socket, yield);
                     std::size_t packet_size = decode.read_size();
                     control_byte control = decode.read_byte();
                     decode.transfer(packet_size);
@@ -132,8 +129,7 @@ namespace fostlib {
 /// Implementation of TCP data send for outbound packets
 template<>
 inline void fostlib::hod::out_packet::operator()(
-        fostlib::socket_type &sock,
-        boost::asio::yield_context yield) const {
+        fostlib::socket_type &sock, boost::asio::yield_context yield) const {
     boost::asio::streambuf header;
     size_sequence(size(), header);
     header.sputc(control);

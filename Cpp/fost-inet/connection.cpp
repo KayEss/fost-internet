@@ -148,7 +148,7 @@ namespace {
 #elif BOOST_VERSION >= 106600 // 1.66.0
           timer(sock.get_io_context()),
 #else
-            timer(sock.get_io_service()),
+          timer(sock.get_io_service()),
 #endif
           received(0) {
             timer.expires_from_now(
