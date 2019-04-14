@@ -1,8 +1,8 @@
-/*
-    Copyright 2009-2018, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2009-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -53,7 +53,7 @@ FSL_TEST_FUNCTION(request_post) {
     FSL_CHECK(post2.data().begin() != post2.data().end());
     FSL_CHECK_EQ(
             fostlib::string("body data"),
-            fostlib::string(
+            std::string(
                     reinterpret_cast<const char *>(
                             (*post2.data().begin()).first),
                     reinterpret_cast<const char *>(
@@ -61,7 +61,7 @@ FSL_TEST_FUNCTION(request_post) {
     // Ensure the first pass didn't consume the data
     FSL_CHECK_EQ(
             fostlib::string("body data"),
-            fostlib::string(
+            std::string(
                     reinterpret_cast<const char *>(
                             (*post2.data().begin()).first),
                     reinterpret_cast<const char *>(
