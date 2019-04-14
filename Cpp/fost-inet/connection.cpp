@@ -61,7 +61,7 @@ namespace {
 
 
 struct ssl_data {
-    ssl_data(boost::asio::io_service &, boost::asio::ip::tcp::socket &sock)
+    ssl_data(boost::asio::io_context &, boost::asio::ip::tcp::socket &sock)
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
@@ -70,7 +70,7 @@ struct ssl_data {
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket &> ssl_sock;
 };
 struct network_connection::ssl : public ssl_data {
-    ssl(boost::asio::io_service &io_service, boost::asio::ip::tcp::socket &sock)
+    ssl(boost::asio::io_context &io_service, boost::asio::ip::tcp::socket &sock)
     : ssl_data(io_service, sock) {}
 };
 namespace {
@@ -149,7 +149,7 @@ namespace {
                 boost::asio::ip::tcp::socket &sock,
                 boost::system::error_code &e,
                 const setting<int64_t> &timeout = c_read_timeout)
-        : sock(sock), error(e), timer(sock.get_io_service()), received(0) {
+        : sock(sock), error(e), timer(sock.get_executor()), received(0) {
             timer.expires_from_now(
                     boost::posix_time::seconds(coerce<long>(timeout.value())));
             timer.async_wait(boost::lambda::bind(
@@ -246,7 +246,7 @@ namespace {
     }
 
     void
-            connect(boost::asio::io_service &io_service,
+            connect(boost::asio::io_context &io_service,
                     boost::asio::ip::tcp::socket &socket,
                     const host &host,
                     port_number port) {
@@ -286,7 +286,7 @@ fostlib::network_connection::network_connection(network_connection &&cnx)
   m_ssl_data(std::move(cnx.m_ssl_data)) {}
 
 fostlib::network_connection::network_connection(
-        std::unique_ptr<boost::asio::io_service> io_service,
+        std::unique_ptr<boost::asio::io_context> io_service,
         std::unique_ptr<boost::asio::ip::tcp::socket> socket)
 : io_service(std::move(io_service)),
   m_socket(std::move(socket)),
@@ -295,7 +295,7 @@ fostlib::network_connection::network_connection(
 
 fostlib::network_connection::network_connection(
         const host &h, nullable<port_number> p)
-: io_service(new boost::asio::io_service),
+: io_service(new boost::asio::io_context),
   m_socket(new boost::asio::ip::tcp::socket(*io_service)),
   m_input_buffer(new boost::asio::streambuf),
   m_ssl_data(nullptr) {
