@@ -170,10 +170,7 @@ namespace fostlib {
     }
     /// Allow a full set of headers to be converted to JSON
     template<typename T>
-    struct coercer<
-            json,
-            T,
-            std::enable_if_t<std::is_base_of_v<headers_base, T>>> {
+    struct coercer<json, T, std::enable_if_t<std::is_base_of_v<headers_base, T>>> {
         json coerce(const headers_base &h) const {
             return detail::from_headers(h);
         }

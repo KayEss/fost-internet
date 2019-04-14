@@ -40,7 +40,7 @@ namespace fostlib {
                           },
                           _val, _1)]
                     | address[boost::phoenix::bind(
-                              [](auto &v, auto &s) { v = s; }, _val, _1)];
+                            [](auto &v, auto &s) { v = s; }, _val, _1)];
 
             address =
                     (name >> boost::spirit::qi::lit('<') >> rfc822
