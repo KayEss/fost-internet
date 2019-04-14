@@ -26,7 +26,7 @@ namespace fostlib {
     // boost::asio::io_context::executor_type>;
 
     /// A TCP/IP network connection from either a server or client
-    class FOST_INET_DECLSPEC network_connection final : boost::noncopyable {
+    class FOST_INET_DECLSPEC network_connection final {
         struct ssl;
         std::unique_ptr<boost::asio::io_context> io_service;
         std::unique_ptr<socket_type> m_socket;
@@ -34,6 +34,10 @@ namespace fostlib {
         ssl *m_ssl_data;
 
       public:
+        /// This type is not copyable
+        network_connection(const network_connection &) = delete;
+        network_connection &operator=(const network_connection &) = delete;
+
         /// Used for server end points where accept returns a socket
         network_connection(
                 std::unique_ptr<boost::asio::io_context> io_service,
