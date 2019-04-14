@@ -21,7 +21,11 @@
 namespace fostlib {
 
 
+#if BOOST_VERSION >= 106600 // 1.66.0
     using io_context_type = boost::asio::io_context;
+#else
+    using io_context_type = boost::asio::io_service;
+#endif
     using socket_type = boost::asio::ip::tcp::socket;
 
 

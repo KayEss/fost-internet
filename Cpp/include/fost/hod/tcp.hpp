@@ -36,8 +36,10 @@ namespace fostlib {
                 return socket.get_executor()
                     .template target<io_context_type::executor_type>()
                     ->context();
-#else
+#elif BOOST_VERSION >= 106600 // 1.66.0
                 return socket.get_io_context();
+#else
+                return socket.get_io_service();
 #endif
             }
 

@@ -145,8 +145,10 @@ namespace {
           error(e),
 #if BOOST_VERSION >= 107000 // 1.70.0
           timer(sock.get_executor()),
+#elif BOOST_VERSION >= 106600 // 1.66.0
+          timer(sock.get_io_context()),
 #else
-          timer(sock.get_executor().context()),
+            timer(sock.get_io_service()),
 #endif
           received(0) {
             timer.expires_from_now(
@@ -177,9 +179,12 @@ namespace {
                     .template target<io_context_type::executor_type>()
                     ->context()
                     .run();
-#else
+#elif BOOST_VERSION >= 106600 // 1.66.0
             sock.get_io_context().reset();
             sock.get_io_context().run();
+#else
+            sock.get_io_service().reset();
+            sock.get_io_service().run();
 #endif
             if (read_result.value().first
                 && read_result.value().first != boost::asio::error::eof) {
