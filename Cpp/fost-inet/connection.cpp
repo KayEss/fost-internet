@@ -141,7 +141,14 @@ namespace {
                 socket_type &sock,
                 boost::system::error_code &e,
                 const setting<int64_t> &timeout = c_read_timeout)
-        : sock(sock), error(e), timer(sock.get_executor()), received(0) {
+        : sock(sock),
+          error(e),
+#if BOOST_VERSION >= 107000 // 1.70.0
+          timer(sock.get_executor()),
+#else
+          timer(sock.get_executor().context()),
+#endif
+          received(0) {
             timer.expires_from_now(
                     boost::posix_time::seconds(coerce<long>(timeout.value())));
             timer.async_wait(boost::lambda::bind(
@@ -161,6 +168,7 @@ namespace {
         }
 
         std::size_t complete() {
+#if BOOST_VERSION >= 107000 // 1.70.0
             sock.get_executor()
                     .template target<boost::asio::io_context::executor_type>()
                     ->context()
@@ -169,6 +177,10 @@ namespace {
                     .template target<boost::asio::io_context::executor_type>()
                     ->context()
                     .run();
+#else
+            sock.get_io_context().reset();
+            sock.get_io_context().run();
+#endif
             if (read_result.value().first
                 && read_result.value().first != boost::asio::error::eof) {
                 fostlib::log::debug(c_fost_inet)(
