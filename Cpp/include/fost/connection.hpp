@@ -21,14 +21,14 @@
 namespace fostlib {
 
 
+    using io_context_type = boost::asio::io_context;
     using socket_type = boost::asio::ip::tcp::socket;
-    // using socket_type = boost::asio::basic_stream_socket<boost::asio::ip::tcp,
-    // boost::asio::io_context::executor_type>;
+
 
     /// A TCP/IP network connection from either a server or client
     class FOST_INET_DECLSPEC network_connection final {
         struct ssl;
-        std::unique_ptr<boost::asio::io_context> io_service;
+        std::unique_ptr<io_context_type> io_service;
         std::unique_ptr<socket_type> m_socket;
         std::unique_ptr<boost::asio::streambuf> m_input_buffer;
         ssl *m_ssl_data;
@@ -40,7 +40,7 @@ namespace fostlib {
 
         /// Used for server end points where accept returns a socket
         network_connection(
-                std::unique_ptr<boost::asio::io_context> io_service,
+                std::unique_ptr<io_context_type> io_service,
                 std::unique_ptr<socket_type> socket);
         /// Used for clients where a host is connected to on a given port number
         network_connection(const host &h, nullable<port_number> p = null);

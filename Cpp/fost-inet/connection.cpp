@@ -55,7 +55,7 @@ namespace {
 
 
 struct ssl_data {
-    ssl_data(boost::asio::io_context &, socket_type &sock)
+    ssl_data(io_context_type &, socket_type &sock)
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
@@ -64,7 +64,7 @@ struct ssl_data {
     boost::asio::ssl::stream<socket_type &> ssl_sock;
 };
 struct network_connection::ssl : public ssl_data {
-    ssl(boost::asio::io_context &io_service, socket_type &sock)
+    ssl(io_context_type &io_service, socket_type &sock)
     : ssl_data(io_service, sock) {}
 };
 namespace {
@@ -170,11 +170,11 @@ namespace {
         std::size_t complete() {
 #if BOOST_VERSION >= 107000 // 1.70.0
             sock.get_executor()
-                    .template target<boost::asio::io_context::executor_type>()
+                    .template target<io_context_type::executor_type>()
                     ->context()
                     .reset();
             sock.get_executor()
-                    .template target<boost::asio::io_context::executor_type>()
+                    .template target<io_context_type::executor_type>()
                     ->context()
                     .run();
 #else
@@ -253,7 +253,7 @@ namespace {
     }
 
     void
-            connect(boost::asio::io_context &io_service,
+            connect(io_context_type &io_service,
                     socket_type &socket,
                     const host &host,
                     port_number port) {
@@ -293,7 +293,7 @@ fostlib::network_connection::network_connection(network_connection &&cnx)
   m_ssl_data(std::move(cnx.m_ssl_data)) {}
 
 fostlib::network_connection::network_connection(
-        std::unique_ptr<boost::asio::io_context> io_service,
+        std::unique_ptr<io_context_type> io_service,
         std::unique_ptr<socket_type> socket)
 : io_service(std::move(io_service)),
   m_socket(std::move(socket)),
@@ -302,7 +302,7 @@ fostlib::network_connection::network_connection(
 
 fostlib::network_connection::network_connection(
         const host &h, nullable<port_number> p)
-: io_service(new boost::asio::io_context),
+: io_service(new io_context_type),
   m_socket(new socket_type(*io_service)),
   m_input_buffer(new boost::asio::streambuf),
   m_ssl_data(nullptr) {
