@@ -13,7 +13,6 @@
 #include <fost/log>
 
 #include <boost/asio/ssl.hpp>
-#include <boost/lambda/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
 
@@ -153,20 +152,20 @@ namespace {
           received(0) {
             timer.expires_from_now(
                     boost::posix_time::seconds(coerce<long>(timeout.value())));
-            timer.async_wait(boost::lambda::bind(
-                    &timedout, boost::ref(sock), boost::ref(timeout_result),
-                    boost::lambda::_1));
+            timer.async_wait([this, &sock](auto err) {
+                return timedout(sock, timeout_result, err);
+            });
         }
 
         connect_async_function_type connect_async_function() {
-            return boost::lambda::bind(
-                    &connect_done, boost::ref(timer), boost::ref(read_result),
-                    boost::lambda::_1);
+            return [this](auto err) {
+                return connect_done(timer, read_result, err);
+            };
         }
         read_async_function_type read_async_function() {
-            return boost::lambda::bind(
-                    &read_done, boost::ref(timer), boost::ref(read_result),
-                    boost::lambda::_1, boost::lambda::_2);
+            return [this](auto err, auto size) {
+                return read_done(timer, read_result, err, size);
+            };
         }
 
         std::size_t complete() {
