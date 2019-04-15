@@ -13,7 +13,6 @@
 
 #include <fost/core>
 #include <fost/pointers>
-#include <boost/filesystem.hpp>
 
 
 namespace fostlib {
