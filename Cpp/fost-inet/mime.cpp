@@ -13,8 +13,6 @@
 #include <fost/exception/parse_error.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
-#include <boost/filesystem/fstream.hpp>
-
 
 using namespace fostlib;
 
@@ -420,18 +418,18 @@ std::unique_ptr<mime::iterator_implementation>
 
 
 fostlib::file_body::file_body(
-        const boost::filesystem::wpath &p,
+        const fostlib::fs::path &p,
         const mime_headers &headers,
         const string &mime_type)
 : mime(headers, mime_type), filename(p) {
     this->headers().set(L"Content-Transfer-Encoding", L"8bit");
     this->headers().set(
-            L"Content-Length", coerce<string>(boost::filesystem::file_size(p)));
+            L"Content-Length", coerce<string>(fostlib::fs::file_size(p)));
 }
 
 
 std::ostream &fostlib::file_body::print_on(std::ostream &o) const {
-    boost::filesystem::ifstream file(filename(), std::ios::binary);
+    fostlib::ifstream file(filename(), std::ios::binary);
     return o << headers() << "\r\n" << file.rdbuf();
 }
 
@@ -444,13 +442,13 @@ bool fostlib::file_body::boundary_is_ok(const string &boundary) const {
 
 struct fostlib::file_body::file_body_iteration :
 public mime::iterator_implementation {
-    boost::filesystem::ifstream file;
-    boost::array<char, 2048> buffer;
-    file_body_iteration(const boost::filesystem::wpath &p)
+    fostlib::ifstream file;
+    std::array<char, 2048> buffer;
+    file_body_iteration(const fostlib::fs::path &p)
     : file(p, std::ios::binary) {}
     const_memory_block operator()() {
         if (!file.eof() && file.good()) {
-            file.read(buffer.c_array(), buffer.size());
+            file.read(buffer.data(), buffer.size());
             return const_memory_block(
                     buffer.data(), buffer.data() + file.gcount());
         } else
@@ -461,5 +459,4 @@ std::unique_ptr<mime::iterator_implementation>
         fostlib::file_body::iterator() const {
     return std::unique_ptr<mime::iterator_implementation>(
             new file_body_iteration(filename()));
-    ;
 }
