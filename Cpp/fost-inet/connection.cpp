@@ -13,7 +13,6 @@
 #include <fost/log>
 
 #include <boost/asio/ssl.hpp>
-#include <boost/lexical_cast.hpp>
 
 
 using namespace fostlib;
