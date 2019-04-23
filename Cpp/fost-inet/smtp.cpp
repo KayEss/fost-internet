@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -121,10 +121,7 @@ struct fostlib::smtp_client::implementation {
             exceptions::not_implemented exception(
                     L"SMTP response was not the one expected");
             insert(exception.data(), "code", "expected", code);
-            insert(exception.data(), "code", "received",
-                   response.underlying()
-                           .substr(0, number.underlying().length())
-                           .c_str());
+            insert(exception.data(), "code", "received", response);
             insert(exception.data(), "command", command);
             insert(exception.data(), "response", response);
             throw exception;

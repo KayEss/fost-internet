@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -170,7 +170,7 @@ FSL_TEST_FUNCTION(text_iterators) {
     FSL_CHECK(ta.begin() != ta.end());
     FSL_CHECK_EQ(
             fostlib::string("Test text document"),
-            fostlib::string(
+            std::string(
                     reinterpret_cast<const char *>((*ta.begin()).first),
                     reinterpret_cast<const char *>((*ta.begin()).second)));
 }

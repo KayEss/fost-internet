@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -21,19 +21,31 @@
 namespace fostlib {
 
 
+#if BOOST_VERSION >= 106600 // 1.66.0
+    using io_context_type = boost::asio::io_context;
+#else
+    using io_context_type = boost::asio::io_service;
+#endif
+    using socket_type = boost::asio::ip::tcp::socket;
+
+
     /// A TCP/IP network connection from either a server or client
-    class FOST_INET_DECLSPEC network_connection final : boost::noncopyable {
+    class FOST_INET_DECLSPEC network_connection final {
         struct ssl;
-        std::unique_ptr<boost::asio::io_service> io_service;
-        std::unique_ptr<boost::asio::ip::tcp::socket> m_socket;
+        std::unique_ptr<io_context_type> io_service;
+        std::unique_ptr<socket_type> m_socket;
         std::unique_ptr<boost::asio::streambuf> m_input_buffer;
         ssl *m_ssl_data;
 
       public:
+        /// This type is not copyable
+        network_connection(const network_connection &) = delete;
+        network_connection &operator=(const network_connection &) = delete;
+
         /// Used for server end points where accept returns a socket
         network_connection(
-                std::unique_ptr<boost::asio::io_service> io_service,
-                std::unique_ptr<boost::asio::ip::tcp::socket> socket);
+                std::unique_ptr<io_context_type> io_service,
+                std::unique_ptr<socket_type> socket);
         /// Used for clients where a host is connected to on a given port number
         network_connection(const host &h, nullable<port_number> p = null);
         /// Move constructor

@@ -60,8 +60,8 @@ namespace {
                 L"Authorization",
                 L"FOST " + api_key + L":"
                         + fostlib::coerce<string>(
-                                  fostlib::coerce<fostlib::base64_string>(
-                                          signature.digest())));
+                                fostlib::coerce<fostlib::base64_string>(
+                                        signature.digest())));
     }
 
 

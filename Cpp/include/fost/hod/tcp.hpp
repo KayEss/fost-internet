@@ -1,5 +1,5 @@
 /**
-    Copyright 2016-2018, Felspar Co Ltd. <http://support.felspar.com/>
+    Copyright 2016-2019, Felspar Co Ltd. <http://support.felspar.com/>
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -22,35 +22,42 @@ namespace fostlib {
 
 
         /// TCP specialisation of the decoder
-        using tcp_decoder = decoder<boost::asio::ip::tcp::socket>;
+        using tcp_decoder = decoder<socket_type>;
 
 
         /// TCP connection
-        class tcp_connection : public connection<boost::asio::ip::tcp::socket> {
+        class tcp_connection : public connection<socket_type> {
           protected:
-            tcp_connection(boost::asio::io_service &ios, peering p)
-            : connection<boost::asio::ip::tcp::socket>(p), socket(ios) {}
+            tcp_connection(io_context_type &ios, peering p)
+            : connection<socket_type>(p), socket(ios) {}
 
-            boost::asio::io_service &get_io_service() override {
+            io_context_type &get_io_service() override {
+#if BOOST_VERSION >= 107000 // 1.70.0
+                return socket.get_executor()
+                        .template target<io_context_type::executor_type>()
+                        ->context();
+#elif BOOST_VERSION >= 106600 // 1.66.0
+                return socket.get_io_context();
+#else
                 return socket.get_io_service();
+#endif
             }
 
           public:
             /// The socket for this connection
-            boost::asio::ip::tcp::socket socket;
+            socket_type socket;
         };
 
         /// Connect to a remote end point over TCP
         template<typename Cnx, typename... A>
         std::shared_ptr<Cnx> tcp_connect(
-                const fostlib::host &to,
-                boost::asio::io_service &ios,
-                A &&... a) {
+                const fostlib::host &to, io_context_type &ios, A &&... a) {
             auto cnx = std::make_shared<Cnx>(ios, std::forward<A>(a)...);
             /// Try to connect to the remote server
             boost::asio::ip::tcp::resolver resolver{ios};
-            boost::asio::ip::tcp::resolver::query q(
-                    to.name().c_str(), to.service().value().c_str());
+            boost::asio::ip::tcp::resolver::query q{
+                    static_cast<std::string>(to.name()),
+                    static_cast<std::string>(to.service().value())};
             boost::asio::ip::tcp::resolver::iterator endp = resolver.resolve(q),
                                                      end;
             boost::system::error_code error;
@@ -81,8 +88,7 @@ namespace fostlib {
                 Dispatch dispatch) {
             while (cnx.socket.is_open()) {
                 try {
-                    decoder<boost::asio::ip::tcp::socket> decode(
-                            cnx.socket, yield);
+                    decoder<socket_type> decode(cnx.socket, yield);
                     std::size_t packet_size = decode.read_size();
                     control_byte control = decode.read_byte();
                     decode.transfer(packet_size);
@@ -124,8 +130,7 @@ namespace fostlib {
 /// Implementation of TCP data send for outbound packets
 template<>
 inline void fostlib::hod::out_packet::operator()(
-        boost::asio::ip::tcp::socket &sock,
-        boost::asio::yield_context yield) const {
+        fostlib::socket_type &sock, boost::asio::yield_context yield) const {
     boost::asio::streambuf header;
     size_sequence(size(), header);
     header.sputc(control);
@@ -144,7 +149,7 @@ inline void fostlib::hod::out_packet::operator()(
 
 /// Implementation for transfer for TCP
 template<>
-inline void fostlib::hod::decoder<boost::asio::ip::tcp::socket>::transfer(
+inline void fostlib::hod::decoder<fostlib::socket_type>::transfer(
         std::size_t bytes) {
     /// If we have a socket then we transfer bytes for it. If however there
     /// is no socket this simply means that we assume that the input buffer

@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -10,17 +10,14 @@
 #include <fost/main>
 #include <fost/http>
 
-#include <boost/filesystem/fstream.hpp>
-#include <boost/lambda/bind.hpp>
-
 
 using namespace fostlib;
 
 
 FSL_MAIN(
-        L"fget",
-        L"Simple HTTP client\n"
-        L"Copyright (C) 2008-2015, Felspar Co. Ltd.")
+        "fget",
+        "Simple HTTP client\n"
+        "Copyright (C) 2008-2019, Felspar Co. Ltd.")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 
@@ -52,9 +49,8 @@ FSL_MAIN(
         o << response->body() << std::endl;
     } else {
         // Save the body to disk
-        boost::filesystem::ofstream file(
-                coerce<boost::filesystem::wpath>(args[2].value()),
-                std::ios::binary);
+        fostlib::ofstream file(
+                coerce<fostlib::fs::path>(args[2].value()), std::ios::binary);
         for (mime::const_iterator chunk(response->body()->begin());
              chunk != response->body()->end(); ++chunk) {
             const char *first = reinterpret_cast<const char *>((*chunk).first),
