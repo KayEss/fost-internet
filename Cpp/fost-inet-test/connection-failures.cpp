@@ -8,8 +8,8 @@
 
 #include "fost-inet-test.hpp"
 #include <fost/internet>
+#include <fost/timer>
 
-#include <boost/timer.hpp>
 #include <thread>
 
 
@@ -84,7 +84,7 @@ namespace {
     }
 }
 FSL_TEST_FUNCTION(early_closure) {
-    boost::timer timer;
+    fostlib::timer timer;
     boost::asio::io_service service;
     host localhost;
     uint16_t port = 64543u;
@@ -99,5 +99,5 @@ FSL_TEST_FUNCTION(early_closure) {
     // the connection
     std::vector<unsigned char> data(20480);
     FSL_CHECK_EXCEPTION(client >> data, fostlib::exceptions::unexpected_eof &);
-    FSL_CHECK(timer.elapsed() < 1);
+    FSL_CHECK(timer.seconds() < 1);
 }
