@@ -37,15 +37,6 @@ namespace {
         throw fostlib::exceptions::out_of_range<int>(
                 "Number to convert to hex digit is too big", 0, 0x10, dig);
     }
-    template<typename S>
-    S hex(utf8 ch) {
-        typename S::value_type num[4];
-        num[0] = '%';
-        num[1] = digit<typename S::value_type>((ch & 0xf0) >> 4);
-        num[2] = digit<typename S::value_type>(ch & 0x0f);
-        num[3] = 0;
-        return S(num);
-    }
     void hex(utf8 ch, std::string &into) {
         into += '%';
         into += digit<std::string::value_type>((ch & 0xf0) >> 4);
@@ -159,20 +150,23 @@ void fostlib::url::filepath_string_tag::do_encode(
 
 void fostlib::url::filepath_string_tag::do_encode(
         const ascii_printable_string &from,
-        ascii_printable_string &into,
+        ascii_printable_string &target,
         const bool encode_slash) {
-    into.clear();
-    std::size_t length = from.underlying().length();
+    std::string into;
+    std::size_t const length = from.bytes();
     into.reserve(length + length / 2);
     for (ascii_printable_string::const_iterator i(from.begin());
-         i != from.end(); ++i)
+         i != from.end(); ++i) {
         if ((encode_slash ? g_url_part_allowed : g_url_allowed)
                     .underlying()
                     .find(*i)
-            == std::string::npos)
-            into += hex<ascii_printable_string>(*i);
-        else
+            == std::string::npos) {
+            hex(*i, into);
+        } else {
             into += *i;
+        }
+    }
+    target = ascii_printable_string{into};
 }
 
 
@@ -207,13 +201,14 @@ void fostlib::url::filepath_string_tag::check_encoded(
 url::filepath_string fostlib::coercer<url::filepath_string, string>::coerce(
         const string &str) {
     utf8_string narrowed(fostlib::coerce<utf8_string>(str));
-    url::filepath_string encoded;
-    for (utf8_string::const_iterator it(narrowed.begin()); it != narrowed.end();
-         ++it)
-        if (g_url_allowed.underlying().find(*it) == std::string::npos)
-            encoded += hex<url::filepath_string>(*it);
-        else
+    std::string encoded;
+    for (auto it(narrowed.begin()); it != narrowed.end(); ++it) {
+        if (g_url_allowed.underlying().find(*it) == std::string::npos) {
+            hex(*it, encoded);
+        } else {
             encoded += *it;
+        }
+    }
     return encoded;
 }
 
