@@ -285,9 +285,8 @@ namespace {
             tb.headers().set(
                     "Content-Type", mime::mime_headers::content(mime_type));
         tb.headers().set_subvalue("Content-Type", "charset", "utf-8");
-        tb.headers().set(L"Content-Transfer-Encoding", L"8bit");
-        tb.headers().set(
-                "Content-Length", coerce<string>(body.underlying().length()));
+        tb.headers().set("Content-Transfer-Encoding", "8bit");
+        tb.headers().set("Content-Length", body.memory().size());
     }
 }
 fostlib::text_body::text_body(
