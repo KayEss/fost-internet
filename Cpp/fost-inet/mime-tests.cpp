@@ -165,6 +165,22 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document");
 }
+FSL_TEST_FUNCTION(text4_unicode) {
+    text_body ta(utf8_string("Test text document\xE2\x80\xBD"));
+    std::stringstream ss;
+    ss << ta;
+    mime::mime_headers headers;
+    headers.parse(
+            coerce<string>(partition(utf8_string(ss.str()), "\r\n\r\n").first));
+    FSL_CHECK_EQ(
+            utf8_string(ss.str()),
+            "\
+Content-Length: 21\r\n\
+Content-Transfer-Encoding: 8bit\r\n\
+Content-Type: text/plain; charset=\"utf-8\"\r\n\
+\r\n\
+Test text document\xE2\x80\xBD");
+}
 FSL_TEST_FUNCTION(text_iterators) {
     text_body ta(utf8_string("Test text document"));
     FSL_CHECK(ta.begin() != ta.end());
