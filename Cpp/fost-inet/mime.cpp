@@ -345,8 +345,8 @@ std::unique_ptr<mime::iterator_implementation>
 }
 
 
-/*
-    fostlib::binary_body
+/**
+    ## fostlib::binary_body
 */
 
 
