@@ -106,10 +106,10 @@ std::pair<string, headers_base::content> fostlib::mime::mime_headers::value(
                         partition(para.first, "=");
                 if (argument.second && argument.second.value().at(0) == '"'
                     && argument.second.value().at(
-                               argument.second.value().length() - 1)
+                               argument.second.value().code_points() - 1)
                             == '"') {
                     argument.second = argument.second.value().substr(
-                            1, argument.second.value().length() - 2);
+                            1, argument.second.value().code_points() - 2);
                 }
                 if (not argument.second)
                     throw exceptions::parse_error(
@@ -328,9 +328,9 @@ public mime::iterator_implementation {
     bool sent;
     text_body_iterator(const utf8_string &b) : body(b), sent(false) {}
     const_memory_block operator()() {
-        if (!body.underlying().length() || sent)
+        if (body.underlying().empty() || sent) {
             return const_memory_block();
-        else {
+        } else {
             sent = true;
             return const_memory_block{body.memory().data(),
                                       body.memory().data()

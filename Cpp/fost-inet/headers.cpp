@@ -40,7 +40,7 @@ namespace {
         if (cut_position == fostlib::string::npos)
             return string_pair(s.value(), fostlib::nullable<string>());
         fostlib::string second =
-                s.value().substr(cut_position + separator.length());
+                s.value().substr(cut_position + separator.code_points());
         return string_pair(
                 s.value().substr(0, cut_position),
                 second.empty() ? fostlib::nullable<string>() : second);
