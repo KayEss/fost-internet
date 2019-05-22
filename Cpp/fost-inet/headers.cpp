@@ -1,8 +1,8 @@
-/*
-    Copyright 1999-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 1999-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -16,8 +16,8 @@
 using namespace fostlib;
 
 
-/*
-    fostlib::headers_base
+/**
+    ## fostlib::headers_base
 */
 
 
@@ -40,7 +40,7 @@ namespace {
         if (cut_position == fostlib::string::npos)
             return string_pair(s.value(), fostlib::nullable<string>());
         fostlib::string second =
-                s.value().substr(cut_position + separator.length());
+                s.value().substr(cut_position + separator.code_points());
         return string_pair(
                 s.value().substr(0, cut_position),
                 second.empty() ? fostlib::nullable<string>() : second);
@@ -60,8 +60,8 @@ namespace {
 }
 
 void fostlib::headers_base::parse(const string &headers) {
-    // This implementation ignores character encodings
-    // - assumes UTF-8 which won't work for mail headers
+    /// This implementation ignores character encodings
+    /// - assumes UTF-8 which won't work for mail headers
     for (string_pair lines(mime_partition(headers)); !lines.first.empty();
          lines = mime_partition(lines.second)) {
         const string_pair line(partition(lines.first, ":"));
@@ -123,7 +123,7 @@ fostlib::headers_base::const_iterator fostlib::headers_base::end() const {
     return m_headers.end();
 }
 
-// NOTE: probably better if implemented as an ostream-derived class.
+/// NOTE: probably better if implemented as an ostream-derived class.
 namespace {
     std::string fold(const std::string &s, size_t line_limit) {
         std::stringstream ss;

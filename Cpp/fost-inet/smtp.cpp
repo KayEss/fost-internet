@@ -116,10 +116,9 @@ struct fostlib::smtp_client::implementation {
         utf8_string number = coerce<utf8_string>(coerce<string>(code));
         utf8_string response;
         cnx >> response;
-        if (response.underlying().substr(0, number.underlying().length())
-            != number.underlying()) {
+        if (not response.underlying().starts_with(number)) {
             exceptions::not_implemented exception(
-                    L"SMTP response was not the one expected");
+                    "SMTP response was not the one expected");
             insert(exception.data(), "code", "expected", code);
             insert(exception.data(), "code", "received", response);
             insert(exception.data(), "command", command);

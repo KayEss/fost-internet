@@ -383,38 +383,41 @@ const url::filepath_string &fostlib::url::pathspec() const {
 }
 
 void fostlib::url::pathspec(const url::filepath_string &a_pathName) {
-    url::filepath_string pathName(a_pathName);
-    // First, formalise the new path.
-    if (pathName.underlying().underlying().length() == 0) {
-        // Assume that if it's blank, the caller means '/'
-        pathName = url::filepath_string("/");
+    auto pathName = static_cast<std::string>(a_pathName);
+    /// First, formalise the new path.
+    if (pathName.empty()) {
+        /// Assume that if it's blank, the caller means '/'
+        pathName = "/";
     }
-    // Obvious directory fixes.
-    if (pathName.underlying().underlying().find("/.")
-        == (pathName.underlying().underlying().length() - 2)) {
-        pathName += '/'; // Add terminating slash if it ends with /.
-    } else if (
-            pathName.underlying().underlying().find("/..")
-            == (pathName.underlying().underlying().length() - 3)) {
+    /// Obvious directory fixes.
+    if (pathName.find("/.") == (pathName.length() - 2)) {
+        // Add terminating slash if it ends with /.
+        pathName += '/';
+    } else if (pathName.find("/..") == (pathName.length() - 3)) {
         pathName += url::filepath_string("/"); // Or /..
     } else if (pathName == url::filepath_string(".")) {
         pathName += url::filepath_string("/");
     } else if (pathName == url::filepath_string("..")) {
-        // Or if it's simply '..' or '.', both of which really mean '../' or
-        // './' anyway.
+        /// Or if it's simply '..' or '.', both of which really mean '../' or
+        /// './' anyway.
         pathName += url::filepath_string("/");
     }
     // Now do we add or replace?
-    if (pathName.underlying().underlying()[0] != '/') {
-        if (m_pathspec.underlying().underlying()
-                    [m_pathspec.underlying().underlying().length() - 1]
-            != '/')
+    if (pathName[0] != '/') {
+        if (not m_pathspec.underlying().underlying().ends_with("/")) {
             m_pathspec += url::filepath_string("/../");
-        // Whatever happens, we don't need the last part of the
-        // pathSpec anymore - the file name.
-        m_pathspec = normalise_path(m_pathspec + pathName);
-    } else // It begins with a /, so we replace.
+        }
+        /// Whatever happens, we don't need the last part of the
+        /// pathSpec anymore - the file name.
+        m_pathspec = normalise_path(
+                static_cast<std::string>(m_pathspec) += pathName);
+        /// TODO The above cast is a bit ugly, but will have to suffice until
+        /// we can get a proper API that allows us to add a std::string to a
+        /// tagged_string
+    } else {
+        /// It begins with a /, so we replace.
         m_pathspec = normalise_path(pathName);
+    }
 }
 
 
