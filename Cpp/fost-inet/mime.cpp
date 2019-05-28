@@ -8,6 +8,8 @@
 
 #include "fost-inet.hpp"
 #include <fost/mime.hpp>
+
+#include <fost/insert>
 #include <fost/string>
 
 #include <fost/exception/parse_error.hpp>
@@ -30,6 +32,28 @@ fostlib::mime::mime(const mime_headers &h, const string &content_type)
 }
 
 fostlib::mime::~mime() {}
+
+
+f5::u8string fostlib::mime::body_as_string() const {
+    f5::u8string string;
+    for (fostlib::mime::const_iterator i(begin()); i != end(); ++i) {
+        f5::u8string data(fostlib::coerce<fostlib::utf8_string>(*i));
+        if (data.bytes() < bytes(*i)) {
+            fostlib::exceptions::not_implemented err{__PRETTY_FUNCTION__,
+                                                     "Not all data converted"};
+            fostlib::insert(err.data(), "data", "bytes", data.bytes());
+            fostlib::insert(err.data(), "bytes", bytes(*i));
+            throw err;
+        }
+        string = string + data;
+    }
+    return string;
+}
+
+
+fostlib::json fostlib::mime::body_as_json() const {
+    return fostlib::json::parse(body_as_string());
+}
 
 
 fostlib::mime::const_iterator fostlib::mime::begin() const {

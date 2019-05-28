@@ -8,7 +8,6 @@ add_library(fost-inet
         http.authentication.cpp
         http.server.cpp
         http.useragent.cpp
-        mime-coercion.cpp
         mime.cpp
         pop3.cpp
         smtp.cpp

@@ -92,6 +92,7 @@ Content-Type: application/x-empty\r\n\
 FSL_TEST_FUNCTION(empty_mime_as_string) {
     empty_mime em;
     FSL_CHECK_EQ(coerce<string>(em), string());
+    FSL_CHECK_EQ(em.body_as_string(), string());
 }
 
 FSL_TEST_FUNCTION(empty_mime_with_headers) {
@@ -180,6 +181,8 @@ Content-Transfer-Encoding: 8bit\r\n\
 Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document\xE2\x80\xBD");
+    FSL_CHECK_EQ(
+            ta.body_as_string(), f5::u8view{"Test text document\xE2\x80\xBD"});
 }
 FSL_TEST_FUNCTION(text_iterators) {
     text_body ta(utf8_string("Test text document"));
