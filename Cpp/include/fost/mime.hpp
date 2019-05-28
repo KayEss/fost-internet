@@ -170,6 +170,10 @@ namespace fostlib {
         bool boundary_is_ok(const string &boundary) const;
 
         accessors<const utf8_string> text;
+
+        f5::u8string body_as_string() const {
+            return static_cast<f5::u8string>(text());
+        }
     };
 
     /// A MIME container which represents binary data in memory
