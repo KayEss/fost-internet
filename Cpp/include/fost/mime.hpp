@@ -229,7 +229,7 @@ namespace fostlib {
 
       public:
         file_body(
-                const boost::filesystem::wpath &file,
+                const fostlib::fs::path &file,
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream");
 
@@ -238,7 +238,7 @@ namespace fostlib {
         /// Check that the boundary can be used
         bool boundary_is_ok(const string &boundary) const;
 
-        accessors<const boost::filesystem::wpath> filename;
+        accessors<const fostlib::fs::path> filename;
     };
 
 

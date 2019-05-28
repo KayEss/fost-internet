@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2018, Felspar Co Ltd. <http://support.felspar.com/>
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -61,7 +61,7 @@ namespace fostlib {
             /// Construct a request for a URL with body data from a file
             request(const string &method,
                     const url &url,
-                    const boost::filesystem::wpath &data);
+                    const fostlib::fs::path &data);
             /// Construct a request for a URL with MIME data
             request(const string &method,
                     const url &url,
