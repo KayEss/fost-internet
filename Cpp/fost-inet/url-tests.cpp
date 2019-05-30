@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2018 Felspar Co Ltd. <https://support.felspar.com/>
+    Copyright 2008-2019, Felspar Co Ltd. <https://support.felspar.com/>
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -40,11 +40,8 @@ FSL_TEST_FUNCTION(filepath_string) {
             coerce<url::filepath_string>(string(L"a/b(c).html")),
             url::filepath_string("a/b%28c%29.html"));
 
-    FSL_CHECK_EQ(
-            coerce<boost::filesystem::wpath>(url::filepath_string("a")), L"a");
-    FSL_CHECK_EQ(
-            coerce<boost::filesystem::wpath>(url::filepath_string("%2B")),
-            L"+");
+    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("a")), L"a");
+    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("%2B")), L"+");
 }
 
 
@@ -206,7 +203,7 @@ FSL_TEST_FUNCTION(path_spec) {
             ascii_printable_string("http://localhost/file-name"));
 
     FSL_CHECK_EQ(
-            coerce<url::filepath_string>(boost::filesystem::wpath(L"test")),
+            coerce<url::filepath_string>(fostlib::fs::path(L"test")),
             url::filepath_string("test"));
     FSL_CHECK_EQ(coerce<string>(u.pathspec()), "/file-name");
     u.pathspec(url::filepath_string("/Coups%20d%27%C3%A9tat"));
@@ -217,10 +214,10 @@ FSL_TEST_FUNCTION(path_spec) {
 
     // This test is not reliable :(
     // #if BOOST_VERSION_MAJOR < 64
-    //     FSL_CHECK_EXCEPTION(coerce<boost::filesystem::wpath>(str),
+    //     FSL_CHECK_EXCEPTION(coerce<fostlib::fs::path>(str),
     //     std::exception&);
     // #else
-    //     FSL_CHECK_EQ(coerce<boost::filesystem::wpath>(str), L"/Coups
+    //     FSL_CHECK_EQ(coerce<fostlib::fs::path>(str), L"/Coups
     //     d'\u00e9tat");
     // #endif
 }

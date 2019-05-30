@@ -119,9 +119,7 @@ fostlib::http::user_agent::request::request(
         const string &method, const url &url, const string &data)
 : m_data(new text_body(data)), method(method), address(url) {}
 fostlib::http::user_agent::request::request(
-        const string &method,
-        const url &url,
-        const boost::filesystem::wpath &data)
+        const string &method, const url &url, const fostlib::fs::path &data)
 : m_data(new file_body(data)), method(method), address(url) {}
 fostlib::http::user_agent::request::request(
         const string &method, const url &url, boost::shared_ptr<mime> mime_data)

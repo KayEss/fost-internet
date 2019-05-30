@@ -214,8 +214,8 @@ url::filepath_string fostlib::coercer<url::filepath_string, string>::coerce(
 
 
 url::filepath_string
-        fostlib::coercer<url::filepath_string, boost::filesystem::wpath>::coerce(
-                const boost::filesystem::wpath &p) {
+        fostlib::coercer<url::filepath_string, fostlib::fs::path>::coerce(
+                const fostlib::fs::path &p) {
     return fostlib::coerce<url::filepath_string>(fostlib::coerce<string>(p));
 }
 
@@ -288,7 +288,7 @@ fostlib::url::url(const url &url, const filepath_string &path)
 : protocol(url.protocol()), server(url.server()), m_pathspec("/") {
     pathspec(path);
 }
-fostlib::url::url(const url &url, const boost::filesystem::wpath &path)
+fostlib::url::url(const url &url, const fostlib::fs::path &path)
 : protocol(url.protocol()), server(url.server()), m_pathspec("/") {
     pathspec(coerce<filepath_string>(path));
 }

@@ -44,6 +44,11 @@ namespace fostlib {
         virtual bool boundary_is_ok(const string &boundary) const = 0;
         virtual std::ostream &print_on(std::ostream &) const = 0;
 
+        /// APIs for fetching the body as one of a these representations.
+        /// These will throw if the body isn't valid or can't be parsed.
+        virtual f5::u8string body_as_string() const;
+        virtual fostlib::json body_as_json() const;
+
         /// An iterator that allows MIME data to be traversed
         class FOST_INET_DECLSPEC const_iterator {
             friend class fostlib::mime;
@@ -165,6 +170,10 @@ namespace fostlib {
         bool boundary_is_ok(const string &boundary) const;
 
         accessors<const utf8_string> text;
+
+        f5::u8string body_as_string() const {
+            return static_cast<f5::u8string>(text());
+        }
     };
 
     /// A MIME container which represents binary data in memory
@@ -220,7 +229,7 @@ namespace fostlib {
 
       public:
         file_body(
-                const boost::filesystem::wpath &file,
+                const fostlib::fs::path &file,
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream");
 
@@ -229,7 +238,7 @@ namespace fostlib {
         /// Check that the boundary can be used
         bool boundary_is_ok(const string &boundary) const;
 
-        accessors<const boost::filesystem::wpath> filename;
+        accessors<const fostlib::fs::path> filename;
     };
 
 
@@ -237,17 +246,16 @@ namespace fostlib {
     template<>
     struct FOST_INET_DECLSPEC coercer<utf8_string, mime> {
         /// Performs the coercion
-        utf8_string coerce(const mime &);
+        utf8_string coerce(mime const &m) {
+            return utf8_string{m.body_as_string()};
+        }
     };
 
     /// Allow the conversion of the MIME content to be extracted as a string
     template<>
     struct FOST_INET_DECLSPEC coercer<string, mime> {
         /// Performs the coercion
-        string coerce(const mime &m) {
-            return fostlib::coerce<fostlib::string>(
-                    fostlib::coerce<fostlib::utf8_string>(m));
-        }
+        string coerce(mime const &m) { return m.body_as_string(); }
     };
 
     /// Allow the conversion of MIME subclasses

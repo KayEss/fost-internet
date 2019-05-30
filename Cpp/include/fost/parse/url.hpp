@@ -1,5 +1,5 @@
 /**
-    Copyright 2007-2018 Felspar Co Ltd. <https://support.felspar.com/>
+    Copyright 2007-2019, Felspar Co Ltd. <https://support.felspar.com/>
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -156,7 +156,7 @@ namespace fostlib {
                     [boost::phoenix::bind(
                             [](auto &v, auto h, auto fs, auto qs, auto frag) {
                                 v = url(h,
-                                        boost::filesystem::path(
+                                        fostlib::fs::path(
                                                 fs.value_or(std::string{})));
                                 if (qs) v.query(qs.value());
                                 if (frag) v.fragment(frag.value());
