@@ -1,3 +1,6 @@
+2019-07-16  Kirit Saelensminde  <kirit@felspar.com>
+ Joining an empty fragment does not give the same result as joining a missing fragment.
+
 2019-05-28  Kirit Saelensminde  <kirit@felspar.com>
  Add methods for fetching out string version and JSON version of mime bodies.
 
