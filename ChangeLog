@@ -1,3 +1,6 @@
+2019-07-17  Kirit Saelensminde  <kirit@felspar.com>
+ Add a way to stop a web server instance.
+
 2019-07-16  Kirit Saelensminde  <kirit@felspar.com>
  Joining an empty fragment does not give the same result as joining a missing fragment.
 

@@ -1,8 +1,8 @@
-/*
-    Copyright 2008-2017, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2008-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -104,6 +104,9 @@ namespace fostlib {
 
             /// Create a server bound to a host and port
             explicit server(const host &h, uint16_t port = 80);
+
+            /// Can be used to force the web server to stop
+            void stop_server();
 
             /// The host the server is bound to
             accessors<const host> binding;

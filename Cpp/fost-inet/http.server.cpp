@@ -30,6 +30,13 @@ fostlib::http::server::server(const host &h, uint16_t p)
           m_service,
           boost::asio::ip::tcp::endpoint(binding().address(), port())) {}
 
+
+void fostlib::http::server::stop_server() {
+    m_server.close();
+    m_service.stop();
+}
+
+
 std::unique_ptr<http::server::request> fostlib::http::server::operator()() {
     std::unique_ptr<boost::asio::io_service> io_service(
             new boost::asio::io_service);
