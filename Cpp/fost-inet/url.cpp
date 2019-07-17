@@ -277,7 +277,8 @@ fostlib::url::url(const url &url, f5::u8view u) : fostlib::url(url) {
             fragment(null);
         }
         if (const auto frag = std::get<3>(parts); frag) {
-            fragment(ascii_printable_string(*frag));
+            /// The fragment part of the relative IRI parser retains the `#`
+            fragment(ascii_printable_string(*frag).substr(1));
         }
     } else {
         throw fostlib::exceptions::not_implemented(
