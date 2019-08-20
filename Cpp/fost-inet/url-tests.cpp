@@ -332,8 +332,7 @@ FSL_TEST_FUNCTION(url_join) {
             url(base, "#fr").as_string(),
             "https://loc:45/some/path?query=yes#fr");
     FSL_CHECK_EQ(
-            url(base, "#").as_string(),
-            "https://loc:45/some/path?query=yes#");
+            url(base, "#").as_string(), "https://loc:45/some/path?query=yes#");
     /// **TODO** The below test needs to throw rather than
     FSL_CHECK_EQ(
             url(base, "../../where").as_string(), "https://loc:45/../where");
