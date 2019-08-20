@@ -11,9 +11,26 @@
 #include <fost/exception/parse_error.hpp>
 #include <fost/insert>
 #include <fost/push_back>
+#include <fost/url.hpp>
 
 
 using namespace fostlib;
+
+
+void fostlib::parse_cookies(fostlib::headers_base::content &cookie) {
+    const auto unescape = [](const auto &s) {
+        const fostlib::url::filepath_string fs{s};
+        return fostlib::coerce<fostlib::string>(fs);
+    };
+    auto cookies = fostlib::split(cookie.value(), "; ");
+    for (const auto &cv : cookies) {
+        const auto parts = partition(cv, "=");
+        cookie.subvalue(
+                unescape(parts.first),
+                unescape(parts.second.value_or(fostlib::string())));
+    }
+    cookie.value(fostlib::string());
+}
 
 
 /**

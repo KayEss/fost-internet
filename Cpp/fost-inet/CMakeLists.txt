@@ -1,6 +1,5 @@
 add_library(fost-inet
         connection.cpp
-        cookie.cpp
         email.cpp
         fost-inet.cpp
         headers.cpp
@@ -22,7 +21,7 @@ install(TARGETS fost-inet LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 if(TARGET check)
     add_library(fost-inet-smoke STATIC EXCLUDE_FROM_ALL
             authentication-tests.cpp
-            cookie.tests.cpp
+            headers.cookie.tests.cpp
             headers-tests.cpp
             host-tests.cpp
             http-tests.cpp
