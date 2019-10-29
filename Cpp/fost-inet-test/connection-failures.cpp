@@ -68,15 +68,16 @@ FSL_TEST_FUNCTION(read_timeouts) {
 namespace {
     void send_data() {
         auto service = std::make_unique<boost::asio::io_service>();
-        host localhost;
-        uint16_t port = 64543u;
+        host const localhost;
+        uint16_t const port = 64543u;
         // Set up a server on a socket
-        boost::asio::ip::tcp::acceptor server(
+        auto server = std::make_unique<boost::asio::ip::tcp::acceptor>(
                 *service,
                 boost::asio::ip::tcp::endpoint(localhost.address(), port));
         auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
         // Accept the connection
-        server.accept(*sock);
+        server->accept(*sock);
+        server.reset(); // Must destroy it before the connection below is destructed
         network_connection server_cnx(std::move(service), std::move(sock));
         // Send a few KB of data
         std::string data(10240, '*');
@@ -86,8 +87,8 @@ namespace {
 FSL_TEST_FUNCTION(early_closure) {
     fostlib::timer timer;
     boost::asio::io_service service;
-    host localhost;
-    uint16_t port = 64543u;
+    host const localhost;
+    uint16_t const port = 64543u;
     // Send some data to the socket
     worker server;
     server(send_data);
