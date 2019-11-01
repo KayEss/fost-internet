@@ -104,8 +104,8 @@ namespace {
     // in the DLL initialisation
     const headers_base::content g_stat;
 }
-const headers_base::content &fostlib::headers_base::
-        operator[](const fostlib::string &n) const {
+const headers_base::content &
+        fostlib::headers_base::operator[](const fostlib::string &n) const {
     header_store_type::const_iterator p(m_headers.find(n));
     if (p == m_headers.end())
         return g_stat;
@@ -159,8 +159,8 @@ namespace {
     }
 }
 
-std::ostream &fostlib::
-        operator<<(std::ostream &o, const fostlib::headers_base &headers) {
+std::ostream &fostlib::operator<<(
+        std::ostream &o, const fostlib::headers_base &headers) {
     for (headers_base::const_iterator i(headers.begin()); i != headers.end();
          ++i) {
         std::stringstream ss;
@@ -262,8 +262,8 @@ headers_base::content::const_iterator
     return m_subvalues.end();
 }
 
-std::ostream &fostlib::
-        operator<<(std::ostream &o, const headers_base::content &v) {
+std::ostream &
+        fostlib::operator<<(std::ostream &o, const headers_base::content &v) {
     /// Without the `static_cast` here the Android NDK compiler goes super weird
     o << static_cast<std::string_view>(v.value());
     for (auto const &i : v) {

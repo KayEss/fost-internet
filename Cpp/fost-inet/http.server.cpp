@@ -253,8 +253,8 @@ fostlib::host fostlib::http::server::request::remote_address() const {
 }
 
 
-fostlib::nullable<fostlib::json> fostlib::http::server::request::
-        operator[](const jcursor &pos) const {
+fostlib::nullable<fostlib::json>
+        fostlib::http::server::request::operator[](const jcursor &pos) const {
     if (pos.size()) {
         const auto size = pos.size();
         if (pos[0] == "headers" && (size == 2 || size == 3)) {
@@ -292,8 +292,8 @@ boost::shared_ptr<fostlib::binary_body>
 }
 
 
-void fostlib::http::server::request::
-        operator()(mime &response, const ascii_string &status) {
+void fostlib::http::server::request::operator()(
+        mime &response, const ascii_string &status) {
     m_handler(response, status);
 }
 
@@ -354,8 +354,8 @@ nliteral fostlib::http::server::status_text(int code) {
 }
 
 
-void fostlib::http::server::request::
-        operator()(mime &response, const int status) {
+void fostlib::http::server::request::operator()(
+        mime &response, const int status) {
     std::stringstream ss;
     ss << status << " " << status_text(status);
     (*this)(response, ascii_string{ss.str()});

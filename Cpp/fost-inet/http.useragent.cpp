@@ -44,8 +44,8 @@ fostlib::http::user_agent::user_agent() {}
 fostlib::http::user_agent::user_agent(const url &u) : base(u) {}
 
 
-std::unique_ptr<http::user_agent::response> fostlib::http::user_agent::
-        operator()(request &req) const {
+std::unique_ptr<http::user_agent::response>
+        fostlib::http::user_agent::operator()(request &req) const {
     try {
         if (!req.headers().exists("Date")) {
             req.headers().set(

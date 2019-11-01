@@ -364,8 +364,8 @@ fostlib::host fostlib::network_connection::remote_end() {
 }
 
 
-network_connection &fostlib::network_connection::
-        operator<<(const const_memory_block &p) {
+network_connection &
+        fostlib::network_connection::operator<<(const const_memory_block &p) {
     const unsigned char *begin = reinterpret_cast<const unsigned char *>(
                                 p.first),
                         *end = reinterpret_cast<const unsigned char *>(
@@ -379,8 +379,8 @@ network_connection &fostlib::network_connection::
     }
     return *this;
 }
-network_connection &fostlib::network_connection::
-        operator<<(const utf8_string &s) {
+network_connection &
+        fostlib::network_connection::operator<<(const utf8_string &s) {
     boost::asio::streambuf b;
     std::ostream os(&b);
     os << s.underlying();
@@ -388,8 +388,8 @@ network_connection &fostlib::network_connection::
     b.consume(length);
     return *this;
 }
-network_connection &fostlib::network_connection::
-        operator<<(const std::stringstream &ss) {
+network_connection &
+        fostlib::network_connection::operator<<(const std::stringstream &ss) {
     return this->operator<<(utf8_string{ss.str()});
 }
 
@@ -415,8 +415,8 @@ network_connection &fostlib::network_connection::operator>>(std::string &s) {
     }
     return *this;
 }
-network_connection &fostlib::network_connection::
-        operator>>(std::vector<utf8> &v) {
+network_connection &
+        fostlib::network_connection::operator>>(std::vector<utf8> &v) {
     const std::size_t chunk =
             coerce<std::size_t>(c_large_read_chunk_size.value());
     while (v.size() - m_input_buffer->size()
