@@ -26,7 +26,9 @@ FSL_MAIN(
     // Create a user agent and request the URL
     http::user_agent browser;
     http::user_agent::request request("GET", url(location));
-    if (args.commandSwitch("authenticate") == "FOST") {
+    if (not args.commandSwitch("authenticate").has_value()) {
+        // Do nothing as there is no authentication mechanism
+    } else if (args.commandSwitch("authenticate") == "FOST") {
         std::set<fostlib::string> tosign;
         if (args.commandSwitch("user")) {
             request.headers().set(
@@ -41,6 +43,10 @@ FSL_MAIN(
         fost_authentication(
                 browser, args.commandSwitch("key").value(),
                 args.commandSwitch("secret").value(), tosign);
+    } else {
+        o << "Unknown authentication mechanism "
+          << args.commandSwitch("authenticate") << std::endl;
+        return 4;
     }
     auto response(browser(request));
     if (not args[2]) {
