@@ -17,7 +17,7 @@ using namespace fostlib;
 FSL_MAIN(
         "fget",
         "Simple HTTP client\n"
-        "Copyright (C) 2008-2019, Felspar Co. Ltd.")
+        "Copyright (c) 2008-2019 Red Anchor Trading Co. Ltd.")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 
