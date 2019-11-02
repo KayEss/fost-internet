@@ -57,14 +57,36 @@ struct ssl_data {
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
+    ssl_data(io_context_type &, socket_type &sock, const std::string &hostname)
+    : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
+        if (not SSL_set_tlsext_host_name(
+                    ssl_sock.native_handle(), hostname.c_str())) {
+            boost::system::error_code ec{
+                    static_cast<int>(::ERR_get_error()),
+                    boost::asio::error::get_ssl_category()};
+            throw exceptions::socket_error(ec);
+        }
+        ctx.set_default_verify_paths();
+        ssl_sock.lowest_layer().set_option(
+                boost::asio::ip::tcp::no_delay(true));
+        ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
+        ssl_sock.set_verify_callback(
+                boost::asio::ssl::rfc2818_verification(hostname));
+        ssl_sock.handshake(boost::asio::ssl::stream_base::client);
+    }
 
     boost::asio::ssl::context ctx;
     boost::asio::ssl::stream<socket_type &> ssl_sock;
 };
+/// Because `ssl` is a private member of `network_connection` we can't
+/// just use this in the free functions below that implement the actual
+/// networking. This sub-classing mechanism works around that.
 struct network_connection::ssl : public ssl_data {
-    ssl(io_context_type &io_service, socket_type &sock)
-    : ssl_data(io_service, sock) {}
+    template<typename... Args>
+    ssl(Args &&... args) : ssl_data{std::forward<Args>(args)...} {}
 };
+
+
 namespace {
 
     void handle_error(
@@ -356,6 +378,14 @@ fostlib::network_connection::~network_connection() {
 
 void fostlib::network_connection::start_ssl() {
     m_ssl_data = new ssl(*io_service, *m_socket);
+}
+void fostlib::network_connection::start_ssl(f5::u8view hostname) {
+    try {
+        m_ssl_data = new ssl{*io_service, *m_socket,
+                             static_cast<std::string>(hostname)};
+    } catch (boost::system::system_error &e) {
+        throw exceptions::socket_error(e.code());
+    }
 }
 
 

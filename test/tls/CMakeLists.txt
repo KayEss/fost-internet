@@ -16,6 +16,7 @@ if(TARGET stress)
     ssltest(sha512.badssl.com true)
 
     ssltest(not-valid.example.com false)
+    ssltest(expired.badssl.com false)
 
     add_custom_target(fost-internet-ssl-tests
         DEPENDS ${fost-internet-ssl-test-list})

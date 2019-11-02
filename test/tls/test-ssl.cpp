@@ -42,19 +42,26 @@ FSL_MAIN(
         fostlib::http::user_agent browser;
         fostlib::http::user_agent::request request(
                 "GET", fostlib::url{location});
-        auto response(browser(request));
+        auto response = browser(request);
         if (c_works.value()) {
             worked();
             return 0;
         } else {
+            o << "No exception was thrown when one was expected\n";
+            o << response->body()->body_as_string() << std::endl;
             return 1;
         }
     } catch (fostlib::exceptions::exception &e) {
-        if (c_works.value()) {
-            return 2;
-        } else {
+        if (not c_works.value()) {
             worked();
             return 0;
+        } else {
+            o << e << std::endl;
+            return 2;
         }
+    } catch (std::exception &e) {
+        std::cerr << "Caught a std::exception " << typeid(e).name() << '\n';
+        std::cerr << e.what() << std::endl;
+        return 3;
     }
 }
