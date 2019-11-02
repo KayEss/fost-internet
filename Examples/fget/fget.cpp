@@ -22,8 +22,7 @@ FSL_MAIN(
     args.commandSwitch("socks", "Network settings", "Socks version");
 
     // The URL to be fetched (default to localhost)
-    string location = args[1].value_or(L"http://localhost/");
-    o << location << std::endl;
+    string location = args[1].value_or("http://localhost/");
     // Create a user agent and request the URL
     http::user_agent browser;
     http::user_agent::request request("GET", url(location));
@@ -46,7 +45,7 @@ FSL_MAIN(
     auto response(browser(request));
     if (not args[2]) {
         // Display the body
-        o << response->body() << std::endl;
+        o << response->body()->body_as_string() << std::endl;
     } else {
         // Save the body to disk
         fostlib::ofstream file(
