@@ -57,6 +57,9 @@ namespace fostlib {
         /// Start SSL on this connection. After a successful handshake all
         /// traffic will be over SSL.
         void start_ssl();
+        /// Start a SSL connection and verify the server connection for the
+        /// specified host name.
+        void start_ssl(f5::u8view hostname);
 
         /// Return the remote end
         host remote_end();

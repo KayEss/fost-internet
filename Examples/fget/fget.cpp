@@ -17,17 +17,18 @@ using namespace fostlib;
 FSL_MAIN(
         "fget",
         "Simple HTTP client\n"
-        "Copyright (C) 2008-2019, Felspar Co. Ltd.")
+        "Copyright (c) 2008-2019 Red Anchor Trading Co. Ltd.")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 
     // The URL to be fetched (default to localhost)
-    string location = args[1].value_or(L"http://localhost/");
-    o << location << std::endl;
+    string location = args[1].value_or("http://localhost/");
     // Create a user agent and request the URL
     http::user_agent browser;
     http::user_agent::request request("GET", url(location));
-    if (args.commandSwitch("authenticate") == "FOST") {
+    if (not args.commandSwitch("authenticate").has_value()) {
+        // Do nothing as there is no authentication mechanism
+    } else if (args.commandSwitch("authenticate") == "FOST") {
         std::set<fostlib::string> tosign;
         if (args.commandSwitch("user")) {
             request.headers().set(
@@ -42,11 +43,15 @@ FSL_MAIN(
         fost_authentication(
                 browser, args.commandSwitch("key").value(),
                 args.commandSwitch("secret").value(), tosign);
+    } else {
+        o << "Unknown authentication mechanism "
+          << args.commandSwitch("authenticate") << std::endl;
+        return 4;
     }
     auto response(browser(request));
     if (not args[2]) {
         // Display the body
-        o << response->body() << std::endl;
+        o << response->body()->body_as_string() << std::endl;
     } else {
         // Save the body to disk
         fostlib::ofstream file(

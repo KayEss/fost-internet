@@ -44,8 +44,8 @@ fostlib::http::user_agent::user_agent() {}
 fostlib::http::user_agent::user_agent(const url &u) : base(u) {}
 
 
-std::unique_ptr<http::user_agent::response> fostlib::http::user_agent::
-        operator()(request &req) const {
+std::unique_ptr<http::user_agent::response>
+        fostlib::http::user_agent::operator()(request &req) const {
     try {
         if (!req.headers().exists("Date")) {
             req.headers().set(
@@ -63,8 +63,9 @@ std::unique_ptr<http::user_agent::response> fostlib::http::user_agent::
         if (authentication()) authentication()(req);
 
         network_connection cnx(req.address().server(), req.address().port());
-        if (req.address().protocol() == ascii_printable_string("https"))
-            cnx.start_ssl();
+        if (req.address().protocol() == "https") {
+            cnx.start_ssl(req.address().server().name());
+        }
 
         std::stringstream buffer;
         buffer << coerce<utf8_string>(req.method()).underlying() << " "

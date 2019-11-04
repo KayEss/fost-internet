@@ -77,7 +77,8 @@ namespace {
         auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*service);
         // Accept the connection
         server->accept(*sock);
-        server.reset(); // Must destroy it before the connection below is destructed
+        server.reset(); // Must destroy it before the connection below is
+                        // destructed
         network_connection server_cnx(std::move(service), std::move(sock));
         // Send a few KB of data
         std::string data(10240, '*');
