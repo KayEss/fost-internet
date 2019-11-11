@@ -29,6 +29,19 @@ namespace fostlib {
     using socket_type = boost::asio::ip::tcp::socket;
 
 
+    /// ## Networking configuration options
+    extern setting<int64_t> const c_connect_timeout;
+    extern setting<int64_t> const c_read_timeout;
+    extern setting<int64_t> const c_large_read_chunk_size;
+
+    extern setting<json> const c_socks_version;
+    extern setting<fostlib::string> const c_socks_host;
+
+    extern setting<bool> const c_always_skip_cert_verification;
+    extern setting<bool> const c_tls_use_standard_verify_paths;
+    extern setting<json> const c_extra_ca_cert_paths;
+
+
     /// A TCP/IP network connection from either a server or client
     class FOST_INET_DECLSPEC network_connection final {
         struct ssl;

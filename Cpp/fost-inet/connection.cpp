@@ -18,38 +18,54 @@
 using namespace fostlib;
 
 
-namespace {
-    const setting<int64_t> c_connect_timeout(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Connect time out",
-            10,
-            true);
-    const setting<int64_t> c_read_timeout(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Read time out",
-            30,
-            true);
-    const setting<int64_t> c_large_read_chunk_size(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Large read chunk size",
-            1024,
-            true);
-    const setting<json> c_socks_version(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Socks version",
-            json(),
-            true);
-    const setting<string> c_socks_host(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Socks host",
-            L"localhost:8888",
-            true);
-}
+/**
+ * ## Configuration defaults
+ */
+
+
+fostlib::setting<int64_t> const fostlib::c_connect_timeout{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Connect time out", 10, true};
+fostlib::setting<int64_t> const fostlib::c_read_timeout{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Read time out", 30, true};
+fostlib::setting<int64_t> const fostlib::c_large_read_chunk_size{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Large read chunk size", 1024, true};
+
+fostlib::setting<fostlib::json> const fostlib::c_socks_version{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Socks version", json{}, true};
+fostlib::setting<fostlib::string> const fostlib::c_socks_host{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Socks host", "localhost:8888", true};
+
+
+fostlib::setting<bool> const fostlib::c_always_skip_cert_verification{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Always skip TLS server certificate verification", false, true};
+#ifdef ANDROID
+fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Use standard verify paths", false, true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificate paths",
+        fostlib::json::array_t{fostlib::json{"/system/etc/security/cacerts/"}},
+        true};
+#else
+fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Use standard verify paths", true, true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificate paths", fostlib::json::array_t{}, true};
+#endif
+
+
+/**
+ * ## TLS implementation
+ */
 
 
 struct ssl_data {
@@ -72,8 +88,14 @@ struct ssl_data {
         }
         ssl_sock.lowest_layer().set_option(
                 boost::asio::ip::tcp::no_delay(true));
-        if (verify) {
-            ctx.set_default_verify_paths();
+        if (verify && not c_always_skip_cert_verification.value()) {
+            if (c_tls_use_standard_verify_paths.value()) {
+                ctx.set_default_verify_paths();
+            }
+            for (auto const &path : c_extra_ca_cert_paths.value()) {
+                ctx.add_verify_path(static_cast<std::string>(
+                        fostlib::coerce<fostlib::string>(path)));
+            }
             ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
             ssl_sock.set_verify_callback(
                     boost::asio::ssl::rfc2818_verification(hostname));
@@ -91,6 +113,11 @@ struct network_connection::ssl : public ssl_data {
     template<typename... Args>
     ssl(Args &&... args) : ssl_data{std::forward<Args>(args)...} {}
 };
+
+
+/**
+ * ## Networking implementation
+ */
 
 
 namespace {
@@ -487,7 +514,7 @@ void fostlib::network_connection::operator>>(boost::asio::streambuf &b) {
 
 
 /**
-    ## fostlib::exceptions::socket_error
+    ## `fostlib::exceptions::socket_error`
 */
 
 
@@ -526,7 +553,7 @@ wliteral const fostlib::exceptions::socket_error::message() const throw() {
 
 
 /**
-    ## fostlib::exceptions::connect_failure
+    ## `fostlib::exceptions::connect_failure`
 */
 
 
@@ -545,7 +572,7 @@ fostlib::wliteral const fostlib::exceptions::connect_failure::message() const
 
 
 /**
-    ## fostlib::exceptions::read_timeout
+    ## `fostlib::exceptions::read_timeout`
 */
 
 
@@ -558,7 +585,7 @@ wliteral const fostlib::exceptions::read_timeout::message() const throw() {
 
 
 /**
-    ## fostlib::exceptions::read_error
+    ## `fostlib::exceptions::read_error`
 */
 
 
