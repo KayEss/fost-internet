@@ -66,9 +66,9 @@ struct ssl_data {
                     boost::asio::error::get_ssl_category()};
             throw exceptions::socket_error(ec);
         }
-        ctx.set_default_verify_paths();
         ssl_sock.lowest_layer().set_option(
                 boost::asio::ip::tcp::no_delay(true));
+        ctx.set_default_verify_paths();
         ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
         ssl_sock.set_verify_callback(
                 boost::asio::ssl::rfc2818_verification(hostname));
