@@ -57,7 +57,11 @@ struct ssl_data {
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
-    ssl_data(io_context_type &, socket_type &sock, const std::string &hostname)
+    ssl_data(
+            io_context_type &,
+            socket_type &sock,
+            std::string const &hostname,
+            bool const verify)
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         if (not SSL_set_tlsext_host_name(
                     ssl_sock.native_handle(), hostname.c_str())) {
@@ -68,10 +72,12 @@ struct ssl_data {
         }
         ssl_sock.lowest_layer().set_option(
                 boost::asio::ip::tcp::no_delay(true));
-        ctx.set_default_verify_paths();
-        ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
-        ssl_sock.set_verify_callback(
-                boost::asio::ssl::rfc2818_verification(hostname));
+        if (verify) {
+            ctx.set_default_verify_paths();
+            ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
+            ssl_sock.set_verify_callback(
+                    boost::asio::ssl::rfc2818_verification(hostname));
+        }
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
 
@@ -379,10 +385,10 @@ fostlib::network_connection::~network_connection() {
 void fostlib::network_connection::start_ssl() {
     m_ssl_data = new ssl(*io_service, *m_socket);
 }
-void fostlib::network_connection::start_ssl(f5::u8view hostname) {
+void fostlib::network_connection::start_ssl(f5::u8view hostname, bool verify) {
     try {
         m_ssl_data = new ssl{*io_service, *m_socket,
-                             static_cast<std::string>(hostname)};
+                             static_cast<std::string>(hostname), verify};
     } catch (boost::system::system_error &e) {
         throw exceptions::socket_error(e.code());
     }

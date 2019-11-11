@@ -59,7 +59,7 @@ namespace fostlib {
         void start_ssl();
         /// Start a SSL connection and verify the server connection for the
         /// specified host name.
-        void start_ssl(f5::u8view hostname);
+        void start_ssl(f5::u8view hostname, bool verify = true);
 
         /// Return the remote end
         host remote_end();
