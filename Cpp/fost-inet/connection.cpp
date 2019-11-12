@@ -532,36 +532,36 @@ void fostlib::network_connection::operator>>(boost::asio::streambuf &b) {
 */
 
 
-fostlib::exceptions::socket_error::socket_error() throw() {}
+fostlib::exceptions::socket_error::socket_error() noexcept {}
 
-fostlib::exceptions::socket_error::socket_error(const string &message) throw()
+fostlib::exceptions::socket_error::socket_error(const string &message) noexcept
 : exception(message) {}
 
 fostlib::exceptions::socket_error::socket_error(
-        const string &message, const string &extra) throw()
+        const string &message, const string &extra) noexcept
 : exception(message) {
     insert(data(), "context", extra);
 }
 
 fostlib::exceptions::socket_error::socket_error(
-        boost::system::error_code error) throw()
+        boost::system::error_code error) noexcept
 : error(error) {
     insert(data(), "error",
            string(boost::lexical_cast<std::string>(error).c_str()));
 }
 
 fostlib::exceptions::socket_error::socket_error(
-        boost::system::error_code error, const string &message) throw()
+        boost::system::error_code error, const string &message) noexcept
 : exception(message), error(error) {
     insert(data(), "error",
            string(boost::lexical_cast<std::string>(error).c_str()));
 }
 
-fostlib::exceptions::socket_error::~socket_error() throw() try {
+fostlib::exceptions::socket_error::~socket_error() noexcept try {
 } catch (...) { fostlib::absorb_exception(); }
 
 
-wliteral const fostlib::exceptions::socket_error::message() const throw() {
+wliteral const fostlib::exceptions::socket_error::message() const noexcept {
     return L"Socket error";
 }
 
@@ -572,7 +572,7 @@ wliteral const fostlib::exceptions::socket_error::message() const throw() {
 
 
 fostlib::exceptions::connect_failure::connect_failure(
-        boost::system::error_code error, const host &h, port_number p) throw()
+        boost::system::error_code error, const host &h, port_number p) noexcept
 : socket_error(error) {
     insert(data(), "host", h);
     insert(data(), "port", p);
@@ -580,7 +580,7 @@ fostlib::exceptions::connect_failure::connect_failure(
 
 
 fostlib::wliteral const fostlib::exceptions::connect_failure::message() const
-        throw() {
+        noexcept {
     return L"Network connection failure";
 }
 
@@ -590,10 +590,10 @@ fostlib::wliteral const fostlib::exceptions::connect_failure::message() const
 */
 
 
-fostlib::exceptions::read_timeout::read_timeout() throw() {}
+fostlib::exceptions::read_timeout::read_timeout() noexcept {}
 
 
-wliteral const fostlib::exceptions::read_timeout::message() const throw() {
+wliteral const fostlib::exceptions::read_timeout::message() const noexcept {
     return L"Read time out";
 }
 
@@ -603,14 +603,14 @@ wliteral const fostlib::exceptions::read_timeout::message() const throw() {
 */
 
 
-fostlib::exceptions::read_error::read_error() throw() {}
+fostlib::exceptions::read_error::read_error() noexcept {}
 
 
 fostlib::exceptions::read_error::read_error(
-        boost::system::error_code error) throw()
+        boost::system::error_code error) noexcept
 : socket_error(error) {}
 
 
-wliteral const fostlib::exceptions::read_error::message() const throw() {
+wliteral const fostlib::exceptions::read_error::message() const noexcept {
     return L"Read error";
 }
