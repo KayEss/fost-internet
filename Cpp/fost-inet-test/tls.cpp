@@ -45,3 +45,17 @@ FSL_TEST_FUNCTION(specified_root) {
     auto const response = ua.get(fostlib::url{"https://sha256.badssl.com/"});
     FSL_CHECK_EQ(response->status(), 200);
 }
+
+
+FSL_TEST_FUNCTION(specify_lets_encrypt) {
+    fostlib::setting<bool> const no_default_paths{
+            "fost-inet-test/tls.cpp", fostlib::c_tls_use_standard_verify_paths,
+            false};
+    fostlib::setting<fostlib::json> const digicert_ca{
+            "fost-inet-test/tls.cpp", fostlib::c_extra_ca_certificates,
+            fostlib::json::array_t{{fostlib::lets_encrypt_root()}}};
+    fostlib::http::user_agent ua;
+    auto const response =
+            ua.get(fostlib::url{"https://valid-isrgrootx1.letsencrypt.org/"});
+    FSL_CHECK_EQ(response->status(), 200);
+}

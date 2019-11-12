@@ -44,6 +44,7 @@ namespace fostlib {
 
     /// ### Well known certificates
     f5::u8view digicert_root_ca();
+    f5::u8view lets_encrypt_root();
 
 
     /// ## `network_connection`
