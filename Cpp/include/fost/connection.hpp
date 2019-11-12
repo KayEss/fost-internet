@@ -37,6 +37,8 @@ namespace fostlib {
     extern setting<json> const c_socks_version;
     extern setting<fostlib::string> const c_socks_host;
 
+    /// TLS server certificate verification options. See the
+    /// [TLS documentation](./../fost-inet/TLS.md)
     extern setting<bool> const c_always_skip_cert_verification;
     extern setting<bool> const c_tls_use_standard_verify_paths;
     extern setting<json> const c_extra_ca_cert_paths;
