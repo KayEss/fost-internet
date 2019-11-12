@@ -40,7 +40,13 @@ namespace fostlib {
     extern setting<bool> const c_always_skip_cert_verification;
     extern setting<bool> const c_tls_use_standard_verify_paths;
     extern setting<json> const c_extra_ca_cert_paths;
+    extern setting<json> const c_extra_ca_certificates;
 
+    /// ### Well known certificates
+    f5::u8view digicert_root_ca();
+
+
+    /// ## `network_connection`
 
     /// A TCP/IP network connection from either a server or client
     class FOST_INET_DECLSPEC network_connection final {

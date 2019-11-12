@@ -44,6 +44,8 @@ fostlib::setting<fostlib::string> const fostlib::c_socks_host{
 fostlib::setting<bool> const fostlib::c_always_skip_cert_verification{
         "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
         "Always skip TLS server certificate verification", false, true};
+
+/// ### Android
 #ifdef ANDROID
 fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
         "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
@@ -53,6 +55,10 @@ fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
         "Extra CA certificate paths",
         fostlib::json::array_t{fostlib::json{"/system/etc/security/cacerts/"}},
         true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_certificates{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificates", fostlib::json::array_t{}, true};
+/// ### Default configuration
 #else
 fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
         "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
@@ -60,6 +66,9 @@ fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
 fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
         "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
         "Extra CA certificate paths", fostlib::json::array_t{}, true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_certificates{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificates", fostlib::json::array_t{}, true};
 #endif
 
 
@@ -95,6 +104,11 @@ struct ssl_data {
             for (auto const &path : c_extra_ca_cert_paths.value()) {
                 ctx.add_verify_path(static_cast<std::string>(
                         fostlib::coerce<fostlib::string>(path)));
+            }
+            for (auto const &certjs : c_extra_ca_certificates.value()) {
+                auto const cert = fostlib::coerce<f5::u8view>(certjs);
+                ctx.add_certificate_authority(boost::asio::buffer(
+                        cert.memory().data(), cert.memory().size()));
             }
             ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
             ssl_sock.set_verify_callback(
