@@ -1,3 +1,6 @@
+2019-11-13  Kirit Saelensminde  <kirit@felspar.com>
+ Added a number of configuration options for server certificate checking.
+
 2019-11-02  Kirit Saelensminde  <kirit@felspar.com>
  Add option to verify server certificates on the network connection and force UA to use it
 
