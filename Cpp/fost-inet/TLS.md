@@ -10,6 +10,18 @@ Server certificate checking cannot be done without knowing the expected hostname
 ## Configuration options
 
 
+### `fostlib::c_always_skip_cert_verification` -- boolean
+
+When set to `true` all certificate verification steps are skipped.
+
+```ini
+[TLS]
+Always skip TLS server certificate verification=true
+```
+
+This defaults to `false` on all platforms. Skipping verification can be a useful debugging tool
+
+
 ### `fostlib::c_tls_use_standard_verify_paths` -- boolean
 
 Turns on or off the search for OpenSSL root certificates in the standard system paths.
@@ -40,7 +52,7 @@ Extra certificates that will be accepted.
 
 ```ini
 [TLS]
-Extra CA certificates = ["-----BEGIN CERTIFICATE-----\n{base 64 data}\n-----END CERTIFICATE-----\n]
+Extra CA certificates=["-----BEGIN CERTIFICATE-----\n{base 64 data}\n-----END CERTIFICATE-----\n"]
 ```
 
 On Apple this includes one Digicert certificate and the Let's Encrypt root. This is unlikely to be enough for most applications, but is enough for all of the tests. On other platforms the list is empty because a full set of root certificates are already available.
