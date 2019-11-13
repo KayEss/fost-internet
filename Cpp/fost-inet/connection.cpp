@@ -18,38 +18,63 @@
 using namespace fostlib;
 
 
-namespace {
-    const setting<int64_t> c_connect_timeout(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Connect time out",
-            10,
-            true);
-    const setting<int64_t> c_read_timeout(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Read time out",
-            30,
-            true);
-    const setting<int64_t> c_large_read_chunk_size(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Large read chunk size",
-            1024,
-            true);
-    const setting<json> c_socks_version(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Socks version",
-            json(),
-            true);
-    const setting<string> c_socks_host(
-            "fost-internet/Cpp/fost-inet/connection.cpp",
-            "Network settings",
-            "Socks host",
-            L"localhost:8888",
-            true);
-}
+/**
+ * ## Configuration defaults
+ */
+
+
+fostlib::setting<int64_t> const fostlib::c_connect_timeout{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Connect time out", 10, true};
+fostlib::setting<int64_t> const fostlib::c_read_timeout{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Read time out", 30, true};
+fostlib::setting<int64_t> const fostlib::c_large_read_chunk_size{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Large read chunk size", 1024, true};
+
+fostlib::setting<fostlib::json> const fostlib::c_socks_version{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Socks version", json{}, true};
+fostlib::setting<fostlib::string> const fostlib::c_socks_host{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "Network settings",
+        "Socks host", "localhost:8888", true};
+
+
+fostlib::setting<bool> const fostlib::c_always_skip_cert_verification{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Always skip TLS server certificate verification", false, true};
+
+/// ### Android
+#ifdef ANDROID
+fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Use standard verify paths", false, true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificate paths",
+        fostlib::json::array_t{fostlib::json{"/system/etc/security/cacerts/"}},
+        true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_certificates{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificates", fostlib::json::array_t{}, true};
+/// ### Default configuration
+#else
+fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Use standard verify paths", true, true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificate paths", fostlib::json::array_t{}, true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_ca_certificates{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA certificates", fostlib::json::array_t{}, true};
+#endif
+
+
+/**
+ * ## TLS implementation
+ */
 
 
 struct ssl_data {
@@ -57,7 +82,11 @@ struct ssl_data {
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
-    ssl_data(io_context_type &, socket_type &sock, const std::string &hostname)
+    ssl_data(
+            io_context_type &,
+            socket_type &sock,
+            std::string const &hostname,
+            bool const verify)
     : ctx(boost::asio::ssl::context::sslv23_client), ssl_sock(sock, ctx) {
         if (not SSL_set_tlsext_host_name(
                     ssl_sock.native_handle(), hostname.c_str())) {
@@ -66,12 +95,25 @@ struct ssl_data {
                     boost::asio::error::get_ssl_category()};
             throw exceptions::socket_error(ec);
         }
-        ctx.set_default_verify_paths();
         ssl_sock.lowest_layer().set_option(
                 boost::asio::ip::tcp::no_delay(true));
-        ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
-        ssl_sock.set_verify_callback(
-                boost::asio::ssl::rfc2818_verification(hostname));
+        if (verify && not c_always_skip_cert_verification.value()) {
+            if (c_tls_use_standard_verify_paths.value()) {
+                ctx.set_default_verify_paths();
+            }
+            for (auto const &path : c_extra_ca_cert_paths.value()) {
+                ctx.add_verify_path(static_cast<std::string>(
+                        fostlib::coerce<fostlib::string>(path)));
+            }
+            for (auto const &certjs : c_extra_ca_certificates.value()) {
+                auto const cert = fostlib::coerce<f5::u8view>(certjs);
+                ctx.add_certificate_authority(boost::asio::buffer(
+                        cert.memory().data(), cert.memory().size()));
+            }
+            ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
+            ssl_sock.set_verify_callback(
+                    boost::asio::ssl::rfc2818_verification(hostname));
+        }
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
 
@@ -85,6 +127,11 @@ struct network_connection::ssl : public ssl_data {
     template<typename... Args>
     ssl(Args &&... args) : ssl_data{std::forward<Args>(args)...} {}
 };
+
+
+/**
+ * ## Networking implementation
+ */
 
 
 namespace {
@@ -379,10 +426,10 @@ fostlib::network_connection::~network_connection() {
 void fostlib::network_connection::start_ssl() {
     m_ssl_data = new ssl(*io_service, *m_socket);
 }
-void fostlib::network_connection::start_ssl(f5::u8view hostname) {
+void fostlib::network_connection::start_ssl(f5::u8view hostname, bool verify) {
     try {
         m_ssl_data = new ssl{*io_service, *m_socket,
-                             static_cast<std::string>(hostname)};
+                             static_cast<std::string>(hostname), verify};
     } catch (boost::system::system_error &e) {
         throw exceptions::socket_error(e.code());
     }
@@ -481,51 +528,51 @@ void fostlib::network_connection::operator>>(boost::asio::streambuf &b) {
 
 
 /**
-    ## fostlib::exceptions::socket_error
+    ## `fostlib::exceptions::socket_error`
 */
 
 
-fostlib::exceptions::socket_error::socket_error() throw() {}
+fostlib::exceptions::socket_error::socket_error() noexcept {}
 
-fostlib::exceptions::socket_error::socket_error(const string &message) throw()
+fostlib::exceptions::socket_error::socket_error(const string &message) noexcept
 : exception(message) {}
 
 fostlib::exceptions::socket_error::socket_error(
-        const string &message, const string &extra) throw()
+        const string &message, const string &extra) noexcept
 : exception(message) {
     insert(data(), "context", extra);
 }
 
 fostlib::exceptions::socket_error::socket_error(
-        boost::system::error_code error) throw()
+        boost::system::error_code error) noexcept
 : error(error) {
     insert(data(), "error",
            string(boost::lexical_cast<std::string>(error).c_str()));
 }
 
 fostlib::exceptions::socket_error::socket_error(
-        boost::system::error_code error, const string &message) throw()
+        boost::system::error_code error, const string &message) noexcept
 : exception(message), error(error) {
     insert(data(), "error",
            string(boost::lexical_cast<std::string>(error).c_str()));
 }
 
-fostlib::exceptions::socket_error::~socket_error() throw() try {
+fostlib::exceptions::socket_error::~socket_error() noexcept try {
 } catch (...) { fostlib::absorb_exception(); }
 
 
-wliteral const fostlib::exceptions::socket_error::message() const throw() {
+wliteral const fostlib::exceptions::socket_error::message() const noexcept {
     return L"Socket error";
 }
 
 
 /**
-    ## fostlib::exceptions::connect_failure
+    ## `fostlib::exceptions::connect_failure`
 */
 
 
 fostlib::exceptions::connect_failure::connect_failure(
-        boost::system::error_code error, const host &h, port_number p) throw()
+        boost::system::error_code error, const host &h, port_number p) noexcept
 : socket_error(error) {
     insert(data(), "host", h);
     insert(data(), "port", p);
@@ -533,37 +580,37 @@ fostlib::exceptions::connect_failure::connect_failure(
 
 
 fostlib::wliteral const fostlib::exceptions::connect_failure::message() const
-        throw() {
+        noexcept {
     return L"Network connection failure";
 }
 
 
 /**
-    ## fostlib::exceptions::read_timeout
+    ## `fostlib::exceptions::read_timeout`
 */
 
 
-fostlib::exceptions::read_timeout::read_timeout() throw() {}
+fostlib::exceptions::read_timeout::read_timeout() noexcept {}
 
 
-wliteral const fostlib::exceptions::read_timeout::message() const throw() {
+wliteral const fostlib::exceptions::read_timeout::message() const noexcept {
     return L"Read time out";
 }
 
 
 /**
-    ## fostlib::exceptions::read_error
+    ## `fostlib::exceptions::read_error`
 */
 
 
-fostlib::exceptions::read_error::read_error() throw() {}
+fostlib::exceptions::read_error::read_error() noexcept {}
 
 
 fostlib::exceptions::read_error::read_error(
-        boost::system::error_code error) throw()
+        boost::system::error_code error) noexcept
 : socket_error(error) {}
 
 
-wliteral const fostlib::exceptions::read_error::message() const throw() {
+wliteral const fostlib::exceptions::read_error::message() const noexcept {
     return L"Read error";
 }

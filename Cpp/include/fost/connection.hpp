@@ -29,6 +29,28 @@ namespace fostlib {
     using socket_type = boost::asio::ip::tcp::socket;
 
 
+    /// ## Networking configuration options
+    extern setting<int64_t> const c_connect_timeout;
+    extern setting<int64_t> const c_read_timeout;
+    extern setting<int64_t> const c_large_read_chunk_size;
+
+    extern setting<json> const c_socks_version;
+    extern setting<fostlib::string> const c_socks_host;
+
+    /// TLS server certificate verification options. See the
+    /// [TLS documentation](./../fost-inet/TLS.md)
+    extern setting<bool> const c_always_skip_cert_verification;
+    extern setting<bool> const c_tls_use_standard_verify_paths;
+    extern setting<json> const c_extra_ca_cert_paths;
+    extern setting<json> const c_extra_ca_certificates;
+
+    /// ### Well known certificates
+    f5::u8view digicert_root_ca();
+    f5::u8view lets_encrypt_root();
+
+
+    /// ## `network_connection`
+
     /// A TCP/IP network connection from either a server or client
     class FOST_INET_DECLSPEC network_connection final {
         struct ssl;
@@ -59,7 +81,7 @@ namespace fostlib {
         void start_ssl();
         /// Start a SSL connection and verify the server connection for the
         /// specified host name.
-        void start_ssl(f5::u8view hostname);
+        void start_ssl(f5::u8view hostname, bool verify = true);
 
         /// Return the remote end
         host remote_end();
@@ -91,27 +113,27 @@ namespace fostlib {
         class FOST_INET_DECLSPEC socket_error : public exception {
           public:
             /// Construct a socket error
-            socket_error() throw();
+            socket_error() noexcept;
             /// Throw an exception providing a message
-            socket_error(const string &message) throw();
+            socket_error(const string &message) noexcept;
             /// Construct a connect failure exception
-            socket_error(boost::system::error_code) throw();
+            socket_error(boost::system::error_code) noexcept;
             /// Throw providing a message and extra information
-            socket_error(const string &message, const string &extra) throw();
+            socket_error(const string &message, const string &extra) noexcept;
             /// Allow us to throw from a Boost error code with a message
             socket_error(
                     boost::system::error_code error,
-                    const string &message) throw();
+                    const string &message) noexcept;
 
             /// Destruct the exception without throwing
-            ~socket_error() throw();
+            ~socket_error() noexcept;
 
             /// Allow access to the error code that caused the exception
             accessors<const nullable<boost::system::error_code>> error;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const throw();
+            const wchar_t *const message() const noexcept;
         };
 
 
@@ -122,11 +144,11 @@ namespace fostlib {
             connect_failure(
                     boost::system::error_code,
                     const host &,
-                    port_number) throw();
+                    port_number) noexcept;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const throw();
+            const wchar_t *const message() const noexcept;
         };
 
         /// Thrown for errors during connection to a socket or reading from a
@@ -134,24 +156,24 @@ namespace fostlib {
         class FOST_INET_DECLSPEC read_timeout : public socket_error {
           public:
             /// Construct a connect failure exception
-            read_timeout() throw();
+            read_timeout() noexcept;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const throw();
+            const wchar_t *const message() const noexcept;
         };
 
         /// Thrown for general errors when reading from a socket
         class FOST_INET_DECLSPEC read_error : public socket_error {
           public:
             /// Construct a connect failure exception
-            read_error() throw();
+            read_error() noexcept;
             /// Construct a read error from an error code
-            read_error(boost::system::error_code) throw();
+            read_error(boost::system::error_code) noexcept;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const throw();
+            const wchar_t *const message() const noexcept;
         };
 
 
