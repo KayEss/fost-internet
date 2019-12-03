@@ -62,3 +62,34 @@ FSL_TEST_FUNCTION(specify_lets_encrypt_leaf) {
 }
 
 
+FSL_TEST_FUNCTION(specify_multiple_roots) {
+    auto logger = fostlib::log::debug(fostlib::c_fost_inet);
+    fostlib::setting<bool> const no_default_paths{
+            "fost-inet-test/tls.cpp", fostlib::c_tls_use_standard_verify_paths,
+            false};
+    fostlib::setting<fostlib::json> const digicert_ca{
+            "fost-inet-test/tls.cpp", fostlib::c_extra_leaf_certificates,
+            fostlib::json::array_t{{fostlib::digicert_root_ca()},
+                                   {fostlib::lets_encrypt_root()}}};
+    fostlib::http::user_agent ua;
+    {
+        auto const response =
+                ua.get(fostlib::url{"https://sha256.badssl.com/"});
+        logger("sha256.badssl.com", response->status());
+        FSL_CHECK_EQ(response->status(), 200);
+    }
+    {
+        auto const response = ua.get(
+                fostlib::url{"https://valid-isrgrootx1.letsencrypt.org/"});
+        logger("valid-isrgrootx1.letsencrypt.org", response->status());
+        FSL_CHECK_EQ(response->status(), 200);
+    }
+    /// This host is used for web proxy tests. It doesn't work because although
+    /// it uses Let's Encrypt, they sign with an intermediate and this setting
+    /// doesn't do chain verification.
+    FSL_CHECK_EXCEPTION(
+            ua.get(fostlib::url{"https://kirit.com/"}),
+            fostlib::exceptions::socket_error &);
+}
+
+
