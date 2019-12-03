@@ -7,6 +7,7 @@
 
 
 #include <fost/http>
+#include <fost/log>
 #include <fost/test>
 
 
@@ -34,12 +35,12 @@ FSL_TEST_FUNCTION(no_default_paths) {
 }
 
 
-FSL_TEST_FUNCTION(specified_root) {
+FSL_TEST_FUNCTION(specified_digicert_leaf) {
     fostlib::setting<bool> const no_default_paths{
             "fost-inet-test/tls.cpp", fostlib::c_tls_use_standard_verify_paths,
             false};
     fostlib::setting<fostlib::json> const digicert_ca{
-            "fost-inet-test/tls.cpp", fostlib::c_extra_ca_certificates,
+            "fost-inet-test/tls.cpp", fostlib::c_extra_leaf_certificates,
             fostlib::json::array_t{{fostlib::digicert_root_ca()}}};
     fostlib::http::user_agent ua;
     auto const response = ua.get(fostlib::url{"https://sha256.badssl.com/"});
@@ -47,15 +48,17 @@ FSL_TEST_FUNCTION(specified_root) {
 }
 
 
-FSL_TEST_FUNCTION(specify_lets_encrypt) {
+FSL_TEST_FUNCTION(specify_lets_encrypt_leaf) {
     fostlib::setting<bool> const no_default_paths{
             "fost-inet-test/tls.cpp", fostlib::c_tls_use_standard_verify_paths,
             false};
     fostlib::setting<fostlib::json> const digicert_ca{
-            "fost-inet-test/tls.cpp", fostlib::c_extra_ca_certificates,
+            "fost-inet-test/tls.cpp", fostlib::c_extra_leaf_certificates,
             fostlib::json::array_t{{fostlib::lets_encrypt_root()}}};
     fostlib::http::user_agent ua;
     auto const response =
             ua.get(fostlib::url{"https://valid-isrgrootx1.letsencrypt.org/"});
     FSL_CHECK_EQ(response->status(), 200);
 }
+
+
