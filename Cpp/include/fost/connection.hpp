@@ -42,7 +42,8 @@ namespace fostlib {
     extern setting<bool> const c_always_skip_cert_verification;
     extern setting<bool> const c_tls_use_standard_verify_paths;
     extern setting<json> const c_extra_ca_cert_paths;
-    extern setting<json> const c_extra_ca_certificates;
+    extern setting<nullable<string>> const c_certificate_verification_file;
+    extern setting<json> const c_extra_leaf_certificates;
 
     /// ### Well known certificates
     f5::u8view digicert_root_ca();
