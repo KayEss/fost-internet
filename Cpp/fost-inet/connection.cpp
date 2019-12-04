@@ -106,13 +106,12 @@ struct ssl_data {
                 ctx.set_default_verify_paths();
             }
             for (auto const &path : c_extra_ca_cert_paths.value()) {
-                //                 ctx.add_verify_path(static_cast<std::string>(
-                //                         fostlib::coerce<fostlib::string>(path)));
+                ctx.add_verify_path(static_cast<std::string>(
+                        fostlib::coerce<fostlib::string>(path)));
             }
             if (c_certificate_verification_file.value()) {
-                //                 auto certs =
-                //                 *c_certificate_verification_file.value();
-                //                 ctx.load_verify_file(certs.shrink_to_fit());
+                auto certs = *c_certificate_verification_file.value();
+                ctx.load_verify_file(certs.shrink_to_fit());
             }
             for (auto const &certjs : c_extra_leaf_certificates.value()) {
                 auto const cert = fostlib::coerce<f5::u8view>(certjs);
