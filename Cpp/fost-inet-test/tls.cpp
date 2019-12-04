@@ -93,3 +93,19 @@ FSL_TEST_FUNCTION(specify_multiple_roots) {
 }
 
 
+FSL_TEST_FUNCTION(specify_certificate_verification_file) {
+    auto logger = fostlib::log::debug(fostlib::c_fost_inet);
+    fostlib::setting<bool> const no_default_paths{
+            "fost-inet-test/tls.cpp",
+            fostlib::c_tls_use_standard_verify_paths, false};
+    fostlib::http::user_agent ua;
+
+    FSL_CHECK_EXCEPTION(
+            ua.get(fostlib::url{"https://kirit.com/"}),
+            fostlib::exceptions::socket_error &);
+
+    /// TODO Add verification file setting to known file
+    auto const response = ua.get(fostlib::url{"https://kirit.com/"});
+    logger("kirit.com", response->status());
+    FSL_CHECK_EQ(response->status(), 200);
+}
