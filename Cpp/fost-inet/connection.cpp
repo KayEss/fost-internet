@@ -55,9 +55,6 @@ fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
         "Extra CA certificate paths",
         fostlib::json::array_t{fostlib::json{"/system/etc/security/cacerts/"}},
         true};
-fostlib::setting<fostlib::json> const fostlib::c_extra_ca_certificates{
-        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
-        "Extra CA certificates", fostlib::json::array_t{}, true};
 /// ### Default configuration
 #else
 fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
@@ -66,10 +63,17 @@ fostlib::setting<bool> const fostlib::c_tls_use_standard_verify_paths{
 fostlib::setting<fostlib::json> const fostlib::c_extra_ca_cert_paths{
         "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
         "Extra CA certificate paths", fostlib::json::array_t{}, true};
-fostlib::setting<fostlib::json> const fostlib::c_extra_ca_certificates{
-        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
-        "Extra CA certificates", fostlib::json::array_t{}, true};
 #endif
+fostlib::setting<fostlib::nullable<fostlib::string>> const
+        fostlib::c_certificate_verification_file{
+                "fost-internet/Cpp/fost-inet/connection.cpp",
+                "TLS",
+                "Certificate verification file",
+                {},
+                true};
+fostlib::setting<fostlib::json> const fostlib::c_extra_leaf_certificates{
+        "fost-internet/Cpp/fost-inet/connection.cpp", "TLS",
+        "Extra CA leaf certificates", fostlib::json::array_t{}, true};
 
 
 /**
@@ -105,7 +109,11 @@ struct ssl_data {
                 ctx.add_verify_path(static_cast<std::string>(
                         fostlib::coerce<fostlib::string>(path)));
             }
-            for (auto const &certjs : c_extra_ca_certificates.value()) {
+            if (c_certificate_verification_file.value()) {
+                auto certs = *c_certificate_verification_file.value();
+                ctx.load_verify_file(certs.shrink_to_fit());
+            }
+            for (auto const &certjs : c_extra_leaf_certificates.value()) {
                 auto const cert = fostlib::coerce<f5::u8view>(certjs);
                 ctx.add_certificate_authority(boost::asio::buffer(
                         cert.memory().data(), cert.memory().size()));

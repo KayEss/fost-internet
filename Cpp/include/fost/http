@@ -6,16 +6,7 @@
  */
 
 
-#ifdef FOST_OS_WINDOWS
-    #define FOST_INET_DECLSPEC __declspec( dllimport )
-#else
-    #define FOST_INET_DECLSPEC
-#endif
-
-
-#include <fost/core>
+#include <fost/url>
 #include <fost/connection.hpp>
-#include <fost/host.hpp>
 #include <fost/http.authentication.fost.hpp>
 #include <fost/http.useragent.hpp>
-#include <fost/url.hpp>

@@ -34,6 +34,18 @@ Use standard verify paths=false
 For Android and Apple this is off by default, other platforms have it on. If you wish to only use certificates that you specify you should set this to `false`.
 
 
+### `fostlib::c_certificate_verification_file` -- Full filename of certificate file
+
+This is a concatenaded list of all of the root certificates to use in PEM format.
+
+```ini
+[TLS]
+Certificate verification file=/path/to/certs.crt
+```
+
+On Apple platforms this may need to be set to a certificate verification file that is shipped with your application.
+
+
 ### `fostlib::c_extra_ca_cert_paths` -- List of strings
 
 Sets paths to search for OpenSSL root certificates.
@@ -46,13 +58,13 @@ Extra CA certificate paths=["/path/to/store1", "path/to/store2"]
 On Android this is set to the path `/system/etc/security/cacerts/` which has been in use since Ice Cream Sandwich. For all other platforms this defaults to an empty list.
 
 
-### `fostlib::c_extra_ca_certificates` -- List of strings in PEM format
+### `fostlib::c_extra_leaf_certificates` -- List of strings in PEM format
 
-Extra certificates that will be accepted.
+Extra certificates that will be accepted. These certificates will not be used with for full chain verification.
 
 ```ini
 [TLS]
-Extra CA certificates=["-----BEGIN CERTIFICATE-----\n{base 64 data}\n-----END CERTIFICATE-----\n"]
+Extra CA leaf certificates=["-----BEGIN CERTIFICATE-----\n{base 64 data}\n-----END CERTIFICATE-----\n"]
 ```
 
-On Apple this includes one Digicert certificate and the Let's Encrypt root. This is unlikely to be enough for most applications, but is enough for all of the tests. On other platforms the list is empty because a full set of root certificates are already available.
+On all platforms this defaults to an empty list.
