@@ -11,6 +11,7 @@
 
 #include <fost/hod/hod.hpp>
 
+#include <boost/range.hpp> // Works around a bug in Boost 1.72.0
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
 
