@@ -25,8 +25,46 @@ FSL_TEST_FUNCTION(expect_get) {
 
 
 FSL_TEST_FUNCTION(cache_keys) {
+    using fostlib::url;
+    fostlib::ua::headers headers;
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("GET", url{"http://localhost/"}, headers),
+            "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
+
+    /// Changing the HTTP method must result in a different cache
+    /// key.
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("POST", url{"http://localhost/"}, headers),
+            "wfh0cz13mw8k49rh5fcjntcqjezbpsv4ghsfs4n90cajm2rhvy90");
+
+    /// The following change to the URL must all result in different
+    /// cache keys.
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("GET", url{"https://localhost/"}, headers),
+            "9y1kh50530hdb09p0erzpwht99xy529n63v529m164n8xr9nvrng");
     FSL_CHECK_EQ(
             fostlib::ua::cache_key(
-                    "GET", fostlib::url{}, fostlib::ua::headers{}),
+                    "GET", url{"http://localhost:8080/"}, headers),
+            "r1k901351tk4zb3w6bz2dfd0edg433v7e2e69crfp6dfxhqecf50");
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("GET", url{"http://localhost/foo"}, headers),
+            "6j8eybwpe5s1sh9d5eyg9by6edfa1eqe8rpxk57z8bezfb4nsqag");
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key(
+                    "GET", url{"http://localhost/?foo=bar"}, headers),
+            "qw4cs8ygp1raksja7sps5m626jsynpkjkcg3ravxnkswe8f0rh2g");
+
+    /// The following changes must not result in different cache keys
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("GET", url{"http://localhost/#foo"}, headers),
+            "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("GET", url{"http://localhost"}, headers),
+            "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
+
+    /// The following should be a unique hash key, but because of the
+    /// default host port it is not
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key("GET", url{"http://localhost:80/"}, headers),
             "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
 }

@@ -24,8 +24,13 @@ void fostlib::ua::expect_get(url const &, json, headers const &) {}
 fostlib::string fostlib::ua::cache_key(
         f5::u8view method, url const &u, headers const &) {
     fostlib::digester hash{fostlib::sha256};
-    hash << method << f5::u8view{" "} << f5::u8view{u.as_string()}
-         << f5::u8view{"\n"};
+    if (u.fragment()) {
+        auto uf = u;
+        uf.fragment({});
+        hash << method << " " << uf.as_string() << "\n";
+    } else {
+        hash << method << " " << u.as_string() << "\n";
+    }
     return f5::u8view{fostlib::coerce<fostlib::base32c_string>(
                               array_view<const unsigned char>{hash.digest()})}
             .substr_pos(0, 52);
