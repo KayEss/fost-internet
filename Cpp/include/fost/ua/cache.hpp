@@ -22,6 +22,24 @@ namespace fostlib::ua {
 
     /// ## Configuration
 
+    /**
+     * The folder used for the persistent cache. If this is not set
+     * then no caching will be performed and all requests will
+     * go upstream.
+     */
+    extern fostlib::setting<std::optional<fostlib::string>> c_cache_folder;
+
+    /**
+     * If this is set to `true` then no actual HTTP/HTTPS requests
+     * will be made, even in the case of an expectation or cache
+     * miss.
+     *
+     * If testing code this should normally be set `true` with
+     * the `c_cache_folder` left as `null` so that any request made
+     * without an expectation doesn't result in an actual
+     * network request.
+     */
+    extern fostlib::setting<bool> c_force_no_http_requests;
 
     /// ## User agent functions
 
