@@ -7,7 +7,10 @@
 
 
 #include "fost-inet.hpp"
-#include <fost/ua/cache.hpp>
+#include <fost/ua/cache.detail.hpp>
+
+#include <fost/base32>
+#include <fost/crypto>
 
 
 fostlib::json fostlib::ua::get_json(url const &, headers const &) {
@@ -16,3 +19,14 @@ fostlib::json fostlib::ua::get_json(url const &, headers const &) {
 
 
 void fostlib::ua::expect_get(url const &, json, headers const &) {}
+
+
+fostlib::string fostlib::ua::cache_key(
+        f5::u8view method, url const &u, headers const &) {
+    fostlib::digester hash{fostlib::sha256};
+    hash << method << f5::u8view{" "} << f5::u8view{u.as_string()}
+         << f5::u8view{"\n"};
+    return f5::u8view{fostlib::coerce<fostlib::base32c_string>(
+                              array_view<const unsigned char>{hash.digest()})}
+            .substr_pos(0, 52);
+}
