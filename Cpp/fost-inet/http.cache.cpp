@@ -13,6 +13,14 @@
 #include <fost/crypto>
 
 
+fostlib::setting<std::optional<fostlib::string>> const
+        fostlib::ua::c_cache_folder{
+                __FILE__, "HTTP cache", "Cache folder", {}, true};
+
+fostlib::setting<bool> const fostlib::ua::c_force_no_http_requests{
+        __FILE__, "HTTP cache", "Force no network requests", false, true};
+
+
 fostlib::json fostlib::ua::get_json(url const &, headers const &) {
     return json{};
 }

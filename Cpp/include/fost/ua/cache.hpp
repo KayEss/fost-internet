@@ -27,7 +27,7 @@ namespace fostlib::ua {
      * then no caching will be performed and all requests will
      * go upstream.
      */
-    extern fostlib::setting<std::optional<fostlib::string>> c_cache_folder;
+    extern fostlib::setting<std::optional<fostlib::string>> const c_cache_folder;
 
     /**
      * If this is set to `true` then no actual HTTP/HTTPS requests
@@ -39,7 +39,7 @@ namespace fostlib::ua {
      * without an expectation doesn't result in an actual
      * network request.
      */
-    extern fostlib::setting<bool> c_force_no_http_requests;
+    extern fostlib::setting<bool> const c_force_no_http_requests;
 
     /// ## User agent functions
 
