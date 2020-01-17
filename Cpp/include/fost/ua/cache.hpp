@@ -45,18 +45,19 @@ namespace fostlib::ua {
 
     /// Fetch the JSON body of the requested URL
     json request_json(
-            f5::u8view method, url const &, headers const & = headers{});
+            f5::u8view method, url const &, json body, headers const &);
     inline json get_json(url const &u, headers const &h = headers{}) {
-        return request_json("GET", u, h);
+        return request_json("GET", u, json{}, h);
     }
-    inline json post_json(url const &u, headers const &h = headers{}) {
-        return request_json("POST", u, h);
+    inline json post_json(
+            url const &u, fostlib::json body, headers const &h = headers{}) {
+        return request_json("POST", u, std::move(body), h);
     }
 
 
     /// ## Testing support
 
-    /// Set an expectation for a `GET` request
+    /// Set an expectation for a request
     void expect(
             f5::u8view method, url const &, json, headers const & = headers{});
     inline void expect_get(url const &u, json b, headers const &h = headers{}) {

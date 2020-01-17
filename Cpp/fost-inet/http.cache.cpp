@@ -37,7 +37,10 @@ namespace {
 
 
 fostlib::json fostlib::ua::request_json(
-        f5::u8view const method, url const &url, headers const &headers) {
+        f5::u8view const method,
+        url const &url,
+        fostlib::json,
+        headers const &headers) {
     fostlib::json ret;
     auto const key = cache_key(method, url, headers);
     if (g_expectations.alter(key, [&](::expect &e) {
