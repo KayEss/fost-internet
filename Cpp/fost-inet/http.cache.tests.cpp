@@ -18,6 +18,10 @@ FSL_TEST_FUNCTION(expect_get) {
     fostlib::url url;
     fostlib::ua::expect_get(url, fostlib::json{});
     FSL_CHECK_EQ(fostlib::ua::get_json(url), fostlib::json{});
+    FSL_CHECK_EQ(fostlib::ua::get_json(url), fostlib::json{});
+
+    fostlib::ua::expect_post(url, fostlib::json{});
+    FSL_CHECK_EQ(fostlib::ua::post_json(url), fostlib::json{});
 }
 
 

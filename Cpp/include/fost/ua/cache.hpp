@@ -44,13 +44,27 @@ namespace fostlib::ua {
     /// ## User agent functions
 
     /// Fetch the JSON body of the requested URL
-    json get_json(url const &, headers const & = headers{});
+    json request_json(
+            f5::u8view method, url const &, headers const & = headers{});
+    inline json get_json(url const &u, headers const &h = headers{}) {
+        return request_json("GET", u, h);
+    }
+    inline json post_json(url const &u, headers const &h = headers{}) {
+        return request_json("POST", u, h);
+    }
 
 
     /// ## Testing support
 
     /// Set an expectation for a `GET` request
-    void expect_get(url const &, json, headers const & = headers{});
+    void expect(
+            f5::u8view method, url const &, json, headers const & = headers{});
+    inline void expect_get(url const &u, json b, headers const &h = headers{}) {
+        expect("GET", u, b, h);
+    }
+    inline void expect_post(url const &u, json b, headers const &h = headers{}) {
+        expect("POST", u, b, h);
+    }
 
 
 }

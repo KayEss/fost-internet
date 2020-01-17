@@ -16,7 +16,7 @@ namespace fostlib::ua {
 
 
     /// Generate the hash from the URL and vary headers
-    fostlib::string cache_key(f5::u8view method, url const &, headers const &);
+    f5::u8string cache_key(f5::u8view method, url const &, headers const &);
 
 
 }
