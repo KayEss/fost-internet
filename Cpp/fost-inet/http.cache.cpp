@@ -43,19 +43,20 @@ fostlib::json fostlib::ua::request_json(
         headers const &headers) {
     fostlib::json ret;
     auto const key = cache_key(method, url, headers);
-    if (g_expectations.alter(key, [&](::expect &e) {
-            if (not e.items.empty()) {
-                ret = e.items.front();
-                if (e.items.size() > 1 || not idempotent(method)) {
-                    e.items.erase(e.items.begin());
-                } else {
-                    e.used = true;
-                }
+    auto const expectation_found = g_expectations.alter(key, [&](::expect &e) {
+        if (not e.items.empty()) {
+            ret = e.items.front();
+            if (e.items.size() > 1 || not idempotent(method)) {
+                e.items.erase(e.items.begin());
             } else {
-                throw fostlib::exceptions::not_implemented{
-                        __PRETTY_FUNCTION__, "Expectations run out", url};
+                e.used = true;
             }
-        })) {
+        } else {
+            throw fostlib::exceptions::not_implemented{
+                    __PRETTY_FUNCTION__, "Expectations run out", url};
+        }
+    });
+    if (expectation_found) {
         return ret;
     } else {
         throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__,
