@@ -57,6 +57,9 @@ namespace fostlib::ua {
 
     /// ## Testing support
 
+    /// Clear all expectations. Should be used at the start of a test
+    void clear_expectations();
+
     /// Set an expectation for a request
     void expect(
             f5::u8view method, url const &, json, headers const & = headers{});

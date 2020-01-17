@@ -64,6 +64,9 @@ fostlib::json fostlib::ua::request_json(
 }
 
 
+void fostlib::ua::clear_expectations() { g_expectations.clear(); }
+
+
 void fostlib::ua::expect(
         f5::u8view const method,
         url const &url,

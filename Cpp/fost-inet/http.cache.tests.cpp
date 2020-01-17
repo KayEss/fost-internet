@@ -79,6 +79,13 @@ FSL_TEST_FUNCTION(expectations) {
             fostlib::exceptions::not_implemented &);
     FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"barney"});
     FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"barney"});
+
+    fostlib::ua::clear_expectations();
+    FSL_CHECK_EXCEPTION(
+            fostlib::ua::get_json(u1), fostlib::exceptions::not_implemented &);
+    FSL_CHECK_EXCEPTION(
+            fostlib::ua::post_json(u1, fostlib::json{}),
+            fostlib::exceptions::not_implemented &);
 }
 
 
