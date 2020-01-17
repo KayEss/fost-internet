@@ -15,13 +15,24 @@ FSL_TEST_SUITE(http_cache);
 
 
 FSL_TEST_FUNCTION(expect_get) {
-    fostlib::url url;
-    fostlib::ua::expect_get(url, fostlib::json{});
-    FSL_CHECK_EQ(fostlib::ua::get_json(url), fostlib::json{});
-    FSL_CHECK_EQ(fostlib::ua::get_json(url), fostlib::json{});
+    fostlib::url const u1;
+    fostlib::ua::expect_get(u1, fostlib::json{});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{});
 
-    fostlib::ua::expect_post(url, fostlib::json{});
-    FSL_CHECK_EQ(fostlib::ua::post_json(url), fostlib::json{});
+    fostlib::ua::expect_post(u1, fostlib::json{});
+    FSL_CHECK_EQ(fostlib::ua::post_json(u1), fostlib::json{});
+    FSL_CHECK_EXCEPTION(fostlib::ua::post_json(u1), fostlib::exceptions::not_implemented&);
+
+    fostlib::url const u2{u1, "/foo"};
+    fostlib::ua::expect_get(u2, fostlib::json{"foo"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"foo"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"foo"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{});
+
+    fostlib::ua::expect_post(u2, fostlib::json{"foo"});
+    FSL_CHECK_EQ(fostlib::ua::post_json(u2), fostlib::json{"foo"});
+    FSL_CHECK_EXCEPTION(fostlib::ua::post_json(u2), fostlib::exceptions::not_implemented&);
 }
 
 
@@ -72,3 +83,10 @@ FSL_TEST_FUNCTION(cache_keys) {
             fostlib::ua::cache_key("GET", url{"http://localhost:80/"}, headers),
             "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
 }
+
+
+FSL_TEST_FUNCTION(method_idempotency) {
+    FSL_CHECK(fostlib::ua::idempotent("GET"));
+    FSL_CHECK(not fostlib::ua::idempotent("POST"));
+}
+

@@ -29,8 +29,23 @@ namespace {
 
 
 fostlib::json fostlib::ua::request_json(
-        f5::u8view const method, url const &, headers const &) {
-    return json{};
+        f5::u8view const method, url const &url, headers const &headers) {
+    fostlib::json ret;
+    auto const key = cache_key(method, url, headers);
+    if (g_expectations.alter(key, [&](::expect &e) {
+        if (not e.empty()) {
+            ret = e.front();
+            if (e.size() > 1 || not idempotent(method)) {
+                e.erase(e.begin());
+            }
+        } else {
+            throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__, "Expectations run out", url};
+        }
+    })) {
+        return ret;
+    } else {
+        throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__, "No expectation"};
+    }
 }
 
 
@@ -43,7 +58,7 @@ void fostlib::ua::expect(
     g_expectations.add_if_not_found(
             key,
             [r]() {
-                return ::expect{1u, r};
+                return ::expect{r};
             },
             [r](::expect &e) { e.push_back(r); });
 }
@@ -62,4 +77,9 @@ f5::u8string fostlib::ua::cache_key(
     return f5::u8view{fostlib::coerce<fostlib::base32c_string>(
                               array_view<const unsigned char>{hash.digest()})}
             .substr_pos(0, 52);
+}
+
+
+bool fostlib::ua::idempotent(f5::u8view const method) {
+    return method == "GET";
 }
