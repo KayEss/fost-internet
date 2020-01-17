@@ -23,7 +23,15 @@ fostlib::setting<bool> const fostlib::ua::c_force_no_http_requests{
 
 
 namespace {
-    using expect = std::vector<fostlib::json>;
+    struct expect {
+        expect(fostlib::json j) : used{false}, items{std::move(j)} {}
+
+        /// The `used` flag is needed to track when an idempotent
+        /// expectation has been re-used, so we know that the
+        /// expectation should be replaced with a new value
+        bool used;
+        std::vector<fostlib::json> items;
+    };
     f5::tsmap<f5::u8string, expect> g_expectations;
 }
 
@@ -33,18 +41,22 @@ fostlib::json fostlib::ua::request_json(
     fostlib::json ret;
     auto const key = cache_key(method, url, headers);
     if (g_expectations.alter(key, [&](::expect &e) {
-        if (not e.empty()) {
-            ret = e.front();
-            if (e.size() > 1 || not idempotent(method)) {
-                e.erase(e.begin());
+            if (not e.items.empty()) {
+                ret = e.items.front();
+                if (e.items.size() > 1 || not idempotent(method)) {
+                    e.items.erase(e.items.begin());
+                } else {
+                    e.used = true;
+                }
+            } else {
+                throw fostlib::exceptions::not_implemented{
+                        __PRETTY_FUNCTION__, "Expectations run out", url};
             }
-        } else {
-            throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__, "Expectations run out", url};
-        }
-    })) {
+        })) {
         return ret;
     } else {
-        throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__, "No expectation"};
+        throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__,
+                                                   "No expectation"};
     }
 }
 
@@ -56,11 +68,15 @@ void fostlib::ua::expect(
         headers const &headers) {
     auto key = cache_key(method, url, headers);
     g_expectations.add_if_not_found(
-            key,
-            [r]() {
-                return ::expect{r};
-            },
-            [r](::expect &e) { e.push_back(r); });
+            key, [r]() { return ::expect{r}; },
+            [r](::expect &e) {
+                if (e.used) {
+                    e.used = false;
+                    e.items[0] = r;
+                } else {
+                    e.items.push_back(r);
+                }
+            });
 }
 
 

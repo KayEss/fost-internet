@@ -14,7 +14,7 @@
 FSL_TEST_SUITE(http_cache);
 
 
-FSL_TEST_FUNCTION(expect_get) {
+FSL_TEST_FUNCTION(expectations) {
     fostlib::url const u1;
     fostlib::ua::expect_get(u1, fostlib::json{});
     FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{});
@@ -22,17 +22,42 @@ FSL_TEST_FUNCTION(expect_get) {
 
     fostlib::ua::expect_post(u1, fostlib::json{});
     FSL_CHECK_EQ(fostlib::ua::post_json(u1), fostlib::json{});
-    FSL_CHECK_EXCEPTION(fostlib::ua::post_json(u1), fostlib::exceptions::not_implemented&);
+    FSL_CHECK_EXCEPTION(
+            fostlib::ua::post_json(u1), fostlib::exceptions::not_implemented &);
 
     fostlib::url const u2{u1, "/foo"};
-    fostlib::ua::expect_get(u2, fostlib::json{"foo"});
-    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"foo"});
-    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"foo"});
+    fostlib::ua::expect_get(u2, fostlib::json{"fred"});
+    fostlib::ua::expect_get(u2, fostlib::json{"barney"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"fred"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"barney"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"barney"});
     FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{});
 
     fostlib::ua::expect_post(u2, fostlib::json{"foo"});
     FSL_CHECK_EQ(fostlib::ua::post_json(u2), fostlib::json{"foo"});
-    FSL_CHECK_EXCEPTION(fostlib::ua::post_json(u2), fostlib::exceptions::not_implemented&);
+    FSL_CHECK_EXCEPTION(
+            fostlib::ua::post_json(u2), fostlib::exceptions::not_implemented &);
+
+    fostlib::ua::expect_get(u1, fostlib::json{"bar"});
+    /// If we don't track properly that this GET result has already
+    /// been returned then the expectation above will not result
+    /// in the correct return value for the first of the requests
+    /// below.
+    FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{"bar"});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{"bar"});
+
+    fostlib::ua::expect_get(u2, fostlib::json{1});
+    fostlib::ua::expect_get(u2, fostlib::json{2});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{1});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{2});
+    FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{2});
+
+    fostlib::ua::expect_post(u2, fostlib::json{true});
+    fostlib::ua::expect_post(u2, fostlib::json{false});
+    FSL_CHECK_EQ(fostlib::ua::post_json(u2), fostlib::json{true});
+    FSL_CHECK_EQ(fostlib::ua::post_json(u2), fostlib::json{false});
+    FSL_CHECK_EXCEPTION(
+            fostlib::ua::post_json(u2), fostlib::exceptions::not_implemented &);
 }
 
 
@@ -89,4 +114,3 @@ FSL_TEST_FUNCTION(method_idempotency) {
     FSL_CHECK(fostlib::ua::idempotent("GET"));
     FSL_CHECK(not fostlib::ua::idempotent("POST"));
 }
-
