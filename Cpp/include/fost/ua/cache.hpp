@@ -57,7 +57,18 @@ namespace fostlib::ua {
 
     /// ## Testing support
 
-    /// Clear all expectations. Should be used at the start of a test
+    /// Instantiate an instance of this type at the start of a test that
+    /// involves the user agent to clear previous expectations and
+    /// make sure that HTTP requests are not actually made
+    struct ua_test {
+        ua_test();
+
+        decltype(c_cache_folder) const no_cache{"test", c_cache_folder, {}};
+        decltype(c_force_no_http_requests)
+                const no_http{"test", c_force_no_http_requests, true};
+    };
+
+    /// Clear all expectations.
     void clear_expectations();
 
     /// Set an expectation for a request

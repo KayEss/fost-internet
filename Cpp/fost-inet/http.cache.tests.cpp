@@ -15,6 +15,8 @@ FSL_TEST_SUITE(http_cache);
 
 
 FSL_TEST_FUNCTION(expectations) {
+    fostlib::ua::ua_test test;
+
     fostlib::url const u1;
     fostlib::ua::expect_get(u1, fostlib::json{});
     FSL_CHECK_EQ(fostlib::ua::get_json(u1), fostlib::json{});

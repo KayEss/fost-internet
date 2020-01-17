@@ -65,6 +65,9 @@ fostlib::json fostlib::ua::request_json(
 }
 
 
+fostlib::ua::ua_test::ua_test() { clear_expectations(); }
+
+
 void fostlib::ua::clear_expectations() { g_expectations.clear(); }
 
 
