@@ -11,6 +11,7 @@
 
 #include <fost/base32>
 #include <fost/crypto>
+#include <fost/insert>
 #include <f5/threading/map.hpp>
 
 
@@ -39,7 +40,7 @@ namespace {
 fostlib::json fostlib::ua::request_json(
         f5::u8view const method,
         url const &url,
-        fostlib::json,
+        fostlib::json body,
         headers const &headers) {
     fostlib::json ret;
     auto const key = cache_key(method, url, headers);
@@ -52,15 +53,15 @@ fostlib::json fostlib::ua::request_json(
                 e.used = true;
             }
         } else {
-            throw fostlib::exceptions::not_implemented{
-                    __PRETTY_FUNCTION__, "Expectations run out", url};
+            throw no_expectation{"Expectations run out", method, url,
+                                 std::move(body), headers};
         }
     });
     if (expectation_found) {
         return ret;
     } else {
-        throw fostlib::exceptions::not_implemented{__PRETTY_FUNCTION__,
-                                                   "No expectation"};
+        throw no_expectation{"Expectation was never set", method, url,
+                             std::move(body), headers};
     }
 }
 
@@ -108,4 +109,23 @@ f5::u8string fostlib::ua::cache_key(
 
 bool fostlib::ua::idempotent(f5::u8view const method) {
     return method == "GET";
+}
+
+
+fostlib::ua::no_expectation::no_expectation(
+        f5::u8view message,
+        f5::u8view method,
+        url const &url,
+        fostlib::json body,
+        headers const &headers)
+: exception(message) {
+    insert(data(), "method", method);
+    insert(data(), "url", url);
+    insert(data(), "body", body);
+    insert(data(), "headers", headers);
+}
+
+
+const wchar_t *const fostlib::ua::no_expectation::message() const {
+    return L"No expectation found for request";
 }

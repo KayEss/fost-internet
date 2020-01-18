@@ -26,7 +26,7 @@ FSL_TEST_FUNCTION(expectations) {
     FSL_CHECK_EQ(fostlib::ua::post_json(u1, fostlib::json{}), fostlib::json{});
     FSL_CHECK_EXCEPTION(
             fostlib::ua::post_json(u1, fostlib::json{}),
-            fostlib::exceptions::not_implemented &);
+            fostlib::ua::no_expectation &);
 
     fostlib::url const u2{u1, "/foo"};
     fostlib::ua::expect_get(u2, fostlib::json{"fred"});
@@ -41,7 +41,7 @@ FSL_TEST_FUNCTION(expectations) {
             fostlib::ua::post_json(u2, fostlib::json{}), fostlib::json{"foo"});
     FSL_CHECK_EXCEPTION(
             fostlib::ua::post_json(u2, fostlib::json{}),
-            fostlib::exceptions::not_implemented &);
+            fostlib::ua::no_expectation &);
 
     fostlib::ua::expect_get(u1, fostlib::json{"bar"});
     /// If we don't track properly that this GET result has already
@@ -65,7 +65,7 @@ FSL_TEST_FUNCTION(expectations) {
             fostlib::ua::post_json(u1, fostlib::json{}), fostlib::json{false});
     FSL_CHECK_EXCEPTION(
             fostlib::ua::post_json(u1, fostlib::json{}),
-            fostlib::exceptions::not_implemented &);
+            fostlib::ua::no_expectation &);
 
     fostlib::ua::expect_get(u2, fostlib::json{"fred"});
     fostlib::ua::expect_get(u2, fostlib::json{"barney"});
@@ -78,16 +78,16 @@ FSL_TEST_FUNCTION(expectations) {
             fostlib::ua::post_json(u1, fostlib::json{}), fostlib::json{false});
     FSL_CHECK_EXCEPTION(
             fostlib::ua::post_json(u1, fostlib::json{}),
-            fostlib::exceptions::not_implemented &);
+            fostlib::ua::no_expectation &);
     FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"barney"});
     FSL_CHECK_EQ(fostlib::ua::get_json(u2), fostlib::json{"barney"});
 
     fostlib::ua::clear_expectations();
     FSL_CHECK_EXCEPTION(
-            fostlib::ua::get_json(u1), fostlib::exceptions::not_implemented &);
+            fostlib::ua::get_json(u1), fostlib::ua::no_expectation &);
     FSL_CHECK_EXCEPTION(
             fostlib::ua::post_json(u1, fostlib::json{}),
-            fostlib::exceptions::not_implemented &);
+            fostlib::ua::no_expectation &);
 }
 
 

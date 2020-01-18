@@ -82,4 +82,20 @@ namespace fostlib::ua {
     }
 
 
+    // The exception type that is thrown when there are no expectations
+    /// left for the request and no cache exists and no HTTP requests can
+    /// be made.
+    class no_expectation : public fostlib::exceptions::exception {
+      public:
+        no_expectation(
+                f5::u8view message,
+                f5::u8view method,
+                url const &url,
+                fostlib::json body,
+                headers const &headers);
+
+        const wchar_t *const message() const;
+    };
+
+
 }
