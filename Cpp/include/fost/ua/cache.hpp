@@ -16,6 +16,9 @@
 namespace fostlib::ua {
 
 
+    extern module const c_fost_inet_ua;
+
+
     /// Type alias to shorten a name
     using headers = mime::mime_headers;
 

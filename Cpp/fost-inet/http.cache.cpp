@@ -15,6 +15,9 @@
 #include <f5/threading/map.hpp>
 
 
+fostlib::module const fostlib::ua::c_fost_inet_ua{c_fost_inet, "ua"};
+
+
 fostlib::setting<std::optional<fostlib::string>> const
         fostlib::ua::c_cache_folder{
                 __FILE__, "HTTP cache", "Cache folder", {}, true};
