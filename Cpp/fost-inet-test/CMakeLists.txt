@@ -3,6 +3,7 @@ if(TARGET stress)
     # before they can be run, and those that do not. The simpler libraries
     # come first.
     add_library(fost-inet-test STATIC EXCLUDE_FROM_ALL
+            cache.cpp
             connection-failures.cpp
             data-transmission.cpp
             host.cpp

@@ -8,6 +8,8 @@
 
 #include "fost-inet.hpp"
 #include <fost/ua/cache.detail.hpp>
+#include <fost/ua/exceptions.hpp>
+#include <fost/http.useragent.hpp>
 
 #include <fost/base32>
 #include <fost/crypto>
@@ -37,14 +39,40 @@ namespace {
         std::vector<fostlib::json> items;
     };
     f5::tsmap<f5::u8string, expect> g_expectations;
+
+
+    fostlib::json make_request(
+            f5::u8view const method,
+            fostlib::url const &url,
+            fostlib::json body,
+            fostlib::ua::headers headers) {
+        headers.add("Accept", "application/json");
+        fostlib::http::user_agent ua;
+        fostlib::http::user_agent::request req{
+                method, url, fostlib::json::unparse(body, false),
+                std::move(headers)};
+        auto response = ua(req);
+        if (response->status() == 404 || response->status() == 410) {
+            throw fostlib::ua::resource_not_found{url};
+        }
+        return response->body()->body_as_json();
+    }
+
+
+    fostlib::json check_cache(
+            f5::u8view const method,
+            fostlib::url const &url,
+            fostlib::json body,
+            fostlib::ua::headers headers) {
+        return make_request(method, url, std::move(body), std::move(headers));
+    }
+
+
 }
 
 
 fostlib::json fostlib::ua::request_json(
-        f5::u8view const method,
-        url const &url,
-        fostlib::json body,
-        headers const &headers) {
+        f5::u8view const method, url const &url, json body, headers headers) {
     fostlib::json ret;
     auto const key = cache_key(method, url, headers);
     auto const expectation_found = g_expectations.alter(key, [&](::expect &e) {
@@ -55,16 +83,20 @@ fostlib::json fostlib::ua::request_json(
             } else {
                 e.used = true;
             }
-        } else {
+        } else if (not c_cache_folder.value() && c_force_no_http_requests.value()) {
             throw no_expectation{"Expectations run out", method, url,
-                                 std::move(body), headers};
+                                 std::move(body), std::move(headers)};
+        } else {
+            ret = check_cache(method, url, std::move(body), std::move(headers));
         }
     });
     if (expectation_found) {
         return ret;
-    } else {
+    } else if (not c_cache_folder.value() && c_force_no_http_requests.value()) {
         throw no_expectation{"Expectation was never set", method, url,
-                             std::move(body), headers};
+                             std::move(body), std::move(headers)};
+    } else {
+        return check_cache(method, url, std::move(body), std::move(headers));
     }
 }
 
@@ -115,6 +147,9 @@ bool fostlib::ua::idempotent(f5::u8view const method) {
 }
 
 
+/// ## Exceptions
+
+
 fostlib::ua::no_expectation::no_expectation(
         f5::u8view message,
         f5::u8view method,
@@ -127,8 +162,13 @@ fostlib::ua::no_expectation::no_expectation(
     insert(data(), "body", body);
     insert(data(), "headers", headers);
 }
-
-
 const wchar_t *const fostlib::ua::no_expectation::message() const {
     return L"No expectation found for request";
+}
+
+
+fostlib::ua::resource_not_found::resource_not_found(url const &u)
+: exception{f5::u8view{u.as_string()}} {}
+const wchar_t *const fostlib::ua::resource_not_found::message() const {
+    return L"Resource not found";
 }

@@ -47,14 +47,13 @@ namespace fostlib::ua {
     /// ## User agent functions
 
     /// Fetch the JSON body of the requested URL
-    json request_json(
-            f5::u8view method, url const &, json body, headers const &);
-    inline json get_json(url const &u, headers const &h = headers{}) {
-        return request_json("GET", u, json{}, h);
+    json request_json(f5::u8view method, url const &, json body, headers);
+    inline json get_json(url const &u, headers h = headers{}) {
+        return request_json("GET", u, json{}, std::move(h));
     }
-    inline json post_json(
-            url const &u, fostlib::json body, headers const &h = headers{}) {
-        return request_json("POST", u, std::move(body), h);
+    inline json
+            post_json(url const &u, fostlib::json body, headers h = headers{}) {
+        return request_json("POST", u, std::move(body), std::move(h));
     }
 
 
@@ -83,22 +82,6 @@ namespace fostlib::ua {
     inline void expect_post(url const &u, json b, headers const &h = headers{}) {
         expect("POST", u, b, h);
     }
-
-
-    // The exception type that is thrown when there are no expectations
-    /// left for the request and no cache exists and no HTTP requests can
-    /// be made.
-    class no_expectation : public fostlib::exceptions::exception {
-      public:
-        no_expectation(
-                f5::u8view message,
-                f5::u8view method,
-                url const &url,
-                fostlib::json body,
-                headers const &headers);
-
-        const wchar_t *const message() const;
-    };
 
 
 }

@@ -8,6 +8,7 @@
 
 #include <fost/ua/cache>
 #include <fost/ua/cache.detail.hpp>
+#include <fost/ua/exceptions.hpp>
 #include <fost/test>
 
 
