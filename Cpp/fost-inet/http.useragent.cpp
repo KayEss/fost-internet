@@ -115,16 +115,21 @@ std::unique_ptr<http::user_agent::response>
 
 
 fostlib::http::user_agent::request::request(const string &method, const url &url)
-: m_data(new empty_mime), method(method), address(url) {}
+: m_data{std::make_shared<empty_mime>()}, method(method), address(url) {}
 fostlib::http::user_agent::request::request(
-        const string &method, const url &url, const string &data)
-: m_data(new text_body(data)), method(method), address(url) {}
+        const string &method,
+        const url &url,
+        const string &data,
+        mime::mime_headers headers)
+: m_data{std::make_shared<text_body>(data, std::move(headers))},
+  method(method),
+  address(url) {}
 fostlib::http::user_agent::request::request(
         const string &method, const url &url, const fostlib::fs::path &data)
-: m_data(new file_body(data)), method(method), address(url) {}
+: m_data{std::make_shared<file_body>(data)}, method(method), address(url) {}
 fostlib::http::user_agent::request::request(
-        const string &method, const url &url, boost::shared_ptr<mime> mime_data)
-: m_data(mime_data), method(method), address(url) {}
+        const string &method, const url &url, std::shared_ptr<mime> mime_data)
+: m_data{std::move(mime_data)}, method(method), address(url) {}
 
 
 /**

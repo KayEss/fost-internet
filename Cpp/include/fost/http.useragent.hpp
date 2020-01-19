@@ -51,13 +51,16 @@ namespace fostlib {
 
         /// Describe a HTTP request
         class FOST_INET_DECLSPEC user_agent::request {
-            boost::shared_ptr<mime> m_data;
+            std::shared_ptr<mime> m_data;
 
           public:
             /// Construct a request for a URL
             request(const string &method, const url &url);
             /// Construct a request for a URL with body data
-            request(const string &method, const url &url, const string &data);
+            request(const string &method,
+                    const url &url,
+                    const string &data,
+                    mime::mime_headers = mime::mime_headers{});
             /// Construct a request for a URL with body data from a file
             request(const string &method,
                     const url &url,
@@ -65,7 +68,11 @@ namespace fostlib {
             /// Construct a request for a URL with MIME data
             request(const string &method,
                     const url &url,
-                    boost::shared_ptr<mime> mime_data);
+                    std::shared_ptr<mime> mime_data);
+            request(const string &method,
+                    const url &url,
+                    boost::shared_ptr<mime> mime_data)
+            : request{method, url, to_std(mime_data)} {}
 
             /// Allow manipulation of the request headers
             mime::mime_headers &headers() { return m_data->headers(); }
