@@ -8,6 +8,7 @@
 
 #include "fost-inet.hpp"
 #include <fost/ua/cache.detail.hpp>
+#include <fost/ua/counters.hpp>
 #include <fost/ua/exceptions.hpp>
 #include <fost/http.useragent.hpp>
 
@@ -28,6 +29,12 @@ fostlib::setting<bool> const fostlib::ua::c_force_no_http_requests{
         __FILE__, "HTTP cache", "Force no network requests", false, true};
 
 
+fostlib::performance
+        fostlib::ua::p_network_requests(c_fost_inet_ua, "http", "requests");
+fostlib::performance
+        fostlib::ua::p_status_errors(c_fost_inet_ua, "http", "status-errors");
+
+
 namespace {
     struct expect {
         expect(fostlib::json j) : used{false}, items{std::move(j)} {}
@@ -42,7 +49,7 @@ namespace {
 
 
     fostlib::json make_request(
-            f5::u8view const method,
+            f5::u8view method,
             fostlib::url const &url,
             fostlib::json body,
             fostlib::ua::headers headers) {
@@ -52,8 +59,16 @@ namespace {
                 method, url, fostlib::json::unparse(body, false),
                 std::move(headers)};
         auto response = ua(req);
-        if (response->status() == 404 || response->status() == 410) {
-            throw fostlib::ua::resource_not_found{url};
+        ++fostlib::ua::p_network_requests;
+        if (response->status() >= 400) {
+            ++fostlib::ua::p_status_errors;
+            switch (response->status()) {
+            case 401: throw fostlib::ua::unauthorized{url};
+            case 403: throw fostlib::ua::forbidden{url};
+            case 404: [[fallthrough]];
+            case 410: throw fostlib::ua::resource_not_found{url};
+            default: throw fostlib::ua::http_error{url, response->status()};
+            }
         }
         try {
             return response->body()->body_as_json();
@@ -153,7 +168,6 @@ bool fostlib::ua::idempotent(f5::u8view const method) {
 
 /// ## Exceptions
 
-
 fostlib::ua::no_expectation::no_expectation(
         f5::u8view message,
         f5::u8view method,
@@ -171,8 +185,28 @@ const wchar_t *const fostlib::ua::no_expectation::message() const {
 }
 
 
-fostlib::ua::resource_not_found::resource_not_found(url const &u)
+fostlib::ua::http_error::http_error(url const &u)
 : exception{f5::u8view{u.as_string()}} {}
+fostlib::ua::http_error::http_error(url const &u, int status_code)
+: exception{f5::u8view{u.as_string()}} {
+    insert(data(), "status-code", status_code);
+}
+const wchar_t *const fostlib::ua::http_error::message() const {
+    return L"HTTP error";
+}
+
+fostlib::ua::resource_not_found::resource_not_found(url const &u)
+: http_error{u} {}
 const wchar_t *const fostlib::ua::resource_not_found::message() const {
     return L"Resource not found";
+}
+
+fostlib::ua::unauthorized::unauthorized(url const &u) : http_error{u} {}
+const wchar_t *const fostlib::ua::unauthorized::message() const {
+    return L"Unauthorized";
+}
+
+fostlib::ua::forbidden::forbidden(url const &u) : http_error{u} {}
+const wchar_t *const fostlib::ua::forbidden::message() const {
+    return L"Forbidden";
 }
