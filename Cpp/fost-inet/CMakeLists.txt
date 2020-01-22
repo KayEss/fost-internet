@@ -5,6 +5,7 @@ add_library(fost-inet
         headers.cpp
         host.cpp
         http.authentication.cpp
+        http.cache.cpp
         http.server.cpp
         http.useragent.cpp
         mime.cpp
@@ -25,6 +26,7 @@ if(TARGET check)
             headers-tests.cpp
             host-tests.cpp
             http-tests.cpp
+            http.cache.tests.cpp
             mime-binary_body-tests.cpp
             mime-mime_envelope-tests.cpp
             mime-tests.cpp
