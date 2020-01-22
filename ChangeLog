@@ -1,3 +1,6 @@
+2020-01-22  Kirit Saelensminde  <kirit@felspar.com>
+ Add high level user agent with test expectation support.
+
 2019-11-13  Kirit Saelensminde  <kirit@felspar.com>
  Added a number of configuration options for server certificate checking.
 
