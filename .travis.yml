@@ -22,11 +22,11 @@ install:
 script:
     - mkdir build.tmp && cd build.tmp
     - 'if [ "$CXX" = "g++" ]; then export CC=gcc-8; export CXX=g++-8; fi'
-    - git clone https://github.com/KayEss/fost-base.git --branch develop
+    - git clone https://github.com/KayEss/fost-base.git
     - git clone https://github.com/KayEss/fost-boost.git
     - git clone https://github.com/KayEss/fost-crypto.git
     - git clone https://github.com/KayEss/f5-cord.git
-    - git clone https://github.com/KayEss/f5-threading.git --branch develop
+    - git clone https://github.com/KayEss/f5-threading.git
     - ln -s ../../boost-cache fost-boost/boost
     - cp ../.travis.CMakeLists.txt CMakeLists.txt
     - cmake . -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -G Ninja
