@@ -55,7 +55,11 @@ namespace {
         if (response->status() == 404 || response->status() == 410) {
             throw fostlib::ua::resource_not_found{url};
         }
-        return response->body()->body_as_json();
+        try {
+            return response->body()->body_as_json();
+        } catch (fostlib::exceptions::parse_error const &) {
+            return fostlib::json{response->body()->body_as_string()};
+        }
     }
 
 
