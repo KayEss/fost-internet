@@ -32,6 +32,8 @@ fostlib::setting<bool> const fostlib::ua::c_force_no_http_requests{
 fostlib::performance
         fostlib::ua::p_network_requests(c_fost_inet_ua, "http", "requests");
 fostlib::performance
+        fostlib::ua::p_redirects_followed(c_fost_inet_ua, "http", "redirects");
+fostlib::performance
         fostlib::ua::p_status_errors(c_fost_inet_ua, "http", "status-errors");
 
 
@@ -50,31 +52,44 @@ namespace {
 
     fostlib::json make_request(
             f5::u8view method,
-            fostlib::url const &url,
+            fostlib::url url,
             fostlib::json body,
             fostlib::ua::headers headers) {
         headers.add("Accept", "application/json");
         fostlib::http::user_agent ua;
-        fostlib::http::user_agent::request req{
-                method, url, fostlib::json::unparse(body, false),
-                std::move(headers)};
-        auto response = ua(req);
-        ++fostlib::ua::p_network_requests;
-        if (response->status() >= 400) {
-            ++fostlib::ua::p_status_errors;
-            switch (response->status()) {
-            case 401: throw fostlib::ua::unauthorized{url};
-            case 403: throw fostlib::ua::forbidden{url};
-            case 404: [[fallthrough]];
-            case 410: throw fostlib::ua::resource_not_found{url};
-            default: throw fostlib::ua::http_error{url, response->status()};
+        for (std::size_t count{}; count < 5; ++count) {
+            fostlib::http::user_agent::request req{
+                    method, url, fostlib::json::unparse(body, false),
+                    std::move(headers)};
+            auto response = ua(req);
+            ++fostlib::ua::p_network_requests;
+            auto const status = response->status();
+            if (status >= 400) {
+                ++fostlib::ua::p_status_errors;
+                switch (status) {
+                case 401: throw fostlib::ua::unauthorized{url};
+                case 403: throw fostlib::ua::forbidden{url};
+                case 404: [[fallthrough]];
+                case 410: throw fostlib::ua::resource_not_found{url};
+                default: throw fostlib::ua::http_error{url, status};
+                }
+            } else if (status >= 301 && status <= 303) {
+                ++fostlib::ua::p_redirects_followed;
+                url = fostlib::url{
+                        url, response->body()->headers()["Location"].value()};
+                if (status == 303) method = "GET";
+            } else {
+                try {
+                    return response->body()->body_as_json();
+                } catch (fostlib::exceptions::parse_error const &) {
+                    return fostlib::json{response->body()->body_as_string()};
+                }
             }
         }
-        try {
-            return response->body()->body_as_json();
-        } catch (fostlib::exceptions::parse_error const &) {
-            return fostlib::json{response->body()->body_as_string()};
-        }
+        throw fostlib::exceptions::not_implemented{
+                __PRETTY_FUNCTION__,
+                "Maximum HTTP request count exceeded. Probably a redirect "
+                "loop"};
     }
 
 

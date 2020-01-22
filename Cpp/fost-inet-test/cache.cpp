@@ -76,3 +76,17 @@ FSL_TEST_FUNCTION(unauthorized) {
             fostlib::ua::unauthorized &);
     FSL_CHECK_EQ(errors + 1, fostlib::ua::p_status_errors.value());
 }
+
+
+FSL_TEST_FUNCTION(redirection) {
+    auto const requests = fostlib::ua::p_network_requests.value();
+    auto const redirects = fostlib::ua::p_redirects_followed.value();
+    auto const errors = fostlib::ua::p_status_errors.value();
+
+    auto const zzt = fostlib::ua::get_json(
+            fostlib::url{"http://kirit.com/beanbag/gtf/ZZT"});
+    FSL_CHECK(zzt.isarray());
+    FSL_CHECK_EQ(requests + 2, fostlib::ua::p_network_requests.value());
+    FSL_CHECK_EQ(redirects + 1, fostlib::ua::p_redirects_followed.value());
+    FSL_CHECK_EQ(errors, fostlib::ua::p_status_errors.value());
+}
