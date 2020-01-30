@@ -53,25 +53,37 @@ namespace {
     fostlib::json make_request(
             f5::u8view method,
             fostlib::url url,
-            fostlib::json body,
+            std::optional<fostlib::json> body,
             fostlib::ua::headers headers) {
         headers.add("Accept", "application/json");
         fostlib::http::user_agent ua;
         for (std::size_t count{}; count < 5; ++count) {
-            fostlib::http::user_agent::request req{
-                    method, url, fostlib::json::unparse(body, false),
-                    std::move(headers)};
+            std::shared_ptr<fostlib::mime> body_data;
+            if (body) {
+                body_data = std::make_shared<fostlib::text_body>(
+                        fostlib::json::unparse(*body, false),
+                        std::move(headers));
+            } else {
+                body_data = std::make_shared<fostlib::empty_mime>(
+                        std::move(headers));
+            }
+            fostlib::http::user_agent::request req{method, url, body_data};
             auto response = ua(req);
             ++fostlib::ua::p_network_requests;
             auto const status = response->status();
             if (status >= 400) {
                 ++fostlib::ua::p_status_errors;
-                switch (status) {
-                case 401: throw fostlib::ua::unauthorized{url};
-                case 403: throw fostlib::ua::forbidden{url};
-                case 404: [[fallthrough]];
-                case 410: throw fostlib::ua::resource_not_found{url};
-                default: throw fostlib::ua::http_error{url, status};
+                try {
+                    switch (status) {
+                    case 401: throw fostlib::ua::unauthorized{url};
+                    case 403: throw fostlib::ua::forbidden{url};
+                    case 404: [[fallthrough]];
+                    case 410: throw fostlib::ua::resource_not_found{url};
+                    default: throw fostlib::ua::http_error{url, status};
+                    }
+                } catch (fostlib::exceptions::exception &e) {
+                    insert(e.data(), "request", "headers", req.headers());
+                    throw;
                 }
             } else if (status >= 301 && status <= 303) {
                 ++fostlib::ua::p_redirects_followed;
@@ -96,7 +108,7 @@ namespace {
     fostlib::json check_cache(
             f5::u8view const method,
             fostlib::url const &url,
-            fostlib::json body,
+            std::optional<fostlib::json> body,
             fostlib::ua::headers headers) {
         return make_request(method, url, std::move(body), std::move(headers));
     }
@@ -106,7 +118,10 @@ namespace {
 
 
 fostlib::json fostlib::ua::request_json(
-        f5::u8view const method, url const &url, json body, headers headers) {
+        f5::u8view const method,
+        url const &url,
+        std::optional<json> body,
+        headers headers) {
     fostlib::json ret;
     auto const key = cache_key(method, url, headers);
     auto const expectation_found = g_expectations.alter(key, [&](::expect &e) {
@@ -187,12 +202,12 @@ fostlib::ua::no_expectation::no_expectation(
         f5::u8view message,
         f5::u8view method,
         url const &url,
-        fostlib::json body,
+        std::optional<json> body,
         headers const &headers)
 : exception(message) {
     insert(data(), "method", method);
     insert(data(), "url", url);
-    insert(data(), "body", body);
+    if (body) insert(data(), "body", *body);
     insert(data(), "headers", headers);
 }
 const wchar_t *const fostlib::ua::no_expectation::message() const {

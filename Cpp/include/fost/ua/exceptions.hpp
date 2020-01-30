@@ -25,7 +25,7 @@ namespace fostlib::ua {
                 f5::u8view message,
                 f5::u8view method,
                 url const &url,
-                fostlib::json body,
+                std::optional<json> body,
                 headers const &headers);
 
         const wchar_t *const message() const;

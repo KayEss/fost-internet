@@ -47,9 +47,10 @@ namespace fostlib::ua {
     /// ## User agent functions
 
     /// Fetch the JSON body of the requested URL
-    json request_json(f5::u8view method, url const &, json body, headers);
+    json request_json(
+            f5::u8view method, url const &, std::optional<json> body, headers);
     inline json get_json(url const &u, headers h = headers{}) {
-        return request_json("GET", u, json{}, std::move(h));
+        return request_json("GET", u, {}, std::move(h));
     }
     inline json
             post_json(url const &u, fostlib::json body, headers h = headers{}) {
