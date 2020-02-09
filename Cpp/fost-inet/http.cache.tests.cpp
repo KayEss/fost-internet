@@ -97,7 +97,7 @@ FSL_TEST_FUNCTION(expectations) {
 
 FSL_TEST_FUNCTION(cache_keys) {
     using fostlib::url;
-    fostlib::ua::headers headers;
+    fostlib::ua::headers const headers;
     FSL_CHECK_EQ(
             fostlib::ua::cache_key("GET", url{"http://localhost/"}, headers),
             "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
@@ -124,6 +124,14 @@ FSL_TEST_FUNCTION(cache_keys) {
             fostlib::ua::cache_key(
                     "GET", url{"http://localhost/?foo=bar"}, headers),
             "qw4cs8ygp1raksja7sps5m626jsynpkjkcg3ravxnkswe8f0rh2g");
+
+    /// The `Authorization` must result in a different hash key
+    auto authorization = headers;
+    authorization.add("Authorization", "bearer=FOO");
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key(
+                    "GET", url{"http://localhost/"}, authorization),
+            "hc16ja53bhwz2c2dns53eb1gb6qsmn4cthqadm14tncfhsa9a3v0");
 
     /// The following changes must not result in different cache keys
     FSL_CHECK_EQ(

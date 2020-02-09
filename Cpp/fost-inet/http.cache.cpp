@@ -176,7 +176,7 @@ void fostlib::ua::expect(
 
 
 f5::u8string fostlib::ua::cache_key(
-        f5::u8view method, url const &u, headers const &) {
+        f5::u8view method, url const &u, headers const &headers) {
     fostlib::digester hash{fostlib::sha256};
     if (u.fragment()) {
         auto uf = u;
@@ -184,6 +184,11 @@ f5::u8string fostlib::ua::cache_key(
         hash << method << " " << uf.as_string() << "\n";
     } else {
         hash << method << " " << u.as_string() << "\n";
+    }
+    if (headers.exists("Authorization")) {
+        hash << "Authorization: "
+             << fostlib::coerce<fostlib::string>(headers["Authorization"])
+             << "\n";
     }
     return f5::u8view{fostlib::coerce<fostlib::base32c_string>(
                               array_view<const unsigned char>{hash.digest()})}
