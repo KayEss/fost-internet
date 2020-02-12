@@ -1,3 +1,6 @@
+2020-02-09  Kirit Saelensminde  <kirit@felspar.com>
+ Can now set exceptions as expected outcomes from the HTTP cache.
+
 2020-01-22  Kirit Saelensminde  <kirit@felspar.com>
  Add high level user agent with test expectation support.
 

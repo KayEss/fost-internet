@@ -92,12 +92,53 @@ FSL_TEST_FUNCTION(expectations) {
 }
 
 
+FSL_TEST_FUNCTION(login) {
+    fostlib::url const profile{"https://example.com/me"},
+            login{"https://example.com/login"};
+
+    /// We want to test something like this function for fetching profile data
+    auto const do_login = [&]() {
+        /// A real implementation would take a username/password
+        fostlib::ua::headers heads;
+        auto bearer = fostlib::ua::post_json(
+                login, fostlib::json{"username/password"});
+        heads.set(
+                "Authorization",
+                "bearer=" + fostlib::coerce<fostlib::string>(bearer));
+        return heads;
+    };
+    auto const get_profile = [&](auto heads) {
+        try {
+            return fostlib::ua::get_json(profile, heads);
+        } catch (fostlib::ua::unauthorized &) {
+            auto authed = do_login();
+            return fostlib::ua::get_json(profile, authed);
+        }
+    };
+
+    /// This would be the test function we would want to write
+    fostlib::ua::ua_test test;
+
+    fostlib::ua::headers wrong, right;
+    wrong.set("Authorization", "bearer=FOO");
+    right.set("Authorization", "bearer=BAR");
+
+    fostlib::ua::expect(
+            "GET", profile, fostlib::ua::unauthorized{profile}, wrong);
+    fostlib::ua::expect_post(login, fostlib::json{"BAR"});
+    fostlib::ua::expect_get(profile, fostlib::json{"Profile data"}, right);
+
+    /// Now get the profile data
+    FSL_CHECK_EQ(get_profile(wrong), "Profile data");
+}
+
+
 /// ## Implementation details
 
 
 FSL_TEST_FUNCTION(cache_keys) {
     using fostlib::url;
-    fostlib::ua::headers headers;
+    fostlib::ua::headers const headers;
     FSL_CHECK_EQ(
             fostlib::ua::cache_key("GET", url{"http://localhost/"}, headers),
             "964dyfcyk487v6wzdsajacmxkj0zrgc6mk1bdmprd3vzjvd83h90");
@@ -124,6 +165,14 @@ FSL_TEST_FUNCTION(cache_keys) {
             fostlib::ua::cache_key(
                     "GET", url{"http://localhost/?foo=bar"}, headers),
             "qw4cs8ygp1raksja7sps5m626jsynpkjkcg3ravxnkswe8f0rh2g");
+
+    /// The `Authorization` must result in a different hash key
+    auto authorization = headers;
+    authorization.add("Authorization", "bearer=FOO");
+    FSL_CHECK_EQ(
+            fostlib::ua::cache_key(
+                    "GET", url{"http://localhost/"}, authorization),
+            "hc16ja53bhwz2c2dns53eb1gb6qsmn4cthqadm14tncfhsa9a3v0");
 
     /// The following changes must not result in different cache keys
     FSL_CHECK_EQ(

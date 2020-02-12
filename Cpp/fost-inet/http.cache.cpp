@@ -38,14 +38,24 @@ fostlib::performance
 
 
 namespace {
+    using expected = std::variant<fostlib::json, std::exception_ptr>;
+    fostlib::json unwrap_or_throw(expected const &e) {
+        struct unwrapper {
+            fostlib::json operator()(fostlib::json j) { return j; }
+            fostlib::json operator()(std::exception_ptr e) {
+                std::rethrow_exception(e);
+            }
+        };
+        return std::visit(unwrapper{}, e);
+    }
     struct expect {
-        expect(fostlib::json j) : used{false}, items{std::move(j)} {}
+        expect(expected j) : used{false}, items{std::move(j)} {}
 
         /// The `used` flag is needed to track when an idempotent
         /// expectation has been re-used, so we know that the
         /// expectation should be replaced with a new value
         bool used;
-        std::vector<fostlib::json> items;
+        std::vector<expected> items;
     };
     f5::tsmap<f5::u8string, expect> g_expectations;
 
@@ -122,7 +132,7 @@ fostlib::json fostlib::ua::request_json(
         url const &url,
         std::optional<json> body,
         headers headers) {
-    fostlib::json ret;
+    expected ret;
     auto const key = cache_key(method, url, headers);
     auto const expectation_found = g_expectations.alter(key, [&](::expect &e) {
         if (not e.items.empty()) {
@@ -140,7 +150,7 @@ fostlib::json fostlib::ua::request_json(
         }
     });
     if (expectation_found) {
-        return ret;
+        return unwrap_or_throw(ret);
     } else if (not c_cache_folder.value() && c_force_no_http_requests.value()) {
         throw no_expectation{"Expectation was never set", method, url,
                              std::move(body), std::move(headers)};
@@ -156,27 +166,43 @@ fostlib::ua::ua_test::ua_test() { clear_expectations(); }
 void fostlib::ua::clear_expectations() { g_expectations.clear(); }
 
 
+namespace {
+    void set_expectation(
+            f5::u8view const method,
+            fostlib::url const &url,
+            ::expected e,
+            fostlib::ua::headers const &headers) {
+        auto key = fostlib::ua::cache_key(method, url, headers);
+        g_expectations.add_if_not_found(
+                key, [r = e]() { return ::expect{r}; },
+                [r = e](::expect &e) {
+                    if (e.used) {
+                        e.used = false;
+                        e.items[0] = r;
+                    } else {
+                        e.items.push_back(r);
+                    }
+                });
+    }
+}
 void fostlib::ua::expect(
         f5::u8view const method,
         url const &url,
         json r,
         headers const &headers) {
-    auto key = cache_key(method, url, headers);
-    g_expectations.add_if_not_found(
-            key, [r]() { return ::expect{r}; },
-            [r](::expect &e) {
-                if (e.used) {
-                    e.used = false;
-                    e.items[0] = r;
-                } else {
-                    e.items.push_back(r);
-                }
-            });
+    set_expectation(method, url, r, headers);
+}
+void fostlib::ua::expect(
+        f5::u8view const method,
+        url const &url,
+        std::exception_ptr e,
+        headers const &headers) {
+    set_expectation(method, url, e, headers);
 }
 
 
 f5::u8string fostlib::ua::cache_key(
-        f5::u8view method, url const &u, headers const &) {
+        f5::u8view method, url const &u, headers const &headers) {
     fostlib::digester hash{fostlib::sha256};
     if (u.fragment()) {
         auto uf = u;
@@ -184,6 +210,11 @@ f5::u8string fostlib::ua::cache_key(
         hash << method << " " << uf.as_string() << "\n";
     } else {
         hash << method << " " << u.as_string() << "\n";
+    }
+    if (headers.exists("Authorization")) {
+        hash << "Authorization: "
+             << fostlib::coerce<fostlib::string>(headers["Authorization"])
+             << "\n";
     }
     return f5::u8view{fostlib::coerce<fostlib::base32c_string>(
                               array_view<const unsigned char>{hash.digest()})}

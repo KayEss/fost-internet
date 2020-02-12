@@ -77,6 +77,26 @@ namespace fostlib::ua {
     /// Set an expectation for a request
     void expect(
             f5::u8view method, url const &, json, headers const & = headers{});
+    /// Set an expectation that request processing will throw
+    void
+            expect(f5::u8view method,
+                   url const &,
+                   std::exception_ptr expected,
+                   headers const & = headers{});
+    template<typename E>
+    inline std::enable_if_t<std::is_base_of_v<std::exception, E>>
+            expect(f5::u8view method,
+                   url const &url,
+                   E &&expected,
+                   headers const &h = headers{}) {
+        try {
+            throw expected;
+        } catch (std::exception &) {
+            expect(method, url, std::current_exception(), h);
+        }
+    }
+
+    /// Wrappers for common APIs
     inline void expect_get(url const &u, json b, headers const &h = headers{}) {
         expect("GET", u, b, h);
     }
