@@ -60,8 +60,8 @@ fostlib::mime::const_iterator fostlib::mime::end() const {
 }
 
 
-/*
-    fostlib::mime::const_iterator
+/**
+    ## fostlib::mime::const_iterator
 */
 
 
@@ -95,16 +95,16 @@ bool fostlib::mime::const_iterator::operator!=(const const_iterator &o) const {
 }
 
 
-/*
-    fostlib::mime::iterator_implementation
+/**
+    ## fostlib::mime::iterator_implementation
 */
 
 
 fostlib::mime::iterator_implementation::~iterator_implementation() = default;
 
 
-/*
-    fostlib::mime::mime_headers
+/**
+    ## fostlib::mime::mime_headers
 */
 
 std::pair<string, headers_base::content> fostlib::mime::mime_headers::value(
@@ -148,8 +148,8 @@ std::pair<string, headers_base::content> fostlib::mime::mime_headers::value(
 }
 
 
-/*
-    fostlib::empty_mime
+/**
+    ## fostlib::empty_mime
 */
 
 
@@ -181,8 +181,8 @@ std::unique_ptr<mime::iterator_implementation>
 }
 
 
-/*
-    fostlib::mime_envelope
+/**
+    ## fostlib::mime_envelope
 */
 
 
@@ -292,8 +292,8 @@ std::unique_ptr<mime::iterator_implementation>
 }
 
 
-/*
-    fostlib::text_body
+/**
+    ## fostlib::text_body
 */
 
 
@@ -430,8 +430,8 @@ std::unique_ptr<mime::iterator_implementation>
 }
 
 
-/*
-    fostlib::file_body
+/**
+    ## fostlib::file_body
 */
 
 
