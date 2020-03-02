@@ -65,7 +65,12 @@ namespace {
             fostlib::url url,
             std::optional<fostlib::json> body,
             fostlib::ua::headers headers) {
-        headers.add("Accept", "application/json");
+        if (not headers.exists("Accept")) {
+            headers.add("Accept", "application/json");
+        }
+        if (body && not headers.exists("Content-Type")) {
+            headers.add("Content-Type", "application/json");
+        }
         fostlib::http::user_agent ua;
         for (std::size_t count{}; count < 5; ++count) {
             std::shared_ptr<fostlib::mime> body_data;
