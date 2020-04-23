@@ -1,3 +1,6 @@
+2020-04-23  Kirit Saelensminde  <kirit@felspar.com>
+ * Deprecate a number of uses of wide character literals.
+
 2020-02-09  Kirit Saelensminde  <kirit@felspar.com>
  Can now set exceptions as expected outcomes from the HTTP cache.
 

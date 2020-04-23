@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -113,13 +113,12 @@ const headers_base::content &
         return (*p).second;
 }
 
-void fostlib::headers_base::set(const string &n) { return set(n, content()); }
-void fostlib::headers_base::set(const string &n, const content &v) {
+void fostlib::headers_base::set(f5::u8view n, content v) {
     m_headers.erase(m_headers.lower_bound(n), m_headers.upper_bound(n));
-    add(n, v);
+    add(n, std::move(v));
 }
-void fostlib::headers_base::add(const string &n, const content &v) {
-    m_headers.insert(m_headers.upper_bound(n), std::make_pair(n, v));
+void fostlib::headers_base::add(f5::u8view n, content v) {
+    m_headers.insert(m_headers.upper_bound(n), std::make_pair(n, std::move(v)));
 }
 void fostlib::headers_base::set_subvalue(
         const string &n, const string &k, const string &v) {
@@ -202,11 +201,10 @@ json fostlib::detail::from_headers(const headers_base &h) {
 
 
 fostlib::headers_base::content::content() {}
-fostlib::headers_base::content::content(nliteral val) : value(val) {}
 fostlib::headers_base::content::content(wliteral val) : value(val) {}
-fostlib::headers_base::content::content(const string &val) : value(val) {}
+fostlib::headers_base::content::content(f5::u8view val) : value(val) {}
 fostlib::headers_base::content::content(
-        const string &val, const std::map<string, string> &args)
+        f5::u8view val, const std::map<string, string> &args)
 : m_subvalues(args.begin(), args.end()), value(val) {}
 fostlib::headers_base::content::content(const json &values, const string &root) {
     try {

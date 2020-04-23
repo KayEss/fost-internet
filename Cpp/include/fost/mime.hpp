@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -75,7 +75,10 @@ namespace fostlib {
       protected:
         virtual std::unique_ptr<iterator_implementation> iterator() const = 0;
 
-        explicit mime(const mime_headers &headers, const string &content_type);
+        mime(mime_headers headers, f5::u8view content_type);
+        [[deprecated("Do not use char const *")]] mime(
+                mime_headers h, nliteral ct)
+        : mime{std::move(h), fostlib::string{ct}} {}
     };
 
 
@@ -150,19 +153,29 @@ namespace fostlib {
         std::unique_ptr<iterator_implementation> iterator() const;
 
       public:
+        [[deprecated("Use the f5::u8view constructor")]] text_body(
+                utf8 const *begin,
+                utf8 const *end,
+                mime_headers headers = mime_headers(),
+                f5::u8view mime = "text/plain");
         text_body(
-                const utf8 *begin,
-                const utf8 *end,
-                const mime_headers &headers = mime_headers(),
-                const string &mime = "text/plain");
-        text_body(
-                const utf8_string &text,
-                const mime_headers &headers = mime_headers(),
-                const string &mime = "text/plain");
-        text_body(
-                const string &text,
-                const mime_headers &headers = mime_headers(),
-                const string &mime = L"text/plain");
+                f5::u8view text,
+                mime_headers headers = mime_headers(),
+                f5::u8view mime = "text/plain");
+        [[deprecated("Do not use wchar_t literals")]] text_body(
+                wchar_t const *text, mime_headers headers, f5::u8view mime)
+        : text_body{fostlib::string{text}, std::move(headers), mime} {}
+        [[deprecated("Do not use wchar_t literals")]] text_body(
+                f5::u8view text, mime_headers headers, wchar_t const *mime)
+        : text_body{text, std::move(headers), fostlib::string{mime}} {}
+        [[deprecated("Do not use wchar_t literals")]] text_body(
+                wchar_t const *text,
+                mime_headers headers = mime_headers(),
+                wchar_t const *mime = L"text/plain")
+        : text_body(
+                fostlib::string{text},
+                std::move(headers),
+                fostlib::string{mime}) {}
 
         /// Print the MIME out on the stream
         std::ostream &print_on(std::ostream &o) const;
