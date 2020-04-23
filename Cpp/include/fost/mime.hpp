@@ -261,7 +261,9 @@ namespace fostlib {
     /// Allow the conversion of MIME subclasses
     template<typename T, typename F>
     struct coercer<T, F, std::enable_if_t<std::is_base_of_v<mime, F>>> {
-        T coerce(F const &f) { return fostlib::coerce<T>(reinterpret_cast<mime const &>(f)); }
+        T coerce(F const &f) {
+            return fostlib::coerce<T>(reinterpret_cast<mime const &>(f));
+        }
     };
 
 
