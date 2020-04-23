@@ -157,8 +157,9 @@ std::pair<string, headers_base::content> fostlib::mime::mime_headers::value(
 fostlib::empty_mime::empty_mime(
         const mime_headers &headers, const string &mime_type)
 : mime(headers, mime_type) {
-    if (!this->headers().exists("Content-Length"))
+    if (not this->headers().exists("Content-Length")) {
         this->headers().set("Content-Length", "0");
+    }
 }
 
 
