@@ -81,6 +81,10 @@ namespace fostlib {
                 set(wchar_t const *n, wchar_t const *c) {
             set(fostlib::string{n}, content{fostlib::string{c}});
         }
+        template<std::size_t N, std::size_t V> // Delete when the below is deleted
+        void set(char const (&n)[N], char const (&v)[V]) {
+            set(f5::u8view{n}, content{f5::u8view{v}});
+        }
         [[deprecated("Do not use char const *")]] void
                 set(f5::u8view name, char const *value) {
             set(name, content{fostlib::string{value}});
