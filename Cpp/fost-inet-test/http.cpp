@@ -9,8 +9,26 @@
 #include "fost-inet-test.hpp"
 #include <fost/test>
 
+#include <fost/http.useragent.hpp>
+#include <fost/http.server.hpp>
+
+
+using namespace std::chrono_literals;
+
 
 FSL_TEST_SUITE(http);
 
 
-FSL_TEST_FUNCTION(basic_request) {}
+FSL_TEST_FUNCTION(basic_request) {
+    std::thread{[]() {
+        fostlib::http::server server{{127, 0, 0, 1}, 45634};
+        auto req = server();
+        fostlib::text_body response{"OK"};
+        (*req)(response);
+    }}.detach();
+    fostlib::http::user_agent ua{{}};
+    std::this_thread::sleep_for(100ms); // TODO use some proper synchronization
+    auto const response = ua.get(fostlib::url{"http://127.0.0.1:45634"});
+    FSL_CHECK_EQ(response->status(), 200);
+}
+
