@@ -30,4 +30,3 @@ FSL_TEST_FUNCTION(basic_request) {
     auto const response = ua.get(fostlib::url{"http://127.0.0.1:45634"});
     FSL_CHECK_EQ(response->status(), 200);
 }
-

@@ -344,9 +344,9 @@ public mime::iterator_implementation {
             return const_memory_block();
         } else {
             sent = true;
-            return const_memory_block{body.memory().data(),
-                                      body.memory().data()
-                                              + body.memory().size()};
+            return const_memory_block{
+                    body.memory().data(),
+                    body.memory().data() + body.memory().size()};
         }
     }
 };
