@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -33,15 +33,15 @@ namespace {
 
         fostlib::string now =
                 fostlib::coerce<fostlib::string>(fostlib::timestamp::now());
-        request.headers().set(L"X-FOST-Timestamp", now);
+        request.headers().set("X-FOST-Timestamp", now);
         signature << now << "\n";
 
-        fostlib::string to_sign, signd = L"X-FOST-Headers";
+        fostlib::string to_sign, signd = "X-FOST-Headers";
         for (std::set<fostlib::string>::const_iterator i(
                      headers_to_sign.begin());
              i != headers_to_sign.end(); ++i) {
-            to_sign += L"\n" + request.headers()[*i].value();
-            signd += L" " + *i;
+            to_sign += "\n" + request.headers()[*i].value();
+            signd += " " + *i;
         }
         signature << signd << to_sign << "\n";
         if (request.data().begin() != request.data().end())
@@ -55,10 +55,10 @@ namespace {
                                                       .value_or("")
                                                       .underlying());
 
-        request.headers().set(L"X-FOST-Headers", signd);
+        request.headers().set("X-FOST-Headers", signd);
         request.headers().set(
-                L"Authorization",
-                L"FOST " + api_key + L":"
+                "Authorization",
+                "FOST " + api_key + ":"
                         + fostlib::coerce<string>(
                                 fostlib::coerce<fostlib::base64_string>(
                                         signature.digest())));

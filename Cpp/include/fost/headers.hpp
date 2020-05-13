@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -67,15 +67,35 @@ namespace fostlib {
         /// Returns true if a specified header exists
         bool exists(const string &) const;
         /// Allows a header to be set, but without any value
-        void set(const string &name);
+        void set(f5::u8view name) { set(name, content{}); }
         /// Allows a header to be given a specified value
-        void set(const string &name, const content &);
+        void set(f5::u8view name, content);
+        void set(f5::u8view name, f5::u8view value) {
+            set(name, content{value});
+        }
+        [[deprecated("Do not use wchar_t literals")]] void
+                set(wchar_t const *n, f5::u8view c) {
+            set(fostlib::string{n}, content{c});
+        }
+        [[deprecated("Do not use wchar_t literals")]] void
+                set(wchar_t const *n, wchar_t const *c) {
+            set(fostlib::string{n}, content{fostlib::string{c}});
+        }
+        template<std::size_t N, std::size_t V> // Delete when the below is deleted
+        void set(char const (&n)[N], char const (&v)[V]) {
+            set(f5::u8view{n}, content{f5::u8view{v}});
+        }
+        [[deprecated("Do not use char const *")]] void
+                set(f5::u8view name, char const *value) {
+            set(name, content{fostlib::string{value}});
+        }
         /// Allows a header to be given a set of values
-        void set(const string &name, const json &j, const string &r = string()) {
+        void set(f5::u8view name, const json &j, f5::u8view r = {}) {
             set(name, content(j, r));
         }
         /// Adds a header with a given name and content
-        void add(const string &name, const content &);
+        void add(f5::u8view name, content);
+        void add(f5::u8view name, f5::u8view c) { add(name, content{c}); }
         /// Allow a specified sub-value on the specified header to be set
         void set_subvalue(const string &name, const string &k, const string &v);
         /// Fetches a header
@@ -98,14 +118,12 @@ namespace fostlib {
           public:
             /// Create empty content for a header value
             content();
-            /// Create header value content from a narrow character literal
-            content(nliteral);
             /// Create header value content from a wide character literal
-            content(wliteral);
+            [[deprecated("Do not use wchar_t literals")]] content(wliteral);
             /// Create header value content from a string
-            content(const string &);
+            content(f5::u8view);
             /// Create header value content from a string with sub-values
-            content(const string &, const std::map<string, string> &);
+            content(f5::u8view, const std::map<string, string> &);
             /// Create header value content from JSON specifying the root key
             explicit content(const json &values, const string &root = string());
 

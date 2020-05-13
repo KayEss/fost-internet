@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -12,33 +12,34 @@
 #include <fost/http.server.hpp>
 
 
-using namespace fostlib;
-
-
 namespace {
-    setting<string> c_host(L"http-simple", L"Server", L"Bind to", L"localhost");
-    setting<int> c_port(L"http-simple", L"Server", L"Port", 8001);
+    fostlib::setting<fostlib::string>
+            c_host("http-simple", "Server", "Bind to", "localhost");
+    fostlib::setting<int> c_port("http-simple", "Server", "Port", 8001);
 }
 
 
 FSL_MAIN(
-        L"http-simple",
-        L"Simple HTTP server\nCopyright (c) 2008-2016, Felspar Co. Ltd.")
+        "http-simple",
+        "Simple HTTP server\nCopyright (c) 2008-2020, Red Anchor Trading Co. "
+        "Ltd.")
 (fostlib::ostream &o, fostlib::arguments &args) {
-    http::server server(host(args[1].value_or(c_host.value())), c_port.value());
-    o << L"Answering requests on "
-         L"http://"
-      << server.binding() << L":" << server.port() << L"/" << std::endl;
+    fostlib::http::server server(
+            fostlib::host(args[1].value_or(c_host.value())), c_port.value());
+    o << "Answering requests on http://" << server.binding() << ":"
+      << server.port() << "/" << std::endl;
     for (bool process(true); process;) {
-        std::unique_ptr<http::server::request> req(server());
-        o << req->method() << L" " << req->file_spec() << std::endl;
-        text_body response(
-                L"<html><body>This <b>is</b> a response</body></html>",
-                mime::mime_headers(), L"text/html");
+        std::unique_ptr<fostlib::http::server::request> req(server());
+        o << req->method() << " " << req->file_spec() << std::endl;
+        fostlib::text_body response{
+                "<html><body>This <b>is</b> a response</body></html>",
+                {},
+                "text/html"};
         (*req)(response);
-        if (req->data()->headers()[L"Host"].value() == L"localhost")
+        if (req->data()->headers()["Host"].value() == "localhost") {
             process = false;
+        }
     }
-    o << L"Told to exit" << std::endl;
+    o << "Told to exit\n";
     return 0;
 }

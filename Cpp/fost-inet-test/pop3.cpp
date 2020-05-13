@@ -1,5 +1,5 @@
 /**
-    Copyright 2009-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2009-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -23,7 +23,7 @@ FSL_TEST_FUNCTION(download_messages) {
     FSL_CHECK_NOTHROW(iterate_mailbox(
             host, [&mail_count](const auto &) { return ++mail_count > 10; },
             c_pop3_test_account.value(),
-            setting<string>::value(L"POP3 client test", L"Password")));
+            setting<string>::value("POP3 client test", "Password")));
 }
 
 
@@ -34,16 +34,16 @@ FSL_TEST_FUNCTION(sending_tests) {
     smtp_client server(host, port);
 
     text_body mail(
-            L"This message shows that messages can be sent from "
-            L"appservices.felspar.com");
-    mail.headers().set(L"Subject", L"Test email -- send directly via SMTP");
+            "This message shows that messages can be sent from "
+            "appservices.felspar.com");
+    mail.headers().set("Subject", "Test email -- send directly via SMTP");
     FSL_CHECK_NOTHROW(server.send(
             mail, "pop3test@felspar.com", "appservices@felspar.com"));
 
     text_body should_be_bounced(
-            L"This should be a bounced message. It shows that bounce messages "
-            L"are being received.");
-    mail.headers().set(L"Subject", L"Test email -- sent to invalid address");
+            "This should be a bounced message. It shows that bounce messages "
+            "are being received.");
+    mail.headers().set("Subject", "Test email -- sent to invalid address");
     FSL_CHECK_NOTHROW(server.send(
             should_be_bounced, "not-valid@felspar.com", "pop3test@felspar.com"));
 }

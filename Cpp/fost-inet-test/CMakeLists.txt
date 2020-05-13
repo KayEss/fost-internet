@@ -7,6 +7,7 @@ if(TARGET stress)
             connection-failures.cpp
             data-transmission.cpp
             host.cpp
+            http.cpp
             user_agent.cpp
         )
     target_link_libraries(fost-inet-test fost-inet)

@@ -78,8 +78,9 @@ FSL_TEST_FUNCTION(specify_multiple_roots) {
             false};
     fostlib::setting<fostlib::json> const digicert_ca{
             "fost-inet-test/tls.cpp", fostlib::c_extra_leaf_certificates,
-            fostlib::json::array_t{{fostlib::digicert_root_ca()},
-                                   {fostlib::lets_encrypt_root()}}};
+            fostlib::json::array_t{
+                    {fostlib::digicert_root_ca()},
+                    {fostlib::lets_encrypt_root()}}};
     fostlib::http::user_agent ua;
     {
         auto const response =

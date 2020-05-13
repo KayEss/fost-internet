@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -20,28 +20,28 @@ FSL_TEST_SUITE(mime);
 
 FSL_TEST_FUNCTION(headers) {
     mime::mime_headers headers;
-    headers.parse(L"X-First: value\r\nX-Second: value");
-    FSL_CHECK(headers.exists(L"X-First"));
-    FSL_CHECK(headers.exists(L"X-Second"));
-    FSL_CHECK(!headers.exists(L"X-Third"));
+    headers.parse("X-First: value\r\nX-Second: value");
+    FSL_CHECK(headers.exists("X-First"));
+    FSL_CHECK(headers.exists("X-Second"));
+    FSL_CHECK(!headers.exists("X-Third"));
 
-    FSL_CHECK_EQ(headers[L"X-First"].value(), L"value");
-    FSL_CHECK_EQ(headers[L"X-Second"].value(), L"value");
+    FSL_CHECK_EQ(headers["X-First"].value(), "value");
+    FSL_CHECK_EQ(headers["X-Second"].value(), "value");
 
-    FSL_CHECK_EQ(headers[L"x-first"].value(), L"value");
-    FSL_CHECK_EQ(headers[L"x-second"].value(), L"value");
+    FSL_CHECK_EQ(headers["x-first"].value(), "value");
+    FSL_CHECK_EQ(headers["x-second"].value(), "value");
 
-    headers.set("X-First", L"Another value");
-    FSL_CHECK_EQ(headers[L"X-First"].value(), L"Another value");
+    headers.set("X-First", "Another value");
+    FSL_CHECK_EQ(headers["X-First"].value(), "Another value");
 }
 
 FSL_TEST_FUNCTION(drops_underscores) {
     mime::mime_headers headers;
-    headers.parse(L"X_First: value1\r\nX-Second: value2");
+    headers.parse("X_First: value1\r\nX-Second: value2");
 
-    FSL_CHECK(not headers.exists(L"X_First"));
-    FSL_CHECK(headers.exists(L"X-Second"));
-    FSL_CHECK(not headers.exists(L"X-Third"));
+    FSL_CHECK(not headers.exists("X_First"));
+    FSL_CHECK(headers.exists("X-Second"));
+    FSL_CHECK(not headers.exists("X-Third"));
 }
 
 FSL_TEST_FUNCTION(headers_case_insensitive) {
@@ -69,7 +69,7 @@ FSL_TEST_FUNCTION(subvalues_case_insensitive) {
 FSL_TEST_FUNCTION(headers_without_values_are_legit) {
     mime::mime_headers headers;
     // from an Exchange bounced message:
-    headers.parse(L"X-MS-TNEF-Correlator: \r\n");
+    headers.parse("X-MS-TNEF-Correlator: \r\n");
     headers.set("TE");
 
     std::ostringstream ss;
@@ -117,7 +117,7 @@ FSL_TEST_FUNCTION(empty_mime_iterators) {
 }
 
 FSL_TEST_FUNCTION(text1) {
-    text_body ta(L"Test text document");
+    text_body ta("Test text document");
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;
@@ -151,7 +151,7 @@ Test text document");
 FSL_TEST_FUNCTION(text3) {
     utf8 b[19];
     std::strncpy(reinterpret_cast<char *>(b), "Test text document", 19);
-    text_body ta(b, b + 18);
+    text_body ta(b, b + 18); // Test of deprecated constructor
     std::stringstream ss;
     ss << ta;
     mime::mime_headers headers;
@@ -202,7 +202,7 @@ FSL_TEST_FUNCTION(text_as_string) {
 FSL_TEST_FUNCTION(mime_attachment) {
     mime_envelope envelope;
     envelope.items().push_back(
-            boost::shared_ptr<mime>(new text_body(L"Test text document")));
+            boost::shared_ptr<mime>(new text_body("Test text document")));
     envelope.boundary();
     std::stringstream ss;
     ss << envelope;
@@ -214,23 +214,23 @@ FSL_TEST_FUNCTION(mime_attachment) {
         FSL_CHECK_EQ(
                 utf8_string(ss.str()),
                 coerce<utf8_string>(
-                        L"\
+                        "\
 Content-Type: multipart/mixed;\r\n\
- boundary=\"" + headers[L"Content-Type"].subvalue(L"boundary").value()
-                        + L"\"\r\n\
+ boundary=\"" + headers["Content-Type"].subvalue("boundary").value()
+                        + "\"\r\n\
 \r\n\
---" + headers[L"Content-Type"].subvalue(L"boundary").value()
-                        + L"\r\n\
+--" + headers["Content-Type"].subvalue("boundary").value()
+                        + "\r\n\
 Content-Length: 18\r\n\
 Content-Transfer-Encoding: 8bit\r\n\
 Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document\r\n\
---" + headers[L"Content-Type"].subvalue(L"boundary").value()
-                        + L"--\r\n\
+--" + headers["Content-Type"].subvalue("boundary").value()
+                        + "--\r\n\
 "));
     } catch (exceptions::exception &e) {
-        if (not headers[L"Content-Type"].subvalue(L"boundary")) {
+        if (not headers["Content-Type"].subvalue("boundary")) {
             insert(e.data(), "envelope", ss.str().c_str());
         }
         throw;
@@ -238,13 +238,13 @@ Test text document\r\n\
 }
 
 FSL_TEST_FUNCTION(wrap_long_mime_header) {
-    text_body mail(L"A short message\n\nanother line\n");
-    mail.headers().set(L"Subject", L"Test email");
+    text_body mail("A short message\n\nanother line\n");
+    mail.headers().set("Subject", "Test email");
     mail.headers().set(
-            L"Dummy",
-            L"This is a long header for email which should be 'folded' "
-            L"according to RFC5322. The folding must happen right before "
-            L"whitespaces around the 78th position.");
+            "Dummy",
+            "This is a long header for email which should be 'folded' "
+            "according to RFC5322. The folding must happen right before "
+            "whitespaces around the 78th position.");
 
     std::stringstream ss;
     ss << mail.headers();
@@ -263,12 +263,12 @@ FSL_TEST_FUNCTION(wrap_long_mime_header) {
 }
 
 FSL_TEST_FUNCTION(wrap_78_char_long_mime_header) {
-    text_body mail(L"A short message\n\nanother line\n");
-    mail.headers().set(L"Subject", L"Test email");
+    text_body mail("A short message\n\nanother line\n");
+    mail.headers().set("Subject", "Test email");
     mail.headers().set(
-            L"Dummy",
-            L"This is a 78-char long header for eachi that should not be "
-            L"folded. :)");
+            "Dummy",
+            "This is a 78-char long header for eachi that should not be "
+            "folded. :)");
 
     std::stringstream ss;
     ss << mail.headers();
@@ -284,9 +284,9 @@ FSL_TEST_FUNCTION(wrap_78_char_long_mime_header) {
 }
 
 FSL_TEST_FUNCTION(wrap_empty_mime_header) {
-    text_body mail(L"A short message\n\nanother line\n");
-    mail.headers().set(L"Subject", L"Test email");
-    mail.headers().set(L"Dummy", L"");
+    text_body mail("A short message\n\nanother line\n");
+    mail.headers().set("Subject", "Test email");
+    mail.headers().set("Dummy", "");
 
     std::stringstream ss;
     ss << mail.headers();

@@ -436,8 +436,9 @@ void fostlib::network_connection::start_ssl() {
 }
 void fostlib::network_connection::start_ssl(f5::u8view hostname, bool verify) {
     try {
-        m_ssl_data = new ssl{*io_service, *m_socket,
-                             static_cast<std::string>(hostname), verify};
+        m_ssl_data =
+                new ssl{*io_service, *m_socket,
+                        static_cast<std::string>(hostname), verify};
     } catch (boost::system::system_error &e) {
         throw exceptions::socket_error(e.code());
     }
@@ -587,8 +588,8 @@ fostlib::exceptions::connect_failure::connect_failure(
 }
 
 
-fostlib::wliteral const fostlib::exceptions::connect_failure::message() const
-        noexcept {
+fostlib::wliteral const
+        fostlib::exceptions::connect_failure::message() const noexcept {
     return L"Network connection failure";
 }
 

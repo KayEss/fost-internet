@@ -24,11 +24,12 @@ using namespace fostlib;
 */
 
 
-fostlib::mime::mime(const mime_headers &h, const string &content_type)
-: content_type(content_type), headers(h) {
-    if (!headers().exists("Content-Type"))
+fostlib::mime::mime(mime_headers h, f5::u8view content_type)
+: content_type{content_type}, headers{std::move(h)} {
+    if (not headers().exists("Content-Type")) {
         headers().set(
-                L"Content-Type", mime::mime_headers::content(content_type));
+                "Content-Type", mime::mime_headers::content{content_type});
+    }
 }
 
 fostlib::mime::~mime() {}
@@ -132,15 +133,15 @@ std::pair<string, headers_base::content> fostlib::mime::mime_headers::value(
                 }
                 if (not argument.second)
                     throw exceptions::parse_error(
-                            L"Message header " + name
-                                    + L" does not have a value for an argument",
+                            "Message header " + name
+                                    + " does not have a value for an argument",
                             para.first);
                 args[argument.first] = argument.second.value();
             }
         }
-        if (name == L"Content-Disposition") // RFC 1867 uses lower case
+        if (name == "Content-Disposition") // RFC 1867 uses lower case
             return std::make_pair(
-                    L"content-disposition", content(disp.first, args));
+                    "content-disposition", content(disp.first, args));
         else
             return std::make_pair(name, content(disp.first, args));
     } else
@@ -156,8 +157,9 @@ std::pair<string, headers_base::content> fostlib::mime::mime_headers::value(
 fostlib::empty_mime::empty_mime(
         const mime_headers &headers, const string &mime_type)
 : mime(headers, mime_type) {
-    if (!this->headers().exists(L"Content-Length"))
-        this->headers().set("Content-Length", L"0");
+    if (not this->headers().exists("Content-Length")) {
+        this->headers().set("Content-Length", "0");
+    }
 }
 
 
@@ -309,25 +311,16 @@ namespace {
     }
 }
 fostlib::text_body::text_body(
-        const utf8 *begin,
+        utf8 const *begin,
         const utf8 *end,
-        const mime_headers &headers,
-        const string &mime_type)
-: mime(headers, mime_type), text(utf8_string(begin, end)) {
+        mime_headers headers,
+        f5::u8view mime_type)
+: mime(std::move(headers), mime_type), text(utf8_string(begin, end)) {
     do_headers(*this, text(), mime_type);
 }
 fostlib::text_body::text_body(
-        const utf8_string &t,
-        const mime_headers &headers,
-        const string &mime_type)
-: mime(headers, mime_type), text(t) {
-    do_headers(*this, text(), mime_type);
-}
-fostlib::text_body::text_body(
-        const fostlib::string &t,
-        const mime_headers &headers,
-        const fostlib::string &mime_type)
-: mime(headers, mime_type), text(coerce<utf8_string>(t)) {
+        f5::u8view t, mime_headers headers, f5::u8view mime_type)
+: mime(std::move(headers), mime_type), text(t) {
     do_headers(*this, text(), mime_type);
 }
 
@@ -351,9 +344,9 @@ public mime::iterator_implementation {
             return const_memory_block();
         } else {
             sent = true;
-            return const_memory_block{body.memory().data(),
-                                      body.memory().data()
-                                              + body.memory().size()};
+            return const_memory_block{
+                    body.memory().data(),
+                    body.memory().data() + body.memory().size()};
         }
     }
 };
@@ -440,9 +433,9 @@ fostlib::file_body::file_body(
         const mime_headers &headers,
         const string &mime_type)
 : mime(headers, mime_type), filename(p) {
-    this->headers().set(L"Content-Transfer-Encoding", L"8bit");
+    this->headers().set("Content-Transfer-Encoding", "8bit");
     this->headers().set(
-            L"Content-Length", coerce<string>(fostlib::fs::file_size(p)));
+            "Content-Length", coerce<string>(fostlib::fs::file_size(p)));
 }
 
 

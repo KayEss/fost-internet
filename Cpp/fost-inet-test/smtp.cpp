@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -49,7 +49,7 @@ FSL_TEST_FUNCTION(from_string_plain) {
 FSL_TEST_FUNCTION(smtp_send) {
     smtp_client server(host(c_smtp_host.value()), c_smtp_port.value());
 
-    text_body mail(L"This is just a simple test email\n\nIgnore/delete it\n");
-    mail.headers().set(L"Subject", L"Test email");
+    text_body mail("This is just a simple test email\n\nIgnore/delete it\n");
+    mail.headers().set("Subject", "Test email");
     server.send(mail, "kirit@felspar.com", "pop3test@felspar.com");
 }

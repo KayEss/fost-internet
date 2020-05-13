@@ -148,8 +148,9 @@ fostlib::json fostlib::ua::request_json(
                 e.used = true;
             }
         } else if (not c_cache_folder.value() && c_force_no_http_requests.value()) {
-            throw no_expectation{"Expectations run out", method, url,
-                                 std::move(body), std::move(headers)};
+            throw no_expectation{
+                    "Expectations run out", method, url, std::move(body),
+                    std::move(headers)};
         } else {
             ret = check_cache(method, url, std::move(body), std::move(headers));
         }
@@ -157,8 +158,9 @@ fostlib::json fostlib::ua::request_json(
     if (expectation_found) {
         return unwrap_or_throw(ret);
     } else if (not c_cache_folder.value() && c_force_no_http_requests.value()) {
-        throw no_expectation{"Expectation was never set", method, url,
-                             std::move(body), std::move(headers)};
+        throw no_expectation{
+                "Expectation was never set", method, url, std::move(body),
+                std::move(headers)};
     } else {
         return check_cache(method, url, std::move(body), std::move(headers));
     }
