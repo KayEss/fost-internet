@@ -201,7 +201,7 @@ json fostlib::detail::from_headers(const headers_base &h) {
 
 
 fostlib::headers_base::content::content() {}
-fostlib::headers_base::content::content(wliteral val) : value(val) {}
+fostlib::headers_base::content::content(wliteral val) : value(transitional_stringify(val)) {}
 fostlib::headers_base::content::content(f5::u8view val) : value(val) {}
 fostlib::headers_base::content::content(
         f5::u8view val, const std::map<string, string> &args)

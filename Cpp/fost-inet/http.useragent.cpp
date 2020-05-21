@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -20,9 +20,6 @@
 #include <fost/log>
 
 
-using namespace fostlib;
-
-
 /**
     ## fostlib::http::user_agent
 */
@@ -32,10 +29,10 @@ namespace {
     boost::asio::io_service g_io_service;
 
     const fostlib::setting<fostlib::string> c_user_agent(
-            L"fost-internet/Cpp/fost-inet/http.useragent.cpp",
-            L"HTTP",
-            L"UserAgent",
-            L"Felspar user agent",
+            "fost-internet/Cpp/fost-inet/http.useragent.cpp",
+            "HTTP",
+            "UserAgent",
+            "Fost user agent",
             true);
 }
 
@@ -44,7 +41,7 @@ fostlib::http::user_agent::user_agent() {}
 fostlib::http::user_agent::user_agent(const url &u) : base(u) {}
 
 
-std::unique_ptr<http::user_agent::response>
+std::unique_ptr<fostlib::http::user_agent::response>
         fostlib::http::user_agent::operator()(request &req) const {
     try {
         if (!req.headers().exists("Date")) {
@@ -56,7 +53,7 @@ std::unique_ptr<http::user_agent::response>
             req.headers().set("Host", req.address().server().name());
         }
         if (!req.headers().exists("User-Agent")) {
-            req.headers().set("User-Agent", c_user_agent.value() + L"/Fost 4");
+            req.headers().set("User-Agent", c_user_agent.value() + "/Fost 4");
         }
         req.headers().set("TE", "trailers");
 
@@ -155,9 +152,9 @@ fostlib::http::user_agent::response::response(
 
 namespace {
     void read_headers(
-            network_connection &cnx,
-            mime::mime_headers &headers,
-            nliteral error_message) {}
+            fostlib::network_connection &cnx,
+            fostlib::mime::mime_headers &headers,
+            fostlib::nliteral error_message) {}
 }
 
 
@@ -192,7 +189,7 @@ fostlib::http::user_agent::response::response(
 }
 
 
-boost::shared_ptr<binary_body> fostlib::http::user_agent::response::body() {
+boost::shared_ptr<fostlib::binary_body> fostlib::http::user_agent::response::body() {
     if (!m_body) {
         try {
             auto logger = fostlib::log::debug(c_fost_inet);

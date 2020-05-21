@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -23,8 +23,8 @@ namespace {
     C digit(unsigned char dig) {
         if (dig < 0x0a) return dig + '0';
         if (dig < 0x10) return dig + 'A' - 0x0a;
-        throw fostlib::exceptions::out_of_range<int>(
-                L"Number to convert to hex digit is too big", 0, 0x10, dig);
+        throw fostlib::exceptions::out_of_range<int>{
+                "Number to convert to hex digit is too big", 0, 0x10, dig};
     }
     template<typename S>
     S hex(unsigned char ch) {

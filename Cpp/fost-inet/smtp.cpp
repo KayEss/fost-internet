@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -17,10 +17,7 @@
 #include <fost/insert>
 
 
-using namespace fostlib;
-
-
-/*
+/**
     fostlib::rfc822_address_tag
 */
 
@@ -38,14 +35,14 @@ void fostlib::rfc822_address_tag::do_encode(
             "ascii_string &into )");
 }
 void fostlib::rfc822_address_tag::check_encoded(const ascii_printable_string &s) {
-    if (s.empty()) throw exceptions::null(L"Email address is empty");
+    if (s.empty()) throw exceptions::null{"Email address is empty"};
     if (s.underlying().find('@') == string::npos)
-        throw exceptions::parse_error(
-                L"Email address doesn't contain @ symbol", coerce<string>(s));
+        throw exceptions::parse_error{
+                "Email address doesn't contain @ symbol", coerce<string>(s)};
 }
 
 
-/*
+/**
     fostlib::email_address
 */
 
@@ -61,14 +58,15 @@ fostlib::email_address::email_address(
 : email(rfc822_address(address)), name(name) {}
 
 
-string fostlib::coercer<string, email_address>::coerce(const email_address &e) {
-    if (not e.name())
-        return L"<" + fostlib::coerce<string>(e.email().underlying()) + ">";
-    else
-        return e.name().value() + L" <"
-                + fostlib::coerce<string>(e.email().underlying()) + L">";
+fostlib::string fostlib::coercer<fostlib::string, fostlib::email_address>::coerce(fostlib::email_address const &e) {
+    if (not e.name()) {
+        return "<" + fostlib::coerce<string>(e.email().underlying()) + ">";
+    } else {
+        return e.name().value() + " <"
+                + fostlib::coerce<string>(e.email().underlying()) + ">";
+    }
 }
-email_address fostlib::coercer<email_address, string>::coerce(const string &s) {
+fostlib::email_address fostlib::coercer<fostlib::email_address, fostlib::string>::coerce(fostlib::string const &s) {
     std::pair<boost::optional<std::string>, std::string> result;
     smtp_address_parser<string::const_iterator> rule;
     auto pos = s.begin();
@@ -100,15 +98,15 @@ struct fostlib::smtp_client::implementation {
 
     implementation(const host &h, const port_number p)
     : can_send(false), cnx(h, p) {
-        check(220, L"Initial connection");
+        check(220, "Initial connection");
         cnx << "HELO FSIP\r\n";
-        check(250, L"HELO");
+        check(250, "HELO");
         can_send = true;
     }
     ~implementation() {
         if (can_send) {
             cnx << "QUIT\r\n";
-            check(221, L"QUIT");
+            check(221, "QUIT");
         }
     }
 
@@ -144,11 +142,11 @@ void fostlib::smtp_client::send(
     m_impl->can_send = false;
 
     m_impl->cnx << "MAIL FROM:<" + from.underlying().underlying() + ">\r\n";
-    m_impl->check(250, L"MAIL FROM");
+    m_impl->check(250, "MAIL FROM");
     m_impl->cnx << "RCPT TO:<" + to.underlying().underlying() + ">\r\n";
-    m_impl->check(250, L"RCPT TO");
+    m_impl->check(250, "RCPT TO");
     m_impl->cnx << "DATA\r\n";
-    m_impl->check(354, L"DATA");
+    m_impl->check(354, "DATA");
 
     std::stringstream ss;
     ss << email.headers();
@@ -158,7 +156,7 @@ void fostlib::smtp_client::send(
     for (mime::const_iterator d(email.begin()); d != email.end(); ++d)
         m_impl->cnx << *d;
     m_impl->cnx << "\r\n.\r\n";
-    m_impl->check(250, L"Data spooling");
+    m_impl->check(250, "Data spooling");
 
     m_impl->can_send = true;
 }

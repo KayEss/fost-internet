@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -143,7 +143,7 @@ namespace fostlib {
         /// Perform a GET request
         inline std::unique_ptr<user_agent::response>
                 user_agent::get(const url &url) const {
-            request r(L"GET", url);
+            request r("GET", url);
             return (*this)(r);
         }
 
@@ -152,7 +152,7 @@ namespace fostlib {
         template<typename D>
         inline std::unique_ptr<user_agent::response>
                 user_agent::post(const url &url, const D &data) const {
-            request r(L"POST", url, data);
+            request r("POST", url, data);
             return (*this)(r);
         }
 
@@ -161,7 +161,7 @@ namespace fostlib {
         template<typename D>
         inline std::unique_ptr<user_agent::response>
                 user_agent::put(const url &url, const D &data) const {
-            request r(L"PUT", url, data);
+            request r("PUT", url, data);
             return (*this)(r);
         }
 

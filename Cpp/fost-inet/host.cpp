@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -12,9 +12,6 @@
 
 #include <algorithm>
 #include <cctype>
-
-
-using namespace fostlib;
 
 
 namespace {
@@ -30,7 +27,7 @@ namespace {
 
 
     fostlib::string ipname(uint32_t ipv4) {
-        return coerce<string>(
+        return fostlib::coerce<fostlib::string>(
                 boost::asio::ip::address{boost::asio::ip::address_v4{ipv4}});
     }
 
@@ -71,25 +68,25 @@ boost::asio::ip::address fostlib::host::address() const {
 }
 
 
-string fostlib::host::name() const { return m_name; }
+fostlib::string fostlib::host::name() const { return m_name; }
 
 
-host fostlib::coercer<host, string>::coerce(const string &hostname) {
+fostlib::host fostlib::coercer<fostlib::host, fostlib::string>::coerce(const string &hostname) {
     host r;
     auto begin = hostname.begin();
     if (fostlib::host_p(begin, hostname.end(), r)) {
         return r;
     } else {
-        throw exceptions::not_implemented(
-                __func__, "Where the host name didn't parse", hostname);
+        throw exceptions::not_implemented{
+                __PRETTY_FUNCTION__, "Where the host name didn't parse", hostname};
     }
 }
-string fostlib::coercer<string, boost::asio::ip::address>::coerce(
-        const boost::asio::ip::address &address) {
+fostlib::string fostlib::coercer<fostlib::string, boost::asio::ip::address>::coerce(
+        boost::asio::ip::address const &address) {
     return fostlib::coerce<string>(
             fostlib::coerce<ascii_string>(address.to_string()));
 }
-ascii_string fostlib::coercer<ascii_string, host>::coerce(const host &h) {
+fostlib::ascii_string fostlib::coercer<fostlib::ascii_string, fostlib::host>::coerce(host const &h) {
     if (not h.service())
         return fostlib::coerce<ascii_string>(h.name());
     else
@@ -99,9 +96,9 @@ ascii_string fostlib::coercer<ascii_string, host>::coerce(const host &h) {
 
 
 fostlib::exceptions::host_not_found::host_not_found(
-        const string &hostname) throw()
-: exception(L"Hostname: " + hostname) {}
+        string const &hostname) noexcept
+: exception(hostname) {}
 const wchar_t *const fostlib::exceptions::host_not_found::message() const
-        throw() {
+        noexcept {
     return L"Could not find an IP address for the host name";
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -51,10 +51,10 @@ namespace fostlib {
         /// Thrown when a host name cannot be resolved
         class FOST_INET_DECLSPEC host_not_found : public exception {
           public:
-            host_not_found(const string &host_name) throw();
+            host_not_found(const string &host_name) noexcept;
 
           protected:
-            const wchar_t *const message() const throw();
+            const wchar_t *const message() const noexcept;
         };
 
 
