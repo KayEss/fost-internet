@@ -71,22 +71,27 @@ boost::asio::ip::address fostlib::host::address() const {
 fostlib::string fostlib::host::name() const { return m_name; }
 
 
-fostlib::host fostlib::coercer<fostlib::host, fostlib::string>::coerce(const string &hostname) {
+fostlib::host fostlib::coercer<fostlib::host, fostlib::string>::coerce(
+        const string &hostname) {
     host r;
     auto begin = hostname.begin();
     if (fostlib::host_p(begin, hostname.end(), r)) {
         return r;
     } else {
         throw exceptions::not_implemented{
-                __PRETTY_FUNCTION__, "Where the host name didn't parse", hostname};
+                __PRETTY_FUNCTION__, "Where the host name didn't parse",
+                hostname};
     }
 }
-fostlib::string fostlib::coercer<fostlib::string, boost::asio::ip::address>::coerce(
-        boost::asio::ip::address const &address) {
+fostlib::string
+        fostlib::coercer<fostlib::string, boost::asio::ip::address>::coerce(
+                boost::asio::ip::address const &address) {
     return fostlib::coerce<string>(
             fostlib::coerce<ascii_string>(address.to_string()));
 }
-fostlib::ascii_string fostlib::coercer<fostlib::ascii_string, fostlib::host>::coerce(host const &h) {
+fostlib::ascii_string
+        fostlib::coercer<fostlib::ascii_string, fostlib::host>::coerce(
+                host const &h) {
     if (not h.service())
         return fostlib::coerce<ascii_string>(h.name());
     else
@@ -98,7 +103,7 @@ fostlib::ascii_string fostlib::coercer<fostlib::ascii_string, fostlib::host>::co
 fostlib::exceptions::host_not_found::host_not_found(
         string const &hostname) noexcept
 : exception(hostname) {}
-const wchar_t *const fostlib::exceptions::host_not_found::message() const
-        noexcept {
+const wchar_t *const
+        fostlib::exceptions::host_not_found::message() const noexcept {
     return L"Could not find an IP address for the host name";
 }

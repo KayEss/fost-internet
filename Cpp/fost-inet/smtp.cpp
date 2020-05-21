@@ -58,7 +58,9 @@ fostlib::email_address::email_address(
 : email(rfc822_address(address)), name(name) {}
 
 
-fostlib::string fostlib::coercer<fostlib::string, fostlib::email_address>::coerce(fostlib::email_address const &e) {
+fostlib::string
+        fostlib::coercer<fostlib::string, fostlib::email_address>::coerce(
+                fostlib::email_address const &e) {
     if (not e.name()) {
         return "<" + fostlib::coerce<string>(e.email().underlying()) + ">";
     } else {
@@ -66,7 +68,9 @@ fostlib::string fostlib::coercer<fostlib::string, fostlib::email_address>::coerc
                 + fostlib::coerce<string>(e.email().underlying()) + ">";
     }
 }
-fostlib::email_address fostlib::coercer<fostlib::email_address, fostlib::string>::coerce(fostlib::string const &s) {
+fostlib::email_address
+        fostlib::coercer<fostlib::email_address, fostlib::string>::coerce(
+                fostlib::string const &s) {
     std::pair<boost::optional<std::string>, std::string> result;
     smtp_address_parser<string::const_iterator> rule;
     auto pos = s.begin();

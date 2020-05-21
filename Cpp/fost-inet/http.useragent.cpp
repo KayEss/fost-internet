@@ -189,7 +189,8 @@ fostlib::http::user_agent::response::response(
 }
 
 
-boost::shared_ptr<fostlib::binary_body> fostlib::http::user_agent::response::body() {
+boost::shared_ptr<fostlib::binary_body>
+        fostlib::http::user_agent::response::body() {
     if (!m_body) {
         try {
             auto logger = fostlib::log::debug(c_fost_inet);

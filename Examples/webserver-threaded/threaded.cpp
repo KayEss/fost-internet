@@ -29,10 +29,12 @@ namespace {
 
 FSL_MAIN(
         "http-threaded",
-        "Threaded HTTP server\n" "Copyright (c) 2009-2020 Red Anchor Trading Co. Ltd.")
+        "Threaded HTTP server\n"
+        "Copyright (c) 2009-2020 Red Anchor Trading Co. Ltd.")
 (fostlib::ostream &o, fostlib::arguments &args) {
     // Bind server to host and port
-    fostlib::http::server server(fostlib::host{args[1].value_or(c_host.value())}, c_port.value());
+    fostlib::http::server server(
+            fostlib::host{args[1].value_or(c_host.value())}, c_port.value());
     o << "Answering requests on http://" << server.binding() << ":"
       << server.port() << "/" << std::endl;
     // Service requests
