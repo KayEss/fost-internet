@@ -1,5 +1,5 @@
 /**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -31,17 +31,17 @@ FSL_TEST_FUNCTION(filepath_string) {
     FSL_CHECK_NOTHROW(url::filepath_string a("a/bc%2B.html"));
 
     FSL_CHECK_EQ(
-            coerce<url::filepath_string>(string(L"abc")),
+            coerce<url::filepath_string>(string("abc")),
             url::filepath_string("abc"));
     FSL_CHECK_EQ(
-            coerce<url::filepath_string>(string(L"a/bc.html")),
+            coerce<url::filepath_string>(string("a/bc.html")),
             url::filepath_string("a/bc.html"));
     FSL_CHECK_EQ(
-            coerce<url::filepath_string>(string(L"a/b(c).html")),
+            coerce<url::filepath_string>(string("a/b(c).html")),
             url::filepath_string("a/b%28c%29.html"));
 
-    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("a")), L"a");
-    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("%2B")), L"+");
+    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("a")), "a");
+    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("%2B")), "+");
 }
 
 
@@ -55,20 +55,20 @@ FSL_TEST_FUNCTION(query_string) {
     FSL_CHECK(not q1["not-a-key"]);
     FSL_CHECK_EQ(q2.at("not-a-key").size(), 0u);
     q1 = q2;
-    q1.append(L"key", null);
+    q1.append("key", null);
     FSL_CHECK_EQ(q1.as_string().value(), ascii_printable_string("key="));
     FSL_CHECK(not q1["key"]);
     FSL_CHECK_EQ(q1.has_key("key"), 1u);
-    q1.append(L"key", null);
+    q1.append("key", null);
     FSL_CHECK_EQ(q1.as_string().value(), ascii_printable_string("key=&key="));
     q2 = q1;
     FSL_CHECK_EQ(q2.as_string().value(), ascii_printable_string("key=&key="));
-    q1.append(L"key", L"(.)");
+    q1.append("key", "(.)");
     FSL_CHECK_EQ(
             q1.as_string().value(),
             ascii_printable_string("key=&key=&key=%28.%29"));
     FSL_CHECK_EQ(q2.as_string().value(), ascii_printable_string("key=&key="));
-    q2.append(L"key", L"\x2014");
+    q2.append("key", f5::u8string{u"\x2014"});
     FSL_CHECK_EQ(
             q1.as_string().value(),
             ascii_printable_string("key=&key=&key=%28.%29"));
@@ -196,7 +196,7 @@ FSL_TEST_FUNCTION(url_parser_filespec) {
 
 
 FSL_TEST_FUNCTION(path_spec) {
-    url u(L"http://localhost/");
+    url u("http://localhost/");
     u.pathspec(url::filepath_string("/file-name"));
     FSL_CHECK_EQ(
             u.as_string(),
@@ -207,10 +207,10 @@ FSL_TEST_FUNCTION(path_spec) {
             url::filepath_string("test"));
     FSL_CHECK_EQ(coerce<string>(u.pathspec()), "/file-name");
     u.pathspec(url::filepath_string("/Coups%20d%27%C3%A9tat"));
-    FSL_CHECK_EQ(coerce<string>(u.pathspec()), L"/Coups d'\u00e9tat");
+    FSL_CHECK_EQ(coerce<string>(u.pathspec()), u"/Coups d'\u00e9tat");
 
     url::filepath_string str("/Coups%20d%27%C3%A9tat");
-    FSL_CHECK_EQ(coerce<string>(str), L"/Coups d'\u00e9tat");
+    FSL_CHECK_EQ(coerce<string>(str), u"/Coups d'\u00e9tat");
 
     // This test is not reliable :(
     // #if BOOST_VERSION_MAJOR < 64
@@ -238,8 +238,8 @@ FSL_TEST_FUNCTION(path_spec_encoding) {
 
 FSL_TEST_FUNCTION(parse) {
     FSL_CHECK_NOTHROW(url a("http://localhost/");
-                      FSL_CHECK_EQ(a.server().name(), L"localhost");)
-    FSL_CHECK_EQ(url("http://localhost").server().name(), L"localhost");
+                      FSL_CHECK_EQ(a.server().name(), "localhost");)
+    FSL_CHECK_EQ(url("http://localhost").server().name(), "localhost");
     FSL_CHECK_EQ(
             url("http://localhost/file-path.html").pathspec(),
             url::filepath_string("/file-path.html"));
@@ -333,7 +333,7 @@ FSL_TEST_FUNCTION(url_join) {
             "https://loc:45/some/path?query=yes#fr");
     FSL_CHECK_EQ(
             url(base, "#").as_string(), "https://loc:45/some/path?query=yes#");
-    /// **TODO** The below test needs to throw rather than
+    /// **TODO** The below test needs to throw rather than pass
     FSL_CHECK_EQ(
             url(base, "../../where").as_string(), "https://loc:45/../where");
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright 2009-2019 Red Anchor Trading Co. Ltd.
+    Copyright 2009-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -111,7 +111,7 @@ FSL_TEST_FUNCTION(fost_authentication) {
             "Not a key", "Not a secret", std::set<string>(), r);
     FSL_CHECK(r.headers().exists("Authorization"));
     FSL_CHECK(r.headers().exists("X-FOST-Timestamp"));
-    FSL_CHECK_EQ(r.headers()["X-FOST-Headers"].value(), L"X-FOST-Headers");
+    FSL_CHECK_EQ(r.headers()["X-FOST-Headers"].value(), "X-FOST-Headers");
 
     http::server::request request(
             r.method(), r.address().pathspec(),
