@@ -76,9 +76,6 @@ namespace fostlib {
         virtual std::unique_ptr<iterator_implementation> iterator() const = 0;
 
         mime(mime_headers headers, f5::u8view content_type);
-        [[deprecated("Do not use char const *")]] mime(
-                mime_headers h, nliteral ct)
-        : mime{std::move(h), fostlib::string{ct}} {}
     };
 
 
@@ -153,29 +150,10 @@ namespace fostlib {
         std::unique_ptr<iterator_implementation> iterator() const;
 
       public:
-        [[deprecated("Use the f5::u8view constructor")]] text_body(
-                utf8 const *begin,
-                utf8 const *end,
-                mime_headers headers = mime_headers(),
-                f5::u8view mime = "text/plain");
         text_body(
                 f5::u8view text,
                 mime_headers headers = mime_headers(),
                 f5::u8view mime = "text/plain");
-        [[deprecated("Do not use wchar_t literals")]] text_body(
-                wchar_t const *text, mime_headers headers, f5::u8view mime)
-        : text_body{fostlib::string{text}, std::move(headers), mime} {}
-        [[deprecated("Do not use wchar_t literals")]] text_body(
-                f5::u8view text, mime_headers headers, wchar_t const *mime)
-        : text_body{text, std::move(headers), fostlib::string{mime}} {}
-        [[deprecated("Do not use wchar_t literals")]] text_body(
-                wchar_t const *text,
-                mime_headers headers = mime_headers(),
-                wchar_t const *mime = L"text/plain")
-        : text_body(
-                fostlib::string{text},
-                std::move(headers),
-                fostlib::string{mime}) {}
 
         /// Print the MIME out on the stream
         std::ostream &print_on(std::ostream &o) const;

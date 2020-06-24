@@ -27,7 +27,7 @@ FSL_TEST_FUNCTION(basic) {
 FSL_TEST_FUNCTION(to_string) {
     email_address addy(rfc822_address("address@example.com"));
     FSL_CHECK_EQ(coerce<string>(addy), "<address@example.com>");
-    addy.name(L"Mr. Address");
+    addy.name("Mr. Address");
     FSL_CHECK_EQ(coerce<string>(addy), "Mr. Address <address@example.com>");
     FSL_CHECK_EQ(
             coerce<utf8_string>(addy), "Mr. Address <address@example.com>");

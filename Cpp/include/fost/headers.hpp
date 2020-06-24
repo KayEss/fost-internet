@@ -73,21 +73,9 @@ namespace fostlib {
         void set(f5::u8view name, f5::u8view value) {
             set(name, content{value});
         }
-        [[deprecated("Do not use wchar_t literals")]] void
-                set(wchar_t const *n, f5::u8view c) {
-            set(fostlib::string{n}, content{c});
-        }
-        [[deprecated("Do not use wchar_t literals")]] void
-                set(wchar_t const *n, wchar_t const *c) {
-            set(fostlib::string{n}, content{fostlib::string{c}});
-        }
         template<std::size_t N, std::size_t V> // Delete when the below is deleted
         void set(char const (&n)[N], char const (&v)[V]) {
             set(f5::u8view{n}, content{f5::u8view{v}});
-        }
-        [[deprecated("Do not use char const *")]] void
-                set(f5::u8view name, char const *value) {
-            set(name, content{fostlib::string{value}});
         }
         /// Allows a header to be given a set of values
         void set(f5::u8view name, const json &j, f5::u8view r = {}) {
@@ -118,8 +106,6 @@ namespace fostlib {
           public:
             /// Create empty content for a header value
             content();
-            /// Create header value content from a wide character literal
-            [[deprecated("Do not use wchar_t literals")]] content(wliteral);
             /// Create header value content from a string
             content(f5::u8view);
             /// Create header value content from a string with sub-values

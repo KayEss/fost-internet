@@ -311,14 +311,6 @@ namespace {
     }
 }
 fostlib::text_body::text_body(
-        utf8 const *begin,
-        const utf8 *end,
-        mime_headers headers,
-        f5::u8view mime_type)
-: mime(std::move(headers), mime_type), text(utf8_string(begin, end)) {
-    do_headers(*this, text(), mime_type);
-}
-fostlib::text_body::text_body(
         f5::u8view t, mime_headers headers, f5::u8view mime_type)
 : mime(std::move(headers), mime_type), text(t) {
     do_headers(*this, text(), mime_type);

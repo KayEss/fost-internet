@@ -1,3 +1,6 @@
+2020-06-24  Kirit Saelensminde  <kirit@felspar.com>
+ Removed deprecated APIs.
+
 2020-04-23  Kirit Saelensminde  <kirit@felspar.com>
  * Deprecate a number of uses of wide character literals.
 
