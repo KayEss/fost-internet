@@ -1,5 +1,5 @@
 /**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
+    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
 
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
@@ -391,10 +391,13 @@ void fostlib::url::pathspec(const url::filepath_string &a_pathName) {
         pathName = "/";
     }
     /// Obvious directory fixes.
-    if (pathName.find("/.") == (pathName.length() - 2)) {
+    if (pathName.find("/.") != std::string::npos
+        && pathName.find("/.") == (pathName.length() - 2)) {
         // Add terminating slash if it ends with /.
         pathName += '/';
-    } else if (pathName.find("/..") == (pathName.length() - 3)) {
+    } else if (
+            pathName.find("/.") != std::string::npos
+            && pathName.find("/..") == (pathName.length() - 3)) {
         pathName += url::filepath_string("/"); // Or /..
     } else if (pathName == url::filepath_string(".")) {
         pathName += url::filepath_string("/");

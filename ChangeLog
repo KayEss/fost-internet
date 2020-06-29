@@ -1,3 +1,6 @@
+2020-06-29 Sukit Saeo <sukit_owl@hotmail.com>
+  Fixed url construct bug when pathspec length < 3
+
 2020-06-24  Kirit Saelensminde  <kirit@felspar.com>
  Removed deprecated APIs.
 

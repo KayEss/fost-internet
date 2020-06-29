@@ -263,6 +263,15 @@ FSL_TEST_FUNCTION(parse) {
                 "123821/")
                     .pathspec(),
             url::filepath_string("/rest/email/new_subscription/123821/"));
+    FSL_CHECK_EQ(
+            url("http://bmf.miro.felspar.net:8000/abc").pathspec(),
+            url::filepath_string("/abc"));
+    FSL_CHECK_EQ(
+            url("http://bmf.miro.felspar.net:8000/ab").pathspec(),
+            url::filepath_string("/ab"));
+    FSL_CHECK_EQ(
+            url("http://bmf.miro.felspar.net:8000/a").pathspec(),
+            url::filepath_string("/a"));
     FSL_CHECK_NOTHROW(url("http://urquell-fn.appspot.com/lib/echo/*Afsk1YSP"));
     FSL_CHECK_NOTHROW(
             url("http://urquell-fn.appspot.com/lib/json/object/basic_data"));
