@@ -391,12 +391,12 @@ void fostlib::url::pathspec(const url::filepath_string &a_pathName) {
         pathName = "/";
     }
     /// Obvious directory fixes.
-    if (pathName.find("/.") != std::string::npos
+    if (pathName.size() > 2
         && pathName.find("/.") == (pathName.length() - 2)) {
         // Add terminating slash if it ends with /.
         pathName += '/';
     } else if (
-            pathName.find("/.") != std::string::npos
+            pathName.size() > 3
             && pathName.find("/..") == (pathName.length() - 3)) {
         pathName += url::filepath_string("/"); // Or /..
     } else if (pathName == url::filepath_string(".")) {
