@@ -52,7 +52,8 @@ namespace fostlib {
                         | boost::spirit::qi::string("HTTP/1.0")
                         | boost::spirit::qi::string("HTTP/1.1");
                 status = boost::spirit::qi::uint_parser<int, 10, 3, 3>();
-                message = +boost::spirit::qi::char_;
+                message = +boost::spirit::qi::char_
+                        | boost::spirit::qi::string("");
             }
         };
 
