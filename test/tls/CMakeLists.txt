@@ -24,13 +24,12 @@ if(TARGET stress)
     ssltest(self-signed.badssl.com false)
     ssltest(untrusted-root.badssl.com false)
 
-    ssltest(1000-sans.badssl.com true)
-
     ## The following return the wrong results. These tests are just to mark
     ## the current behaviour and to notify any changes due to changes in
     ## the underlying Boost/ASIO/OpenSSL libraries being used.
     ssltest(revoked.badssl.com true)
     ssltest(pinning-test.badssl.com true)
+    ssltest(1000-sans.badssl.com false)
     ssltest(10000-sans.badssl.com false)
 
     add_custom_target(fost-internet-ssl-tests
