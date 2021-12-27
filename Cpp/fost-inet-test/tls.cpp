@@ -94,12 +94,15 @@ FSL_TEST_FUNCTION(specify_multiple_roots) {
         logger("valid-isrgrootx1.letsencrypt.org", response->status());
         FSL_CHECK_EQ(response->status(), 200);
     }
+    /// TODO Find another example here because Let's Encrypt now sign with their
+    /// own certificate
+
     /// This host is used for web proxy tests. It doesn't work because although
     /// it uses Let's Encrypt, they sign with an intermediate and this setting
     /// doesn't do chain verification.
-    FSL_CHECK_EXCEPTION(
-            ua.get(fostlib::url{"https://kirit.com/"}),
-            fostlib::exceptions::socket_error &);
+    // FSL_CHECK_EXCEPTION(
+    //         ua.get(fostlib::url{"https://kirit.com/"}),
+    //         fostlib::exceptions::socket_error &);
 }
 
 
