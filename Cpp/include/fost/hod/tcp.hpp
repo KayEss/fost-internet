@@ -51,7 +51,7 @@ namespace fostlib {
         /// Connect to a remote end point over TCP
         template<typename Cnx, typename... A>
         std::shared_ptr<Cnx> tcp_connect(
-                const fostlib::host &to, io_context_type &ios, A &&... a) {
+                const fostlib::host &to, io_context_type &ios, A &&...a) {
             auto cnx = std::make_shared<Cnx>(ios, std::forward<A>(a)...);
             /// Try to connect to the remote server
             boost::asio::ip::tcp::resolver resolver{ios};

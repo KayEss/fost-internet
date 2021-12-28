@@ -35,7 +35,7 @@ namespace fostlib {
                 // Build the base array
                 control_bytes base;
                 for (int cc{}; cc != 256; ++cc) {
-                    base[cc] = [vAny_default, cc](auto &&... v) {
+                    base[cc] = [vAny_default, cc](auto &&...v) {
                         vAny_default(cc, v...);
                     };
                 }
@@ -55,8 +55,7 @@ namespace fostlib {
 
             /// Dispatch the message to the right handler
             template<typename... A>
-            auto dispatch(
-                    uint8_t version, control_byte control, A &&... a) const {
+            auto dispatch(uint8_t version, control_byte control, A &&...a) const {
                 return processors.at(version)[control](std::forward<A>(a)...);
             }
 

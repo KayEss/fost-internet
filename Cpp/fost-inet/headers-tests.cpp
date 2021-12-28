@@ -70,7 +70,7 @@ FSL_TEST_FUNCTION(field_setting) {
     headers.add("H1", "d"); // Adds a second H1 header
     FSL_CHECK(headers.end() != headers.begin());
     FSL_CHECK(++headers.begin() != headers.end());
-    FSL_CHECK(++++headers.begin() == headers.end());
+    FSL_CHECK(++ ++headers.begin() == headers.end());
 }
 
 

@@ -133,7 +133,7 @@ struct ssl_data {
 /// networking. This sub-classing mechanism works around that.
 struct network_connection::ssl : public ssl_data {
     template<typename... Args>
-    ssl(Args &&... args) : ssl_data{std::forward<Args>(args)...} {}
+    ssl(Args &&...args) : ssl_data{std::forward<Args>(args)...} {}
 };
 
 
