@@ -33,7 +33,7 @@ namespace fostlib {
 
 
         /// Case insensitive version of std::less for chars in the ASCII range
-        struct ascii_iless : std::binary_function<string, string, bool> {
+        struct ascii_iless {
             bool operator()(const string &c1, const string &c2) const {
                 return std::lexicographical_compare(
                         c1.begin(), c1.end(), c2.begin(), c2.end(),

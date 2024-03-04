@@ -119,9 +119,7 @@ namespace std {
     /// Allow email addresses to be used as keys in std::map and to be stored in
     /// a std::set.
     template<>
-    struct less<fostlib::email_address> :
-    public std::
-            binary_function<bool, fostlib::email_address, fostlib::email_address> {
+    struct less<fostlib::email_address> {
         /// Answer the collation question
         bool operator()(
                 const fostlib::email_address &l,
