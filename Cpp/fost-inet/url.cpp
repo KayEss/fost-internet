@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/insert>
 #include <fost/string>
@@ -214,8 +206,8 @@ url::filepath_string fostlib::coercer<url::filepath_string, string>::coerce(
 
 
 url::filepath_string
-        fostlib::coercer<url::filepath_string, fostlib::fs::path>::coerce(
-                const fostlib::fs::path &p) {
+        fostlib::coercer<url::filepath_string, std::filesystem::path>::coerce(
+                const std::filesystem::path &p) {
     return fostlib::coerce<url::filepath_string>(fostlib::coerce<string>(p));
 }
 
@@ -247,7 +239,7 @@ setting<string> fostlib::url::s_default_host(
 
 fostlib::url::url()
 : protocol("http"), server(host(s_default_host.value())), m_pathspec("/") {}
-fostlib::url::url(const url &url, f5::u8view u) : fostlib::url(url) {
+fostlib::url::url(const url &url, felspar::u8view u) : fostlib::url(url) {
     /// **TODO** We need to de-IRI this, i.e  escape unicode code points
     /// that aren't as per the ASCII sub-set used by URLs
     const auto *pos = u.data(), *end = u.data() + u.bytes();
@@ -281,15 +273,15 @@ fostlib::url::url(const url &url, f5::u8view u) : fostlib::url(url) {
             fragment(ascii_printable_string(*frag).substr(1));
         }
     } else {
-        throw fostlib::exceptions::not_implemented(
-                __func__, "Didn't parse", f5::u8view(pos, (end - pos)));
+        throw fostlib::exceptions::not_implemented{
+                "Didn't parse", felspar::u8view(pos, (end - pos))};
     }
 }
 fostlib::url::url(const url &url, const filepath_string &path)
 : protocol(url.protocol()), server(url.server()), m_pathspec("/") {
     pathspec(path);
 }
-fostlib::url::url(const url &url, const fostlib::fs::path &path)
+fostlib::url::url(const url &url, const std::filesystem::path &path)
 : protocol(url.protocol()), server(url.server()), m_pathspec("/") {
     pathspec(coerce<filepath_string>(path));
 }
@@ -430,14 +422,14 @@ void fostlib::url::pathspec(const url::filepath_string &a_pathName) {
 
 
 fostlib::exceptions::relative_path_error::relative_path_error(
-        const string &base, const string &rel, const string &error) throw()
-: exceptions::exception(error) {
+        const string &base, const string &rel, const string &error, felspar::source_location const &loc) noexcept
+: exceptions::exception{error, loc} {
     try {
         insert(data(), "base", base);
         insert(data(), "relative", rel);
     } catch (...) { absorb_exception(); }
 }
-wliteral const fostlib::exceptions::relative_path_error::message() const
-        throw() {
-    return L"Relative path error";
+felspar::u8view fostlib::exceptions::relative_path_error::message() const
+        noexcept {
+    return "Relative path error";
 }

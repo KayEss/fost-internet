@@ -1,15 +1,7 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/datetime>
 #include <fost/crypto>
-
+#include <fost/exception/not_implemented.hpp>
 #include <fost/http.authentication.fost.hpp>
 
 
@@ -32,7 +24,7 @@ namespace {
                   << "\n";
 
         fostlib::string now =
-                fostlib::coerce<fostlib::string>(fostlib::timestamp::now());
+                fostlib::coerce<fostlib::string>(std::chrono::system_clock::now());
         request.headers().set("X-FOST-Timestamp", now);
         signature << now << "\n";
 
@@ -91,7 +83,7 @@ void fostlib::http::fost_authentication(
 fostlib::http::fost_authn::fost_authn(const string &m, bool a)
 : error(m), authenticated(false), under_attack(a) {}
 fostlib::http::fost_authn::fost_authn(
-        boost::shared_ptr<const mime::mime_headers> h)
+        std::shared_ptr<const mime::mime_headers> h)
 : authenticated(true), under_attack(true), signed_headers(h) {}
 
 
@@ -126,15 +118,16 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
             return fost_authn("No X-FOST-Timestamp header found");
 
         // TODO Switch to using a proper parser here so errors can be caught
-        boost::posix_time::ptime time_signed =
-                coerce<boost::posix_time::ptime>(coerce<timestamp>(json(
-                        request.data()->headers()["X-FOST-Timestamp"].value())));
-        boost::posix_time::ptime now =
-                coerce<boost::posix_time::ptime>(timestamp::now());
-        boost::posix_time::ptime oldest(now - boost::posix_time::minutes(5));
-        boost::posix_time::ptime youngest(now + boost::posix_time::minutes(5));
-        if (time_signed < oldest || time_signed > youngest)
-            return fost_authn("Clock skew is too high");
+        throw fostlib::exceptions::not_implemented{};
+        // boost::posix_time::ptime time_signed =
+        //         coerce<boost::posix_time::ptime>(coerce<std::chrono::system_clock::time_point>(json(
+        //                 request.data()->headers()["X-FOST-Timestamp"].value())));
+        // boost::posix_time::ptime now =
+        //         coerce<boost::posix_time::ptime>(std::chrono::system_clock::now());
+        // boost::posix_time::ptime oldest(now - boost::posix_time::minutes(5));
+        // boost::posix_time::ptime youngest(now + boost::posix_time::minutes(5));
+        // if (time_signed < oldest || time_signed > youngest)
+        //     return fost_authn("Clock skew is too high");
 
         std::pair<string, nullable<string>> signature_partition =
                 partition(authorization.second.value(), ":");
@@ -148,7 +141,7 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
                 return fost_authn("Key not found", true);
             } else {
                 const string &secret = found_secret.value();
-                boost::shared_ptr<mime::mime_headers> headers(
+                std::shared_ptr<mime::mime_headers> headers(
                         new mime::mime_headers);
                 hmac document(&sha1, secret);
                 document << request.method() << " " << request.file_spec()

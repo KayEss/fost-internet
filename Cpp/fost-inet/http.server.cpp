@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/http.server.hpp>
 #include <fost/parse/http.server.hpp>
@@ -13,9 +5,6 @@
 #include <fost/exception/parse_error.hpp>
 #include <fost/log>
 #include <fost/threading>
-
-
-using namespace fostlib;
 
 
 /**
@@ -37,7 +26,7 @@ void fostlib::http::server::stop_server() {
 }
 
 
-std::unique_ptr<http::server::request> fostlib::http::server::operator()() {
+std::unique_ptr<fostlib::http::server::request> fostlib::http::server::operator()() {
     std::unique_ptr<boost::asio::io_service> io_service(
             new boost::asio::io_service);
     auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*io_service);
@@ -48,21 +37,21 @@ std::unique_ptr<http::server::request> fostlib::http::server::operator()() {
 
 namespace {
     bool
-            service(std::function<bool(http::server::request &)> service_lambda,
+            service(std::function<bool(fostlib::http::server::request &)> service_lambda,
                     boost::asio::io_service *servicep,
                     boost::asio::ip::tcp::socket *sockp) {
         std::unique_ptr<boost::asio::io_service> io_service(servicep);
         std::unique_ptr<boost::asio::ip::tcp::socket> usockp(sockp);
         try {
-            http::server::request req(std::move(io_service), std::move(usockp));
+            fostlib::http::server::request req(std::move(io_service), std::move(usockp));
             try {
                 return service_lambda(req);
             } catch (fostlib::exceptions::exception &e) {
                 auto estr = fostlib::coerce<fostlib::string>(e);
-                log::error(c_fost_inet)(
+                fostlib::log::error(fostlib::c_fost_inet)(
                         "", "web server service -- exception caught")(
                         "exception", estr);
-                text_body error(estr);
+                fostlib::text_body error(estr);
                 req(error, 500);
                 return true;
             }
@@ -74,22 +63,22 @@ namespace {
 
     void respond_on_socket(
             fostlib::network_connection *cnx,
-            mime &response,
-            const ascii_string &status) {
+            fostlib::mime &response,
+            const fostlib::ascii_string &status) {
         std::stringstream buffer;
-        response.headers().fold_limit(null); // Turn off MIME line folding
+        response.headers().fold_limit(fostlib::null); // Turn off MIME line folding
         buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
                << response.headers() << "\r\n";
         *cnx << buffer;
-        for (mime::const_iterator i(response.begin()); i != response.end();
+        for (fostlib::mime::const_iterator i(response.begin()); i != response.end();
              ++i) {
             *cnx << *i;
         }
     }
 
     void raise_connection_error(
-            const mime &response, const ascii_string &status) {
-        throw exceptions::null(
+            const fostlib::mime &response, const fostlib::ascii_string &status) {
+        throw fostlib::exceptions::null(
                 "This is a mock server request. It cannot send a response to "
                 "any client");
     }
@@ -107,7 +96,7 @@ void fostlib::http::server::operator()(
         std::function<bool(http::server::request &)> service_lambda,
         std::function<bool(void)> terminate_lambda) {
     // Create a worker pool to service the requests
-    workerpool pool;
+    fostlib::workerpool pool;
     while (true) {
         // Use a raw pointer here for minimum overhead -- if it all goes wrong
         // and a socket leaks, we don't care (for now)
@@ -278,12 +267,12 @@ fostlib::nullable<fostlib::json>
         }
     }
     throw exceptions::not_implemented(
-            __func__, "Requested path into request is not possible",
+            "Requested path into request is not possible",
             fostlib::coerce<fostlib::json>(pos));
 }
 
 
-boost::shared_ptr<fostlib::binary_body>
+std::shared_ptr<fostlib::binary_body>
         fostlib::http::server::request::data() const {
     if (!m_mime.get())
         throw exceptions::null(
@@ -298,7 +287,7 @@ void fostlib::http::server::request::operator()(
 }
 
 
-nliteral fostlib::http::server::status_text(int code) {
+felspar::u8view fostlib::http::server::status_text(int code) {
     switch (code) {
     case 100: return "Continue";
     case 101: return "Switching Protocols";

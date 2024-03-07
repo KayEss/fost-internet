@@ -1,11 +1,3 @@
-/**
-    Copyright 2015-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/connection.hpp>
 
@@ -25,8 +17,8 @@ fostlib::module const fostlib::c_fost_inet(c_fost, "inet");
  * cat DigiCertGlobalRootCA.crt | openssl x509 -inform der -in - -out -
  * ```
  */
-f5::u8view fostlib::digicert_root_ca() {
-    constexpr f5::u8view const cert =
+felspar::u8view fostlib::digicert_root_ca() {
+    static constexpr felspar::u8view const cert =
             "-----BEGIN CERTIFICATE-----\n"
             "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\n"
             "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n"
@@ -57,8 +49,8 @@ f5::u8view fostlib::digicert_root_ca() {
  * This certificate is downloaded from
  */
 
-f5::u8view fostlib::lets_encrypt_root() {
-    constexpr f5::u8view const cert =
+felspar::u8view fostlib::lets_encrypt_root() {
+    static constexpr felspar::u8view const cert =
             "-----BEGIN CERTIFICATE-----\n"
             "MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw\n"
             "TzELMAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2Vh\n"

@@ -1,11 +1,3 @@
-/**
-    Copyright 2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #pragma once
 
 
@@ -22,50 +14,51 @@ namespace fostlib::ua {
     class no_expectation : public fostlib::exceptions::exception {
       public:
         no_expectation(
-                f5::u8view message,
-                f5::u8view method,
+                felspar::u8view message,
+                felspar::u8view method,
                 url const &url,
                 std::optional<json> body,
-                headers const &headers);
+                headers const &headers,
+                felspar::source_location const & = felspar::source_location::current());
 
-        const wchar_t *const message() const;
+        felspar::u8view message() const noexcept override;
     };
 
 
     /// Generic status error exception
     class http_error : public fostlib::exceptions::exception {
       public:
-        http_error(url const &u);
-        http_error(url const &u, int status_code);
+        http_error(url const &u, felspar::source_location const & = felspar::source_location::current());
+        http_error(url const &u, int status_code, felspar::source_location const & = felspar::source_location::current());
 
-        const wchar_t *const message() const;
+        felspar::u8view message() const noexcept override;
     };
 
 
     /// The resource could not be found.
     class resource_not_found : public http_error {
       public:
-        resource_not_found(fostlib::url const &);
+        resource_not_found(fostlib::url const &, felspar::source_location const & = felspar::source_location::current());
 
-        const wchar_t *const message() const;
+        felspar::u8view message() const noexcept override;
     };
 
 
     /// The user is not authorized yet (401)
     class unauthorized : public http_error {
       public:
-        unauthorized(fostlib::url const &);
+        unauthorized(fostlib::url const &, felspar::source_location const & = felspar::source_location::current());
 
-        const wchar_t *const message() const;
+        felspar::u8view message() const noexcept override;
     };
 
 
     /// The resource is forbidden (403)
     class forbidden : public http_error {
       public:
-        forbidden(fostlib::url const &);
+        forbidden(fostlib::url const &, felspar::source_location const & = felspar::source_location::current());
 
-        const wchar_t *const message() const;
+        felspar::u8view message() const noexcept override;
     };
 
 

@@ -1,11 +1,3 @@
-/**
-    Copyright 2009-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_HTTP_AUTHENTICATION_FOST_HPP
 #define FOST_HTTP_AUTHENTICATION_FOST_HPP
 #pragma once
@@ -13,6 +5,8 @@
 
 #include "http.useragent.hpp"
 #include "http.server.hpp"
+
+#include <set>
 
 
 namespace fostlib {
@@ -48,11 +42,11 @@ namespace fostlib {
             /// also true if the authentication passed
             accessors<const bool> under_attack;
             /// The set of headers that were properly signed as part of the request
-            boost::shared_ptr<const mime::mime_headers> signed_headers;
+            std::shared_ptr<const mime::mime_headers> signed_headers;
 
           private:
             fost_authn(const string &, bool under_attack = false);
-            fost_authn(boost::shared_ptr<const mime::mime_headers>);
+            fost_authn(std::shared_ptr<const mime::mime_headers>);
             friend FOST_INET_DECLSPEC fost_authn fost_authentication(
                     std::function<nullable<string>(string)>, server::request &);
             friend FOST_INET_DECLSPEC fost_authn fost_authentication(

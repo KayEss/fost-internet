@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/mime.hpp>
 #include <fost/exception/parse_error.hpp>
@@ -113,11 +105,11 @@ const headers_base::content &
         return (*p).second;
 }
 
-void fostlib::headers_base::set(f5::u8view n, content v) {
+void fostlib::headers_base::set(felspar::u8view n, content v) {
     m_headers.erase(m_headers.lower_bound(n), m_headers.upper_bound(n));
     add(n, std::move(v));
 }
-void fostlib::headers_base::add(f5::u8view n, content v) {
+void fostlib::headers_base::add(felspar::u8view n, content v) {
     m_headers.insert(m_headers.upper_bound(n), std::make_pair(n, std::move(v)));
 }
 void fostlib::headers_base::set_subvalue(
@@ -201,9 +193,9 @@ json fostlib::detail::from_headers(const headers_base &h) {
 
 
 fostlib::headers_base::content::content() {}
-fostlib::headers_base::content::content(f5::u8view val) : value(val) {}
+fostlib::headers_base::content::content(felspar::u8view val) : value(val) {}
 fostlib::headers_base::content::content(
-        f5::u8view val, const std::map<string, string> &args)
+        felspar::u8view val, const std::map<string, string> &args)
 : m_subvalues(args.begin(), args.end()), value(val) {}
 fostlib::headers_base::content::content(const json &values, const string &root) {
     try {
@@ -224,7 +216,7 @@ fostlib::headers_base::content::content(const json &values, const string &root) 
             value(coerce<string>(values));
         } else {
             throw exceptions::not_implemented(
-                    __func__, "Can't set header values from this JSON", values);
+                    "Can't set header values from this JSON", values);
         }
     } catch (exceptions::exception &e) {
         insert(e.data(), "headers_base", "content", "values", values);

@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/host.hpp>
 #include <fost/parse/host.hpp>
@@ -79,7 +71,7 @@ fostlib::host fostlib::coercer<fostlib::host, fostlib::string>::coerce(
         return r;
     } else {
         throw exceptions::not_implemented{
-                __PRETTY_FUNCTION__, "Where the host name didn't parse",
+                "Where the host name didn't parse",
                 hostname};
     }
 }
@@ -101,9 +93,10 @@ fostlib::ascii_string
 
 
 fostlib::exceptions::host_not_found::host_not_found(
-        string const &hostname) noexcept
-: exception(hostname) {}
-const wchar_t *const
+        string const &hostname, felspar::source_location const &loc) noexcept
+: exception{hostname, loc} {}
+
+felspar::u8view
         fostlib::exceptions::host_not_found::message() const noexcept {
-    return L"Could not find an IP address for the host name";
+    return "Could not find an IP address for the host name";
 }

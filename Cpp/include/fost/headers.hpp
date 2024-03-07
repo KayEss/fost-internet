@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_HEADERS_HPP
 #define FOST_HEADERS_HPP
 #pragma once
@@ -47,7 +39,7 @@ namespace fostlib {
 
     /// An abstract base class used to describe headers as they appear in
     /// protocols like SMTP and HTTP.
-    class FOST_INET_DECLSPEC FSL_ABSTRACT headers_base {
+    class FOST_INET_DECLSPEC headers_base {
       public:
         class content;
 
@@ -67,23 +59,23 @@ namespace fostlib {
         /// Returns true if a specified header exists
         bool exists(const string &) const;
         /// Allows a header to be set, but without any value
-        void set(f5::u8view name) { set(name, content{}); }
+        void set(felspar::u8view name) { set(name, content{}); }
         /// Allows a header to be given a specified value
-        void set(f5::u8view name, content);
-        void set(f5::u8view name, f5::u8view value) {
+        void set(felspar::u8view name, content);
+        void set(felspar::u8view name, felspar::u8view value) {
             set(name, content{value});
         }
         template<std::size_t N, std::size_t V> // Delete when the below is deleted
         void set(char const (&n)[N], char const (&v)[V]) {
-            set(f5::u8view{n}, content{f5::u8view{v}});
+            set(felspar::u8view{n}, content{felspar::u8view{v}});
         }
         /// Allows a header to be given a set of values
-        void set(f5::u8view name, const json &j, f5::u8view r = {}) {
+        void set(felspar::u8view name, const json &j, felspar::u8view r = {}) {
             set(name, content(j, r));
         }
         /// Adds a header with a given name and content
-        void add(f5::u8view name, content);
-        void add(f5::u8view name, f5::u8view c) { add(name, content{c}); }
+        void add(felspar::u8view name, content);
+        void add(felspar::u8view name, felspar::u8view c) { add(name, content{c}); }
         /// Allow a specified sub-value on the specified header to be set
         void set_subvalue(const string &name, const string &k, const string &v);
         /// Fetches a header
@@ -107,9 +99,9 @@ namespace fostlib {
             /// Create empty content for a header value
             content();
             /// Create header value content from a string
-            content(f5::u8view);
+            content(felspar::u8view);
             /// Create header value content from a string with sub-values
-            content(f5::u8view, const std::map<string, string> &);
+            content(felspar::u8view, const std::map<string, string> &);
             /// Create header value content from JSON specifying the root key
             explicit content(const json &values, const string &root = string());
 

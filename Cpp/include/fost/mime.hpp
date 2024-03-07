@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_INTERNET_MIME_HPP
 #define FOST_INTERNET_MIME_HPP
 #pragma once
@@ -46,13 +38,13 @@ namespace fostlib {
 
         /// APIs for fetching the body as one of a these representations.
         /// These will throw if the body isn't valid or can't be parsed.
-        virtual f5::u8string body_as_string() const;
+        virtual felspar::u8string body_as_string() const;
         virtual fostlib::json body_as_json() const;
 
         /// An iterator that allows MIME data to be traversed
         class FOST_INET_DECLSPEC const_iterator {
             friend class fostlib::mime;
-            boost::shared_ptr<iterator_implementation> underlying;
+            std::shared_ptr<iterator_implementation> underlying;
             const_memory_block current;
             const_iterator(std::unique_ptr<iterator_implementation> p);
 
@@ -75,7 +67,7 @@ namespace fostlib {
       protected:
         virtual std::unique_ptr<iterator_implementation> iterator() const = 0;
 
-        mime(mime_headers headers, f5::u8view content_type);
+        mime(mime_headers headers, felspar::u8view content_type);
     };
 
 
@@ -114,28 +106,28 @@ namespace fostlib {
         bool boundary_is_ok(const string &boundary) const;
 
         /// The type of the attachments
-        typedef std::list<boost::shared_ptr<mime>> items_type;
+        typedef std::list<std::shared_ptr<mime>> items_type;
         /// The embedded MIME items
         accessors<items_type, fostlib::lvalue> items;
 
         /// Attach a MIME type
         template<typename M, typename P1>
-        boost::shared_ptr<M> attach(const P1 &p1) {
-            boost::shared_ptr<M> attachment(new M(p1));
+        std::shared_ptr<M> attach(const P1 &p1) {
+            std::shared_ptr<M> attachment(new M(p1));
             items().push_back(attachment);
             return attachment;
         }
         /// Attach a MIME type
         template<typename M, typename P1, typename P2>
-        boost::shared_ptr<M> attach(const P1 &p1, const P2 &p2) {
-            boost::shared_ptr<M> attachment(new M(p1, p2));
+        std::shared_ptr<M> attach(const P1 &p1, const P2 &p2) {
+            std::shared_ptr<M> attachment(new M(p1, p2));
             items().push_back(attachment);
             return attachment;
         }
         /// Attach a MIME type
         template<typename M, typename P1, typename P2, typename P3>
-        boost::shared_ptr<M> attach(const P1 &p1, const P2 &p2, const P3 &p3) {
-            boost::shared_ptr<M> attachment(new M(p1, p2, p3));
+        std::shared_ptr<M> attach(const P1 &p1, const P2 &p2, const P3 &p3) {
+            std::shared_ptr<M> attachment(new M(p1, p2, p3));
             items().push_back(attachment);
             return attachment;
         }
@@ -151,9 +143,9 @@ namespace fostlib {
 
       public:
         text_body(
-                f5::u8view text,
+                felspar::u8view text,
                 mime_headers headers = mime_headers(),
-                f5::u8view mime = "text/plain");
+                felspar::u8view mime = "text/plain");
 
         /// Print the MIME out on the stream
         std::ostream &print_on(std::ostream &o) const;
@@ -162,8 +154,8 @@ namespace fostlib {
 
         accessors<const utf8_string> text;
 
-        f5::u8string body_as_string() const {
-            return static_cast<f5::u8string>(text());
+        felspar::u8string body_as_string() const {
+            return static_cast<felspar::u8string>(text());
         }
     };
 
@@ -220,7 +212,7 @@ namespace fostlib {
 
       public:
         file_body(
-                const fostlib::fs::path &file,
+                const std::filesystem::path &file,
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream");
 
@@ -229,7 +221,7 @@ namespace fostlib {
         /// Check that the boundary can be used
         bool boundary_is_ok(const string &boundary) const;
 
-        accessors<const fostlib::fs::path> filename;
+        accessors<const std::filesystem::path> filename;
     };
 
 

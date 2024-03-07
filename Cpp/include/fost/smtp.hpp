@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_INTERNET_SMTP_HPP
 #define FOST_INTERNET_SMTP_HPP
 #pragma once
@@ -95,13 +87,14 @@ namespace fostlib {
 
 
     /// An SMTP client for sending emails
-    class FOST_INET_DECLSPEC smtp_client : boost::noncopyable {
+    class FOST_INET_DECLSPEC smtp_client {
         struct implementation;
         implementation *m_impl;
 
       public:
         /// Create a client which connects to the specified server
         smtp_client(const host &server, const port_number = 25);
+        smtp_client(smtp_client const &) = delete;
         ~smtp_client();
 
         /// Send an email to the specified recipient from the specified sender

@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_INTERNET_HTTP_USERAGENT_HPP
 #define FOST_INTERNET_HTTP_USERAGENT_HPP
 #pragma once
@@ -20,12 +12,13 @@ namespace fostlib {
     namespace http {
 
 
-        class FOST_INET_DECLSPEC user_agent : boost::noncopyable {
+        class FOST_INET_DECLSPEC user_agent {
           public:
             /// Construct a new user agent
             user_agent();
             /// Construct a new user agent given a base URL
             explicit user_agent(const url &base);
+            user_agent(user_agent const &) = delete;
 
             class request;
             class response;
@@ -64,15 +57,11 @@ namespace fostlib {
             /// Construct a request for a URL with body data from a file
             request(const string &method,
                     const url &url,
-                    const fostlib::fs::path &data);
+                    const std::filesystem::path &data);
             /// Construct a request for a URL with MIME data
             request(const string &method,
                     const url &url,
                     std::shared_ptr<mime> mime_data);
-            request(const string &method,
-                    const url &url,
-                    boost::shared_ptr<mime> mime_data)
-            : request{method, url, to_std(mime_data)} {}
 
             /// Allow manipulation of the request headers
             mime::mime_headers &headers() { return m_data->headers(); }
@@ -95,7 +84,7 @@ namespace fostlib {
 
 
         /// Describe a HTTP response
-        class FOST_INET_DECLSPEC user_agent::response : boost::noncopyable {
+        class FOST_INET_DECLSPEC user_agent::response {
             friend class user_agent;
             mime::mime_headers m_headers;
             response(
@@ -112,7 +101,7 @@ namespace fostlib {
                     const string &method,
                     const url &address,
                     int status,
-                    boost::shared_ptr<binary_body> body,
+                    std::shared_ptr<binary_body> body,
                     const mime::mime_headers & = mime::mime_headers(),
                     const string &message = string());
 
@@ -132,11 +121,11 @@ namespace fostlib {
             const mime::mime_headers &headers() const { return m_headers; }
 
             /// The response body and headers
-            boost::shared_ptr<binary_body> body();
+            std::shared_ptr<binary_body> body();
 
           private:
             std::unique_ptr<network_connection> m_cnx;
-            boost::shared_ptr<binary_body> m_body;
+            std::shared_ptr<binary_body> m_body;
         };
 
 

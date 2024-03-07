@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 
 #include <fost/http.useragent.hpp>
@@ -47,7 +39,7 @@ std::unique_ptr<fostlib::http::user_agent::response>
         if (!req.headers().exists("Date")) {
             req.headers().set(
                     "Date",
-                    coerce<string>(coerce<rfc1123_timestamp>(timestamp::now())));
+                    coerce<string>(coerce<rfc1123_timestamp>(std::chrono::system_clock::now())));
         }
         if (!req.headers().exists("Host")) {
             req.headers().set("Host", req.address().server().name());
@@ -122,7 +114,7 @@ fostlib::http::user_agent::request::request(
   method(method),
   address(url) {}
 fostlib::http::user_agent::request::request(
-        const string &method, const url &url, const fostlib::fs::path &data)
+        const string &method, const url &url, const std::filesystem::path &data)
 : m_data{std::make_shared<file_body>(data)}, method(method), address(url) {}
 fostlib::http::user_agent::request::request(
         const string &method, const url &url, std::shared_ptr<mime> mime_data)
@@ -138,7 +130,7 @@ fostlib::http::user_agent::response::response(
         const string &method,
         const url &address,
         int status,
-        boost::shared_ptr<binary_body> body,
+        std::shared_ptr<binary_body> body,
         const mime::mime_headers &headers,
         const string &message)
 : m_headers(headers),
@@ -189,7 +181,7 @@ fostlib::http::user_agent::response::response(
 }
 
 
-boost::shared_ptr<fostlib::binary_body>
+std::shared_ptr<fostlib::binary_body>
         fostlib::http::user_agent::response::body() {
     if (!m_body) {
         try {
@@ -205,7 +197,7 @@ boost::shared_ptr<fostlib::binary_body>
             logger("length", length);
 
             if (status() == 304 || (length && length.value() == 0)) {
-                m_body = boost::shared_ptr<binary_body>(
+                m_body = std::shared_ptr<binary_body>(
                         new binary_body(m_headers));
             } else if (not length) {
                 if (m_headers["Transfer-Encoding"].value() == "chunked") {
@@ -230,7 +222,7 @@ boost::shared_ptr<fostlib::binary_body>
                     read_headers(
                             *m_cnx, m_headers,
                             "Whilst reading trailing headers");
-                    m_body = boost::shared_ptr<binary_body>(
+                    m_body = std::shared_ptr<binary_body>(
                             new binary_body(data, m_headers));
                 } else {
                     logger("fetching", "transfer", "unknown size");
@@ -242,13 +234,13 @@ boost::shared_ptr<fostlib::binary_body>
                     while (body_buffer.size()) {
                         body_data.push_back(body_buffer.sbumpc());
                     }
-                    m_body = boost::shared_ptr<binary_body>(
+                    m_body = std::shared_ptr<binary_body>(
                             new binary_body(body_data, m_headers));
                 }
             } else {
                 std::vector<unsigned char> body(length.value());
                 *m_cnx >> body;
-                m_body = boost::shared_ptr<binary_body>(
+                m_body = std::shared_ptr<binary_body>(
                         new binary_body(body, m_headers));
             }
         } catch (fostlib::exceptions::exception &) { throw; }

@@ -1,11 +1,3 @@
-/**
-    Copyright 2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #pragma once
 
 
@@ -48,7 +40,7 @@ namespace fostlib::ua {
 
     /// Fetch the JSON body of the requested URL
     json request_json(
-            f5::u8view method, url const &, std::optional<json> body, headers);
+            felspar::u8view method, url const &, std::optional<json> body, headers);
     inline json get_json(url const &u, headers h = headers{}) {
         return request_json("GET", u, {}, std::move(h));
     }
@@ -76,16 +68,16 @@ namespace fostlib::ua {
 
     /// Set an expectation for a request
     void expect(
-            f5::u8view method, url const &, json, headers const & = headers{});
+            felspar::u8view method, url const &, json, headers const & = headers{});
     /// Set an expectation that request processing will throw
     void
-            expect(f5::u8view method,
+            expect(felspar::u8view method,
                    url const &,
                    std::exception_ptr expected,
                    headers const & = headers{});
     template<typename E>
     inline std::enable_if_t<std::is_base_of_v<std::exception, E>>
-            expect(f5::u8view method,
+            expect(felspar::u8view method,
                    url const &url,
                    E &&expected,
                    headers const &h = headers{}) {

@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_HOST_HPP
 #define FOST_HOST_HPP
 #pragma once
@@ -51,10 +43,10 @@ namespace fostlib {
         /// Thrown when a host name cannot be resolved
         class FOST_INET_DECLSPEC host_not_found : public exception {
           public:
-            host_not_found(const string &host_name) noexcept;
+            host_not_found(const string &host_name, felspar::source_location const & = felspar::source_location::current()) noexcept;
 
           protected:
-            const wchar_t *const message() const noexcept;
+            felspar::u8view message() const noexcept override;
         };
 
 

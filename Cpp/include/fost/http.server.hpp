@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_INTERNET_HTTP_SERVER_HPP
 #define FOST_INTERNET_HTTP_SERVER_HPP
 #pragma once
@@ -22,17 +14,17 @@ namespace fostlib {
 
 
         /// A minimal HTTP server
-        class FOST_INET_DECLSPEC server : boost::noncopyable {
+        class FOST_INET_DECLSPEC server {
           public:
             /// The request from a user agent
-            class FOST_INET_DECLSPEC request : boost::noncopyable {
+            class FOST_INET_DECLSPEC request {
                 friend class fostlib::http::server;
-                boost::scoped_ptr<network_connection> m_cnx;
+                std::unique_ptr<network_connection> m_cnx;
                 std::function<void(mime &, const ascii_string &)> m_handler;
                 string m_method;
                 url::filepath_string m_pathspec;
                 url::query_string m_query_string;
-                boost::shared_ptr<binary_body> m_mime;
+                std::shared_ptr<binary_body> m_mime;
 
               public:
                 /// Create an empty request
@@ -72,7 +64,7 @@ namespace fostlib {
                     return m_query_string;
                 }
                 /// The request body and headers
-                boost::shared_ptr<binary_body> data() const;
+                std::shared_ptr<binary_body> data() const;
 
                 /// Shortcut to the headers
                 mime::mime_headers &headers() { return m_mime->headers(); }
@@ -124,7 +116,7 @@ namespace fostlib {
                     std::function<bool(void)> terminator);
 
             /// Return the status text associated with a status code
-            static nliteral status_text(int code);
+            static felspar::u8view status_text(int code);
 
           private:
             boost::asio::io_service m_service;

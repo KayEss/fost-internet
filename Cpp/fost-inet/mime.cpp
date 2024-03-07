@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/mime.hpp>
 
@@ -14,6 +6,8 @@
 
 #include <fost/exception/parse_error.hpp>
 #include <fost/exception/unexpected_eof.hpp>
+
+#include <fstream>
 
 
 using namespace fostlib;
@@ -24,7 +18,7 @@ using namespace fostlib;
 */
 
 
-fostlib::mime::mime(mime_headers h, f5::u8view content_type)
+fostlib::mime::mime(mime_headers h, felspar::u8view content_type)
 : content_type{content_type}, headers{std::move(h)} {
     if (not headers().exists("Content-Type")) {
         headers().set(
@@ -35,7 +29,7 @@ fostlib::mime::mime(mime_headers h, f5::u8view content_type)
 fostlib::mime::~mime() {}
 
 
-f5::u8string fostlib::mime::body_as_string() const {
+felspar::u8string fostlib::mime::body_as_string() const {
     std::string str;
     for (auto const &i : *this) {
         str.append(
@@ -43,7 +37,7 @@ f5::u8string fostlib::mime::body_as_string() const {
                 reinterpret_cast<char const *>(i.second));
     }
     fostlib::utf8_string_tag::check_encoded(str);
-    return f5::u8string{std::move(str)};
+    return felspar::u8string{std::move(str)};
 }
 
 
@@ -206,7 +200,7 @@ const fostlib::string &fostlib::mime_envelope::boundary() {
 
 bool fostlib::mime_envelope::boundary_is_ok(const string &boundary) const {
     bool ok = true;
-    for (std::list<boost::shared_ptr<mime>>::const_iterator part(
+    for (std::list<std::shared_ptr<mime>>::const_iterator part(
                  items().begin());
          ok && part != items().end(); ++part)
         ok = (*part)->boundary_is_ok(boundary);
@@ -232,7 +226,7 @@ public mime::iterator_implementation {
     mime_envelope::items_type::const_iterator current_attachment,
             end_attachment;
 
-    boost::scoped_ptr<mime::const_iterator> current, end;
+    std::unique_ptr<mime::const_iterator> current, end;
 
     utf8_string internal_buffer, boundary;
 
@@ -307,11 +301,11 @@ namespace {
                     "Content-Type", mime::mime_headers::content(mime_type));
         tb.headers().set_subvalue("Content-Type", "charset", "utf-8");
         tb.headers().set("Content-Transfer-Encoding", "8bit");
-        tb.headers().set("Content-Length", body.memory().size());
+        tb.headers().set("Content-Length", static_cast<felspar::u8string>(std::to_string(body.memory().size())));
     }
 }
 fostlib::text_body::text_body(
-        f5::u8view t, mime_headers headers, f5::u8view mime_type)
+        felspar::u8view t, mime_headers headers, felspar::u8view mime_type)
 : mime(std::move(headers), mime_type), text(t) {
     do_headers(*this, text(), mime_type);
 }
@@ -421,18 +415,18 @@ std::unique_ptr<mime::iterator_implementation>
 
 
 fostlib::file_body::file_body(
-        const fostlib::fs::path &p,
+        const std::filesystem::path &p,
         const mime_headers &headers,
         const string &mime_type)
 : mime(headers, mime_type), filename(p) {
     this->headers().set("Content-Transfer-Encoding", "8bit");
     this->headers().set(
-            "Content-Length", coerce<string>(fostlib::fs::file_size(p)));
+            "Content-Length", coerce<string>(std::filesystem::file_size(p)));
 }
 
 
 std::ostream &fostlib::file_body::print_on(std::ostream &o) const {
-    fostlib::ifstream file(filename(), std::ios::binary);
+    std::ifstream file(filename(), std::ios::binary);
     return o << headers() << "\r\n" << file.rdbuf();
 }
 
@@ -445,9 +439,9 @@ bool fostlib::file_body::boundary_is_ok(const string &boundary) const {
 
 struct fostlib::file_body::file_body_iteration :
 public mime::iterator_implementation {
-    fostlib::ifstream file;
+    std::ifstream file;
     std::array<char, 2048> buffer;
-    file_body_iteration(const fostlib::fs::path &p)
+    file_body_iteration(const std::filesystem::path &p)
     : file(p, std::ios::binary) {}
     const_memory_block operator()() {
         if (!file.eof() && file.good()) {
@@ -460,6 +454,5 @@ public mime::iterator_implementation {
 };
 std::unique_ptr<mime::iterator_implementation>
         fostlib::file_body::iterator() const {
-    return std::unique_ptr<mime::iterator_implementation>(
-            new file_body_iteration(filename()));
+    return std::make_unique<file_body_iteration>(filename());
 }

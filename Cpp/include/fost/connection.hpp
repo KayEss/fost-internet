@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_CONNECTION_HPP
 #define FOST_CONNECTION_HPP
 #pragma once
@@ -46,8 +38,8 @@ namespace fostlib {
     extern setting<json> const c_extra_leaf_certificates;
 
     /// ### Well known certificates
-    f5::u8view digicert_root_ca();
-    f5::u8view lets_encrypt_root();
+    felspar::u8view digicert_root_ca();
+    felspar::u8view lets_encrypt_root();
 
 
     /// ## `network_connection`
@@ -82,7 +74,7 @@ namespace fostlib {
         void start_ssl();
         /// Start a SSL connection and verify the server connection for the
         /// specified host name.
-        void start_ssl(f5::u8view hostname, bool verify = true);
+        void start_ssl(felspar::u8view hostname, bool verify = true);
 
         /// Return the remote end
         host remote_end();
@@ -114,17 +106,17 @@ namespace fostlib {
         class FOST_INET_DECLSPEC socket_error : public exception {
           public:
             /// Construct a socket error
-            socket_error() noexcept;
+            socket_error(felspar::source_location const & = felspar::source_location::current()) noexcept;
             /// Throw an exception providing a message
-            socket_error(const string &message) noexcept;
+            socket_error(const string &message, felspar::source_location const & = felspar::source_location::current()) noexcept;
             /// Construct a connect failure exception
-            socket_error(boost::system::error_code) noexcept;
+            socket_error(boost::system::error_code, felspar::source_location const & = felspar::source_location::current()) noexcept;
             /// Throw providing a message and extra information
-            socket_error(const string &message, const string &extra) noexcept;
+            socket_error(const string &message, const string &extra, felspar::source_location const & = felspar::source_location::current()) noexcept;
             /// Allow us to throw from a Boost error code with a message
             socket_error(
                     boost::system::error_code error,
-                    const string &message) noexcept;
+                    const string &message, felspar::source_location const & = felspar::source_location::current()) noexcept;
 
             /// Destruct the exception without throwing
             ~socket_error() noexcept;
@@ -134,7 +126,7 @@ namespace fostlib {
 
           protected:
             /// The error message title
-            const wchar_t *const message() const noexcept;
+            felspar::u8view message() const noexcept;
         };
 
 
@@ -145,11 +137,11 @@ namespace fostlib {
             connect_failure(
                     boost::system::error_code,
                     const host &,
-                    port_number) noexcept;
+                    port_number, felspar::source_location const & = felspar::source_location::current()) noexcept;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const noexcept;
+            felspar::u8view message() const noexcept;
         };
 
         /// Thrown for errors during connection to a socket or reading from a
@@ -157,24 +149,24 @@ namespace fostlib {
         class FOST_INET_DECLSPEC read_timeout : public socket_error {
           public:
             /// Construct a connect failure exception
-            read_timeout() noexcept;
+            read_timeout(felspar::source_location const & = felspar::source_location::current()) noexcept;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const noexcept;
+            felspar::u8view message() const noexcept;
         };
 
         /// Thrown for general errors when reading from a socket
         class FOST_INET_DECLSPEC read_error : public socket_error {
           public:
             /// Construct a connect failure exception
-            read_error() noexcept;
+            read_error(felspar::source_location const & = felspar::source_location::current()) noexcept;
             /// Construct a read error from an error code
-            read_error(boost::system::error_code) noexcept;
+            read_error(boost::system::error_code, felspar::source_location const & = felspar::source_location::current()) noexcept;
 
           protected:
             /// The error message title
-            const wchar_t *const message() const noexcept;
+            felspar::u8view message() const noexcept;
         };
 
 

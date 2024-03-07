@@ -1,11 +1,3 @@
-/**
-    Copyright 2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/ua/cache.detail.hpp>
 #include <fost/ua/counters.hpp>
@@ -15,7 +7,7 @@
 #include <fost/base32>
 #include <fost/crypto>
 #include <fost/insert>
-#include <f5/threading/map.hpp>
+#include <felspar/threading/map.hpp>
 
 
 fostlib::module const fostlib::ua::c_fost_inet_ua{c_fost_inet, "ua"};
@@ -57,11 +49,11 @@ namespace {
         bool used;
         std::vector<expected> items;
     };
-    f5::tsmap<f5::u8string, expect> g_expectations;
+    felspar::threading::tsmap<felspar::u8string, expect> g_expectations;
 
 
     fostlib::json make_request(
-            f5::u8view method,
+            felspar::u8view method,
             fostlib::url url,
             std::optional<fostlib::json> body,
             fostlib::ua::headers headers) {
@@ -114,14 +106,13 @@ namespace {
             }
         }
         throw fostlib::exceptions::not_implemented{
-                __PRETTY_FUNCTION__,
                 "Maximum HTTP request count exceeded. Probably a redirect "
                 "loop"};
     }
 
 
     fostlib::json check_cache(
-            f5::u8view const method,
+            felspar::u8view const method,
             fostlib::url const &url,
             std::optional<fostlib::json> body,
             fostlib::ua::headers headers) {
@@ -133,7 +124,7 @@ namespace {
 
 
 fostlib::json fostlib::ua::request_json(
-        f5::u8view const method,
+        felspar::u8view const method,
         url const &url,
         std::optional<json> body,
         headers headers) {
@@ -175,7 +166,7 @@ void fostlib::ua::clear_expectations() { g_expectations.clear(); }
 
 namespace {
     void set_expectation(
-            f5::u8view const method,
+            felspar::u8view const method,
             fostlib::url const &url,
             ::expected e,
             fostlib::ua::headers const &headers) {
@@ -193,14 +184,14 @@ namespace {
     }
 }
 void fostlib::ua::expect(
-        f5::u8view const method,
+        felspar::u8view const method,
         url const &url,
         json r,
         headers const &headers) {
     set_expectation(method, url, r, headers);
 }
 void fostlib::ua::expect(
-        f5::u8view const method,
+        felspar::u8view const method,
         url const &url,
         std::exception_ptr e,
         headers const &headers) {
@@ -208,28 +199,28 @@ void fostlib::ua::expect(
 }
 
 
-f5::u8string fostlib::ua::cache_key(
-        f5::u8view method, url const &u, headers const &headers) {
+felspar::u8string fostlib::ua::cache_key(
+        felspar::u8view method, url const &u, headers const &headers) {
     fostlib::digester hash{fostlib::sha256};
     if (u.fragment()) {
         auto uf = u;
         uf.fragment({});
-        hash << method << " " << uf.as_string() << "\n";
+        hash << method << " " << static_cast<std::string_view>(uf.as_string()) << "\n";
     } else {
-        hash << method << " " << u.as_string() << "\n";
+        hash << method << " " << static_cast<std::string_view>(u.as_string()) << "\n";
     }
     if (headers.exists("Authorization")) {
         hash << "Authorization: "
              << fostlib::coerce<fostlib::string>(headers["Authorization"])
              << "\n";
     }
-    return f5::u8view{fostlib::coerce<fostlib::base32c_string>(
+    return felspar::u8view{fostlib::coerce<fostlib::base32c_string>(
                               array_view<const unsigned char>{hash.digest()})}
             .substr_pos(0, 52);
 }
 
 
-bool fostlib::ua::idempotent(f5::u8view const method) {
+bool fostlib::ua::idempotent(felspar::u8view const method) {
     return method == "GET";
 }
 
@@ -237,44 +228,50 @@ bool fostlib::ua::idempotent(f5::u8view const method) {
 /// ## Exceptions
 
 fostlib::ua::no_expectation::no_expectation(
-        f5::u8view message,
-        f5::u8view method,
+        felspar::u8view message,
+        felspar::u8view method,
         url const &url,
         std::optional<json> body,
-        headers const &headers)
-: exception(message) {
+        headers const &headers,
+        felspar::source_location const &loc)
+: exception(message, loc) {
     insert(data(), "method", method);
     insert(data(), "url", url);
     if (body) insert(data(), "body", *body);
     insert(data(), "headers", headers);
 }
-const wchar_t *const fostlib::ua::no_expectation::message() const {
-    return L"No expectation found for request";
+felspar::u8view fostlib::ua::no_expectation::message() const noexcept {
+    return "No expectation found for request";
 }
 
 
-fostlib::ua::http_error::http_error(url const &u)
-: exception{f5::u8view{u.as_string()}} {}
-fostlib::ua::http_error::http_error(url const &u, int status_code)
-: exception{f5::u8view{u.as_string()}} {
+fostlib::ua::http_error::http_error(url const &u,
+        felspar::source_location const &loc)
+: exception{felspar::u8view{u.as_string()}, loc} {}
+fostlib::ua::http_error::http_error(url const &u, int status_code,
+        felspar::source_location const &loc)
+: exception{felspar::u8view{u.as_string()}, loc} {
     insert(data(), "status-code", status_code);
 }
-const wchar_t *const fostlib::ua::http_error::message() const {
-    return L"HTTP error";
+felspar::u8view fostlib::ua::http_error::message() const noexcept {
+    return "HTTP error";
 }
 
-fostlib::ua::resource_not_found::resource_not_found(url const &u)
-: http_error{u} {}
-const wchar_t *const fostlib::ua::resource_not_found::message() const {
-    return L"Resource not found";
+fostlib::ua::resource_not_found::resource_not_found(url const &u,
+        felspar::source_location const &loc)
+: http_error{u, loc} {}
+felspar::u8view fostlib::ua::resource_not_found::message() const noexcept {
+    return "Resource not found";
 }
 
-fostlib::ua::unauthorized::unauthorized(url const &u) : http_error{u} {}
-const wchar_t *const fostlib::ua::unauthorized::message() const {
-    return L"Unauthorized";
+fostlib::ua::unauthorized::unauthorized(url const &u,
+        felspar::source_location const &loc) : http_error{u, loc} {}
+felspar::u8view fostlib::ua::unauthorized::message() const noexcept {
+    return "Unauthorized";
 }
 
-fostlib::ua::forbidden::forbidden(url const &u) : http_error{u} {}
-const wchar_t *const fostlib::ua::forbidden::message() const {
-    return L"Forbidden";
+fostlib::ua::forbidden::forbidden(url const &u,
+        felspar::source_location const &loc) : http_error{u, loc} {}
+felspar::u8view fostlib::ua::forbidden::message() const noexcept {
+    return "Forbidden";
 }

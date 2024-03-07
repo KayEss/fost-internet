@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_URL_HPP
 #define FOST_URL_HPP
 #pragma once
@@ -77,13 +69,13 @@ namespace fostlib {
         explicit url(const string &);
         /// Construct a URL from a base joining the new string (a potentially
         /// relative IRI)
-        url(const url &base, f5::u8view);
+        url(const url &base, felspar::u8view);
         template<std::size_t N>
-        url(const url &base, const char (&a)[N]) : url(base, f5::u8view(a)) {}
+        url(const url &base, const char (&a)[N]) : url(base, felspar::u8view(a)) {}
         /// Construct a URL from a base and a new path
         url(const url &base, const filepath_string &new_path);
         /// Construct a URL from a base and a new path
-        url(const url &base, const fostlib::fs::path &new_path);
+        url(const url &base, const std::filesystem::path &new_path);
         /// Construct from a base with a JSON pointer value
         url(const url &base, const jcursor &);
         /// Other URL constructors
@@ -119,10 +111,11 @@ namespace fostlib {
             relative_path_error(
                     const string &base,
                     const string &rel,
-                    const string &error) throw();
+                    const string &error,
+                    felspar::source_location const & = felspar::source_location::current()) noexcept;
 
           protected:
-            wliteral const message() const throw();
+            felspar::u8view message() const noexcept;
         };
 
 
@@ -167,9 +160,9 @@ namespace fostlib {
     };
     /// Allow a path to be turned into a file specification.
     template<>
-    struct FOST_INET_DECLSPEC coercer<url::filepath_string, fostlib::fs::path> {
+    struct FOST_INET_DECLSPEC coercer<url::filepath_string, std::filesystem::path> {
         /// Performs the coercion
-        url::filepath_string coerce(const fostlib::fs::path &s);
+        url::filepath_string coerce(const std::filesystem::path &s);
     };
     /// Allow a file specification to be turned into a string.
     template<>
@@ -179,10 +172,10 @@ namespace fostlib {
     };
     /// Allow a file specification to be turned into a path.
     template<>
-    struct FOST_INET_DECLSPEC coercer<fostlib::fs::path, url::filepath_string> {
+    struct FOST_INET_DECLSPEC coercer<std::filesystem::path, url::filepath_string> {
         /// Performs the coercion
-        fostlib::fs::path coerce(const url::filepath_string &s) {
-            return fostlib::coerce<fostlib::fs::path>(
+        std::filesystem::path coerce(const url::filepath_string &s) {
+            return fostlib::coerce<std::filesystem::path>(
                     fostlib::coerce<string>(s));
         }
     };

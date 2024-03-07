@@ -1,11 +1,3 @@
-/**
-    Copyright 2007-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #ifndef FOST_PARSE_URL_HPP
 #define FOST_PARSE_URL_HPP
 
@@ -156,7 +148,7 @@ namespace fostlib {
                     [boost::phoenix::bind(
                             [](auto &v, auto h, auto fs, auto qs, auto frag) {
                                 v = url(h,
-                                        fostlib::fs::path(
+                                        std::filesystem::path(
                                                 fs.value_or(std::string{})));
                                 if (qs) v.query(qs.value());
                                 if (frag) v.fragment(frag.value());

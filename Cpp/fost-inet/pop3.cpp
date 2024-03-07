@@ -1,10 +1,3 @@
-/**
-    Copyright 2009-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
 #include "fost-inet.hpp"
 #include <fost/pop3.hpp>
 #include <fost/exception/out_of_range.hpp>
@@ -208,7 +201,7 @@ void fostlib::pop3::iterate_mailbox(
         std::function<bool(const text_body &)> destroy_message,
         const string &username,
         const string &password) {
-    boost::scoped_ptr<pop3cnx> mailbox(new pop3cnx(host, username, password));
+    std::unique_ptr<pop3cnx> mailbox(new pop3cnx(host, username, password));
     const size_t messages = mailbox->message_count;
     log::info(c_fost_inet, "Number of messages found", messages);
 
