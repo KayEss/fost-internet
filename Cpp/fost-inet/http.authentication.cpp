@@ -23,8 +23,8 @@ namespace {
         signature << request.method() << " " << request.address().pathspec()
                   << "\n";
 
-        fostlib::string now =
-                fostlib::coerce<fostlib::string>(std::chrono::system_clock::now());
+        fostlib::string now = fostlib::coerce<fostlib::string>(
+                std::chrono::system_clock::now());
         request.headers().set("X-FOST-Timestamp", now);
         signature << now << "\n";
 
@@ -125,8 +125,9 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
         // boost::posix_time::ptime now =
         //         coerce<boost::posix_time::ptime>(std::chrono::system_clock::now());
         // boost::posix_time::ptime oldest(now - boost::posix_time::minutes(5));
-        // boost::posix_time::ptime youngest(now + boost::posix_time::minutes(5));
-        // if (time_signed < oldest || time_signed > youngest)
+        // boost::posix_time::ptime youngest(now +
+        // boost::posix_time::minutes(5)); if (time_signed < oldest ||
+        // time_signed > youngest)
         //     return fost_authn("Clock skew is too high");
 
         std::pair<string, nullable<string>> signature_partition =

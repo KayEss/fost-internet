@@ -43,7 +43,10 @@ namespace fostlib {
         /// Thrown when a host name cannot be resolved
         class FOST_INET_DECLSPEC host_not_found : public exception {
           public:
-            host_not_found(const string &host_name, felspar::source_location const & = felspar::source_location::current()) noexcept;
+            host_not_found(
+                    const string &host_name,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
 
           protected:
             felspar::u8view message() const noexcept override;

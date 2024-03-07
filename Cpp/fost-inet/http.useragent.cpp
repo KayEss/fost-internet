@@ -39,7 +39,8 @@ std::unique_ptr<fostlib::http::user_agent::response>
         if (!req.headers().exists("Date")) {
             req.headers().set(
                     "Date",
-                    coerce<string>(coerce<rfc1123_timestamp>(std::chrono::system_clock::now())));
+                    coerce<string>(coerce<rfc1123_timestamp>(
+                            std::chrono::system_clock::now())));
         }
         if (!req.headers().exists("Host")) {
             req.headers().set("Host", req.address().server().name());

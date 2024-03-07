@@ -75,7 +75,9 @@ namespace fostlib {
         }
         /// Adds a header with a given name and content
         void add(felspar::u8view name, content);
-        void add(felspar::u8view name, felspar::u8view c) { add(name, content{c}); }
+        void add(felspar::u8view name, felspar::u8view c) {
+            add(name, content{c});
+        }
         /// Allow a specified sub-value on the specified header to be set
         void set_subvalue(const string &name, const string &k, const string &v);
         /// Fetches a header

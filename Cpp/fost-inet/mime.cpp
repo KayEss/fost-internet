@@ -200,8 +200,7 @@ const fostlib::string &fostlib::mime_envelope::boundary() {
 
 bool fostlib::mime_envelope::boundary_is_ok(const string &boundary) const {
     bool ok = true;
-    for (std::list<std::shared_ptr<mime>>::const_iterator part(
-                 items().begin());
+    for (std::list<std::shared_ptr<mime>>::const_iterator part(items().begin());
          ok && part != items().end(); ++part)
         ok = (*part)->boundary_is_ok(boundary);
     return ok;
@@ -301,7 +300,10 @@ namespace {
                     "Content-Type", mime::mime_headers::content(mime_type));
         tb.headers().set_subvalue("Content-Type", "charset", "utf-8");
         tb.headers().set("Content-Transfer-Encoding", "8bit");
-        tb.headers().set("Content-Length", static_cast<felspar::u8string>(std::to_string(body.memory().size())));
+        tb.headers().set(
+                "Content-Length",
+                static_cast<felspar::u8string>(
+                        std::to_string(body.memory().size())));
     }
 }
 fostlib::text_body::text_body(

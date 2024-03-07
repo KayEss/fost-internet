@@ -425,7 +425,8 @@ fostlib::network_connection::~network_connection() {
 void fostlib::network_connection::start_ssl() {
     m_ssl_data = new ssl(*io_service, *m_socket);
 }
-void fostlib::network_connection::start_ssl(felspar::u8view hostname, bool verify) {
+void fostlib::network_connection::start_ssl(
+        felspar::u8view hostname, bool verify) {
     try {
         m_ssl_data =
                 new ssl{*io_service, *m_socket,
@@ -532,27 +533,32 @@ void fostlib::network_connection::operator>>(boost::asio::streambuf &b) {
 */
 
 
-fostlib::exceptions::socket_error::socket_error(felspar::source_location const &loc) noexcept
+fostlib::exceptions::socket_error::socket_error(
+        felspar::source_location const &loc) noexcept
 : exception{loc} {}
 
-fostlib::exceptions::socket_error::socket_error(const string &message, felspar::source_location const &loc) noexcept
+fostlib::exceptions::socket_error::socket_error(
+        const string &message, felspar::source_location const &loc) noexcept
 : exception(message, loc) {}
 
 fostlib::exceptions::socket_error::socket_error(
-        const string &message, const string &extra, felspar::source_location const &loc) noexcept
+        const string &message,
+        const string &extra,
+        felspar::source_location const &loc) noexcept
 : exception(message, loc) {
     insert(data(), "context", extra);
 }
 
 fostlib::exceptions::socket_error::socket_error(
-        boost::system::error_code error, felspar::source_location const &loc) noexcept
-: exception{loc}, error(error) {
-}
+        boost::system::error_code error,
+        felspar::source_location const &loc) noexcept
+: exception{loc}, error(error) {}
 
 fostlib::exceptions::socket_error::socket_error(
-        boost::system::error_code error, const string &message, felspar::source_location const &loc) noexcept
-: exception(message, loc), error(error) {
-}
+        boost::system::error_code error,
+        const string &message,
+        felspar::source_location const &loc) noexcept
+: exception(message, loc), error(error) {}
 
 fostlib::exceptions::socket_error::~socket_error() noexcept try {
 } catch (...) { fostlib::absorb_exception(); }
@@ -569,15 +575,17 @@ felspar::u8view fostlib::exceptions::socket_error::message() const noexcept {
 
 
 fostlib::exceptions::connect_failure::connect_failure(
-        boost::system::error_code error, const host &h, port_number p, felspar::source_location const &loc) noexcept
+        boost::system::error_code error,
+        const host &h,
+        port_number p,
+        felspar::source_location const &loc) noexcept
 : socket_error(error, loc) {
     insert(data(), "host", h);
     insert(data(), "port", p);
 }
 
 
-felspar::u8view
-        fostlib::exceptions::connect_failure::message() const noexcept {
+felspar::u8view fostlib::exceptions::connect_failure::message() const noexcept {
     return "Network connection failure";
 }
 
@@ -587,7 +595,8 @@ felspar::u8view
 */
 
 
-fostlib::exceptions::read_timeout::read_timeout(felspar::source_location const &loc) noexcept
+fostlib::exceptions::read_timeout::read_timeout(
+        felspar::source_location const &loc) noexcept
 : socket_error{loc} {}
 
 
@@ -601,12 +610,14 @@ felspar::u8view fostlib::exceptions::read_timeout::message() const noexcept {
 */
 
 
-fostlib::exceptions::read_error::read_error(felspar::source_location const &loc) noexcept
+fostlib::exceptions::read_error::read_error(
+        felspar::source_location const &loc) noexcept
 : socket_error{loc} {}
 
 
 fostlib::exceptions::read_error::read_error(
-        boost::system::error_code error, felspar::source_location const &loc) noexcept
+        boost::system::error_code error,
+        felspar::source_location const &loc) noexcept
 : socket_error(error, loc) {}
 
 

@@ -19,7 +19,8 @@ namespace fostlib::ua {
                 url const &url,
                 std::optional<json> body,
                 headers const &headers,
-                felspar::source_location const & = felspar::source_location::current());
+                felspar::source_location const & =
+                        felspar::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -28,8 +29,15 @@ namespace fostlib::ua {
     /// Generic status error exception
     class http_error : public fostlib::exceptions::exception {
       public:
-        http_error(url const &u, felspar::source_location const & = felspar::source_location::current());
-        http_error(url const &u, int status_code, felspar::source_location const & = felspar::source_location::current());
+        http_error(
+                url const &u,
+                felspar::source_location const & =
+                        felspar::source_location::current());
+        http_error(
+                url const &u,
+                int status_code,
+                felspar::source_location const & =
+                        felspar::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -38,7 +46,10 @@ namespace fostlib::ua {
     /// The resource could not be found.
     class resource_not_found : public http_error {
       public:
-        resource_not_found(fostlib::url const &, felspar::source_location const & = felspar::source_location::current());
+        resource_not_found(
+                fostlib::url const &,
+                felspar::source_location const & =
+                        felspar::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -47,7 +58,10 @@ namespace fostlib::ua {
     /// The user is not authorized yet (401)
     class unauthorized : public http_error {
       public:
-        unauthorized(fostlib::url const &, felspar::source_location const & = felspar::source_location::current());
+        unauthorized(
+                fostlib::url const &,
+                felspar::source_location const & =
+                        felspar::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -56,7 +70,10 @@ namespace fostlib::ua {
     /// The resource is forbidden (403)
     class forbidden : public http_error {
       public:
-        forbidden(fostlib::url const &, felspar::source_location const & = felspar::source_location::current());
+        forbidden(
+                fostlib::url const &,
+                felspar::source_location const & =
+                        felspar::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };

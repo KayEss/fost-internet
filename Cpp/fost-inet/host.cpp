@@ -71,8 +71,7 @@ fostlib::host fostlib::coercer<fostlib::host, fostlib::string>::coerce(
         return r;
     } else {
         throw exceptions::not_implemented{
-                "Where the host name didn't parse",
-                hostname};
+                "Where the host name didn't parse", hostname};
     }
 }
 fostlib::string
@@ -96,7 +95,6 @@ fostlib::exceptions::host_not_found::host_not_found(
         string const &hostname, felspar::source_location const &loc) noexcept
 : exception{hostname, loc} {}
 
-felspar::u8view
-        fostlib::exceptions::host_not_found::message() const noexcept {
+felspar::u8view fostlib::exceptions::host_not_found::message() const noexcept {
     return "Could not find an IP address for the host name";
 }

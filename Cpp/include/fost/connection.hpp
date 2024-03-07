@@ -106,17 +106,31 @@ namespace fostlib {
         class FOST_INET_DECLSPEC socket_error : public exception {
           public:
             /// Construct a socket error
-            socket_error(felspar::source_location const & = felspar::source_location::current()) noexcept;
+            socket_error(
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
             /// Throw an exception providing a message
-            socket_error(const string &message, felspar::source_location const & = felspar::source_location::current()) noexcept;
+            socket_error(
+                    const string &message,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
             /// Construct a connect failure exception
-            socket_error(boost::system::error_code, felspar::source_location const & = felspar::source_location::current()) noexcept;
+            socket_error(
+                    boost::system::error_code,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
             /// Throw providing a message and extra information
-            socket_error(const string &message, const string &extra, felspar::source_location const & = felspar::source_location::current()) noexcept;
+            socket_error(
+                    const string &message,
+                    const string &extra,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
             /// Allow us to throw from a Boost error code with a message
             socket_error(
                     boost::system::error_code error,
-                    const string &message, felspar::source_location const & = felspar::source_location::current()) noexcept;
+                    const string &message,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
 
             /// Destruct the exception without throwing
             ~socket_error() noexcept;
@@ -137,7 +151,9 @@ namespace fostlib {
             connect_failure(
                     boost::system::error_code,
                     const host &,
-                    port_number, felspar::source_location const & = felspar::source_location::current()) noexcept;
+                    port_number,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
 
           protected:
             /// The error message title
@@ -149,7 +165,9 @@ namespace fostlib {
         class FOST_INET_DECLSPEC read_timeout : public socket_error {
           public:
             /// Construct a connect failure exception
-            read_timeout(felspar::source_location const & = felspar::source_location::current()) noexcept;
+            read_timeout(
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
 
           protected:
             /// The error message title
@@ -160,9 +178,14 @@ namespace fostlib {
         class FOST_INET_DECLSPEC read_error : public socket_error {
           public:
             /// Construct a connect failure exception
-            read_error(felspar::source_location const & = felspar::source_location::current()) noexcept;
+            read_error(
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
             /// Construct a read error from an error code
-            read_error(boost::system::error_code, felspar::source_location const & = felspar::source_location::current()) noexcept;
+            read_error(
+                    boost::system::error_code,
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
 
           protected:
             /// The error message title

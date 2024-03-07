@@ -205,17 +205,20 @@ felspar::u8string fostlib::ua::cache_key(
     if (u.fragment()) {
         auto uf = u;
         uf.fragment({});
-        hash << method << " " << static_cast<std::string_view>(uf.as_string()) << "\n";
+        hash << method << " " << static_cast<std::string_view>(uf.as_string())
+             << "\n";
     } else {
-        hash << method << " " << static_cast<std::string_view>(u.as_string()) << "\n";
+        hash << method << " " << static_cast<std::string_view>(u.as_string())
+             << "\n";
     }
     if (headers.exists("Authorization")) {
         hash << "Authorization: "
              << fostlib::coerce<fostlib::string>(headers["Authorization"])
              << "\n";
     }
-    return felspar::u8view{fostlib::coerce<fostlib::base32c_string>(
-                              array_view<const unsigned char>{hash.digest()})}
+    return felspar::u8view{
+            fostlib::coerce<fostlib::base32c_string>(
+                    array_view<const unsigned char>{hash.digest()})}
             .substr_pos(0, 52);
 }
 
@@ -245,11 +248,11 @@ felspar::u8view fostlib::ua::no_expectation::message() const noexcept {
 }
 
 
-fostlib::ua::http_error::http_error(url const &u,
-        felspar::source_location const &loc)
+fostlib::ua::http_error::http_error(
+        url const &u, felspar::source_location const &loc)
 : exception{felspar::u8view{u.as_string()}, loc} {}
-fostlib::ua::http_error::http_error(url const &u, int status_code,
-        felspar::source_location const &loc)
+fostlib::ua::http_error::http_error(
+        url const &u, int status_code, felspar::source_location const &loc)
 : exception{felspar::u8view{u.as_string()}, loc} {
     insert(data(), "status-code", status_code);
 }
@@ -257,21 +260,23 @@ felspar::u8view fostlib::ua::http_error::message() const noexcept {
     return "HTTP error";
 }
 
-fostlib::ua::resource_not_found::resource_not_found(url const &u,
-        felspar::source_location const &loc)
+fostlib::ua::resource_not_found::resource_not_found(
+        url const &u, felspar::source_location const &loc)
 : http_error{u, loc} {}
 felspar::u8view fostlib::ua::resource_not_found::message() const noexcept {
     return "Resource not found";
 }
 
-fostlib::ua::unauthorized::unauthorized(url const &u,
-        felspar::source_location const &loc) : http_error{u, loc} {}
+fostlib::ua::unauthorized::unauthorized(
+        url const &u, felspar::source_location const &loc)
+: http_error{u, loc} {}
 felspar::u8view fostlib::ua::unauthorized::message() const noexcept {
     return "Unauthorized";
 }
 
-fostlib::ua::forbidden::forbidden(url const &u,
-        felspar::source_location const &loc) : http_error{u, loc} {}
+fostlib::ua::forbidden::forbidden(
+        url const &u, felspar::source_location const &loc)
+: http_error{u, loc} {}
 felspar::u8view fostlib::ua::forbidden::message() const noexcept {
     return "Forbidden";
 }

@@ -422,14 +422,17 @@ void fostlib::url::pathspec(const url::filepath_string &a_pathName) {
 
 
 fostlib::exceptions::relative_path_error::relative_path_error(
-        const string &base, const string &rel, const string &error, felspar::source_location const &loc) noexcept
+        const string &base,
+        const string &rel,
+        const string &error,
+        felspar::source_location const &loc) noexcept
 : exceptions::exception{error, loc} {
     try {
         insert(data(), "base", base);
         insert(data(), "relative", rel);
     } catch (...) { absorb_exception(); }
 }
-felspar::u8view fostlib::exceptions::relative_path_error::message() const
-        noexcept {
+felspar::u8view
+        fostlib::exceptions::relative_path_error::message() const noexcept {
     return "Relative path error";
 }

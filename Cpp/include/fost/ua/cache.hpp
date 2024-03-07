@@ -40,7 +40,10 @@ namespace fostlib::ua {
 
     /// Fetch the JSON body of the requested URL
     json request_json(
-            felspar::u8view method, url const &, std::optional<json> body, headers);
+            felspar::u8view method,
+            url const &,
+            std::optional<json> body,
+            headers);
     inline json get_json(url const &u, headers h = headers{}) {
         return request_json("GET", u, {}, std::move(h));
     }
@@ -67,8 +70,11 @@ namespace fostlib::ua {
     void clear_expectations();
 
     /// Set an expectation for a request
-    void expect(
-            felspar::u8view method, url const &, json, headers const & = headers{});
+    void
+            expect(felspar::u8view method,
+                   url const &,
+                   json,
+                   headers const & = headers{});
     /// Set an expectation that request processing will throw
     void
             expect(felspar::u8view method,

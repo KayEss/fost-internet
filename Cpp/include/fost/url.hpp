@@ -71,7 +71,8 @@ namespace fostlib {
         /// relative IRI)
         url(const url &base, felspar::u8view);
         template<std::size_t N>
-        url(const url &base, const char (&a)[N]) : url(base, felspar::u8view(a)) {}
+        url(const url &base, const char (&a)[N])
+        : url(base, felspar::u8view(a)) {}
         /// Construct a URL from a base and a new path
         url(const url &base, const filepath_string &new_path);
         /// Construct a URL from a base and a new path
@@ -112,7 +113,8 @@ namespace fostlib {
                     const string &base,
                     const string &rel,
                     const string &error,
-                    felspar::source_location const & = felspar::source_location::current()) noexcept;
+                    felspar::source_location const & =
+                            felspar::source_location::current()) noexcept;
 
           protected:
             felspar::u8view message() const noexcept;
@@ -160,7 +162,8 @@ namespace fostlib {
     };
     /// Allow a path to be turned into a file specification.
     template<>
-    struct FOST_INET_DECLSPEC coercer<url::filepath_string, std::filesystem::path> {
+    struct FOST_INET_DECLSPEC
+            coercer<url::filepath_string, std::filesystem::path> {
         /// Performs the coercion
         url::filepath_string coerce(const std::filesystem::path &s);
     };
@@ -172,7 +175,8 @@ namespace fostlib {
     };
     /// Allow a file specification to be turned into a path.
     template<>
-    struct FOST_INET_DECLSPEC coercer<std::filesystem::path, url::filepath_string> {
+    struct FOST_INET_DECLSPEC
+            coercer<std::filesystem::path, url::filepath_string> {
         /// Performs the coercion
         std::filesystem::path coerce(const url::filepath_string &s) {
             return fostlib::coerce<std::filesystem::path>(

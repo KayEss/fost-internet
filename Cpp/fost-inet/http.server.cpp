@@ -26,7 +26,8 @@ void fostlib::http::server::stop_server() {
 }
 
 
-std::unique_ptr<fostlib::http::server::request> fostlib::http::server::operator()() {
+std::unique_ptr<fostlib::http::server::request>
+        fostlib::http::server::operator()() {
     std::unique_ptr<boost::asio::io_service> io_service(
             new boost::asio::io_service);
     auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*io_service);
@@ -36,14 +37,15 @@ std::unique_ptr<fostlib::http::server::request> fostlib::http::server::operator(
 }
 
 namespace {
-    bool
-            service(std::function<bool(fostlib::http::server::request &)> service_lambda,
-                    boost::asio::io_service *servicep,
-                    boost::asio::ip::tcp::socket *sockp) {
+    bool service(
+            std::function<bool(fostlib::http::server::request &)> service_lambda,
+            boost::asio::io_service *servicep,
+            boost::asio::ip::tcp::socket *sockp) {
         std::unique_ptr<boost::asio::io_service> io_service(servicep);
         std::unique_ptr<boost::asio::ip::tcp::socket> usockp(sockp);
         try {
-            fostlib::http::server::request req(std::move(io_service), std::move(usockp));
+            fostlib::http::server::request req(
+                    std::move(io_service), std::move(usockp));
             try {
                 return service_lambda(req);
             } catch (fostlib::exceptions::exception &e) {
@@ -66,18 +68,20 @@ namespace {
             fostlib::mime &response,
             const fostlib::ascii_string &status) {
         std::stringstream buffer;
-        response.headers().fold_limit(fostlib::null); // Turn off MIME line folding
+        response.headers().fold_limit(
+                fostlib::null); // Turn off MIME line folding
         buffer << "HTTP/1.0 " << status.underlying() << "\r\n"
                << response.headers() << "\r\n";
         *cnx << buffer;
-        for (fostlib::mime::const_iterator i(response.begin()); i != response.end();
-             ++i) {
+        for (fostlib::mime::const_iterator i(response.begin());
+             i != response.end(); ++i) {
             *cnx << *i;
         }
     }
 
     void raise_connection_error(
-            const fostlib::mime &response, const fostlib::ascii_string &status) {
+            const fostlib::mime &response,
+            const fostlib::ascii_string &status) {
         throw fostlib::exceptions::null(
                 "This is a mock server request. It cannot send a response to "
                 "any client");
