@@ -1,11 +1,3 @@
-/**
-    Copyright 2009-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet-test.hpp"
 #include <fost/http>
 
@@ -29,7 +21,7 @@ FSL_TEST_FUNCTION(user_agent) {
 
 
 FSL_TEST_FUNCTION(mime_request) {
-    boost::shared_ptr<mime> request_body(new empty_mime);
+    std::shared_ptr<mime> request_body(new empty_mime);
     http::user_agent ua(url("https://kirit.com/"));
     http::user_agent::request r("GET", ua.base(), request_body);
     FSL_CHECK_NOTHROW(ua(r));

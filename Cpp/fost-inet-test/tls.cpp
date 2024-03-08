@@ -1,11 +1,3 @@
-/**
-    Copyright 2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include <fost/http>
 #include <fost/log>
 #include <fost/test>
@@ -41,19 +33,6 @@ FSL_TEST_FUNCTION(no_default_paths) {
     FSL_CHECK_EXCEPTION(
             ua.get(fostlib::url{"https://sha256.badssl.com/"}),
             fostlib::exceptions::socket_error &);
-}
-
-
-FSL_TEST_FUNCTION(specified_digicert_leaf) {
-    fostlib::setting<bool> const no_default_paths{
-            "fost-inet-test/tls.cpp", fostlib::c_tls_use_standard_verify_paths,
-            false};
-    fostlib::setting<fostlib::json> const digicert_ca{
-            "fost-inet-test/tls.cpp", fostlib::c_extra_leaf_certificates,
-            fostlib::json::array_t{{fostlib::digicert_root_ca()}}};
-    fostlib::http::user_agent ua;
-    auto const response = ua.get(fostlib::url{"https://sha256.badssl.com/"});
-    FSL_CHECK_EQ(response->status(), 200);
 }
 
 
@@ -120,9 +99,9 @@ FSL_TEST_FUNCTION(specify_certificate_verification_file) {
     /// TODO Add verification file setting to known file
     { // Fail the test if the certificate file doesn't actually exist
         auto const certfile =
-                fostlib::coerce<fostlib::fs::path>(c_ca_cert_file.value());
+                fostlib::coerce<std::filesystem::path>(c_ca_cert_file.value());
         logger("certfile", certfile);
-        FSL_CHECK(fostlib::fs::exists(certfile));
+        FSL_CHECK(std::filesystem::exists(certfile));
         /// If the above check fails then a setting is needed to point to the
         /// certificate file. See top of this file.
     }

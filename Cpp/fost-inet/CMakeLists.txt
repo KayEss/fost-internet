@@ -20,7 +20,7 @@ set_target_properties(fost-inet PROPERTIES DEBUG_POSTFIX "-d")
 install(TARGETS fost-inet LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 
 if(TARGET check)
-    add_library(fost-inet-smoke STATIC EXCLUDE_FROM_ALL
+    add_test_run(check fost-inet TESTS
             authentication-tests.cpp
             headers.cookie.tests.cpp
             headers-tests.cpp
@@ -33,6 +33,4 @@ if(TARGET check)
             smtp-tests.cpp
             url-tests.cpp
         )
-    target_link_libraries(fost-inet-smoke fost-inet)
-    smoke_test(fost-inet-smoke)
 endif()

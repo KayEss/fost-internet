@@ -6,6 +6,7 @@
 
 
 using namespace fostlib;
+using namespace std::literals;
 
 
 namespace {
@@ -117,8 +118,14 @@ fostlib::http::fost_authn fostlib::http::fost_authentication(
         if (!request.data()->headers().exists("X-FOST-Timestamp"))
             return fost_authn("No X-FOST-Timestamp header found");
 
-        // TODO Switch to using a proper parser here so errors can be caught
-        throw fostlib::exceptions::not_implemented{};
+        auto const time_signed = coerce<std::chrono::system_clock::time_point>(
+                json(request.data()->headers()["X-FOST-Timestamp"].value()));
+        auto const now = std::chrono::system_clock::now();
+        auto const oldest = now - 5 * 60s;
+        auto const youngest = now + 5 * 60s;
+        if (time_signed < oldest or time_signed > youngest) {
+            return fost_authn("Clock skew is too high");
+        }
         // boost::posix_time::ptime time_signed =
         //         coerce<boost::posix_time::ptime>(coerce<std::chrono::system_clock::time_point>(json(
         //                 request.data()->headers()["X-FOST-Timestamp"].value())));

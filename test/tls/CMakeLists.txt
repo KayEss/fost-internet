@@ -15,22 +15,24 @@ if(TARGET stress)
     ## a large number of TLS/SSL test cases. Only the most important are
     ## currently checked.
     ssltest(sha256.badssl.com true)
-    ssltest(sha384.badssl.com true)
-    ssltest(sha512.badssl.com true)
 
     ssltest(not-valid.example.com false)
     ssltest(expired.badssl.com false)
-    ssltest(wrong.host.badssl.com false)
+    ssltest(revoked.badssl.com false)
     ssltest(self-signed.badssl.com false)
     ssltest(untrusted-root.badssl.com false)
+    ssltest(wrong.host.badssl.com false)
 
     ## The following return the wrong results. These tests are just to mark
     ## the current behaviour and to notify any changes due to changes in
     ## the underlying Boost/ASIO/OpenSSL libraries being used.
-    ssltest(revoked.badssl.com true)
     ssltest(pinning-test.badssl.com true)
     ssltest(1000-sans.badssl.com false)
     ssltest(10000-sans.badssl.com false)
+    ## Firefox agrees that these are bad, even though the badssl.com
+    ## thinks them good
+    ssltest(sha384.badssl.com false)
+    ssltest(sha512.badssl.com false)
 
     add_custom_target(fost-internet-ssl-tests
         DEPENDS ${fost-internet-ssl-test-list})

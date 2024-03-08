@@ -1,11 +1,3 @@
-/**
-    Copyright 2009-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet-test.hpp"
 #include <fost/http>
 #include <fost/datetime>
@@ -66,7 +58,7 @@ FSL_TEST_FUNCTION(no_authentication) {
         FSL_CHECK_EQ(authn.error().value(), "No X-FOST-Timestamp header found");
     }
 
-    request.data()->headers().set("X-FOST-Timestamp", "2010-01-01 00:00:00");
+    request.data()->headers().set("X-FOST-Timestamp", "2010-01-01T00:00:00Z");
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());
@@ -75,7 +67,8 @@ FSL_TEST_FUNCTION(no_authentication) {
     }
 
     request.data()->headers().set(
-            "X-FOST-Timestamp", coerce<string>(timestamp::now()));
+            "X-FOST-Timestamp",
+            coerce<string>(std::chrono::system_clock::now()));
     {
         http::fost_authn authn(http::fost_authentication(keys, request));
         FSL_CHECK(!authn.authenticated());

@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include <fost/cli>
 #include <fost/main>
 #include <fost/http>
@@ -20,7 +12,8 @@ namespace {
     void worked() {
         if (c_output.value()) {
             fostlib::utf::save_file(
-                    fostlib::coerce<fostlib::fs::path>(c_output.value().value()),
+                    fostlib::coerce<std::filesystem::path>(
+                            c_output.value().value()),
                     "");
         }
     }

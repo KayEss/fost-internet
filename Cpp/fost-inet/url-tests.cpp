@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet-test.hpp"
 #include <fost/parse/url.hpp>
 #include <fost/exception/parse_error.hpp>
@@ -40,8 +32,9 @@ FSL_TEST_FUNCTION(filepath_string) {
             coerce<url::filepath_string>(string("a/b(c).html")),
             url::filepath_string("a/b%28c%29.html"));
 
-    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("a")), "a");
-    FSL_CHECK_EQ(coerce<fostlib::fs::path>(url::filepath_string("%2B")), "+");
+    FSL_CHECK_EQ(coerce<std::filesystem::path>(url::filepath_string("a")), "a");
+    FSL_CHECK_EQ(
+            coerce<std::filesystem::path>(url::filepath_string("%2B")), "+");
 }
 
 
@@ -68,7 +61,7 @@ FSL_TEST_FUNCTION(query_string) {
             q1.as_string().value(),
             ascii_printable_string("key=&key=&key=%28.%29"));
     FSL_CHECK_EQ(q2.as_string().value(), ascii_printable_string("key=&key="));
-    q2.append("key", f5::u8string{u"\x2014"});
+    q2.append("key", felspar::u8string{u"\x2014"});
     FSL_CHECK_EQ(
             q1.as_string().value(),
             ascii_printable_string("key=&key=&key=%28.%29"));
@@ -203,7 +196,7 @@ FSL_TEST_FUNCTION(path_spec) {
             ascii_printable_string("http://localhost/file-name"));
 
     FSL_CHECK_EQ(
-            coerce<url::filepath_string>(fostlib::fs::path(L"test")),
+            coerce<url::filepath_string>(std::filesystem::path(L"test")),
             url::filepath_string("test"));
     FSL_CHECK_EQ(coerce<string>(u.pathspec()), "/file-name");
     u.pathspec(url::filepath_string("/Coups%20d%27%C3%A9tat"));
@@ -314,7 +307,7 @@ FSL_TEST_FUNCTION(parse) {
 
 
 FSL_TEST_FUNCTION(url_join) {
-    using namespace f5::literals;
+    using namespace felspar::literals;
     url base("https://loc:45/some/path?query=yes#fragment");
     FSL_CHECK_EQ(
             url(base, "http://example.com").as_string(), "http://example.com/");

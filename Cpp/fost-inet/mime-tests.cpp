@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet-test.hpp"
 #include <fost/mime.hpp>
 
@@ -164,7 +156,8 @@ Content-Type: text/plain; charset=\"utf-8\"\r\n\
 \r\n\
 Test text document\xE2\x80\xBD");
     FSL_CHECK_EQ(
-            ta.body_as_string(), f5::u8view{"Test text document\xE2\x80\xBD"});
+            ta.body_as_string(),
+            felspar::u8view{"Test text document\xE2\x80\xBD"});
 }
 FSL_TEST_FUNCTION(text_iterators) {
     text_body ta(utf8_string("Test text document"));
@@ -184,7 +177,7 @@ FSL_TEST_FUNCTION(text_as_string) {
 FSL_TEST_FUNCTION(mime_attachment) {
     mime_envelope envelope;
     envelope.items().push_back(
-            boost::shared_ptr<mime>(new text_body("Test text document")));
+            std::shared_ptr<mime>(new text_body("Test text document")));
     envelope.boundary();
     std::stringstream ss;
     ss << envelope;
