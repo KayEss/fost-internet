@@ -18,7 +18,6 @@ if(TARGET stress)
 
     ssltest(not-valid.example.com false)
     ssltest(expired.badssl.com false)
-    ssltest(revoked.badssl.com false)
     ssltest(self-signed.badssl.com false)
     ssltest(untrusted-root.badssl.com false)
     ssltest(wrong.host.badssl.com false)
@@ -27,6 +26,7 @@ if(TARGET stress)
     ## the current behaviour and to notify any changes due to changes in
     ## the underlying Boost/ASIO/OpenSSL libraries being used.
     ssltest(pinning-test.badssl.com true)
+    ssltest(revoked.badssl.com true)
     ssltest(1000-sans.badssl.com false)
     ssltest(10000-sans.badssl.com false)
     ## Firefox agrees that these are bad, even though the badssl.com
