@@ -499,9 +499,8 @@ network_connection &
             coerce<std::size_t>(c_large_read_chunk_size.value());
     while (v.size() - m_input_buffer->size()
            && read(*m_socket, m_ssl_data, *m_input_buffer,
-                   boost::asio::transfer_at_least(
-                           std::min(v.size() - m_input_buffer->size(), chunk))))
-        ;
+                   boost::asio::transfer_at_least(std::min(
+                           v.size() - m_input_buffer->size(), chunk))));
     if (m_input_buffer->size() < v.size()) {
         exceptions::unexpected_eof exception(
                 "Could not read all of the requested bytes from the network "

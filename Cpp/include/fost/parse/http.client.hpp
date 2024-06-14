@@ -43,9 +43,7 @@ namespace fostlib {
 
                 top = (version >> space >> status >> space
                        >> message)[boost::phoenix::bind(
-                        [](auto &l, auto &v, auto &s, auto &m) {
-                            l = {v, s, m};
-                        },
+                        [](auto &l, auto &v, auto &s, auto &m) { l = {v, s, m}; },
                         _val, _1, _2, _3)];
 
                 version = boost::spirit::qi::string("HTTP/0.9")
