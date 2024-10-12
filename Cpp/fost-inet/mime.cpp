@@ -354,10 +354,10 @@ fostlib::binary_body::binary_body(
         const mime_headers &headers, const string &mime_type)
 : mime(headers, mime_type) {}
 fostlib::binary_body::binary_body(
-        const data_type &data,
+        const span_type data,
         const mime_headers &headers,
         const string &mime_type)
-: mime(headers, mime_type), data(data) {}
+: mime(headers, mime_type), data(data.begin(), data.end()) {}
 fostlib::binary_body::binary_body(
         const char *begin,
         const char *end,

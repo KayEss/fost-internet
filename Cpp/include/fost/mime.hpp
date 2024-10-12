@@ -166,7 +166,8 @@ namespace fostlib {
 
       public:
         /// The type of the data storage vector
-        typedef std::vector<unsigned char> data_type;
+        using data_type = std::vector<unsigned char>;
+        using span_type = std::span<unsigned char const>;
 
         /// Construct an empty body
         binary_body(
@@ -174,9 +175,14 @@ namespace fostlib {
                 const string &mime = "application/x-empty");
         /// Construct from a data block
         binary_body(
-                const data_type &data,
+                span_type data,
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream");
+        binary_body(
+                data_type const &d,
+                mime_headers const &h = mime_headers(),
+                string const &m = "binary/octet-stream")
+        : binary_body{std::span{d}, h, m} {}
         /// Construct from a byte array
         binary_body(
                 const char *begin,
