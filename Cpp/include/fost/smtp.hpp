@@ -12,6 +12,10 @@
 namespace fostlib {
 
 
+    extern const setting<string> c_smtp_host;
+    extern const setting<port_number> c_smtp_port;
+
+
     /// Tag type for an email address
     struct FOST_INET_DECLSPEC rfc822_address_tag {
         static void

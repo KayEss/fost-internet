@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/connection.hpp>
 #include <fost/smtp.hpp>
@@ -15,6 +7,21 @@
 #include <fost/exception/parse_error.hpp>
 
 #include <fost/insert>
+
+
+const fostlib::setting<fostlib::string> fostlib::c_smtp_host(
+        "fost-internet/Cpp/fost-inet/smtp.cpp",
+        "fost-internet tests",
+        "SMTP server",
+        "localhost",
+        true);
+
+const fostlib::setting<fostlib::port_number> fostlib::c_smtp_port(
+        "fost-internet/Cpp/fost-inet/smtp.cpp",
+        "fost-internet tests",
+        "SMTP port",
+        25,
+        true);
 
 
 /**
