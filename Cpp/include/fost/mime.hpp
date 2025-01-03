@@ -179,6 +179,15 @@ namespace fostlib {
                 const mime_headers &headers = mime_headers(),
                 const string &mime = "binary/octet-stream");
         binary_body(
+                std::span<std::byte const> data,
+                const mime_headers &headers = mime_headers(),
+                const string &mime = "binary/octet-stream")
+        : binary_body{
+                  span_type{
+                          reinterpret_cast<unsigned char const *>(data.data()),
+                          data.size()},
+                  headers, mime} {}
+        binary_body(
                 data_type const &d,
                 mime_headers const &h = mime_headers(),
                 string const &m = "binary/octet-stream")
