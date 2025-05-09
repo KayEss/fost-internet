@@ -230,8 +230,9 @@ FSL_TEST_FUNCTION(path_spec_encoding) {
 
 
 FSL_TEST_FUNCTION(parse) {
-    FSL_CHECK_NOTHROW(url a("http://localhost/");
-                      FSL_CHECK_EQ(a.server().name(), "localhost");)
+    FSL_CHECK_NOTHROW(
+            url a("http://localhost/");
+            FSL_CHECK_EQ(a.server().name(), "localhost");)
     FSL_CHECK_EQ(url("http://localhost").server().name(), "localhost");
     FSL_CHECK_EQ(
             url("http://localhost/file-path.html").pathspec(),

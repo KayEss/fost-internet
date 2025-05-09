@@ -183,8 +183,8 @@ FSL_TEST_FUNCTION(mime_attachment) {
     ss << envelope;
     mime::mime_headers headers;
 
-    FSL_CHECK_NOTHROW(headers.parse(coerce<string>(
-            partition(utf8_string(ss.str()), "\r\n\r\n").first)));
+    FSL_CHECK_NOTHROW(headers.parse(
+            coerce<string>(partition(utf8_string(ss.str()), "\r\n\r\n").first)));
     try {
         FSL_CHECK_EQ(
                 utf8_string(ss.str()),

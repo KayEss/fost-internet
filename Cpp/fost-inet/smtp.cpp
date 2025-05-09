@@ -88,8 +88,9 @@ fostlib::email_address
                     fostlib::coerce<ascii_printable_string>(result.second));
         else
             return email_address(
-                    rfc822_address(fostlib::coerce<ascii_printable_string>(
-                            result.second)),
+                    rfc822_address(
+                            fostlib::coerce<ascii_printable_string>(
+                                    result.second)),
                     trim(string(result.first.value())));
     } else {
         throw exceptions::parse_error(

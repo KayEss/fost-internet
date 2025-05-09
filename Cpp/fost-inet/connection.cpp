@@ -98,8 +98,9 @@ struct ssl_data {
                 ctx.set_default_verify_paths();
             }
             for (auto const &path : c_extra_ca_cert_paths.value()) {
-                ctx.add_verify_path(static_cast<std::string>(
-                        fostlib::coerce<fostlib::string>(path)));
+                ctx.add_verify_path(
+                        static_cast<std::string>(
+                                fostlib::coerce<fostlib::string>(path)));
             }
             if (c_certificate_verification_file.value()) {
                 auto certs = *c_certificate_verification_file.value();
@@ -107,8 +108,9 @@ struct ssl_data {
             }
             for (auto const &certjs : c_extra_leaf_certificates.value()) {
                 auto const cert = fostlib::coerce<felspar::u8view>(certjs);
-                ctx.add_certificate_authority(boost::asio::buffer(
-                        cert.memory().data(), cert.memory().size()));
+                ctx.add_certificate_authority(
+                        boost::asio::buffer(
+                                cert.memory().data(), cert.memory().size()));
             }
             ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
             ssl_sock.set_verify_callback(
@@ -499,8 +501,8 @@ network_connection &
             coerce<std::size_t>(c_large_read_chunk_size.value());
     while (v.size() - m_input_buffer->size()
            && read(*m_socket, m_ssl_data, *m_input_buffer,
-                   boost::asio::transfer_at_least(std::min(
-                           v.size() - m_input_buffer->size(), chunk))));
+                   boost::asio::transfer_at_least(
+                           std::min(v.size() - m_input_buffer->size(), chunk))));
     if (m_input_buffer->size() < v.size()) {
         exceptions::unexpected_eof exception(
                 "Could not read all of the requested bytes from the network "
