@@ -54,7 +54,7 @@ FSL_TEST_FUNCTION(can_get_image) {
 FSL_TEST_FUNCTION(forbidden) {
     auto const errors = fostlib::ua::p_status_errors.value();
     FSL_CHECK_EXCEPTION(
-            fostlib::ua::get_json(fostlib::url{"https://kirit.com/_resources/"}),
+            fostlib::ua::get_json(fostlib::url{"https://kirit.com/.static/"}),
             fostlib::ua::forbidden &);
     FSL_CHECK_EQ(errors + 1, fostlib::ua::p_status_errors.value());
 }
