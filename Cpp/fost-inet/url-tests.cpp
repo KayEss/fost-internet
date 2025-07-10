@@ -31,6 +31,9 @@ FSL_TEST_FUNCTION(filepath_string) {
     FSL_CHECK_EQ(
             coerce<url::filepath_string>(string("a/b(c).html")),
             url::filepath_string("a/b%28c%29.html"));
+    FSL_CHECK_EQ(
+            coerce<url::filepath_string>(string("/a=b")),
+            url::filepath_string("/a=b"));
 
     FSL_CHECK_EQ(coerce<std::filesystem::path>(url::filepath_string("a")), "a");
     FSL_CHECK_EQ(

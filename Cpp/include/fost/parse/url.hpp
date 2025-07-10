@@ -1,5 +1,6 @@
 #ifndef FOST_PARSE_URL_HPP
 #define FOST_PARSE_URL_HPP
+#pragma once
 
 
 #include <fost/url.hpp>
@@ -58,8 +59,8 @@ namespace fostlib {
                     [](auto &v, auto s) { v = ascii_printable_string(s); },
                     _val, _1)];
 
-            line = *boost::spirit::qi::char_("_@$&~!a-zA-Z0-9/.,:'()+%*-");
-            id = +boost::spirit::qi::char_("_@$&~!a-zA-Z0-9/.,:'()+%*-");
+            line = *boost::spirit::qi::char_("_@$&~=!a-zA-Z0-9/.,:'()+%*-");
+            id = +boost::spirit::qi::char_("_@$&~=!a-zA-Z0-9/.,:'()+%*-");
         }
     };
 
