@@ -154,6 +154,14 @@ namespace fostlib {
             return string(ss.str().c_str());
         }
     };
+    template<typename T>
+    struct coercer<string, T, std::enable_if_t<std::is_base_of_v<headers_base, T>>> {
+        string coerce(headers_base const &c) const {
+            std::stringstream ss;
+            ss << c;
+            return string(ss.str().c_str());
+        }
+    };
     /// Allow header content value to be turned to JSON
     template<>
     struct coercer<json, headers_base::content> {
