@@ -1,11 +1,3 @@
-/**
-    Copyright 1999-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include "fost-inet.hpp"
 #include <fost/url.hpp>
 #include <fost/string>
@@ -43,11 +35,11 @@ namespace {
      * the query string key names you're pretty much asking for a
      * ton of trouble anyway, so....
      */
-    const fostlib::utf8_string g_query_string_allowed(
+    std::string_view constexpr g_query_string_allowed{
             ".,:/\\_-*~="
             "0123456789"
             "abcdefghijklmnopqrstuvwxyz"
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
 
 
 }
@@ -118,8 +110,7 @@ namespace {
         std::string r;
         auto const i(coerce<utf8_string>(s));
         for (auto const c : i.memory()) {
-            if (g_query_string_allowed.underlying().find(c)
-                == std::string::npos) {
+            if (g_query_string_allowed.find(c) == std::string::npos) {
                 r += hex<std::string>(c);
             } else {
                 r += c;
