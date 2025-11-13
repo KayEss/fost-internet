@@ -92,7 +92,7 @@ fostlib::ascii_string
 
 
 fostlib::exceptions::host_not_found::host_not_found(
-        string const &hostname, felspar::source_location const &loc) noexcept
+        string const &hostname, std::source_location const &loc) noexcept
 : exception{hostname, loc} {}
 
 felspar::u8view fostlib::exceptions::host_not_found::message() const noexcept {

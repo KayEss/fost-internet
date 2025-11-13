@@ -19,8 +19,7 @@ namespace fostlib::ua {
                 url const &url,
                 std::optional<json> body,
                 headers const &headers,
-                felspar::source_location const & =
-                        felspar::source_location::current());
+                std::source_location const & = std::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -31,13 +30,11 @@ namespace fostlib::ua {
       public:
         http_error(
                 url const &u,
-                felspar::source_location const & =
-                        felspar::source_location::current());
+                std::source_location const & = std::source_location::current());
         http_error(
                 url const &u,
                 int status_code,
-                felspar::source_location const & =
-                        felspar::source_location::current());
+                std::source_location const & = std::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -48,8 +45,7 @@ namespace fostlib::ua {
       public:
         resource_not_found(
                 fostlib::url const &,
-                felspar::source_location const & =
-                        felspar::source_location::current());
+                std::source_location const & = std::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -60,8 +56,7 @@ namespace fostlib::ua {
       public:
         unauthorized(
                 fostlib::url const &,
-                felspar::source_location const & =
-                        felspar::source_location::current());
+                std::source_location const & = std::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };
@@ -72,8 +67,7 @@ namespace fostlib::ua {
       public:
         forbidden(
                 fostlib::url const &,
-                felspar::source_location const & =
-                        felspar::source_location::current());
+                std::source_location const & = std::source_location::current());
 
         felspar::u8view message() const noexcept override;
     };

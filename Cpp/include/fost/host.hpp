@@ -45,8 +45,8 @@ namespace fostlib {
           public:
             host_not_found(
                     const string &host_name,
-                    felspar::source_location const & =
-                            felspar::source_location::current()) noexcept;
+                    std::source_location const & =
+                            std::source_location::current()) noexcept;
 
           protected:
             felspar::u8view message() const noexcept override;

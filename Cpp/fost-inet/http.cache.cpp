@@ -236,7 +236,7 @@ fostlib::ua::no_expectation::no_expectation(
         url const &url,
         std::optional<json> body,
         headers const &headers,
-        felspar::source_location const &loc)
+        std::source_location const &loc)
 : exception(message, loc) {
     insert(data(), "method", method);
     insert(data(), "url", url);
@@ -249,10 +249,10 @@ felspar::u8view fostlib::ua::no_expectation::message() const noexcept {
 
 
 fostlib::ua::http_error::http_error(
-        url const &u, felspar::source_location const &loc)
+        url const &u, std::source_location const &loc)
 : exception{felspar::u8view{u.as_string()}, loc} {}
 fostlib::ua::http_error::http_error(
-        url const &u, int status_code, felspar::source_location const &loc)
+        url const &u, int status_code, std::source_location const &loc)
 : exception{felspar::u8view{u.as_string()}, loc} {
     insert(data(), "status-code", status_code);
 }
@@ -261,21 +261,20 @@ felspar::u8view fostlib::ua::http_error::message() const noexcept {
 }
 
 fostlib::ua::resource_not_found::resource_not_found(
-        url const &u, felspar::source_location const &loc)
+        url const &u, std::source_location const &loc)
 : http_error{u, loc} {}
 felspar::u8view fostlib::ua::resource_not_found::message() const noexcept {
     return "Resource not found";
 }
 
 fostlib::ua::unauthorized::unauthorized(
-        url const &u, felspar::source_location const &loc)
+        url const &u, std::source_location const &loc)
 : http_error{u, loc} {}
 felspar::u8view fostlib::ua::unauthorized::message() const noexcept {
     return "Unauthorized";
 }
 
-fostlib::ua::forbidden::forbidden(
-        url const &u, felspar::source_location const &loc)
+fostlib::ua::forbidden::forbidden(url const &u, std::source_location const &loc)
 : http_error{u, loc} {}
 felspar::u8view fostlib::ua::forbidden::message() const noexcept {
     return "Forbidden";

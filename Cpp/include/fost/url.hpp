@@ -113,8 +113,8 @@ namespace fostlib {
                     const string &base,
                     const string &rel,
                     const string &error,
-                    felspar::source_location const & =
-                            felspar::source_location::current()) noexcept;
+                    std::source_location const & =
+                            std::source_location::current()) noexcept;
 
           protected:
             felspar::u8view message() const noexcept;

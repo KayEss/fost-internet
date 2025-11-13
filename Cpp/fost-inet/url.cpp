@@ -425,7 +425,7 @@ fostlib::exceptions::relative_path_error::relative_path_error(
         const string &base,
         const string &rel,
         const string &error,
-        felspar::source_location const &loc) noexcept
+        std::source_location const &loc) noexcept
 : exceptions::exception{error, loc} {
     try {
         insert(data(), "base", base);
