@@ -5,6 +5,7 @@
 
 #include <fost/hod/hod.hpp>
 #include <fost/hod/protocol.hpp>
+#include <fost/internet>
 
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -59,7 +60,7 @@ namespace fostlib {
 
             /// Return the IO service that needs to be used to service
             /// the underlying connection
-            virtual boost::asio::io_service &get_io_service() = 0;
+            virtual io_context_type &get_io_service() = 0;
 
           public:
             /// Start up the data sending and receiving processes
