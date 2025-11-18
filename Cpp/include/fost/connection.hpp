@@ -65,8 +65,7 @@ namespace fostlib {
         network_connection(
                 const host &h,
                 nullable<port_number> p = null,
-                std::source_location const & =
-                        std::source_location::current());
+                std::source_location const & = std::source_location::current());
         /// Move constructor
         network_connection(network_connection &&);
 

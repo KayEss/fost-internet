@@ -376,9 +376,7 @@ fostlib::network_connection::network_connection(
   m_ssl_data(nullptr) {}
 
 fostlib::network_connection::network_connection(
-        const host &h,
-        nullable<port_number> p,
-        std::source_location const &loc)
+        const host &h, nullable<port_number> p, std::source_location const &loc)
 : io_service(new io_context_type),
   m_socket(new socket_type(*io_service)),
   m_input_buffer(new boost::asio::streambuf),
