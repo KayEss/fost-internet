@@ -114,7 +114,7 @@ struct ssl_data {
             }
             ssl_sock.set_verify_mode(boost::asio::ssl::verify_peer);
             ssl_sock.set_verify_callback(
-                    boost::asio::ssl::rfc2818_verification(hostname));
+                    boost::asio::ssl::host_name_verification(hostname));
         }
         ssl_sock.handshake(boost::asio::ssl::stream_base::client);
     }
@@ -243,7 +243,7 @@ namespace {
             sock.get_executor()
                     .template target<io_context_type::executor_type>()
                     ->context()
-                    .reset();
+                    .restart();
             sock.get_executor()
                     .template target<io_context_type::executor_type>()
                     ->context()
@@ -329,7 +329,8 @@ namespace {
             connect(io_context_type &io_service,
                     socket_type &socket,
                     const host &host,
-                    port_number port) {
+                    port_number port,
+                    std::source_location const &loc) {
         using namespace boost::asio::ip;
         tcp::resolver resolver(io_service);
         tcp::resolver::query q(
@@ -353,8 +354,9 @@ namespace {
                 connect_error = boost::asio::error::timed_out;
             }
         }
-        if (connect_error)
-            throw exceptions::connect_failure(connect_error, host, port);
+        if (connect_error) {
+            throw exceptions::connect_failure(connect_error, host, port, loc);
+        }
     }
 }
 
@@ -374,7 +376,9 @@ fostlib::network_connection::network_connection(
   m_ssl_data(nullptr) {}
 
 fostlib::network_connection::network_connection(
-        const host &h, nullable<port_number> p)
+        const host &h,
+        nullable<port_number> p,
+        std::source_location const &loc)
 : io_service(new io_context_type),
   m_socket(new socket_type(*io_service)),
   m_input_buffer(new boost::asio::streambuf),
@@ -386,7 +390,7 @@ fostlib::network_connection::network_connection(
     if (!socks.isnull()) {
         const host socks_host(coerce<host>(c_socks_host.value()));
         connect(*io_service, *m_socket, socks_host,
-                coerce<port_number>(socks_host.service().value_or("0")));
+                coerce<port_number>(socks_host.service().value_or("0")), loc);
         if (c_socks_version.value() == json(4)) {
             boost::asio::streambuf b;
             // Build and send the command to establish the connection
@@ -406,16 +410,17 @@ fostlib::network_connection::network_connection(
                 || m_input_buffer->sbumpc() != 0x5a)
                 throw exceptions::socket_error(
                         "SOCKS 4 error handling where the response values are "
-                        "not 0x00 0x5a");
+                        "not 0x00 0x5a",
+                        loc);
             char ignore[6];
             m_input_buffer->sgetn(ignore, 6);
         } else {
             throw exceptions::socket_error(
                     "SOCKS version not implemented",
-                    coerce<string>(c_socks_version.value()));
+                    coerce<string>(c_socks_version.value()), loc);
         }
     } else {
-        connect(*io_service, *m_socket, h, port);
+        connect(*io_service, *m_socket, h, port, loc);
     }
 }
 

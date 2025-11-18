@@ -32,7 +32,7 @@ FSL_TEST_FUNCTION(connect_failure) {
 
 
 FSL_TEST_FUNCTION(read_timeouts) {
-    boost::asio::io_service service;
+    boost::asio::io_context service;
     host localhost;
     uint16_t port = 64544u;
     // Set a very short time out whilst running the test
@@ -43,6 +43,8 @@ FSL_TEST_FUNCTION(read_timeouts) {
     // Set up a server on a socket
     boost::asio::ip::tcp::acceptor server(
             service, boost::asio::ip::tcp::endpoint(localhost.address(), port));
+    // Wait for long enough for the server to start
+    std::this_thread::sleep_for(std::chrono::milliseconds{250});
 
     // Connect to it and try to read from it
     {
@@ -60,7 +62,7 @@ FSL_TEST_FUNCTION(read_timeouts) {
 
 namespace {
     void send_data() {
-        auto service = std::make_unique<boost::asio::io_service>();
+        auto service = std::make_unique<boost::asio::io_context>();
         host const localhost;
         uint16_t const port = 64543u;
         // Set up a server on a socket
@@ -80,7 +82,7 @@ namespace {
 }
 FSL_TEST_FUNCTION(early_closure) {
     fostlib::timer timer;
-    boost::asio::io_service service;
+    boost::asio::io_context service;
     host const localhost;
     uint16_t const port = 64543u;
     // Send some data to the socket

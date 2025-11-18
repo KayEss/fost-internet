@@ -46,7 +46,7 @@ fostlib::host::host(
 
 
 boost::asio::ip::address fostlib::host::address() const {
-    boost::asio::io_service io_service;
+    boost::asio::io_context io_service;
     boost::asio::ip::tcp::resolver resolver(io_service);
     boost::asio::ip::tcp::resolver::query query{
             static_cast<std::string>(coerce<ascii_string>(name()).underlying()),

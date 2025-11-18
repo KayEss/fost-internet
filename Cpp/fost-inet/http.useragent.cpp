@@ -18,7 +18,7 @@
 
 
 namespace {
-    boost::asio::io_service g_io_service;
+    boost::asio::io_context g_io_service;
 
     const fostlib::setting<fostlib::string> c_user_agent(
             "fost-internet/Cpp/fost-inet/http.useragent.cpp",
@@ -34,7 +34,8 @@ fostlib::http::user_agent::user_agent(const url &u) : base(u) {}
 
 
 std::unique_ptr<fostlib::http::user_agent::response>
-        fostlib::http::user_agent::operator()(request &req) const {
+        fostlib::http::user_agent::operator()(
+                request &req, std::source_location const &loc) const {
     try {
         if (!req.headers().exists("Date")) {
             req.headers().set(
@@ -52,7 +53,8 @@ std::unique_ptr<fostlib::http::user_agent::response>
 
         if (authentication()) authentication()(req);
 
-        network_connection cnx(req.address().server(), req.address().port());
+        network_connection cnx(
+                req.address().server(), req.address().port(), loc);
         if (req.address().protocol() == "https") {
             cnx.start_ssl(req.address().server().name());
         }
@@ -83,7 +85,8 @@ std::unique_ptr<fostlib::http::user_agent::response>
             if (not boost::spirit::qi::parse(pos, end, rule, status)
                 || pos != end) {
                 throw exceptions::parse_error(
-                        "Expected a HTTP response", coerce<string>(first_line));
+                        "Expected a HTTP response", coerce<string>(first_line),
+                        loc);
             }
         }
 

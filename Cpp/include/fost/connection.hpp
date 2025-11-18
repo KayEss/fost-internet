@@ -62,11 +62,14 @@ namespace fostlib {
                 std::unique_ptr<io_context_type> io_service,
                 std::unique_ptr<socket_type> socket);
         /// Used for clients where a host is connected to on a given port number
-        network_connection(const host &h, nullable<port_number> p = null);
+        network_connection(
+                const host &h,
+                nullable<port_number> p = null,
+                std::source_location const & =
+                        std::source_location::current());
         /// Move constructor
         network_connection(network_connection &&);
 
-        /// Non-virtual destructor so sub-classing is not allowed
         ~network_connection();
 
         /// Start SSL on this connection. After a successful handshake all

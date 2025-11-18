@@ -28,8 +28,8 @@ void fostlib::http::server::stop_server() {
 
 std::unique_ptr<fostlib::http::server::request>
         fostlib::http::server::operator()() {
-    std::unique_ptr<boost::asio::io_service> io_service(
-            new boost::asio::io_service);
+    std::unique_ptr<boost::asio::io_context> io_service(
+            new boost::asio::io_context);
     auto sock = std::make_unique<boost::asio::ip::tcp::socket>(*io_service);
     m_server.accept(*sock);
     return std::unique_ptr<http::server::request>(
@@ -39,9 +39,9 @@ std::unique_ptr<fostlib::http::server::request>
 namespace {
     bool service(
             std::function<bool(fostlib::http::server::request &)> service_lambda,
-            boost::asio::io_service *servicep,
+            boost::asio::io_context *servicep,
             boost::asio::ip::tcp::socket *sockp) {
-        std::unique_ptr<boost::asio::io_service> io_service(servicep);
+        std::unique_ptr<boost::asio::io_context> io_service(servicep);
         std::unique_ptr<boost::asio::ip::tcp::socket> usockp(sockp);
         try {
             fostlib::http::server::request req(
@@ -104,7 +104,7 @@ void fostlib::http::server::operator()(
     while (true) {
         // Use a raw pointer here for minimum overhead -- if it all goes wrong
         // and a socket leaks, we don't care (for now)
-        boost::asio::io_service *service(new boost::asio::io_service);
+        boost::asio::io_context *service(new boost::asio::io_context);
         boost::asio::ip::tcp::socket *sock(
                 new boost::asio::ip::tcp::socket(*service));
         m_server.accept(*sock);
@@ -129,7 +129,7 @@ fostlib::http::server::request::request()
 
 
 fostlib::http::server::request::request(
-        std::unique_ptr<boost::asio::io_service> io_service,
+        std::unique_ptr<boost::asio::io_context> io_service,
         std::unique_ptr<boost::asio::ip::tcp::socket> connection)
 : m_cnx(new network_connection(std::move(io_service), std::move(connection))),
   m_handler(raise_connection_error) {

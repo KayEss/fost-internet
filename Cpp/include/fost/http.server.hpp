@@ -30,7 +30,7 @@ namespace fostlib {
                 /// Create an empty request
                 request();
                 /// Create a request from data on the provided socket
-                request(std::unique_ptr<boost::asio::io_service> io_service,
+                request(std::unique_ptr<boost::asio::io_context> io_service,
                         std::unique_ptr<boost::asio::ip::tcp::socket> connection);
                 /// This constructor is useful for mocking the request that
                 /// doesn't get responded to
@@ -119,7 +119,7 @@ namespace fostlib {
             static felspar::u8view status_text(int code);
 
           private:
-            boost::asio::io_service m_service;
+            boost::asio::io_context m_service;
             boost::asio::ip::tcp::acceptor m_server;
         };
 
