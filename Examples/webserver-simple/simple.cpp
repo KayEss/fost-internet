@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include <fost/cli>
 #include <fost/main.hpp>
 #include <fost/internet>
@@ -21,8 +13,7 @@ namespace {
 
 FSL_MAIN(
         "http-simple",
-        "Simple HTTP server\nCopyright (c) 2008-2020, Red Anchor Trading Co. "
-        "Ltd.")
+        "Simple HTTP server")
 (fostlib::ostream &o, fostlib::arguments &args) {
     fostlib::http::server server(
             fostlib::host(args[1].value_or(c_host.value())), c_port.value());

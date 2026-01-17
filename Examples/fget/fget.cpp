@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2019 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include <fost/cli>
 #include <fost/main>
 #include <fost/http>
@@ -16,8 +8,7 @@ using namespace fostlib;
 
 FSL_MAIN(
         "fget",
-        "Simple HTTP client\n"
-        "Copyright (c) 2008-2019 Red Anchor Trading Co. Ltd.")
+        "Simple HTTP client")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 

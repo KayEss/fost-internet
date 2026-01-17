@@ -1,11 +1,3 @@
-/**
-    Copyright 2008-2020 Red Anchor Trading Co. Ltd.
-
-    Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
- */
-
-
 #include <fost/main>
 #include <fost/internet>
 #include <fost/http.server.hpp>
@@ -29,8 +21,7 @@ namespace {
 
 FSL_MAIN(
         "http-threaded",
-        "Threaded HTTP server\n"
-        "Copyright (c) 2009-2020 Red Anchor Trading Co. Ltd.")
+        "Threaded HTTP server")
 (fostlib::ostream &o, fostlib::arguments &args) {
     // Bind server to host and port
     fostlib::http::server server(

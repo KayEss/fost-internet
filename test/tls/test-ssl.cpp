@@ -22,8 +22,7 @@ namespace {
 
 FSL_MAIN(
         "test-ssl",
-        "Check HTTPS connections and failures\n"
-        "Copyright (c) 2008-2019 Red Anchor Trading Co. Ltd.")
+        "Check HTTPS connections and failures")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("o", c_output);
     args.commandSwitch("w", c_works);
