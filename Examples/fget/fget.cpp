@@ -6,9 +6,7 @@
 using namespace fostlib;
 
 
-FSL_MAIN(
-        "fget",
-        "Simple HTTP client")
+FSL_MAIN("fget", "Simple HTTP client")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("socks", "Network settings", "Socks version");
 

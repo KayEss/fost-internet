@@ -19,9 +19,7 @@ namespace {
 }
 
 
-FSL_MAIN(
-        "http-threaded",
-        "Threaded HTTP server")
+FSL_MAIN("http-threaded", "Threaded HTTP server")
 (fostlib::ostream &o, fostlib::arguments &args) {
     // Bind server to host and port
     fostlib::http::server server(

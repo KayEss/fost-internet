@@ -11,9 +11,7 @@ namespace {
 }
 
 
-FSL_MAIN(
-        "http-simple",
-        "Simple HTTP server")
+FSL_MAIN("http-simple", "Simple HTTP server")
 (fostlib::ostream &o, fostlib::arguments &args) {
     fostlib::http::server server(
             fostlib::host(args[1].value_or(c_host.value())), c_port.value());

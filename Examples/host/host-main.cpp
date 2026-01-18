@@ -3,9 +3,7 @@
 #include <fost/main.hpp>
 
 
-FSL_MAIN(
-        "host",
-        "host")
+FSL_MAIN("host", "host")
 (fostlib::ostream &out, fostlib::arguments &args) {
     for (fostlib::arguments::size_type c(1); c < args.size(); ++c) try {
             out << args[c].value() << " -> "

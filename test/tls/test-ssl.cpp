@@ -20,9 +20,7 @@ namespace {
 }
 
 
-FSL_MAIN(
-        "test-ssl",
-        "Check HTTPS connections and failures")
+FSL_MAIN("test-ssl", "Check HTTPS connections and failures")
 (fostlib::ostream &o, fostlib::arguments &args) {
     args.commandSwitch("o", c_output);
     args.commandSwitch("w", c_works);
