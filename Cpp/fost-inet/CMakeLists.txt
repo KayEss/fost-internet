@@ -14,7 +14,7 @@ add_library(fost-inet
         url-query_string.cpp
         url.cpp
     )
-target_link_libraries(fost-inet fost-crypto crypto ssl)
+target_link_libraries(fost-inet fost-crypto Boost::asio crypto ssl)
 target_include_directories(fost-inet PUBLIC ../include)
 set_target_properties(fost-inet PROPERTIES DEBUG_POSTFIX "-d")
 install(TARGETS fost-inet LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
