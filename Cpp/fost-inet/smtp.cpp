@@ -1,5 +1,6 @@
 #include "fost-inet.hpp"
 #include <fost/connection.hpp>
+#include <fost/datetime>
 #include <fost/smtp.hpp>
 #include <fost/parse/email.hpp>
 
@@ -161,6 +162,12 @@ void fostlib::smtp_client::send(
     m_impl->check(354, "DATA");
 
     std::stringstream ss;
+    if (!email.headers().exists("Date")) {
+        ss << "Date: "
+           << coerce<string>(coerce<rfc1123_timestamp>(
+                      std::chrono::system_clock::now()))
+           << "\r\n";
+    }
     ss << email.headers();
     ss << "\r\n";
     m_impl->cnx << ss;
