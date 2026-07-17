@@ -11,9 +11,9 @@ if(TARGET stress)
         list(APPEND fost-internet-ssl-test-list fost-internet-ssl-test-${host})
     endmacro()
 
-    ## These tests are executed against https://badssl.com/ which contains
-    ## a large number of TLS/SSL test cases. Only the most important are
-    ## currently checked.
+    # These tests are executed against https://badssl.com/ which contains
+    # a large number of TLS/SSL test cases. Only the most important are
+    # currently checked.
     ssltest(sha256.badssl.com true)
 
     ssltest(not-valid.example.com false)
@@ -22,15 +22,15 @@ if(TARGET stress)
     ssltest(untrusted-root.badssl.com false)
     ssltest(wrong.host.badssl.com false)
 
-    ## The following return the wrong results. These tests are just to mark
-    ## the current behaviour and to notify any changes due to changes in
-    ## the underlying Boost/ASIO/OpenSSL libraries being used.
+    # The following return the wrong results. These tests are just to mark
+    # the current behaviour and to notify any changes due to changes in
+    # the underlying Boost/ASIO/OpenSSL libraries being used.
     ssltest(pinning-test.badssl.com true)
     ssltest(revoked.badssl.com true)
     ssltest(1000-sans.badssl.com false)
     ssltest(10000-sans.badssl.com false)
-    ## Firefox agrees that these are bad, even though the badssl.com
-    ## thinks them good
+    # Firefox agrees that these are bad, even though the badssl.com
+    # thinks them good
     ssltest(sha384.badssl.com false)
     ssltest(sha512.badssl.com false)
 
