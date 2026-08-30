@@ -78,6 +78,14 @@ namespace fostlib {
         void add(felspar::u8view name, felspar::u8view c) {
             add(name, content{c});
         }
+        /**
+         * A string-literal value would otherwise be ambiguous between the
+         * `content` and `u8view` overloads above
+         */
+        template<std::size_t N>
+        void add(felspar::u8view name, char const (&c)[N]) {
+            add(name, content{c});
+        }
         /// Allow a specified sub-value on the specified header to be set
         void set_subvalue(const string &name, const string &k, const string &v);
         /// Fetches a header
@@ -102,6 +110,13 @@ namespace fostlib {
             content();
             /// Create header value content from a string
             content(felspar::u8view);
+            /**
+             * Create header value content from a string literal. Without this
+             * a literal is ambiguous between the `u8view` and `json`
+             * constructors, exactly as for `string` and `json`.
+             */
+            template<std::size_t N>
+            content(char const (&s)[N]) : content(felspar::u8view{s}) {}
             /// Create header value content from a string with sub-values
             content(felspar::u8view, const std::map<string, string> &);
             /// Create header value content from JSON specifying the root key
